@@ -1,0 +1,31 @@
+L 08/22/2021 - 13:17:42: SourceMod error session started
+L 08/22/2021 - 13:17:42: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210822.log")
+L 08/22/2021 - 13:17:42: [CRASH] Accelerator uploaded crash dump: Crash ID: OMHH-DUDE-5COJ
+L 08/22/2021 - 13:17:47: Error log file session closed.
+L 08/22/2021 - 14:35:40: SourceMod error session started
+L 08/22/2021 - 14:35:40: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210822.log")
+L 08/22/2021 - 14:35:40: [CRASH] Accelerator uploaded crash dump: Crash ID: LQPR-RSMN-OLTA
+L 08/22/2021 - 14:35:45: Error log file session closed.
+L 08/22/2021 - 18:14:16: SourceMod error session started
+L 08/22/2021 - 18:14:16: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210822.log")
+L 08/22/2021 - 18:14:16: [CRASH] Accelerator uploaded crash dump: Crash ID: JI2Y-SBPX-ZXSI
+L 08/22/2021 - 18:14:23: Error log file session closed.
+L 08/22/2021 - 18:58:25: SourceMod error session started
+L 08/22/2021 - 18:58:25: Info (map "c5m3_cemetery") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210822.log")
+L 08/22/2021 - 18:58:25: [SM] Exception reported: Client 8 is not in game
+L 08/22/2021 - 18:58:25: [SM] Blaming: optional/kether/pause.smx
+L 08/22/2021 - 18:58:25: [SM] Call stack trace:
+L 08/22/2021 - 18:58:25: [SM]   [0] GetClientTeam
+L 08/22/2021 - 18:58:25: [SM]   [1] Line 757, D:\l4d2 serv\addons\sourcemod\scripting\kether\pause.sp::IsPlayer
+L 08/22/2021 - 18:58:25: [SM]   [2] Line 242, D:\l4d2 serv\addons\sourcemod\scripting\kether\pause.sp::Pause_Cmd
+L 08/22/2021 - 18:58:25: [SM]   [4] FakeClientCommand
+L 08/22/2021 - 18:58:25: [SM]   [5] Line 141, D:\l4d2 serv\addons\sourcemod\scripting\kether\autopause.sp::playerDisconnect
+L 08/22/2021 - 19:21:06: Error log file session closed.
+L 08/22/2021 - 19:38:43: SourceMod error session started
+L 08/22/2021 - 19:38:43: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210822.log")
+L 08/22/2021 - 19:38:43: [CRASH] Accelerator uploaded crash dump: Crash ID: MPVT-LT44-SKYK
+L 08/22/2021 - 19:38:49: Error log file session closed.
+L 08/22/2021 - 20:19:58: SourceMod error session started
+L 08/22/2021 - 20:19:58: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210822.log")
+L 08/22/2021 - 20:19:58: [CRASH] Accelerator uploaded crash dump: Crash ID: L6QD-YKH2-XFPM
+L 08/22/2021 - 20:20:04: Error log file session closed.

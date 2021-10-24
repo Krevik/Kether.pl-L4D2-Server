@@ -1,0 +1,125 @@
+L 10/08/2021 - 18:54:58: SourceMod error session started
+L 10/08/2021 - 18:54:58: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211008.log")
+L 10/08/2021 - 18:54:58: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 18:54:58: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 18:54:58: [SM] Call stack trace:
+L 10/08/2021 - 18:54:58: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 18:54:58: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 18:54:58: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/08/2021 - 18:54:58: [CRASH] Accelerator uploaded crash dump: Crash ID: MBQ6-ZGDP-UAEN
+L 10/08/2021 - 18:55:00: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 18:55:00: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 18:55:00: [SM] Call stack trace:
+L 10/08/2021 - 18:55:00: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 18:55:00: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 18:55:00: [SM] Exception reported: Failed to find LagComp addresses: 0xede64080, 00000000, 00000000
+L 10/08/2021 - 18:55:00: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/08/2021 - 18:55:00: [SM] Call stack trace:
+L 10/08/2021 - 18:55:00: [SM]   [0] SetFailState
+L 10/08/2021 - 18:55:00: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/08/2021 - 18:55:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/08/2021 - 18:55:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/08/2021 - 18:55:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/08/2021 - 18:55:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/08/2021 - 18:55:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/08/2021 - 18:55:04: Error log file session closed.
+L 10/08/2021 - 19:31:20: SourceMod error session started
+L 10/08/2021 - 19:31:20: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211008.log")
+L 10/08/2021 - 19:31:20: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 19:31:20: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 19:31:20: [SM] Call stack trace:
+L 10/08/2021 - 19:31:20: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 19:31:20: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 19:31:20: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/08/2021 - 19:31:20: [CRASH] Accelerator uploaded crash dump: Crash ID: IDMJ-FTAQ-WT2M
+L 10/08/2021 - 19:31:22: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 19:31:22: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 19:31:22: [SM] Call stack trace:
+L 10/08/2021 - 19:31:22: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 19:31:22: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 19:31:22: [SM] Exception reported: Failed to find LagComp addresses: 0xede2a080, 00000000, 00000000
+L 10/08/2021 - 19:31:22: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/08/2021 - 19:31:22: [SM] Call stack trace:
+L 10/08/2021 - 19:31:22: [SM]   [0] SetFailState
+L 10/08/2021 - 19:31:22: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/08/2021 - 19:31:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/08/2021 - 19:31:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/08/2021 - 19:31:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/08/2021 - 19:31:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/08/2021 - 19:31:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/08/2021 - 19:31:26: Error log file session closed.
+L 10/08/2021 - 20:41:28: SourceMod error session started
+L 10/08/2021 - 20:41:28: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211008.log")
+L 10/08/2021 - 20:41:28: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 20:41:28: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 20:41:28: [SM] Call stack trace:
+L 10/08/2021 - 20:41:28: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 20:41:28: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 20:41:28: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/08/2021 - 20:41:29: [CRASH] Accelerator uploaded crash dump: Crash ID: EN7Z-K33X-GGO6
+L 10/08/2021 - 20:41:30: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 20:41:30: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 20:41:30: [SM] Call stack trace:
+L 10/08/2021 - 20:41:30: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 20:41:30: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 20:41:30: [SM] Exception reported: Failed to find LagComp addresses: 0xede07080, 00000000, 00000000
+L 10/08/2021 - 20:41:30: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/08/2021 - 20:41:30: [SM] Call stack trace:
+L 10/08/2021 - 20:41:30: [SM]   [0] SetFailState
+L 10/08/2021 - 20:41:30: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/08/2021 - 20:41:31: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/08/2021 - 20:41:31: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/08/2021 - 20:41:31: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/08/2021 - 20:41:31: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/08/2021 - 20:41:31: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/08/2021 - 20:41:34: Error log file session closed.
+L 10/08/2021 - 20:44:58: SourceMod error session started
+L 10/08/2021 - 20:44:58: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211008.log")
+L 10/08/2021 - 20:44:58: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 20:44:58: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 20:44:58: [SM] Call stack trace:
+L 10/08/2021 - 20:44:58: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 20:44:58: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 20:44:58: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/08/2021 - 20:44:59: [CRASH] Accelerator uploaded crash dump: Crash ID: MOQH-N3UD-HB5T
+L 10/08/2021 - 20:45:00: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 20:45:00: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 20:45:00: [SM] Call stack trace:
+L 10/08/2021 - 20:45:00: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 20:45:00: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 20:45:00: [SM] Exception reported: Failed to find LagComp addresses: 0xeddff080, 00000000, 00000000
+L 10/08/2021 - 20:45:00: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/08/2021 - 20:45:00: [SM] Call stack trace:
+L 10/08/2021 - 20:45:00: [SM]   [0] SetFailState
+L 10/08/2021 - 20:45:00: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/08/2021 - 20:45:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/08/2021 - 20:45:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/08/2021 - 20:45:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/08/2021 - 20:45:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/08/2021 - 20:45:01: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/08/2021 - 20:45:04: Error log file session closed.
+L 10/08/2021 - 21:32:13: SourceMod error session started
+L 10/08/2021 - 21:32:13: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211008.log")
+L 10/08/2021 - 21:32:13: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 21:32:13: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 21:32:13: [SM] Call stack trace:
+L 10/08/2021 - 21:32:13: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 21:32:13: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 21:32:13: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/08/2021 - 21:32:13: [CRASH] Accelerator uploaded crash dump: Crash ID: Q57Z-MBVA-2JFL
+L 10/08/2021 - 21:32:14: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/08/2021 - 21:32:14: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/08/2021 - 21:32:14: [SM] Call stack trace:
+L 10/08/2021 - 21:32:14: [SM]   [0] ConVar.AddChangeHook
+L 10/08/2021 - 21:32:14: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/08/2021 - 21:32:15: [SM] Exception reported: Failed to find LagComp addresses: 0xede36080, 00000000, 00000000
+L 10/08/2021 - 21:32:15: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/08/2021 - 21:32:15: [SM] Call stack trace:
+L 10/08/2021 - 21:32:15: [SM]   [0] SetFailState
+L 10/08/2021 - 21:32:15: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/08/2021 - 21:32:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/08/2021 - 21:32:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/08/2021 - 21:32:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/08/2021 - 21:32:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/08/2021 - 21:32:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/08/2021 - 21:32:19: Error log file session closed.

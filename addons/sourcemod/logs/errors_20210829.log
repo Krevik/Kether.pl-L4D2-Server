@@ -1,0 +1,27 @@
+L 08/29/2021 - 00:59:32: SourceMod error session started
+L 08/29/2021 - 00:59:32: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210829.log")
+L 08/29/2021 - 00:59:32: [CRASH] Accelerator uploaded crash dump: Crash ID: EQH2-C4SX-WA7F
+L 08/29/2021 - 00:59:38: Error log file session closed.
+L 08/29/2021 - 16:43:03: SourceMod error session started
+L 08/29/2021 - 16:43:03: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210829.log")
+L 08/29/2021 - 16:43:03: [CRASH] Accelerator uploaded crash dump: Crash ID: EYCD-UXGH-RWBH
+L 08/29/2021 - 16:43:09: Error log file session closed.
+L 08/29/2021 - 19:15:55: SourceMod error session started
+L 08/29/2021 - 19:15:55: Info (map "c10m4_mainstreet") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210829.log")
+L 08/29/2021 - 19:15:55: [SM] Exception reported: Client 3 is not in game
+L 08/29/2021 - 19:15:55: [SM] Blaming: optional/kether/pause.smx
+L 08/29/2021 - 19:15:55: [SM] Call stack trace:
+L 08/29/2021 - 19:15:55: [SM]   [0] GetClientTeam
+L 08/29/2021 - 19:15:55: [SM]   [1] Line 757, D:\l4d2 serv\addons\sourcemod\scripting\kether\pause.sp::IsPlayer
+L 08/29/2021 - 19:15:55: [SM]   [2] Line 242, D:\l4d2 serv\addons\sourcemod\scripting\kether\pause.sp::Pause_Cmd
+L 08/29/2021 - 19:15:55: [SM]   [4] FakeClientCommand
+L 08/29/2021 - 19:15:55: [SM]   [5] Line 141, D:\l4d2 serv\addons\sourcemod\scripting\kether\autopause.sp::playerDisconnect
+L 08/29/2021 - 19:26:28: Error log file session closed.
+L 08/29/2021 - 19:27:29: SourceMod error session started
+L 08/29/2021 - 19:27:29: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210829.log")
+L 08/29/2021 - 19:27:29: [CRASH] Accelerator uploaded crash dump: Crash ID: FWR3-FVE4-2XTS
+L 08/29/2021 - 19:27:35: Error log file session closed.
+L 08/29/2021 - 22:08:11: SourceMod error session started
+L 08/29/2021 - 22:08:11: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210829.log")
+L 08/29/2021 - 22:08:11: [CRASH] Accelerator uploaded crash dump: Crash ID: QO55-334A-KWWO
+L 08/29/2021 - 22:08:24: Error log file session closed.

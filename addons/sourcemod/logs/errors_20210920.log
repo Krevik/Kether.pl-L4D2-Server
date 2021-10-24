@@ -1,0 +1,54 @@
+L 09/20/2021 - 16:53:04: SourceMod error session started
+L 09/20/2021 - 16:53:04: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210920.log")
+L 09/20/2021 - 16:53:04: [confoglcompmod.smx] [MI] Couldn't load MapInfo data!
+L 09/20/2021 - 16:53:17: SourceMod error session started
+L 09/20/2021 - 16:53:17: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210920.log")
+L 09/20/2021 - 16:53:17: [confoglcompmod.smx] [MI] Couldn't load MapInfo data!
+L 09/20/2021 - 16:53:17: [CRASH] Accelerator uploaded crash dump: Crash ID: DHKA-FNQP-6W2M
+L 09/20/2021 - 16:53:18: [SM] Exception reported: Invalid key value handle 0 (error 4)
+L 09/20/2021 - 16:53:18: [SM] Blaming: confoglcompmod.smx
+L 09/20/2021 - 16:53:18: [SM] Call stack trace:
+L 09/20/2021 - 16:53:18: [SM]   [0] KvJumpToKey
+L 09/20/2021 - 16:53:18: [SM]   [1] Line 204, modules/MapInfo.sp::MI_KV_UpdateMapInfo
+L 09/20/2021 - 16:53:18: [SM]   [2] Line 45, modules/MapInfo.sp::MI_OnMapStart
+L 09/20/2021 - 16:53:18: [SM]   [3] Line 114, F:\Users\Administrator\Documents\GitHub\L4D2-Competitive-Rework\addons\sourcemod\scripting\confoglcompmod.sp::OnMapStart
+L 09/20/2021 - 16:53:20: [SM] Exception reported: Failed to find LagComp addresses: 0xede64080, 00000000, 00000000
+L 09/20/2021 - 16:53:20: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/20/2021 - 16:53:20: [SM] Call stack trace:
+L 09/20/2021 - 16:53:20: [SM]   [0] SetFailState
+L 09/20/2021 - 16:53:20: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/20/2021 - 16:53:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/20/2021 - 16:53:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/20/2021 - 16:53:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/20/2021 - 16:53:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/20/2021 - 16:53:25: Error log file session closed.
+L 09/20/2021 - 23:38:32: SourceMod error session started
+L 09/20/2021 - 23:38:32: Info (map "c4m1_milltown_a") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210920.log")
+L 09/20/2021 - 23:38:32: [SM] Exception reported: Invalid entity passed 0
+L 09/20/2021 - 23:38:32: [SM] Blaming: anticheat/l4d2_user_commands.smx
+L 09/20/2021 - 23:38:32: [SM] Call stack trace:
+L 09/20/2021 - 23:38:32: [SM]   [0] DynamicHook.HookEntity
+L 09/20/2021 - 23:38:32: [SM]   [1] Line 119, D:\SourcePawn10\l4d2_user_commands.sp::OnClientPutInServer
+L 09/20/2021 - 23:38:32: [SM]   [2] Line 104, D:\SourcePawn10\l4d2_user_commands.sp::OnPluginStart
+L 09/20/2021 - 23:38:32: [SM] Unable to load plugin "anticheat/l4d2_user_commands.smx": Error detected in plugin startup (see error logs)
+L 09/20/2021 - 23:38:44: [SM] Exception reported: Failed to find LagComp addresses: 0xede64080, 00000000, 00000000
+L 09/20/2021 - 23:38:44: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/20/2021 - 23:38:44: [SM] Call stack trace:
+L 09/20/2021 - 23:38:44: [SM]   [0] SetFailState
+L 09/20/2021 - 23:38:44: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/20/2021 - 23:38:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/20/2021 - 23:38:48: Error log file session closed.

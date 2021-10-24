@@ -1,0 +1,120 @@
+L 10/16/2021 - 18:24:57: SourceMod error session started
+L 10/16/2021 - 18:24:57: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211016.log")
+L 10/16/2021 - 18:24:57: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/16/2021 - 18:24:57: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/16/2021 - 18:24:57: [SM] Call stack trace:
+L 10/16/2021 - 18:24:57: [SM]   [0] ConVar.AddChangeHook
+L 10/16/2021 - 18:24:57: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/16/2021 - 18:24:57: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/16/2021 - 18:24:58: [CRASH] Accelerator uploaded crash dump: Crash ID: 6CGL-IRUL-WMFM
+L 10/16/2021 - 18:25:00: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/16/2021 - 18:25:00: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/16/2021 - 18:25:00: [SM] Call stack trace:
+L 10/16/2021 - 18:25:00: [SM]   [0] ConVar.AddChangeHook
+L 10/16/2021 - 18:25:00: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/16/2021 - 18:25:02: [SM] Exception reported: Failed to find LagComp addresses: 0xeddfd080, 00000000, 00000000
+L 10/16/2021 - 18:25:02: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/16/2021 - 18:25:02: [SM] Call stack trace:
+L 10/16/2021 - 18:25:02: [SM]   [0] SetFailState
+L 10/16/2021 - 18:25:02: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/16/2021 - 18:25:02: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/16/2021 - 18:25:02: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/16/2021 - 18:25:02: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/16/2021 - 18:25:02: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/16/2021 - 18:25:02: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/16/2021 - 18:25:05: Error log file session closed.
+L 10/16/2021 - 19:00:14: SourceMod error session started
+L 10/16/2021 - 19:00:14: Info (map "c11m3_garage") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211016.log")
+L 10/16/2021 - 19:00:14: [SM] Exception reported: Client 7 is not in game
+L 10/16/2021 - 19:00:14: [SM] Blaming: optional/kether/c_readyup.smx
+L 10/16/2021 - 19:00:14: [SM] Call stack trace:
+L 10/16/2021 - 19:00:14: [SM]   [0] GetClientTeam
+L 10/16/2021 - 19:00:14: [SM]   [1] Line 1780, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::IsPlayer
+L 10/16/2021 - 19:00:14: [SM]   [2] Line 575, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Unready_Cmd
+L 10/16/2021 - 19:00:14: [SM]   [3] Line 520, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Vote_Callback
+L 10/16/2021 - 19:00:14: [SM] Exception reported: Client 7 is not in game
+L 10/16/2021 - 19:00:14: [SM] Blaming: optional/kether/c_readyup.smx
+L 10/16/2021 - 19:00:14: [SM] Call stack trace:
+L 10/16/2021 - 19:00:14: [SM]   [0] GetClientTeam
+L 10/16/2021 - 19:00:14: [SM]   [1] Line 1780, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::IsPlayer
+L 10/16/2021 - 19:00:14: [SM]   [2] Line 575, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Unready_Cmd
+L 10/16/2021 - 19:00:14: [SM]   [3] Line 520, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Vote_Callback
+L 10/16/2021 - 19:00:14: [SM] Exception reported: Client 7 is not in game
+L 10/16/2021 - 19:00:14: [SM] Blaming: optional/kether/c_readyup.smx
+L 10/16/2021 - 19:00:14: [SM] Call stack trace:
+L 10/16/2021 - 19:00:14: [SM]   [0] GetClientTeam
+L 10/16/2021 - 19:00:14: [SM]   [1] Line 1780, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::IsPlayer
+L 10/16/2021 - 19:00:14: [SM]   [2] Line 575, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Unready_Cmd
+L 10/16/2021 - 19:00:14: [SM]   [3] Line 520, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Vote_Callback
+L 10/16/2021 - 19:00:14: [SM] Exception reported: Client 7 is not in game
+L 10/16/2021 - 19:00:14: [SM] Blaming: optional/kether/c_readyup.smx
+L 10/16/2021 - 19:00:14: [SM] Call stack trace:
+L 10/16/2021 - 19:00:14: [SM]   [0] GetClientTeam
+L 10/16/2021 - 19:00:14: [SM]   [1] Line 1780, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::IsPlayer
+L 10/16/2021 - 19:00:14: [SM]   [2] Line 575, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Unready_Cmd
+L 10/16/2021 - 19:00:14: [SM]   [3] Line 520, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Vote_Callback
+L 10/16/2021 - 19:00:14: [SM] Exception reported: Client 7 is not in game
+L 10/16/2021 - 19:00:14: [SM] Blaming: optional/kether/c_readyup.smx
+L 10/16/2021 - 19:00:14: [SM] Call stack trace:
+L 10/16/2021 - 19:00:14: [SM]   [0] GetClientTeam
+L 10/16/2021 - 19:00:14: [SM]   [1] Line 1780, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::IsPlayer
+L 10/16/2021 - 19:00:14: [SM]   [2] Line 575, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Unready_Cmd
+L 10/16/2021 - 19:00:14: [SM]   [3] Line 520, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Vote_Callback
+L 10/16/2021 - 19:00:14: [SM] Exception reported: Client 7 is not in game
+L 10/16/2021 - 19:00:14: [SM] Blaming: optional/kether/c_readyup.smx
+L 10/16/2021 - 19:00:14: [SM] Call stack trace:
+L 10/16/2021 - 19:00:14: [SM]   [0] GetClientTeam
+L 10/16/2021 - 19:00:14: [SM]   [1] Line 1780, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::IsPlayer
+L 10/16/2021 - 19:00:14: [SM]   [2] Line 575, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Unready_Cmd
+L 10/16/2021 - 19:00:14: [SM]   [3] Line 520, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::Vote_Callback
+L 10/16/2021 - 19:17:56: Error log file session closed.
+L 10/16/2021 - 19:33:01: SourceMod error session started
+L 10/16/2021 - 19:33:01: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211016.log")
+L 10/16/2021 - 19:33:01: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/16/2021 - 19:33:01: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/16/2021 - 19:33:01: [SM] Call stack trace:
+L 10/16/2021 - 19:33:01: [SM]   [0] ConVar.AddChangeHook
+L 10/16/2021 - 19:33:01: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/16/2021 - 19:33:01: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/16/2021 - 19:33:01: [CRASH] Accelerator uploaded crash dump: Crash ID: GY3M-H7WJ-J3NY
+L 10/16/2021 - 19:33:03: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/16/2021 - 19:33:03: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/16/2021 - 19:33:03: [SM] Call stack trace:
+L 10/16/2021 - 19:33:03: [SM]   [0] ConVar.AddChangeHook
+L 10/16/2021 - 19:33:03: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/16/2021 - 19:33:03: [SM] Exception reported: Failed to find LagComp addresses: 0xeddd8080, 00000000, 00000000
+L 10/16/2021 - 19:33:03: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/16/2021 - 19:33:03: [SM] Call stack trace:
+L 10/16/2021 - 19:33:03: [SM]   [0] SetFailState
+L 10/16/2021 - 19:33:03: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/16/2021 - 19:33:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/16/2021 - 19:33:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/16/2021 - 19:33:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/16/2021 - 19:33:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/16/2021 - 19:33:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/16/2021 - 19:33:07: Error log file session closed.
+L 10/16/2021 - 21:08:36: SourceMod error session started
+L 10/16/2021 - 21:08:36: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211016.log")
+L 10/16/2021 - 21:08:36: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/16/2021 - 21:08:36: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/16/2021 - 21:08:36: [SM] Call stack trace:
+L 10/16/2021 - 21:08:36: [SM]   [0] ConVar.AddChangeHook
+L 10/16/2021 - 21:08:36: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/16/2021 - 21:08:36: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/16/2021 - 21:08:37: [CRASH] Accelerator uploaded crash dump: Crash ID: NLQD-QG4R-Q7YH
+L 10/16/2021 - 21:08:38: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/16/2021 - 21:08:38: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/16/2021 - 21:08:38: [SM] Call stack trace:
+L 10/16/2021 - 21:08:38: [SM]   [0] ConVar.AddChangeHook
+L 10/16/2021 - 21:08:38: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/16/2021 - 21:08:38: [SM] Exception reported: Failed to find LagComp addresses: 0xede93080, 00000000, 00000000
+L 10/16/2021 - 21:08:38: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/16/2021 - 21:08:38: [SM] Call stack trace:
+L 10/16/2021 - 21:08:38: [SM]   [0] SetFailState
+L 10/16/2021 - 21:08:38: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/16/2021 - 21:08:39: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/16/2021 - 21:08:39: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/16/2021 - 21:08:39: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/16/2021 - 21:08:39: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/16/2021 - 21:08:39: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/16/2021 - 21:08:42: Error log file session closed.

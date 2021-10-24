@@ -1,0 +1,52 @@
+L 09/11/2021 - 15:18:06: SourceMod error session started
+L 09/11/2021 - 15:18:06: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 15:18:06: [CRASH] Accelerator uploaded crash dump: Crash ID: P33A-GVHN-AVVC
+L 09/11/2021 - 15:18:15: Error log file session closed.
+L 09/11/2021 - 18:24:59: SourceMod error session started
+L 09/11/2021 - 18:24:59: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 18:24:59: [CRASH] Accelerator uploaded crash dump: Crash ID: CI4V-Y7Y2-RHAR
+L 09/11/2021 - 18:25:05: Error log file session closed.
+L 09/11/2021 - 19:16:12: SourceMod error session started
+L 09/11/2021 - 19:16:12: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 19:16:12: [CRASH] Accelerator uploaded crash dump: Crash ID: RFLC-EG5D-ZGG6
+L 09/11/2021 - 19:16:18: Error log file session closed.
+L 09/11/2021 - 20:13:15: SourceMod error session started
+L 09/11/2021 - 20:13:15: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 20:13:15: [CRASH] Accelerator uploaded crash dump: Crash ID: Q6NS-LHRN-XSXO
+L 09/11/2021 - 20:13:21: Error log file session closed.
+L 09/11/2021 - 21:37:21: SourceMod error session started
+L 09/11/2021 - 21:37:21: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 21:37:21: [CRASH] Accelerator uploaded crash dump: Crash ID: IBJ3-TROK-J27E
+L 09/11/2021 - 21:37:27: Error log file session closed.
+L 09/11/2021 - 22:29:39: SourceMod error session started
+L 09/11/2021 - 22:29:39: Info (map "c2m1_highway") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/11/2021 - 22:29:39: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/11/2021 - 22:29:42: Error log file session closed.
+L 09/11/2021 - 23:37:06: SourceMod error session started
+L 09/11/2021 - 23:37:06: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 23:37:06: [CRASH] Accelerator uploaded crash dump: Crash ID: 5WNO-WFN2-ZDMA
+L 09/11/2021 - 23:37:12: Error log file session closed.
+L 09/11/2021 - 23:41:24: SourceMod error session started
+L 09/11/2021 - 23:41:24: Info (map "c7m1_docks") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210911.log")
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/11/2021 - 23:41:24: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/11/2021 - 23:41:28: Error log file session closed.

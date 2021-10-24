@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Door_Open"
+	{
+		"en"		"{olive}[Saferoom] {white}opened by {orange}%N"
+	}
+
+	"Door_Close"
+	{
+		"en"		"{olive}[Saferoom] {white}closed by {orange}%N"
+	}
+}

@@ -1,0 +1,40 @@
+L 09/17/2021 - 17:03:56: SourceMod error session started
+L 09/17/2021 - 17:03:56: Info (map "c4m1_milltown_a") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210917.log")
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/17/2021 - 17:03:56: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/17/2021 - 17:03:59: Error log file session closed.
+L 09/17/2021 - 19:05:58: SourceMod error session started
+L 09/17/2021 - 19:05:58: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210917.log")
+L 09/17/2021 - 19:05:58: [CRASH] Accelerator uploaded crash dump: Crash ID: GHQ6-USOG-GGZ6
+L 09/17/2021 - 19:06:05: Error log file session closed.
+L 09/17/2021 - 20:37:47: SourceMod error session started
+L 09/17/2021 - 20:37:47: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210917.log")
+L 09/17/2021 - 20:37:47: [CRASH] Accelerator uploaded crash dump: Crash ID: DSMY-FWQV-M546
+L 09/17/2021 - 20:37:53: Error log file session closed.
+L 09/17/2021 - 22:53:27: SourceMod error session started
+L 09/17/2021 - 22:53:27: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210917.log")
+L 09/17/2021 - 22:53:27: [CRASH] Accelerator uploaded crash dump: Crash ID: YZDQ-UF6M-RTPI
+L 09/17/2021 - 22:53:33: Error log file session closed.
+L 09/17/2021 - 22:56:43: SourceMod error session started
+L 09/17/2021 - 22:56:43: Info (map "c3m1_plankcountry") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210917.log")
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/17/2021 - 22:56:43: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/17/2021 - 22:56:46: Error log file session closed.

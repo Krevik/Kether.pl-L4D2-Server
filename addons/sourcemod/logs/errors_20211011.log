@@ -1,0 +1,25 @@
+L 10/11/2021 - 20:11:20: SourceMod error session started
+L 10/11/2021 - 20:11:20: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211011.log")
+L 10/11/2021 - 20:11:20: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/11/2021 - 20:11:20: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/11/2021 - 20:11:20: [SM] Call stack trace:
+L 10/11/2021 - 20:11:20: [SM]   [0] ConVar.AddChangeHook
+L 10/11/2021 - 20:11:20: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/11/2021 - 20:11:20: [SM] Unable to load plugin "fixes/l4d2_unsilent_jockey.smx": Error detected in plugin startup (see error logs)
+L 10/11/2021 - 20:11:21: [CRASH] Accelerator uploaded crash dump: Crash ID: VZZ5-OGHB-CVWO
+L 10/11/2021 - 20:11:25: [SM] Exception reported: Invalid convar handle 0 (error 4)
+L 10/11/2021 - 20:11:25: [SM] Blaming: fixes/l4d2_unsilent_jockey.smx
+L 10/11/2021 - 20:11:25: [SM] Call stack trace:
+L 10/11/2021 - 20:11:25: [SM]   [0] ConVar.AddChangeHook
+L 10/11/2021 - 20:11:25: [SM]   [1] Line 91, D:\SourcePawn10\l4d2_unsilent_jockey.sp::OnPluginStart
+L 10/11/2021 - 20:11:28: [SM] Exception reported: Failed to find LagComp addresses: 0xede1b080, 00000000, 00000000
+L 10/11/2021 - 20:11:28: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 10/11/2021 - 20:11:28: [SM] Call stack trace:
+L 10/11/2021 - 20:11:28: [SM]   [0] SetFailState
+L 10/11/2021 - 20:11:28: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 10/11/2021 - 20:11:30: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 10/11/2021 - 20:11:30: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 10/11/2021 - 20:11:30: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_enabled)
+L 10/11/2021 - 20:11:30: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 10/11/2021 - 20:11:30: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 10/11/2021 - 20:11:33: Error log file session closed.

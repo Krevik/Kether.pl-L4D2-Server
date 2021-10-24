@@ -1,0 +1,114 @@
+L 09/24/2021 - 00:02:58: SourceMod error session started
+L 09/24/2021 - 00:02:58: Info (map "c5m1_waterfront") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 00:02:58: [SM] Exception reported: Failed to find LagComp addresses: 0xeddbe080, 00000000, 00000000
+L 09/24/2021 - 00:02:58: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 00:02:58: [SM] Call stack trace:
+L 09/24/2021 - 00:02:58: [SM]   [0] SetFailState
+L 09/24/2021 - 00:02:58: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/24/2021 - 00:02:58: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/24/2021 - 00:03:01: Error log file session closed.
+L 09/24/2021 - 01:00:15: SourceMod error session started
+L 09/24/2021 - 01:00:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 01:00:15: [CRASH] Accelerator uploaded crash dump: Crash ID: IYGR-YR4H-2E7I
+L 09/24/2021 - 01:00:16: [SM] Exception reported: Failed to find LagComp addresses: 0xedda0080, 00000000, 00000000
+L 09/24/2021 - 01:00:16: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 01:00:16: [SM] Call stack trace:
+L 09/24/2021 - 01:00:16: [SM]   [0] SetFailState
+L 09/24/2021 - 01:00:16: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 01:00:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 01:00:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 01:00:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 01:00:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 01:00:20: Error log file session closed.
+L 09/24/2021 - 17:49:58: SourceMod error session started
+L 09/24/2021 - 17:49:58: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 17:49:58: [CRASH] Accelerator uploaded crash dump: Crash ID: XMMP-Z4S2-LR57
+L 09/24/2021 - 17:50:03: [SM] Exception reported: Failed to find LagComp addresses: 0xede40080, 00000000, 00000000
+L 09/24/2021 - 17:50:03: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 17:50:03: [SM] Call stack trace:
+L 09/24/2021 - 17:50:03: [SM]   [0] SetFailState
+L 09/24/2021 - 17:50:03: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 17:50:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 17:50:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 17:50:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 17:50:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 17:50:06: Error log file session closed.
+L 09/24/2021 - 18:37:45: SourceMod error session started
+L 09/24/2021 - 18:37:45: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 18:37:45: [CRASH] Accelerator uploaded crash dump: Crash ID: CZ7O-WZ34-DEUQ
+L 09/24/2021 - 18:37:47: [SM] Exception reported: Failed to find LagComp addresses: 0xeddd0080, 00000000, 00000000
+L 09/24/2021 - 18:37:47: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 18:37:47: [SM] Call stack trace:
+L 09/24/2021 - 18:37:47: [SM]   [0] SetFailState
+L 09/24/2021 - 18:37:47: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 18:37:47: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 18:37:47: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 18:37:47: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 18:37:47: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 18:37:50: Error log file session closed.
+L 09/24/2021 - 20:52:18: SourceMod error session started
+L 09/24/2021 - 20:52:18: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 20:52:18: [CRASH] Accelerator uploaded crash dump: Crash ID: PYRY-EFAM-PYPX
+L 09/24/2021 - 20:52:20: [SM] Exception reported: Failed to find LagComp addresses: 0xede5d080, 00000000, 00000000
+L 09/24/2021 - 20:52:20: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 20:52:20: [SM] Call stack trace:
+L 09/24/2021 - 20:52:20: [SM]   [0] SetFailState
+L 09/24/2021 - 20:52:20: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 20:52:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 20:52:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 20:52:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 20:52:21: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 20:52:24: Error log file session closed.
+L 09/24/2021 - 20:56:49: SourceMod error session started
+L 09/24/2021 - 20:56:49: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 20:56:49: [CRASH] Accelerator uploaded crash dump: Crash ID: QTVY-YEGX-C4HH
+L 09/24/2021 - 20:56:51: [SM] Exception reported: Failed to find LagComp addresses: 0xede6a080, 00000000, 00000000
+L 09/24/2021 - 20:56:51: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 20:56:51: [SM] Call stack trace:
+L 09/24/2021 - 20:56:51: [SM]   [0] SetFailState
+L 09/24/2021 - 20:56:51: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 20:56:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 20:56:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 20:56:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 20:56:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 20:56:54: Error log file session closed.
+L 09/24/2021 - 22:23:03: SourceMod error session started
+L 09/24/2021 - 22:23:03: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 22:23:03: [CRASH] Accelerator uploaded crash dump: Crash ID: UJI3-R36K-4Q6W
+L 09/24/2021 - 22:23:04: [SM] Exception reported: Failed to find LagComp addresses: 0xeddf3080, 00000000, 00000000
+L 09/24/2021 - 22:23:04: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 22:23:04: [SM] Call stack trace:
+L 09/24/2021 - 22:23:04: [SM]   [0] SetFailState
+L 09/24/2021 - 22:23:04: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 22:23:05: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 22:23:05: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 22:23:05: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 22:23:05: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 22:23:08: Error log file session closed.
+L 09/24/2021 - 22:30:31: SourceMod error session started
+L 09/24/2021 - 22:30:31: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210924.log")
+L 09/24/2021 - 22:30:31: [CRASH] Accelerator uploaded crash dump: Crash ID: RFSV-Q5XR-K3BR
+L 09/24/2021 - 22:30:33: [SM] Exception reported: Failed to find LagComp addresses: 0xede79080, 00000000, 00000000
+L 09/24/2021 - 22:30:33: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/24/2021 - 22:30:33: [SM] Call stack trace:
+L 09/24/2021 - 22:30:33: [SM]   [0] SetFailState
+L 09/24/2021 - 22:30:33: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/24/2021 - 22:30:34: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/24/2021 - 22:30:34: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/24/2021 - 22:30:34: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/24/2021 - 22:30:34: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/24/2021 - 22:30:37: Error log file session closed.

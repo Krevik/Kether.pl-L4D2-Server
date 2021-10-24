@@ -1,0 +1,24 @@
+L 09/12/2021 - 00:39:14: SourceMod error session started
+L 09/12/2021 - 00:39:14: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210912.log")
+L 09/12/2021 - 00:39:14: [CRASH] Accelerator uploaded crash dump: Crash ID: LJTR-HACD-XHT2
+L 09/12/2021 - 00:39:20: Error log file session closed.
+L 09/12/2021 - 12:17:13: SourceMod error session started
+L 09/12/2021 - 12:17:13: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210912.log")
+L 09/12/2021 - 12:17:13: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 09/12/2021 - 12:17:16: Error log file session closed.
+L 09/12/2021 - 13:34:21: SourceMod error session started
+L 09/12/2021 - 13:34:21: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210912.log")
+L 09/12/2021 - 13:34:21: [CRASH] Accelerator uploaded crash dump: Crash ID: ZPBY-X6CB-6GDJ
+L 09/12/2021 - 13:34:26: Error log file session closed.
+L 09/12/2021 - 20:09:01: SourceMod error session started
+L 09/12/2021 - 20:09:01: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210912.log")
+L 09/12/2021 - 20:09:01: [CRASH] Accelerator uploaded crash dump: Crash ID: XWXT-KQMT-R7E4
+L 09/12/2021 - 20:09:07: Error log file session closed.
+L 09/12/2021 - 21:07:26: SourceMod error session started
+L 09/12/2021 - 21:07:26: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210912.log")
+L 09/12/2021 - 21:07:26: [CRASH] Accelerator uploaded crash dump: Crash ID: ONNU-VYWR-T6Z4
+L 09/12/2021 - 21:07:31: Error log file session closed.
+L 09/12/2021 - 22:02:56: SourceMod error session started
+L 09/12/2021 - 22:02:56: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210912.log")
+L 09/12/2021 - 22:02:56: [CRASH] Accelerator uploaded crash dump: Crash ID: JPA4-OSUA-CHGY
+L 09/12/2021 - 22:03:02: Error log file session closed.

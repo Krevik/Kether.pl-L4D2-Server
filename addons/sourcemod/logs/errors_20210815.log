@@ -1,0 +1,156 @@
+L 08/15/2021 - 09:28:55: SourceMod error session started
+L 08/15/2021 - 09:28:55: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 09:28:55: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:28:55: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:28:55: [SM] Call stack trace:
+L 08/15/2021 - 09:28:55: [SM]   [1] Line 94, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearPlayerData
+L 08/15/2021 - 09:28:55: [SM]   [2] Line 86, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearAllPlayersData
+L 08/15/2021 - 09:28:55: [SM]   [3] Line 147, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::RoundStart_Event
+L 08/15/2021 - 09:29:35: SourceMod error session started
+L 08/15/2021 - 09:29:35: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 09:29:35: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:29:35: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:29:35: [SM] Call stack trace:
+L 08/15/2021 - 09:29:35: [SM]   [1] Line 94, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearPlayerData
+L 08/15/2021 - 09:29:35: [SM]   [2] Line 86, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearAllPlayersData
+L 08/15/2021 - 09:29:35: [SM]   [3] Line 147, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::RoundStart_Event
+L 08/15/2021 - 09:29:56: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:29:56: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:29:56: [SM] Call stack trace:
+L 08/15/2021 - 09:29:56: [SM]   [1] Line 94, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearPlayerData
+L 08/15/2021 - 09:29:56: [SM]   [2] Line 121, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::OnClientPutInServer
+L 08/15/2021 - 09:31:02: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:31:02: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:31:02: [SM] Call stack trace:
+L 08/15/2021 - 09:31:02: [SM]   [1] Line 216, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PlayerDeath_Event
+L 08/15/2021 - 09:31:02: [SM]   [3] ForcePlayerSuicide
+L 08/15/2021 - 09:31:02: [SM]   [4] Line 37, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::PerformSlay
+L 08/15/2021 - 09:31:02: [SM]   [5] Line 147, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::Command_Slay
+L 08/15/2021 - 09:31:03: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:31:03: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:31:03: [SM] Call stack trace:
+L 08/15/2021 - 09:31:03: [SM]   [1] Line 216, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PlayerDeath_Event
+L 08/15/2021 - 09:31:03: [SM]   [3] ForcePlayerSuicide
+L 08/15/2021 - 09:31:03: [SM]   [4] Line 37, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::PerformSlay
+L 08/15/2021 - 09:31:03: [SM]   [5] Line 147, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::Command_Slay
+L 08/15/2021 - 09:32:53: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:32:53: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:32:53: [SM] Call stack trace:
+L 08/15/2021 - 09:32:53: [SM]   [1] Line 94, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearPlayerData
+L 08/15/2021 - 09:32:53: [SM]   [2] Line 121, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::OnClientPutInServer
+L 08/15/2021 - 09:33:06: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:33:06: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:33:06: [SM] Call stack trace:
+L 08/15/2021 - 09:33:06: [SM]   [1] Line 216, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PlayerDeath_Event
+L 08/15/2021 - 09:33:06: [SM]   [3] ForcePlayerSuicide
+L 08/15/2021 - 09:33:06: [SM]   [4] Line 37, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::PerformSlay
+L 08/15/2021 - 09:33:06: [SM]   [5] Line 147, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::Command_Slay
+L 08/15/2021 - 09:44:30: SourceMod error session started
+L 08/15/2021 - 09:44:30: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 09:44:30: [CRASH] Accelerator uploaded crash dump: Crash ID: 3NI4-3TWL-EKC5
+L 08/15/2021 - 09:44:35: Error log file session closed.
+L 08/15/2021 - 09:44:35: SourceMod error session started
+L 08/15/2021 - 09:44:35: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 09:44:35: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 09:44:35: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 09:44:35: [SM] Call stack trace:
+L 08/15/2021 - 09:44:35: [SM]   [1] Line 94, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearPlayerData
+L 08/15/2021 - 09:44:35: [SM]   [2] Line 86, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ClearAllPlayersData
+L 08/15/2021 - 09:44:35: [SM]   [3] Line 147, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::RoundStart_Event
+L 08/15/2021 - 10:27:27: SourceMod error session started
+L 08/15/2021 - 10:27:27: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 10:27:27: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 10:27:27: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 10:27:27: [SM] Call stack trace:
+L 08/15/2021 - 10:27:27: [SM]   [1] Line 219, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PlayerDeath_Event
+L 08/15/2021 - 10:27:27: [SM]   [3] ForcePlayerSuicide
+L 08/15/2021 - 10:27:27: [SM]   [4] Line 37, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::PerformSlay
+L 08/15/2021 - 10:27:27: [SM]   [5] Line 147, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::Command_Slay
+L 08/15/2021 - 10:27:29: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 10:27:29: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 10:27:29: [SM] Call stack trace:
+L 08/15/2021 - 10:27:29: [SM]   [1] Line 219, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PlayerDeath_Event
+L 08/15/2021 - 10:27:29: [SM]   [3] ForcePlayerSuicide
+L 08/15/2021 - 10:27:29: [SM]   [4] Line 37, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::PerformSlay
+L 08/15/2021 - 10:27:29: [SM]   [5] Line 147, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::Command_Slay
+L 08/15/2021 - 10:27:31: [SM] Exception reported: Array index out-of-bounds (index 9, limit 9)
+L 08/15/2021 - 10:27:31: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 10:27:31: [SM] Call stack trace:
+L 08/15/2021 - 10:27:31: [SM]   [1] Line 219, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PlayerDeath_Event
+L 08/15/2021 - 10:27:31: [SM]   [3] ForcePlayerSuicide
+L 08/15/2021 - 10:27:31: [SM]   [4] Line 37, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::PerformSlay
+L 08/15/2021 - 10:27:31: [SM]   [5] Line 147, /home/builds/sourcemod/linux-1.10/build/plugins/playercommands/slay.sp::Command_Slay
+L 08/15/2021 - 10:27:59: [SM] Exception reported: Client index 6 is invalid (arg 3)
+L 08/15/2021 - 10:27:59: [SM] Blaming: optional/kether/c_l4d2_survivor_mvp_track.smx
+L 08/15/2021 - 10:27:59: [SM] Call stack trace:
+L 08/15/2021 - 10:27:59: [SM]   [0] VFormat
+L 08/15/2021 - 10:27:59: [SM]   [1] Line 74, D:\l4d2 serv\addons\sourcemod\scripting\kether\include\colors.inc::CPrintToChat
+L 08/15/2021 - 10:27:59: [SM]   [2] Line 275, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::PrintDamageThatSurvivorDoneToHisEnemy
+L 08/15/2021 - 10:27:59: [SM]   [3] Line 240, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2_survivor_mvp_track.sp::ChargerCarryStart_Event
+L 08/15/2021 - 10:28:19: SourceMod error session started
+L 08/15/2021 - 10:28:19: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 10:28:19: [CRASH] Accelerator uploaded crash dump: Crash ID: GDGA-I4YG-CI3W
+L 08/15/2021 - 10:28:23: Error log file session closed.
+L 08/15/2021 - 12:15:19: SourceMod error session started
+L 08/15/2021 - 12:15:19: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 12:15:19: [CRASH] Accelerator uploaded crash dump: Crash ID: J624-H7ZR-TPT3
+L 08/15/2021 - 12:15:24: Error log file session closed.
+L 08/15/2021 - 12:32:21: SourceMod error session started
+L 08/15/2021 - 12:32:21: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 12:32:21: [CRASH] Accelerator uploaded crash dump: Crash ID: LHKS-ECCS-43VK
+L 08/15/2021 - 12:32:26: Error log file session closed.
+L 08/15/2021 - 12:36:16: SourceMod error session started
+L 08/15/2021 - 12:36:16: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 12:36:16: [CRASH] Accelerator uploaded crash dump: Crash ID: 4DNV-RY6H-JTPA
+L 08/15/2021 - 12:36:21: Error log file session closed.
+L 08/15/2021 - 12:37:49: SourceMod error session started
+L 08/15/2021 - 12:37:49: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 12:37:49: [CRASH] Accelerator uploaded crash dump: Crash ID: GKO3-2YWL-E5Q7
+L 08/15/2021 - 12:37:54: Error log file session closed.
+L 08/15/2021 - 12:39:13: SourceMod error session started
+L 08/15/2021 - 12:39:13: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 12:39:13: [CRASH] Accelerator uploaded crash dump: Crash ID: TRPA-WM7T-TAHS
+L 08/15/2021 - 12:39:18: Error log file session closed.
+L 08/15/2021 - 12:48:27: SourceMod error session started
+L 08/15/2021 - 12:48:27: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 12:48:27: [CRASH] Accelerator uploaded crash dump: Crash ID: JHB7-2IJJ-PMF5
+L 08/15/2021 - 12:48:32: Error log file session closed.
+L 08/15/2021 - 15:10:15: SourceMod error session started
+L 08/15/2021 - 15:10:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 15:10:15: [CRASH] Accelerator uploaded crash dump: Crash ID: 2I6E-JHIR-NL3P
+L 08/15/2021 - 15:10:19: Error log file session closed.
+L 08/15/2021 - 16:03:04: SourceMod error session started
+L 08/15/2021 - 16:03:04: Info (map "c8m3_sewers") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 16:03:04: [SM] Exception reported: Client 7 is not in game
+L 08/15/2021 - 16:03:04: [SM] Blaming: optional/kether/pause.smx
+L 08/15/2021 - 16:03:04: [SM] Call stack trace:
+L 08/15/2021 - 16:03:04: [SM]   [0] GetClientTeam
+L 08/15/2021 - 16:03:04: [SM]   [1] Line 757, D:\l4d2 serv\addons\sourcemod\scripting\kether\pause.sp::IsPlayer
+L 08/15/2021 - 16:03:04: [SM]   [2] Line 242, D:\l4d2 serv\addons\sourcemod\scripting\kether\pause.sp::Pause_Cmd
+L 08/15/2021 - 16:03:04: [SM]   [4] FakeClientCommand
+L 08/15/2021 - 16:03:04: [SM]   [5] Line 141, D:\l4d2 serv\addons\sourcemod\scripting\kether\autopause.sp::playerDisconnect
+L 08/15/2021 - 16:05:45: Error log file session closed.
+L 08/15/2021 - 16:07:55: SourceMod error session started
+L 08/15/2021 - 16:07:55: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 16:07:55: [CRASH] Accelerator uploaded crash dump: Crash ID: L4FY-A5J5-L56A
+L 08/15/2021 - 16:08:00: Error log file session closed.
+L 08/15/2021 - 17:46:26: SourceMod error session started
+L 08/15/2021 - 17:46:26: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 17:46:26: [CRASH] Accelerator uploaded crash dump: Crash ID: 4TUQ-KFZW-A4SH
+L 08/15/2021 - 17:46:31: Error log file session closed.
+L 08/15/2021 - 17:47:05: SourceMod error session started
+L 08/15/2021 - 17:47:05: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 17:47:05: [CRASH] Accelerator uploaded crash dump: Crash ID: ADK5-WNSV-JERS
+L 08/15/2021 - 17:47:10: Error log file session closed.
+L 08/15/2021 - 19:11:19: SourceMod error session started
+L 08/15/2021 - 19:11:19: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 19:11:19: [CRASH] Accelerator uploaded crash dump: Crash ID: MHSP-KGN2-U7IV
+L 08/15/2021 - 19:11:24: Error log file session closed.
+L 08/15/2021 - 19:13:23: SourceMod error session started
+L 08/15/2021 - 19:13:23: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 19:13:23: [CRASH] Accelerator uploaded crash dump: Crash ID: YYDW-G4BM-LM33
+L 08/15/2021 - 19:13:28: Error log file session closed.
+L 08/15/2021 - 20:40:57: SourceMod error session started
+L 08/15/2021 - 20:40:57: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210815.log")
+L 08/15/2021 - 20:40:57: [CRASH] Accelerator uploaded crash dump: Crash ID: XE52-WA62-FN2S
+L 08/15/2021 - 20:41:02: Error log file session closed.

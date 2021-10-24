@@ -1,0 +1,32 @@
+L 08/20/2021 - 09:40:15: SourceMod error session started
+L 08/20/2021 - 09:40:15: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 09:40:15: [CRASH] Accelerator uploaded crash dump: Crash ID: ZSSN-OM4V-DIN4
+L 08/20/2021 - 09:40:21: Error log file session closed.
+L 08/20/2021 - 09:47:56: SourceMod error session started
+L 08/20/2021 - 09:47:56: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 09:47:56: [CRASH] Accelerator uploaded crash dump: Crash ID: UTTO-P6GL-ASH5
+L 08/20/2021 - 09:48:01: Error log file session closed.
+L 08/20/2021 - 10:03:18: SourceMod error session started
+L 08/20/2021 - 10:03:18: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 10:03:18: [CRASH] Accelerator uploaded crash dump: Crash ID: IOS7-SUVS-GN7G
+L 08/20/2021 - 10:03:24: Error log file session closed.
+L 08/20/2021 - 18:51:21: SourceMod error session started
+L 08/20/2021 - 18:51:21: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 18:51:21: [CRASH] Accelerator uploaded crash dump: Crash ID: RDUU-D35G-QDHB
+L 08/20/2021 - 18:51:27: Error log file session closed.
+L 08/20/2021 - 19:39:17: SourceMod error session started
+L 08/20/2021 - 19:39:17: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 19:39:17: [CRASH] Accelerator uploaded crash dump: Crash ID: VFOB-V5RZ-JTXX
+L 08/20/2021 - 19:39:24: Error log file session closed.
+L 08/20/2021 - 20:22:25: SourceMod error session started
+L 08/20/2021 - 20:22:25: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 20:22:25: [CRASH] Accelerator uploaded crash dump: Crash ID: WDHL-YCJ2-PHQT
+L 08/20/2021 - 20:22:31: Error log file session closed.
+L 08/20/2021 - 22:49:15: SourceMod error session started
+L 08/20/2021 - 22:49:15: Info (map "c2m1_highway") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 22:49:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 08/20/2021 - 22:49:18: Error log file session closed.
+L 08/20/2021 - 23:25:51: SourceMod error session started
+L 08/20/2021 - 23:25:51: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210820.log")
+L 08/20/2021 - 23:25:51: [CRASH] Accelerator uploaded crash dump: Crash ID: CA46-AVU7-574X
+L 08/20/2021 - 23:25:57: Error log file session closed.

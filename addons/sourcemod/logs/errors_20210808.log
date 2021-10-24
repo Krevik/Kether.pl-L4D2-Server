@@ -1,0 +1,127 @@
+L 08/08/2021 - 09:34:47: SourceMod error session started
+L 08/08/2021 - 09:34:47: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 09:34:47: [CRASH] Accelerator uploaded crash dump: Crash ID: QPGT-UGMQ-2NS2
+L 08/08/2021 - 09:34:52: Error log file session closed.
+L 08/08/2021 - 09:39:50: SourceMod error session started
+L 08/08/2021 - 09:39:50: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 09:39:50: [CRASH] Accelerator uploaded crash dump: Crash ID: 6H7O-NEOS-H6L2
+L 08/08/2021 - 09:39:55: Error log file session closed.
+L 08/08/2021 - 10:10:42: SourceMod error session started
+L 08/08/2021 - 10:10:42: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:10:42: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:10:42: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:10:45: Error log file session closed.
+L 08/08/2021 - 10:19:59: SourceMod error session started
+L 08/08/2021 - 10:19:59: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:19:59: [CRASH] Accelerator uploaded crash dump: Crash ID: GE7R-I3ET-7DR4
+L 08/08/2021 - 10:20:01: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:20:01: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:20:04: Error log file session closed.
+L 08/08/2021 - 10:24:04: SourceMod error session started
+L 08/08/2021 - 10:24:04: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:24:04: [CRASH] Accelerator uploaded crash dump: Crash ID: GEXQ-WAN2-MJF3
+L 08/08/2021 - 10:24:05: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:24:05: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:24:09: Error log file session closed.
+L 08/08/2021 - 10:27:57: SourceMod error session started
+L 08/08/2021 - 10:27:57: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:27:57: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:27:57: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:28:00: Error log file session closed.
+L 08/08/2021 - 10:29:51: SourceMod error session started
+L 08/08/2021 - 10:29:51: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:29:51: [CRASH] Accelerator uploaded crash dump: Crash ID: MHQY-5XQR-62MC
+L 08/08/2021 - 10:29:53: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:29:53: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:29:56: Error log file session closed.
+L 08/08/2021 - 10:30:54: SourceMod error session started
+L 08/08/2021 - 10:30:54: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:30:54: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:30:54: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:30:58: Error log file session closed.
+L 08/08/2021 - 10:40:09: SourceMod error session started
+L 08/08/2021 - 10:40:09: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:40:09: [CRASH] Accelerator uploaded crash dump: Crash ID: EBBQ-VSL6-4POM
+L 08/08/2021 - 10:40:10: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:40:10: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:40:13: Error log file session closed.
+L 08/08/2021 - 10:54:55: SourceMod error session started
+L 08/08/2021 - 10:54:55: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:54:55: [CRASH] Accelerator uploaded crash dump: Crash ID: JQMB-YKO4-VDZ4
+L 08/08/2021 - 10:54:57: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:54:57: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:55:00: Error log file session closed.
+L 08/08/2021 - 10:56:01: SourceMod error session started
+L 08/08/2021 - 10:56:01: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 10:56:01: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 10:56:01: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 10:56:04: Error log file session closed.
+L 08/08/2021 - 12:14:20: SourceMod error session started
+L 08/08/2021 - 12:14:20: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 12:14:20: [CRASH] Accelerator uploaded crash dump: Crash ID: VDMB-BTTS-MBPI
+L 08/08/2021 - 12:14:21: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 12:14:21: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 12:14:24: Error log file session closed.
+L 08/08/2021 - 13:23:47: SourceMod error session started
+L 08/08/2021 - 13:23:47: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 13:23:47: [CRASH] Accelerator uploaded crash dump: Crash ID: VDEY-ISTB-C35P
+L 08/08/2021 - 13:23:49: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 13:23:49: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 13:23:52: Error log file session closed.
+L 08/08/2021 - 13:24:32: SourceMod error session started
+L 08/08/2021 - 13:24:32: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 13:24:32: [CRASH] Accelerator uploaded crash dump: Crash ID: D6XP-IKSF-IDED
+L 08/08/2021 - 13:24:34: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 13:24:34: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 13:24:37: Error log file session closed.
+L 08/08/2021 - 13:41:36: SourceMod error session started
+L 08/08/2021 - 13:41:36: Info (map "c5m1_waterfront") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 13:41:36: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 08/08/2021 - 13:41:39: Error log file session closed.
+L 08/08/2021 - 13:43:36: SourceMod error session started
+L 08/08/2021 - 13:43:36: Info (map "c5m1_waterfront") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 13:43:36: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 13:43:36: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 13:43:39: Error log file session closed.
+L 08/08/2021 - 14:54:02: SourceMod error session started
+L 08/08/2021 - 14:54:02: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 14:54:02: [CRASH] Accelerator uploaded crash dump: Crash ID: A264-JNUF-TYWN
+L 08/08/2021 - 14:54:04: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 14:54:04: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 14:54:07: Error log file session closed.
+L 08/08/2021 - 15:13:57: SourceMod error session started
+L 08/08/2021 - 15:13:57: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 15:13:57: [CRASH] Accelerator uploaded crash dump: Crash ID: 2HRJ-E7II-IJSP
+L 08/08/2021 - 15:13:59: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 15:13:59: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 15:14:02: Error log file session closed.
+L 08/08/2021 - 15:44:00: SourceMod error session started
+L 08/08/2021 - 15:44:00: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 15:44:00: [CRASH] Accelerator uploaded crash dump: Crash ID: 6SUN-BUJ2-KP2W
+L 08/08/2021 - 15:44:02: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_distance, which is already being tracked.
+L 08/08/2021 - 15:44:02: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_respawn_interval, which is already being tracked.
+L 08/08/2021 - 15:44:05: Error log file session closed.
+L 08/08/2021 - 16:49:46: SourceMod error session started
+L 08/08/2021 - 16:49:46: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 16:49:46: [CRASH] Accelerator uploaded crash dump: Crash ID: QUCT-Z4MA-AKLH
+L 08/08/2021 - 16:49:51: Error log file session closed.
+L 08/08/2021 - 17:41:40: SourceMod error session started
+L 08/08/2021 - 17:41:40: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 17:41:40: [CRASH] Accelerator uploaded crash dump: Crash ID: 7767-MKNM-UWYX
+L 08/08/2021 - 17:41:45: Error log file session closed.
+L 08/08/2021 - 18:42:10: SourceMod error session started
+L 08/08/2021 - 18:42:10: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 18:42:10: [CRASH] Accelerator uploaded crash dump: Crash ID: YV6N-6MZP-HNS5
+L 08/08/2021 - 18:42:14: Error log file session closed.
+L 08/08/2021 - 20:03:55: SourceMod error session started
+L 08/08/2021 - 20:03:55: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 20:03:55: [CRASH] Accelerator uploaded crash dump: Crash ID: LWKT-WSSN-3LH6
+L 08/08/2021 - 20:04:00: Error log file session closed.
+L 08/08/2021 - 21:10:43: SourceMod error session started
+L 08/08/2021 - 21:10:43: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 21:10:43: [CRASH] Accelerator uploaded crash dump: Crash ID: GT5P-ODPP-ZGFS
+L 08/08/2021 - 21:10:48: Error log file session closed.
+L 08/08/2021 - 22:01:15: SourceMod error session started
+L 08/08/2021 - 22:01:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210808.log")
+L 08/08/2021 - 22:01:15: [CRASH] Accelerator uploaded crash dump: Crash ID: 5VXB-7BNB-OWYK
+L 08/08/2021 - 22:01:20: Error log file session closed.

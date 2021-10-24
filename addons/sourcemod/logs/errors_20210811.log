@@ -1,0 +1,73 @@
+L 08/11/2021 - 18:27:13: SourceMod error session started
+L 08/11/2021 - 18:27:13: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 18:27:13: [CRASH] Accelerator uploaded crash dump: Crash ID: BCT5-Q4VE-DK4X
+L 08/11/2021 - 18:27:21: Error log file session closed.
+L 08/11/2021 - 19:17:27: SourceMod error session started
+L 08/11/2021 - 19:17:27: Info (map "c7m3_port") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 19:17:27: [SM] Exception reported: Handle d1ee0469 is invalid (error 3)
+L 08/11/2021 - 19:17:27: [SM] Blaming: optional/kether/sm_give.smx
+L 08/11/2021 - 19:17:27: [SM] Call stack trace:
+L 08/11/2021 - 19:17:27: [SM]   [0] CloseHandle
+L 08/11/2021 - 19:17:27: [SM]   [1] Line 197, D:\l4d2 serv\LIVESERVER\serwery\standard 60T\addons\sourcemod\scripting\sm_give.sp::ItemsMenuHandler
+L 08/11/2021 - 19:17:35: [SM] Exception reported: Handle 5b620462 is invalid (error 3)
+L 08/11/2021 - 19:17:35: [SM] Blaming: optional/kether/sm_give.smx
+L 08/11/2021 - 19:17:35: [SM] Call stack trace:
+L 08/11/2021 - 19:17:35: [SM]   [0] CloseHandle
+L 08/11/2021 - 19:17:35: [SM]   [1] Line 197, D:\l4d2 serv\LIVESERVER\serwery\standard 60T\addons\sourcemod\scripting\sm_give.sp::ItemsMenuHandler
+L 08/11/2021 - 19:17:40: [SM] Exception reported: Handle 44be04a6 is invalid (error 3)
+L 08/11/2021 - 19:17:40: [SM] Blaming: optional/kether/sm_give.smx
+L 08/11/2021 - 19:17:40: [SM] Call stack trace:
+L 08/11/2021 - 19:17:40: [SM]   [0] CloseHandle
+L 08/11/2021 - 19:17:40: [SM]   [1] Line 197, D:\l4d2 serv\LIVESERVER\serwery\standard 60T\addons\sourcemod\scripting\sm_give.sp::ItemsMenuHandler
+L 08/11/2021 - 19:31:27: SourceMod error session started
+L 08/11/2021 - 19:31:27: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 19:31:27: [CRASH] Accelerator uploaded crash dump: Crash ID: EL7J-J7NZ-NYES
+L 08/11/2021 - 19:31:32: Error log file session closed.
+L 08/11/2021 - 19:42:08: SourceMod error session started
+L 08/11/2021 - 19:42:08: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 19:42:08: [CRASH] Accelerator uploaded crash dump: Crash ID: 7MA6-YS6M-Q6GO
+L 08/11/2021 - 19:42:13: Error log file session closed.
+L 08/11/2021 - 20:00:35: SourceMod error session started
+L 08/11/2021 - 20:00:35: Info (map "c14m1_junkyard") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 20:00:35: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 08/11/2021 - 20:00:38: Error log file session closed.
+L 08/11/2021 - 20:49:44: SourceMod error session started
+L 08/11/2021 - 20:49:44: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 20:49:44: [CRASH] Accelerator uploaded crash dump: Crash ID: SAAH-NFAD-JRGI
+L 08/11/2021 - 20:49:45: Error log file session closed.
+L 08/11/2021 - 20:51:24: SourceMod error session started
+L 08/11/2021 - 20:51:24: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 20:51:24: [CRASH] Accelerator uploaded crash dump: Crash ID: S4HR-MMN3-M6MD
+L 08/11/2021 - 20:51:29: Error log file session closed.
+L 08/11/2021 - 20:57:05: SourceMod error session started
+L 08/11/2021 - 20:57:05: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 20:57:05: [SM] Exception reported: Array index out-of-bounds (index 5, limit 4)
+L 08/11/2021 - 20:57:05: [SM] Blaming: optional/kether/c_l4d2scores.smx
+L 08/11/2021 - 20:57:05: [SM] Call stack trace:
+L 08/11/2021 - 20:57:05: [SM]   [1] Line 1087, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2scores.sp::TryTeamPlacement
+L 08/11/2021 - 20:57:05: [SM]   [2] Line 661, D:\l4d2 serv\addons\sourcemod\scripting\kether\c_l4d2scores.sp::Command_SwapTo
+L 08/11/2021 - 21:09:36: Error log file session closed.
+L 08/11/2021 - 21:22:52: SourceMod error session started
+L 08/11/2021 - 21:22:52: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 21:22:52: [CRASH] Accelerator uploaded crash dump: Crash ID: 6M3J-QTQL-FC3I
+L 08/11/2021 - 21:22:57: Error log file session closed.
+L 08/11/2021 - 21:59:39: SourceMod error session started
+L 08/11/2021 - 21:59:39: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 21:59:39: [CRASH] Accelerator uploaded crash dump: Crash ID: AUPE-EG4A-MLO4
+L 08/11/2021 - 21:59:44: Error log file session closed.
+L 08/11/2021 - 22:18:19: SourceMod error session started
+L 08/11/2021 - 22:18:19: Info (map "c7m1_docks") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 22:18:19: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 08/11/2021 - 22:18:22: Error log file session closed.
+L 08/11/2021 - 22:38:26: SourceMod error session started
+L 08/11/2021 - 22:38:26: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 22:38:26: [CRASH] Accelerator uploaded crash dump: Crash ID: KNSH-TJCY-ANRV
+L 08/11/2021 - 22:38:31: Error log file session closed.
+L 08/11/2021 - 22:40:59: SourceMod error session started
+L 08/11/2021 - 22:40:59: Info (map "c2m1_highway") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 22:40:59: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 08/11/2021 - 22:41:03: Error log file session closed.
+L 08/11/2021 - 23:26:47: SourceMod error session started
+L 08/11/2021 - 23:26:47: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210811.log")
+L 08/11/2021 - 23:26:47: [CRASH] Accelerator uploaded crash dump: Crash ID: Y45Y-U5B5-LZ2K
+L 08/11/2021 - 23:26:52: Error log file session closed.

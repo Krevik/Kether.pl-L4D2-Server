@@ -1,0 +1,36 @@
+L 09/19/2021 - 11:59:50: SourceMod error session started
+L 09/19/2021 - 11:59:50: Info (map "c2m1_highway") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210919.log")
+L 09/19/2021 - 11:59:50: [SM] Exception reported: Failed to find LagComp addresses: 0xeddac080, 00000000, 00000000
+L 09/19/2021 - 11:59:50: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/19/2021 - 11:59:50: [SM] Call stack trace:
+L 09/19/2021 - 11:59:50: [SM]   [0] SetFailState
+L 09/19/2021 - 11:59:50: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/19/2021 - 11:59:50: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/19/2021 - 11:59:53: Error log file session closed.
+L 09/19/2021 - 13:01:18: SourceMod error session started
+L 09/19/2021 - 13:01:18: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210919.log")
+L 09/19/2021 - 13:01:18: [CRASH] Accelerator uploaded crash dump: Crash ID: 44B3-H3WK-ZXNO
+L 09/19/2021 - 13:01:20: [SM] Exception reported: Failed to find LagComp addresses: 0xede85080, 00000000, 00000000
+L 09/19/2021 - 13:01:20: [SM] Blaming: optional/kether/l4d2_lagcomp_manager.smx
+L 09/19/2021 - 13:01:20: [SM] Call stack trace:
+L 09/19/2021 - 13:01:20: [SM]   [0] SetFailState
+L 09/19/2021 - 13:01:20: [SM]   [1] Line 32, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_lagcomp_manager.sp::OnPluginStart
+L 09/19/2021 - 13:01:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_disable_ghost_hurt)
+L 09/19/2021 - 13:01:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (confogl_remove_parachutist)
+L 09/19/2021 - 13:01:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_always)
+L 09/19/2021 - 13:01:22: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_unsilentjockey_time)
+L 09/19/2021 - 13:01:25: Error log file session closed.

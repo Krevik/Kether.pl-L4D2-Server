@@ -1,0 +1,16 @@
+L 08/02/2021 - 20:28:00: SourceMod error session started
+L 08/02/2021 - 20:28:00: Info (map "c8m1_apartment") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210802.log")
+L 08/02/2021 - 20:28:00: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 08/02/2021 - 20:28:04: Error log file session closed.
+L 08/02/2021 - 20:37:21: SourceMod error session started
+L 08/02/2021 - 20:37:21: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210802.log")
+L 08/02/2021 - 20:37:21: [CRASH] Accelerator uploaded crash dump: Crash ID: EC6F-ZCY2-MSNA
+L 08/02/2021 - 20:37:26: Error log file session closed.
+L 08/02/2021 - 21:45:36: SourceMod error session started
+L 08/02/2021 - 21:45:36: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210802.log")
+L 08/02/2021 - 21:45:36: [CRASH] Accelerator uploaded crash dump: Crash ID: 2ANP-4WFC-VEDC
+L 08/02/2021 - 21:45:41: Error log file session closed.
+L 08/02/2021 - 23:10:11: SourceMod error session started
+L 08/02/2021 - 23:10:11: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210802.log")
+L 08/02/2021 - 23:10:11: [CRASH] Accelerator uploaded crash dump: Crash ID: PNEN-ZWYR-KEB4
+L 08/02/2021 - 23:10:16: Error log file session closed.

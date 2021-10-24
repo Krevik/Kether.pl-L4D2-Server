@@ -1,0 +1,25 @@
+//  = 0x01 (WHITE)
+//  = 0x02 (WHITE)
+//  = 0x03 (LIGHTGREEN)
+//  = 0x04 (YELLOW)
+//  = 0x05 (GREEN)
+
+"Phrases"
+{
+	"ShowHintMessage"
+	{
+		"de"		"Auf diesem Server kannst du folgende Kommandos benutzen !afk, !join, !infected and !kill"
+	}
+	"MessageInfected"
+	{
+		"de"		"[SM] Du musst ein Infizierter sein um dich umzubringen"
+	}
+	"MessageSurvivors"
+	{
+		"de"		"[SM] Du musst ein Überlebender sein um dich umzubringen"
+	}
+	"MessageNotAllowed"
+	{
+		"de"		"[SM] Auf diesem Server darfst du dich nicht umzubringen"
+	}
+}

@@ -1,0 +1,46 @@
+L 08/06/2021 - 01:11:47: SourceMod error session started
+L 08/06/2021 - 01:11:47: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 01:11:47: [CRASH] Accelerator uploaded crash dump: Crash ID: BGR3-BOSF-ZQ4A
+L 08/06/2021 - 01:11:49: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar z_female_boomer_spawn_chance, which is already being tracked.
+L 08/06/2021 - 01:11:52: Error log file session closed.
+L 08/06/2021 - 16:57:15: SourceMod error session started
+L 08/06/2021 - 16:57:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 16:57:15: [CRASH] Accelerator uploaded crash dump: Crash ID: HEBD-S5QT-AJHC
+L 08/06/2021 - 16:57:20: Error log file session closed.
+L 08/06/2021 - 17:56:26: SourceMod error session started
+L 08/06/2021 - 17:56:26: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 17:56:26: [CRASH] Accelerator uploaded crash dump: Crash ID: 4MUE-J6ME-RVO5
+L 08/06/2021 - 17:56:31: Error log file session closed.
+L 08/06/2021 - 20:06:11: SourceMod error session started
+L 08/06/2021 - 20:06:11: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 20:06:11: [CRASH] Accelerator uploaded crash dump: Crash ID: APIA-VNC5-TJHI
+L 08/06/2021 - 20:06:15: Error log file session closed.
+L 08/06/2021 - 21:28:02: SourceMod error session started
+L 08/06/2021 - 21:28:02: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 21:28:02: [SM] Exception reported: Invalid timer handle d3e504e4 (error 3)
+L 08/06/2021 - 21:28:02: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/06/2021 - 21:28:02: [SM] Call stack trace:
+L 08/06/2021 - 21:28:02: [SM]   [0] KillTimer
+L 08/06/2021 - 21:28:02: [SM]   [1] Line 99, D:\krevika\l4d2 server files\server_20329\left4dead2\addons\sourcemod\scripting\TeamMix.sp::StopMix
+L 08/06/2021 - 21:28:02: [SM]   [2] Line 80, D:\krevika\l4d2 server files\server_20329\left4dead2\addons\sourcemod\scripting\TeamMix.sp::OnRoundIsLive
+L 08/06/2021 - 21:28:02: [SM]   [4] Call_Finish
+L 08/06/2021 - 21:28:02: [SM]   [5] Line 748, D:\krevika\l4d2 server files\server_20329\left4dead2\addons\sourcemod\scripting\c_readyup.sp::InitiateLive
+L 08/06/2021 - 21:28:02: [SM]   [6] Line 870, D:\krevika\l4d2 server files\server_20329\left4dead2\addons\sourcemod\scripting\c_readyup.sp::ReadyCountdownDelay_Timer
+L 08/06/2021 - 21:28:38: Error log file session closed.
+L 08/06/2021 - 21:28:39: SourceMod error session started
+L 08/06/2021 - 21:28:39: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 21:28:39: [SM] Exception reported: Invalid timer handle d3e504e4 (error 1)
+L 08/06/2021 - 21:28:39: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/06/2021 - 21:28:39: [SM] Call stack trace:
+L 08/06/2021 - 21:28:39: [SM]   [0] KillTimer
+L 08/06/2021 - 21:28:39: [SM]   [1] Line 99, D:\krevika\l4d2 server files\server_20329\left4dead2\addons\sourcemod\scripting\TeamMix.sp::StopMix
+L 08/06/2021 - 21:28:39: [SM]   [2] Line 75, D:\krevika\l4d2 server files\server_20329\left4dead2\addons\sourcemod\scripting\TeamMix.sp::OnMapStart
+L 08/06/2021 - 21:42:07: Error log file session closed.
+L 08/06/2021 - 22:01:52: SourceMod error session started
+L 08/06/2021 - 22:01:52: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 22:01:52: [CRASH] Accelerator uploaded crash dump: Crash ID: M5CV-HBRS-CAET
+L 08/06/2021 - 22:01:57: Error log file session closed.
+L 08/06/2021 - 23:27:15: SourceMod error session started
+L 08/06/2021 - 23:27:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20210806.log")
+L 08/06/2021 - 23:27:15: [CRASH] Accelerator uploaded crash dump: Crash ID: CS43-XZQD-NYGV
+L 08/06/2021 - 23:27:19: Error log file session closed.

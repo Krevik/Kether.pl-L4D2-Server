@@ -1,0 +1,68 @@
+L 08/25/2021 - 18:49:03: SourceMod error session started
+L 08/25/2021 - 18:49:03: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210825.log")
+L 08/25/2021 - 18:49:03: [CRASH] Accelerator uploaded crash dump: Crash ID: QK6M-A7NE-BAZK
+L 08/25/2021 - 18:49:12: Error log file session closed.
+L 08/25/2021 - 19:43:13: SourceMod error session started
+L 08/25/2021 - 19:43:13: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210825.log")
+L 08/25/2021 - 19:43:13: [CRASH] Accelerator uploaded crash dump: Crash ID: VR2J-O4FK-H6AQ
+L 08/25/2021 - 19:43:19: Error log file session closed.
+L 08/25/2021 - 19:51:45: SourceMod error session started
+L 08/25/2021 - 19:51:45: Info (map "uf1_boulevard") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210825.log")
+L 08/25/2021 - 19:51:45: [SM] Exception reported: Invalid timer handle 51f904a7 (error 3)
+L 08/25/2021 - 19:51:45: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/25/2021 - 19:51:45: [SM] Call stack trace:
+L 08/25/2021 - 19:51:45: [SM]   [0] KillTimer
+L 08/25/2021 - 19:51:45: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 08/25/2021 - 19:51:45: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 08/25/2021 - 19:51:45: [SM]   [4] Call_Finish
+L 08/25/2021 - 19:51:45: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 08/25/2021 - 19:51:45: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 08/25/2021 - 19:58:31: [SM] Exception reported: Invalid timer handle 51f904a7 (error 1)
+L 08/25/2021 - 19:58:31: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/25/2021 - 19:58:31: [SM] Call stack trace:
+L 08/25/2021 - 19:58:31: [SM]   [0] KillTimer
+L 08/25/2021 - 19:58:31: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 08/25/2021 - 19:58:31: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 08/25/2021 - 19:58:31: [SM]   [4] Call_Finish
+L 08/25/2021 - 19:58:31: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 08/25/2021 - 19:58:31: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 08/25/2021 - 20:09:28: Error log file session closed.
+L 08/25/2021 - 20:09:29: SourceMod error session started
+L 08/25/2021 - 20:09:29: Info (map "uf2_rooftops") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210825.log")
+L 08/25/2021 - 20:09:29: [SM] Exception reported: Invalid timer handle 51f904a7 (error 1)
+L 08/25/2021 - 20:09:29: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/25/2021 - 20:09:29: [SM] Call stack trace:
+L 08/25/2021 - 20:09:29: [SM]   [0] KillTimer
+L 08/25/2021 - 20:09:29: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 08/25/2021 - 20:09:29: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 08/25/2021 - 20:10:57: [SM] Exception reported: Invalid timer handle 51f904a7 (error 1)
+L 08/25/2021 - 20:10:57: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/25/2021 - 20:10:57: [SM] Call stack trace:
+L 08/25/2021 - 20:10:57: [SM]   [0] KillTimer
+L 08/25/2021 - 20:10:57: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 08/25/2021 - 20:10:57: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 08/25/2021 - 20:10:57: [SM]   [4] Call_Finish
+L 08/25/2021 - 20:10:57: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 08/25/2021 - 20:10:57: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 08/25/2021 - 20:25:50: [SM] Exception reported: Invalid timer handle 51f904a7 (error 1)
+L 08/25/2021 - 20:25:50: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/25/2021 - 20:25:50: [SM] Call stack trace:
+L 08/25/2021 - 20:25:50: [SM]   [0] KillTimer
+L 08/25/2021 - 20:25:50: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 08/25/2021 - 20:25:50: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 08/25/2021 - 20:25:50: [SM]   [4] Call_Finish
+L 08/25/2021 - 20:25:50: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 08/25/2021 - 20:25:50: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 08/25/2021 - 20:38:48: Error log file session closed.
+L 08/25/2021 - 20:38:50: SourceMod error session started
+L 08/25/2021 - 20:38:50: Info (map "uf3_harbor") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210825.log")
+L 08/25/2021 - 20:38:50: [SM] Exception reported: Invalid timer handle 51f904a7 (error 1)
+L 08/25/2021 - 20:38:50: [SM] Blaming: optional/kether/TeamMix.smx
+L 08/25/2021 - 20:38:50: [SM] Call stack trace:
+L 08/25/2021 - 20:38:50: [SM]   [0] KillTimer
+L 08/25/2021 - 20:38:50: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 08/25/2021 - 20:38:50: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 08/25/2021 - 20:40:47: SourceMod error session started
+L 08/25/2021 - 20:40:47: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210825.log")
+L 08/25/2021 - 20:40:47: [CRASH] Accelerator uploaded crash dump: Crash ID: LDAK-EXXB-6HTE
+L 08/25/2021 - 20:40:53: Error log file session closed.

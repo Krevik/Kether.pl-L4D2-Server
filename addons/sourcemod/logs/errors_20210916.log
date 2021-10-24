@@ -1,0 +1,257 @@
+L 09/16/2021 - 18:03:50: SourceMod error session started
+L 09/16/2021 - 18:03:50: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 18:03:50: [CRASH] Accelerator uploaded crash dump: Crash ID: GQGR-OBPR-67U7
+L 09/16/2021 - 18:03:55: Error log file session closed.
+L 09/16/2021 - 19:09:37: SourceMod error session started
+L 09/16/2021 - 19:09:37: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 19:09:37: [CRASH] Accelerator uploaded crash dump: Crash ID: OJRT-VHKI-NF2G
+L 09/16/2021 - 19:09:43: Error log file session closed.
+L 09/16/2021 - 20:11:50: SourceMod error session started
+L 09/16/2021 - 20:11:50: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 20:11:50: [CRASH] Accelerator uploaded crash dump: Crash ID: GZUC-QRDK-LYQG
+L 09/16/2021 - 20:11:56: Error log file session closed.
+L 09/16/2021 - 21:16:45: SourceMod error session started
+L 09/16/2021 - 21:16:45: Info (map "c7m1_docks") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minrate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxrate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_mincmdrate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxcmdrate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_minupdaterate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_maxupdaterate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar nb_update_frequency, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar net_splitpacket_maxrate, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_min_interp_ratio, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar sv_client_max_interp_ratio, which is already being tracked.
+L 09/16/2021 - 21:16:45: [confoglcompmod.smx] [Confogl] CvarSettings: Attempt to track ConVar fps_max, which is already being tracked.
+L 09/16/2021 - 21:16:48: Error log file session closed.
+L 09/16/2021 - 21:21:38: SourceMod error session started
+L 09/16/2021 - 21:21:38: Info (map "c7m1_docks") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 21:21:38: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 21:21:38: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:21:38: [SM] Call stack trace:
+L 09/16/2021 - 21:21:38: [SM]   [0] KillTimer
+L 09/16/2021 - 21:21:38: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:21:38: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 21:21:38: [SM]   [4] Call_Finish
+L 09/16/2021 - 21:21:38: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 21:21:38: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 21:27:24: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 21:27:24: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:27:24: [SM] Call stack trace:
+L 09/16/2021 - 21:27:24: [SM]   [0] KillTimer
+L 09/16/2021 - 21:27:24: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:27:24: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 21:27:24: [SM]   [4] Call_Finish
+L 09/16/2021 - 21:27:24: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 21:27:24: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 21:32:28: Error log file session closed.
+L 09/16/2021 - 21:32:30: SourceMod error session started
+L 09/16/2021 - 21:32:30: Info (map "c7m2_barge") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 21:32:30: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 21:32:30: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:32:30: [SM] Call stack trace:
+L 09/16/2021 - 21:32:30: [SM]   [0] KillTimer
+L 09/16/2021 - 21:32:30: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:32:30: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 21:33:43: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 21:33:43: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:33:43: [SM] Call stack trace:
+L 09/16/2021 - 21:33:43: [SM]   [0] KillTimer
+L 09/16/2021 - 21:33:43: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:33:43: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 21:33:43: [SM]   [4] Call_Finish
+L 09/16/2021 - 21:33:43: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 21:33:43: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 21:46:35: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 21:46:35: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:46:35: [SM] Call stack trace:
+L 09/16/2021 - 21:46:35: [SM]   [0] KillTimer
+L 09/16/2021 - 21:46:35: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:46:35: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 21:46:35: [SM]   [4] Call_Finish
+L 09/16/2021 - 21:46:35: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 21:46:35: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 21:53:42: Error log file session closed.
+L 09/16/2021 - 21:53:43: SourceMod error session started
+L 09/16/2021 - 21:53:43: Info (map "c7m3_port") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 21:53:43: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 21:53:43: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:53:43: [SM] Call stack trace:
+L 09/16/2021 - 21:53:43: [SM]   [0] KillTimer
+L 09/16/2021 - 21:53:43: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:53:43: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 21:54:37: Error log file session closed.
+L 09/16/2021 - 21:54:38: SourceMod error session started
+L 09/16/2021 - 21:54:38: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 21:54:38: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 21:54:38: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 21:54:38: [SM] Call stack trace:
+L 09/16/2021 - 21:54:38: [SM]   [0] KillTimer
+L 09/16/2021 - 21:54:38: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 21:54:38: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 22:02:05: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 22:02:05: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:02:05: [SM] Call stack trace:
+L 09/16/2021 - 22:02:05: [SM]   [0] KillTimer
+L 09/16/2021 - 22:02:05: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:02:05: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:02:05: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:02:05: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:02:05: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:06:08: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 22:06:08: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:06:08: [SM] Call stack trace:
+L 09/16/2021 - 22:06:08: [SM]   [0] KillTimer
+L 09/16/2021 - 22:06:08: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:06:08: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:06:08: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:06:08: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:06:08: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:11:23: Error log file session closed.
+L 09/16/2021 - 22:11:24: SourceMod error session started
+L 09/16/2021 - 22:11:24: Info (map "c5m2_park") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 22:11:24: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 22:11:24: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:11:24: [SM] Call stack trace:
+L 09/16/2021 - 22:11:24: [SM]   [0] KillTimer
+L 09/16/2021 - 22:11:24: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:11:24: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 22:12:48: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 22:12:48: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:12:48: [SM] Call stack trace:
+L 09/16/2021 - 22:12:48: [SM]   [0] KillTimer
+L 09/16/2021 - 22:12:48: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:12:48: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:12:48: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:12:48: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:12:48: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:19:39: [SM] Exception reported: Invalid timer handle d26702a1 (error 3)
+L 09/16/2021 - 22:19:39: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:19:39: [SM] Call stack trace:
+L 09/16/2021 - 22:19:39: [SM]   [0] KillTimer
+L 09/16/2021 - 22:19:39: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:19:39: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:19:39: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:19:39: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:19:39: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:24:17: Error log file session closed.
+L 09/16/2021 - 22:24:18: SourceMod error session started
+L 09/16/2021 - 22:24:18: Info (map "c5m3_cemetery") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 22:24:18: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 22:24:18: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:24:18: [SM] Call stack trace:
+L 09/16/2021 - 22:24:18: [SM]   [0] KillTimer
+L 09/16/2021 - 22:24:18: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:24:18: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 22:25:14: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 22:25:14: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:25:14: [SM] Call stack trace:
+L 09/16/2021 - 22:25:14: [SM]   [0] KillTimer
+L 09/16/2021 - 22:25:14: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:25:14: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:25:14: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:25:14: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:25:14: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:35:23: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 22:35:23: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:35:23: [SM] Call stack trace:
+L 09/16/2021 - 22:35:23: [SM]   [0] KillTimer
+L 09/16/2021 - 22:35:23: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:35:23: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:35:23: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:35:23: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:35:23: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:45:57: Error log file session closed.
+L 09/16/2021 - 22:45:58: SourceMod error session started
+L 09/16/2021 - 22:45:58: Info (map "c5m4_quarter") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 22:45:58: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 22:45:58: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:45:58: [SM] Call stack trace:
+L 09/16/2021 - 22:45:58: [SM]   [0] KillTimer
+L 09/16/2021 - 22:45:58: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:45:58: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 22:47:14: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 22:47:14: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:47:14: [SM] Call stack trace:
+L 09/16/2021 - 22:47:14: [SM]   [0] KillTimer
+L 09/16/2021 - 22:47:14: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:47:14: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:47:14: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:47:14: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:47:14: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 22:55:32: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 22:55:32: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 22:55:32: [SM] Call stack trace:
+L 09/16/2021 - 22:55:32: [SM]   [0] KillTimer
+L 09/16/2021 - 22:55:32: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 22:55:32: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 22:55:32: [SM]   [4] Call_Finish
+L 09/16/2021 - 22:55:32: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 22:55:32: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 23:01:28: Error log file session closed.
+L 09/16/2021 - 23:01:30: SourceMod error session started
+L 09/16/2021 - 23:01:30: Info (map "c5m5_bridge") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 23:01:30: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:01:30: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:01:30: [SM] Call stack trace:
+L 09/16/2021 - 23:01:30: [SM]   [0] KillTimer
+L 09/16/2021 - 23:01:30: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:01:30: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 23:02:31: Error log file session closed.
+L 09/16/2021 - 23:02:35: SourceMod error session started
+L 09/16/2021 - 23:02:35: Info (map "c14m1_junkyard") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 23:02:35: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:02:35: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:02:35: [SM] Call stack trace:
+L 09/16/2021 - 23:02:35: [SM]   [0] KillTimer
+L 09/16/2021 - 23:02:35: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:02:35: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 23:03:26: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:03:26: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:03:26: [SM] Call stack trace:
+L 09/16/2021 - 23:03:26: [SM]   [0] KillTimer
+L 09/16/2021 - 23:03:26: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:03:26: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 23:03:26: [SM]   [4] Call_Finish
+L 09/16/2021 - 23:03:26: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 23:03:26: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 23:10:27: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:10:27: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:10:27: [SM] Call stack trace:
+L 09/16/2021 - 23:10:27: [SM]   [0] KillTimer
+L 09/16/2021 - 23:10:27: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:10:27: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 23:10:27: [SM]   [4] Call_Finish
+L 09/16/2021 - 23:10:27: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 23:10:27: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 23:16:27: Error log file session closed.
+L 09/16/2021 - 23:16:30: SourceMod error session started
+L 09/16/2021 - 23:16:30: Info (map "c14m2_lighthouse") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 23:16:30: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:16:30: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:16:30: [SM] Call stack trace:
+L 09/16/2021 - 23:16:30: [SM]   [0] KillTimer
+L 09/16/2021 - 23:16:30: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:16:30: [SM]   [2] Line 79, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnMapStart
+L 09/16/2021 - 23:18:13: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:18:13: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:18:13: [SM] Call stack trace:
+L 09/16/2021 - 23:18:13: [SM]   [0] KillTimer
+L 09/16/2021 - 23:18:13: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:18:13: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 23:18:13: [SM]   [4] Call_Finish
+L 09/16/2021 - 23:18:13: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 23:18:13: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 23:26:36: [SM] Exception reported: Invalid timer handle d26702a1 (error 1)
+L 09/16/2021 - 23:26:36: [SM] Blaming: optional/kether/TeamMix.smx
+L 09/16/2021 - 23:26:36: [SM] Call stack trace:
+L 09/16/2021 - 23:26:36: [SM]   [0] KillTimer
+L 09/16/2021 - 23:26:36: [SM]   [1] Line 103, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::StopMix
+L 09/16/2021 - 23:26:36: [SM]   [2] Line 84, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\TeamMix.sp::OnRoundIsLive
+L 09/16/2021 - 23:26:36: [SM]   [4] Call_Finish
+L 09/16/2021 - 23:26:36: [SM]   [5] Line 1367, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::InitiateLive
+L 09/16/2021 - 23:26:36: [SM]   [6] Line 1396, D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\kether\c_readyup.sp::ReadyCountdownDelay_Timer
+L 09/16/2021 - 23:38:32: SourceMod error session started
+L 09/16/2021 - 23:38:32: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20210916.log")
+L 09/16/2021 - 23:38:32: [CRASH] Accelerator uploaded crash dump: Crash ID: PODV-WXH4-UWJA
+L 09/16/2021 - 23:38:39: Error log file session closed.
