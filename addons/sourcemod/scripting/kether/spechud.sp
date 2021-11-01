@@ -7,11 +7,12 @@
 #undef REQUIRE_PLUGIN
 #include <readyup>
 #include <pause>
-#include <l4d2_boss_percents>
 #include <l4d2_hybrid_scoremod>
 #include <l4d2_scoremod>
 #include <l4d2_health_temp_bonus>
 #include <l4d_tank_control_eq>
+#include <l4d2_boss_percents>
+
 #define REQUIRE_PLUGIN
 
 #pragma semicolon 1
@@ -1644,4 +1645,26 @@ stock int GetSurvivorTemporaryHealth(int client)
 {
 	int temphp = RoundToCeil(GetEntPropFloat(client, Prop_Send, "m_healthBuffer") - ((GetGameTime() - GetEntPropFloat(client, Prop_Send, "m_healthBufferTime")) * fPainPillsDecayRate)) - 1;
 	return (temphp > 0 ? temphp : 0);
+}
+
+stock float GetTankFlow(int round)
+{
+	return L4D2Direct_GetVSTankFlowPercent(round)/* -
+		( GetConVarFloat(g_hVsBossBuffer) / L4D2Direct_GetMapMaxFlowDistance() )*/;
+}
+
+stock float GetWitchFlow(int round)
+{
+	return L4D2Direct_GetVSWitchFlowPercent(round)/* -
+		( GetConVarFloat(g_hVsBossBuffer) / L4D2Direct_GetMapMaxFlowDistance() )*/;
+}
+
+stock bool IsStaticWitchMap()
+{
+	return RoundToNearest(GetWitchFlow(0) * 100.0) < 1;
+}
+
+stock bool IsStaticTankMap()
+{
+	return RoundToNearest(GetTankFlow(0) * 100.0) < 1;
 }
