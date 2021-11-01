@@ -685,7 +685,7 @@ public Action HudDrawTimer(Handle hTimer)
 				SendPanelToClient(tankHud, client, DummyTankHudHandler, 3);
 			}else{
 				if(!IsFakeClient(client)){
-						PrintHintText(client, "Control : %d / 2 | Frustration: %d", L4D2Direct_GetTankPassedCount(), GetTankFrustration(client));
+						PrintHintText(client, "Control : %d | Frustration: %d", L4D2Direct_GetTankPassedCount(), GetTankFrustration(client));
 					}
 			}
 			if (!bTankHudHintShown[client])
@@ -1145,8 +1145,8 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	switch (passCount)
 	{
 		case 0: FormatEx(info, sizeof(info), "native");
-		case 1: FormatEx(info, sizeof(info), "%i", passCount);
-		case 2: FormatEx(info, sizeof(info), "%i", passCount);
+		case 1: FormatEx(info, sizeof(info), "%ist", passCount);
+		case 2: FormatEx(info, sizeof(info), "%ind", passCount);
 		case 3: FormatEx(info, sizeof(info), "%ird", passCount);
 		default: FormatEx(info, sizeof(info), "%ith", passCount);
 	}
@@ -1154,11 +1154,11 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	if (!IsFakeClient(tank))
 	{
 		GetClientFixedName(tank, name, sizeof(name));
-		Format(info, sizeof(info), "Control : %s (%s / 2)", name, info);
+		Format(info, sizeof(info), "Control : %s (%s)", name, info);
 	}
 	else
 	{
-		Format(info, sizeof(info), "Control : AI (%s / 2)", info);
+		Format(info, sizeof(info), "Control : AI (%s)", info);
 	}
 	DrawPanelText(hSpecHud, info);
 
