@@ -1201,8 +1201,8 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	// Draw fire status
 	if (GetEntityFlags(tank) & FL_ONFIRE)
 	{
-		int timeleft = RoundToCeil(healthPercent * fTankBurnDuration);
-		//FormatEx(info, sizeof(info), "On Fire : %is", timeleft);
+		int timeleft = RoundToCeil(healthPercent / 100.0 * fTankBurnDuration);
+		FormatEx(info, sizeof(info), "On Fire: %is", timeleft);
 		DrawPanelText(hSpecHud, info);
 	}
 	
