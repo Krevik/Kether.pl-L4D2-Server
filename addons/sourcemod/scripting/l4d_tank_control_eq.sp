@@ -23,6 +23,8 @@ bool casterSystemAvailable;
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("GetTankSelection", Native_GetTankSelection);
+
+	return APLRes_Success;
 }
 
 public int Native_GetTankSelection(Handle plugin, int numParams) { return getInfectedPlayerBySteamId(queuedTankSteamId); }
@@ -30,7 +32,7 @@ public int Native_GetTankSelection(Handle plugin, int numParams) { return getInf
 public Plugin myinfo = 
 {
     name = "L4D2 Tank Control",
-    author = "arti", //Add support sm1.11 - A1m`
+    author = "arti",
     description = "Distributes the role of the tank evenly throughout the team",
     version = "0.0.18",
     url = "https://github.com/alexberriman/l4d2-plugins/tree/master/l4d_tank_control"
@@ -127,15 +129,17 @@ public void RoundStart_Event(Event hEvent, const char[] eName, bool dontBroadcas
 
 public Action newGame(Handle timer)
 {
-    int teamAScore = L4D2Direct_GetVSCampaignScore(0);
-    int teamBScore = L4D2Direct_GetVSCampaignScore(1);
-    
-    // If it's a new game, reset the tank pool
-    if (teamAScore == 0 && teamBScore == 0)
-    {
-        h_whosHadTank.Clear();
-        queuedTankSteamId = "";
-    }
+	int teamAScore = L4D2Direct_GetVSCampaignScore(0);
+	int teamBScore = L4D2Direct_GetVSCampaignScore(1);
+
+	// If it's a new game, reset the tank pool
+	if (teamAScore == 0 && teamBScore == 0)
+	{
+		h_whosHadTank.Clear();
+		queuedTankSteamId = "";
+	}
+
+	return Plugin_Stop;
 }
 
 /**
@@ -433,7 +437,7 @@ public void outputTankToAll(any data)
     }
 }
 
-stock int PrintToInfected(const char[] Message, any ... )
+stock void PrintToInfected(const char[] Message, any ... )
 {
     char sPrint[256];
     VFormat(sPrint, sizeof(sPrint), Message, 2);

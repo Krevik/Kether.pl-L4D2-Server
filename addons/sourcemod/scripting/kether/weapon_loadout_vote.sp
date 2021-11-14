@@ -408,7 +408,6 @@ public Action Timer_InformPlayers(Handle hTimer)
 
 	for (int i = 1; i <= MaxClients; i++) {
 		if (IsClientInGame(i) && GetClientTeam(i) != view_as<int>(L4D2Team_Spectator) && !g_bVoteUnderstood[i]) {
-			CPrintToChat(i, "{blue}[{green}Zone{blue}]{default}: Welcome to {blue}Zone{green}Hunters{default}.");
 			CPrintToChat(i, "{blue}[{green}Zone{blue}]{default}: Type {olive}!mode {default}in chat to vote on weapons used.");
 		}
 	}

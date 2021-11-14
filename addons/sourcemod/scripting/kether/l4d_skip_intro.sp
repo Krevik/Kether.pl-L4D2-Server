@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION		"1.10"
+#define PLUGIN_VERSION		"1.11"
 
 /*======================================================================================
 	Plugin Info:
@@ -31,6 +31,9 @@
 
 ========================================================================================
 	Change Log:
+
+1.11 (11-Jul-2021)
+	- Slight optimization and change to fix the unhook event errors.
 
 1.10 (21-Jun-2021)
 	- Changes to fix the last update potentially not working for all maps.
@@ -81,7 +84,7 @@
 
 
 ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog;
-bool g_bCvarAllow, g_bMapStarted, g_bHookedEvent, g_bLeft4DHooks, g_bFaded, g_bOutput1, g_bOutput2;
+bool g_bCvarAllow, g_bMapStarted, g_bLeft4DHooks, g_bFaded, g_bOutput1, g_bOutput2;
 
 
 
@@ -125,7 +128,6 @@ public void OnPluginStart()
 	g_hCvarModesOff = CreateConVar(	"l4d_skip_intro_modes_off",		"",				"Turn off the plugin in these game modes, separate by commas (no spaces). (Empty = none).", CVAR_FLAGS );
 	g_hCvarModesTog = CreateConVar(	"l4d_skip_intro_modes_tog",		"0",			"Turn on the plugin in these game modes. 0=All, 1=Coop, 2=Survival, 4=Versus, 8=Scavenge. Add numbers together.", CVAR_FLAGS );
 	CreateConVar(					"l4d_skip_intro_version",		PLUGIN_VERSION,	"Skip Intro plugin version.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	AutoExecConfig(true,			"l4d_skip_intro");
 
 	g_hCvarMPGameMode = FindConVar("mp_gamemode");
 	g_hCvarMPGameMode.AddChangeHook(ConVarChanged_Allow);
@@ -133,6 +135,8 @@ public void OnPluginStart()
 	g_hCvarModes.AddChangeHook(ConVarChanged_Allow);
 	g_hCvarModesOff.AddChangeHook(ConVarChanged_Allow);
 	g_hCvarAllow.AddChangeHook(ConVarChanged_Allow);
+
+	HookEvent("gameinstructor_nodraw", Event_NoDraw, EventHookMode_PostNoCopy); // Because round_start can be too early when clients are not in-game.
 }
 
 
@@ -158,7 +162,6 @@ void IsAllowed()
 	if( g_bCvarAllow == false && bCvarAllow == true && bAllowMode == true )
 	{
 		g_bCvarAllow = true;
-		OnMapStart();
 	}
 
 	else if( g_bCvarAllow == true && (bCvarAllow == false || bAllowMode == false) )
@@ -237,32 +240,6 @@ public void OnGamemode(const char[] output, int caller, int activator, float del
 		g_iCurrentMode = 8;
 }
 
-// Only hook for first map when using left4dhooks, otherwise always hooked.
-public void OnMapStart()
-{
-	g_bMapStarted = true;
-
-	if( (g_bLeft4DHooks && !g_bHookedEvent && L4D_IsFirstMapInScenario()) || (!g_bLeft4DHooks && !g_bHookedEvent) )
-	{
-		if( g_bCvarAllow )
-		{
-			g_bHookedEvent = true;
-			HookEvent("gameinstructor_nodraw", Event_NoDraw, EventHookMode_PostNoCopy); // Because round_start can be too early when clients are not in-game.
-		}
-	}
-}
-
-public void OnMapEnd()
-{
-	g_bMapStarted = false;
-
-	if( g_bLeft4DHooks && g_bHookedEvent )
-	{
-		g_bHookedEvent = false;
-		UnhookEvent("gameinstructor_nodraw", Event_NoDraw, EventHookMode_PostNoCopy);
-	}
-}
-
 public void Event_NoDraw(Event event, const char[] name, bool dontBroadcast)
 {
 	if( g_bCvarAllow && (!g_bLeft4DHooks || L4D_IsFirstMapInScenario()) )
@@ -307,6 +284,7 @@ public Action TimerStart(Handle timer)
 					// SetVariantString(buffer);
 					// AcceptEntityInput(entity, "AddOutput");
 
+					// ALLOW MOVEMENT
 					FormatEx(buffer, sizeof(buffer), "OnUser1 %s:ReleaseSurvivorPositions::0:-1", director);
 					SetVariantString(buffer);
 					AcceptEntityInput(entity, "AddOutput");
@@ -323,14 +301,9 @@ public Action TimerStart(Handle timer)
 					AcceptEntityInput(entity, "FireUser1");
 				}
 
-				// STOP SCENE - targetname is for each different player
-				GetEntPropString(entity, Prop_Data, "m_iName", buffer, sizeof(buffer));
-
-				Format(buffer, sizeof(buffer), "OnUser2 %s:StartMovement::0:-1", buffer);
-				SetVariantString(buffer);
-				AcceptEntityInput(entity, "AddOutput");
-
-				AcceptEntityInput(entity, "FireUser2");
+				// STOP SCENE
+				SetVariantString("!self");
+				AcceptEntityInput(entity, "StartMovement");
 
 				// AcceptEntityInput(entity, "Kill"); // Kill works good, but maybe some 3rd party maps use this for other scenes, so better to not kill.. especially if no left4dhooks and checking every map.
 			}
@@ -360,4 +333,6 @@ public Action TimerStart(Handle timer)
 			// DispatchSpawn(entity);
 		}
 	}
+
+	return Plugin_Stop;
 }

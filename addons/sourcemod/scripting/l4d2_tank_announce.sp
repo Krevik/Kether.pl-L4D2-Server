@@ -5,13 +5,14 @@
 #include <sdktools_sound>
 #include <dhooks>
 #include <colors>
-#define L4D2UTIL_STOCKS_ONLY
+#define L4D2UTIL_STOCKS_ONLY 1
 #include <l4d2util>
 #undef REQUIRE_PLUGIN
 #include <l4d_tank_control_eq>
 //#define REQUIRE_PLUGIN
 
 #define LEFT4FRAMEWORK_GAMEDATA "left4dhooks.l4d2"
+#define SECTION_NAME "ZombieManager::SpawnTank"
 
 #define PLUGIN_VERSION "1.3b"
 #define DANG "ui/pickup_secret01.wav"
@@ -34,13 +35,13 @@ public void OnPluginStart()
 		SetFailState("Missing gamedata \"%s\".", LEFT4FRAMEWORK_GAMEDATA);
 	}
 	
-	g_hDetour = DHookCreateFromConf(hGameData, "SpawnTank");
+	g_hDetour = DHookCreateFromConf(hGameData, SECTION_NAME);
 	if (g_hDetour == null) {
-		SetFailState("Failed to create detour \"SpawnTank\" from gamedata.");
+		SetFailState("Failed to create detour '" ... SECTION_NAME ..."' from gamedata.");
 	}
 	
 	if (!DHookEnableDetour(g_hDetour, true, OnSpawnTank)) {
-		SetFailState("Failed to enable detour \"SpawnTank\".");
+		SetFailState("Failed to enable detour '" ... SECTION_NAME ... "'.");
 	}
 
 	delete hGameData;

@@ -22,7 +22,8 @@ static const char sEntityList[][] =
 {
 	"inferno",
 	"entityflame",
-	"fire_cracker_blast"
+	"fire_cracker_blast",
+	"trigger_hurt"
 };
 
 ConVar
@@ -195,6 +196,8 @@ public Action ExtinguishDelay(Handle hTimer, any iUserID)
 	if (iClient > 0 && IsLiveInfected(iClient)) {
 		ExtinguishFire(iClient);
 	}
+
+	return Plugin_Stop;
 }
 
 bool IsLiveInfected(int iClient)

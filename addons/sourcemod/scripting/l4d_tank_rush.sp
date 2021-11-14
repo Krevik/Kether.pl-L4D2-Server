@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <left4dhooks>
 #include <colors>
-#define L4D2UTIL_STOCKS_ONLY
+#define L4D2UTIL_STOCKS_ONLY 1
 #include <l4d2util>
 
 bool 
@@ -22,7 +22,7 @@ ConVar
 public Plugin myinfo =
 {
 	name = "L4D2 No Tank Rush",
-	author = "Jahze, vintik, devilesk, Sir", //Add support sm1.11 - A1m`
+	author = "Jahze, vintik, devilesk, Sir",
 	version = "1.1.4",
 	description = "Stops distance points accumulating whilst the tank is alive, with the option of unfreezing distance on reaching the Saferoom"
 };
@@ -73,6 +73,8 @@ public Action L4D2_OnEndVersusModeRound(bool countSurvivors)
 	if (cvar_unfreezeSaferoom.IntValue == 1 && IsTankActuallyInPlay() && GetUprightSurvivors() > 0) {
 		UnFreezePoints(true, 2);
 	}
+
+	return Plugin_Continue;
 }
 
 void PluginDisable()
@@ -113,14 +115,14 @@ public void PlayerDeath(Event hEvent, const char[] eName, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(hEvent.GetInt("userid"));
 	if (client > 0 && IsTank(client)) {
-		CreateTimer(0.1, CheckForTanksDelay, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, CheckForTanksDelay, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
 public void OnClientDisconnect(int client)
 {
 	if (IsTank(client)) {
-		CreateTimer(0.1, CheckForTanksDelay, TIMER_FLAG_NO_MAPCHANGE);
+		CreateTimer(0.1, CheckForTanksDelay, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -129,6 +131,8 @@ public Action CheckForTanksDelay(Handle timer)
 	if (!IsTankActuallyInPlay()) {
 		UnFreezePoints(true);
 	}
+
+	return Plugin_Stop;
 }
 
 void FreezePoints(bool show_message = false)

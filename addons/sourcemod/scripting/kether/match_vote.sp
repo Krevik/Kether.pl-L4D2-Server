@@ -46,7 +46,7 @@ public OnPluginStart()
 	}
 	
 	g_hSvMaxPlayers = FindConVar("sv_maxplayers");
-	g_hMaxPlayers = CreateConVar("mv_maxplayers", "16", "How many slots would you like the Server to be at Config Load/Unload?");
+	g_hMaxPlayers = CreateConVar("mv_maxplayers", "30", "How many slots would you like the Server to be at Config Load/Unload?");
 	RegConsoleCmd("sm_match", MatchRequest);
 	RegConsoleCmd("sm_rmatch", MatchReset);
 	
@@ -254,7 +254,7 @@ public VoteActionHandler(Handle:vote, BuiltinVoteAction:action, param1, param2)
 	}
 }
 
-public MatchVoteResultHandler(Handle:vote, num_votes, num_clients, const client_info[][2], num_items, const item_info[][2])
+public void MatchVoteResultHandler(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
 	for (new i=0; i<num_items; i++)
 	{
@@ -281,15 +281,45 @@ public Action:MatchReset(client, args)
 
 StartResetMatchVote(client)
 {
+	if (GetClientTeam(client) == L4D_TEAM_SPECTATE)
+	{
+		CPrintToChat(client, "{blue}[{default}Match{blue}] {default}Resetmatch voting isn't allowed for spectators.");
+		return;
+	}
 	if (!LGO_IsMatchModeLoaded())
 	{
 		CPrintToChat(client, "{blue}[{default}Match{blue}] {default}No matchmode loaded.");
 		return;
 	}
-	CPrintToChat(client, "{blue}[{default}Match{blue}] {default}In order to reset the match you have to restart the server!");
+	if (IsNewBuiltinVoteAllowed())
+	{
+		new iNumPlayers;
+		decl iPlayers[MaxClients];
+		for (new i=1; i<=MaxClients; i++)
+		{
+			if (!IsClientInGame(i) || IsFakeClient(i) || (GetClientTeam(i) == L4D_TEAM_SPECTATE))
+			{
+				continue;
+			}
+			iPlayers[iNumPlayers++] = i;
+		}
+		if (ConnectingPlayers() > 0)
+		{
+			CPrintToChat(client, "{blue}[{default}Match{blue}] {default}Resetmatch vote cannot be started. Players are connecting");
+			return;
+		}
+		g_hVote = CreateBuiltinVote(VoteActionHandler, BuiltinVoteType_Custom_YesNo, BuiltinVoteAction_Cancel | BuiltinVoteAction_VoteEnd | BuiltinVoteAction_End);
+		SetBuiltinVoteArgument(g_hVote, "Turn off confogl?");
+		SetBuiltinVoteInitiator(g_hVote, client);
+		SetBuiltinVoteResultCallback(g_hVote, ResetMatchVoteResultHandler);
+		DisplayBuiltinVote(g_hVote, iPlayers, iNumPlayers, 20);
+		FakeClientCommand(client, "Vote Yes");
+		return;
+	}
+	CPrintToChat(client, "{blue}[{default}Match{blue}] {default}Resetmatch vote cannot be started now.");
 }
 
-public ResetMatchVoteResultHandler(Handle:vote, num_votes, num_clients, const client_info[][2], num_items, const item_info[][2])
+public void ResetMatchVoteResultHandler(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
 	for (new i=0; i<num_items; i++)
 	{

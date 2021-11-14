@@ -46,18 +46,14 @@ char spectatorSteamIds[MAX_SPECTATORS][STEAMID_LENGTH];
 */
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	switch (GetEngineVersion())
+	EngineVersion test = GetEngineVersion();
+	if (test != Engine_Left4Dead && test != Engine_Left4Dead2 )
 	{
-		case Engine_Left4Dead, Engine_Left4Dead2:
-		{
-			return APLRes_Success;
-		}
-		default:
-		{
-			strcopy(error, err_max, "Spec stays spec work with Left 4 Dead 1 or 2 only!");
-			return APLRes_SilentFailure;
-		}
+		strcopy(error, err_max, "Plugin only supports Left 4 Dead 1 & 2.");
+		return APLRes_SilentFailure;
 	}
+	
+	return APLRes_Success;
 }
 
 /*
@@ -194,7 +190,11 @@ public Action Timer_MoveToSpec(Handle timer, int client) {
 
 public Action ReSpec(Handle timer, int client)
 {
-    if(IsClientInGame(client) && GetClientTeam(client) == 1) FakeClientCommand(client, "say /spectate");
+	if (IsClientInGame(client) && GetClientTeam(client) == 1) {
+		FakeClientCommand(client, "say /spectate");
+	}
+
+	return Plugin_Stop;
 }
 
 /*

@@ -21,7 +21,7 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	RegConsoleCmd("sm_slots", SlotsRequest);
-	hMaxSlots = CreateConVar("slots_max_slots", "12", "Maximum amount of slots you wish players to be able to vote for? (DON'T GO HIGHER THAN 30)");
+	hMaxSlots = CreateConVar("slots_max_slots", "30", "Maximum amount of slots you wish players to be able to vote for? (DON'T GO HIGHER THAN 30)");
 	MaxSlots = GetConVarInt(hMaxSlots);
 	HookConVarChange(hMaxSlots, CVarChanged);
 }
@@ -101,7 +101,7 @@ bool:StartSlotVote(client, String:Slots[])
 	return false;
 }
 
-public SlotVoteResultHandler(Handle:vote, num_votes, num_clients, const client_info[][2], num_items, const item_info[][2])
+public void SlotVoteResultHandler(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
 	for (new i=0; i<num_items; i++)
 	{
