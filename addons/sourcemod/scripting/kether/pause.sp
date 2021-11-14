@@ -126,7 +126,9 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_pause", Pause_Cmd, "Pauses the game");
 	RegConsoleCmd("sm_unpause", Unpause_Cmd, "Marks your team as ready for an unpause");
 	RegConsoleCmd("sm_ready", Unpause_Cmd, "Marks your team as ready for an unpause");
+	RegConsoleCmd("sm_r", Unpause_Cmd, "Marks your team as ready for an unpause");
 	RegConsoleCmd("sm_unready", Unready_Cmd, "Marks your team as ready for an unpause");
+	RegConsoleCmd("sm_nr", Unready_Cmd, "Marks your team as ready for an unpause");
 	RegConsoleCmd("sm_toggleready", ToggleReady_Cmd, "Toggles your team's ready status");
 	
 	RegAdminCmd("sm_forcepause", ForcePause_Cmd, ADMFLAG_BAN, "Pauses the game and only allows admins to unpause");
