@@ -55,22 +55,23 @@ sm_cvar sv_allow_wait_command 0
 // 1. Change 100000 to (Tickrate * 1000) for Rate and Splitpacket.
 // 2. Change 100 to (Tickrate) for Cmd and Update Rates.
 // ----------------------------------------------------------------------- 
-sm_cvar sv_minrate 108000                         // Should never change this.
-sm_cvar sv_maxrate 108000                        // Set Value to: Tickrate * 1000
-sm_cvar sv_mincmdrate 108                        	// Should never change this.
-sm_cvar sv_maxcmdrate 108                         // Set Value to Tickrate.
-sm_cvar sv_minupdaterate 108                    // Should never change this.
-sm_cvar sv_maxupdaterate 108                    // Set Value to Tickrate.
-sm_cvar nb_update_frequency 0.024           	// Default 0.1 - Lowest possible value before noticing stuttering common (0.024)
-sm_cvar net_splitpacket_maxrate 54000		// Set Value to: (Tickrate / 2) * 1000
+sm_cvar sv_minrate 67000                         // Should never change this.
+sm_cvar sv_maxrate 67000                        // Set Value to: Tickrate * 1000
+sm_cvar sv_mincmdrate 67                        	// Should never change this.
+sm_cvar sv_maxcmdrate 67                         // Set Value to Tickrate.
+sm_cvar sv_minupdaterate 67                    // Should never change this.
+sm_cvar sv_maxupdaterate 67                    // Set Value to Tickrate.
+sm_cvar nb_update_frequency 0.03           	// Default 0.1 - Lowest possible value before noticing stuttering common (0.024)
+sm_cvar net_splitpacket_maxrate 33500		// Set Value to: (Tickrate / 2) * 1000
 sm_cvar sv_client_min_interp_ratio 0
 sm_cvar sv_client_max_interp_ratio 2   
 sm_cvar fps_max 0                             // Forces the maximum amount of FPS the CPU has available for the Server.
 
 // Slots (This prevents constant resetting of sv_maxplayers on map change)
-sm_cvar mv_maxplayers 32         
-sm_cvar sv_maxplayers 32
+sm_cvar mv_maxplayers 16         
+sm_cvar sv_maxplayers 16
 
+sv_downloadurl "http://k26606_s20329.fastdl2.livs.pl/s20329" //Fastdownload
 sv_region 3
 sm_cvar sv_allowdownload "1"
 

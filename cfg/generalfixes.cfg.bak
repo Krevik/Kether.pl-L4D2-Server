@@ -55,7 +55,6 @@ sm plugins load fixes/l4d_backjump_fix.smx
 sm plugins load fixes/l4d2_reload_fix.smx
 sm plugins load fixes/l4d2_tank_charger_m2_fix.smx
 sm plugins load fixes/l4d2_character_fix.smx
-sm plugins load fixes/TickrateFixes.smx
 
 //additional
 sm plugins load optional/aliases.smx
