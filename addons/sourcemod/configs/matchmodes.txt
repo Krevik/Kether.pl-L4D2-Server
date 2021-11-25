@@ -10,6 +10,10 @@
 		{
 			"name" "Kether Realism Versus"
 		}
+		"kether_t1"
+		{
+			"name" "Kether T1"
+		}
 	}
 	"ZoneMod Configs"
 	{
