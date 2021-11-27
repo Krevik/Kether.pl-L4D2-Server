@@ -1,0 +1,55 @@
+/*
+	******************************************************************************************************************************************************
+
+	You can display phrases in chat with color using any of the methods below:
+
+	Using color codes:
+		•  // Default (use instead of \x01), Alt + 01 Keyboard Shortcut
+		•  // Light lightgreen (use instead of \x03), Alt + 03 Keyboard Shortcut
+		•  // Orange (use instead of \x04), Alt + 04 Keyboard Shortcut
+		•  // Olive (use instead of \x05), Alt + 05 Keyboard Shortcut
+
+	or
+
+	Using color tags:
+		• {default} // Default (use instead of \x01)
+		• {lightgreen} // Light lightgreen (use instead of \x03)
+		• {orange} // Orange (use instead of \x04)
+		• {olive} // lightgreen (use instead of \x05)
+
+	******************************************************************************************************************************************************
+*/
+
+"Phrases"
+{
+	"Voice Usage"
+	{
+		"#format"	"{1:i},{2:i}"
+		"en"		"{orange}[ {default}Usage: {lightgreen}!voice{olive} <{1}-{2}> {orange}]"
+		"es"		"{orange}[ {default}Uso: {lightgreen}!voice{olive} <{1}-{2}> {orange}]"
+		"pt"		"{orange}[ {default}Uso: {lightgreen}!voice{olive} <{1}-{2}> {orange}]"
+		"pt_p"		"{orange}[ {default}Uso: {lightgreen}!voice{olive} <{1}-{2}> {orange}]"
+	}
+	"Voice Set"
+	{
+		"#format"	"{1:i},{2:i},{3:i}"
+		"en"		"{orange}[ {default}Voice pitch set to{lightgreen} {1}{olive} <Min:{2}/Max:{3}> {orange}]"
+		"es"		"{orange}[ {default}Tono de voz ajustado para{lightgreen} {1}{olive} <Min:{2}/Max:{3}> {orange}]"
+		"pt"		"{orange}[ {default}Tom de voz ajustado para{lightgreen} {1}{olive} <Min:{2}/Max:{3}> {orange}]"
+		"pt_p"		"{orange}[ {default}Tom de voz ajustado para{lightgreen} {1}{olive} <Min:{2}/Max:{3}> {orange}]"
+	}
+	"Voice Disabled"
+	{
+		"en"		"{orange}[ {default}Voice pitch {orange}disabled {orange}]"
+		"es"		"{orange}[ {default}Tono de voz {orange}desactivado {orange}]"
+		"pt"		"{orange}[ {default}Tom de voz {orange}desabilitado {orange}]"
+		"pt_p"		"{orange}[ {default}Tom de voz {orange}desabilitado {orange}]"
+	}
+	"Voice Reset"
+	{
+		"en"		"{orange}[ {default}Voice pitch {lightgreen}reset {orange}]"
+		"es"		"{orange}[ {default}Tono de voz {lightgreen}restablecido {orange}]"
+		"pt"		"{orange}[ {default}Tom de voz {lightgreen}redefinido {orange}]"
+		"pt_p"		"{orange}[ {default}Tom de voz {lightgreen}redefinido {orange}]"
+	}
+}
