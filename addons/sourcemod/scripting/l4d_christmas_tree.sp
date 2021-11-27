@@ -173,7 +173,6 @@ char g_sItems[][] =
 	"weapon_molotov",
 	"weapon_pipe_bomb",
 	"weapon_vomitjar",
-	"weapon_first_aid_kit",
 	"weapon_defibrillator",
 	"weapon_upgradepack_explosive",
 	"weapon_upgradepack_incendiary",
@@ -270,15 +269,15 @@ public void OnPluginStart()
 	g_hCvarBallNum =	CreateConVar(	"l4d_tree_ball_count",		"8",			"How many balls to display per column.", CVAR_FLAGS );
 	g_hCvarBallCol =	CreateConVar(	"l4d_tree_ball_columns",	"4",			"How many columns of balls to display.", CVAR_FLAGS );
 	g_hCvarBallRad =	CreateConVar(	"l4d_tree_ball_radius",		"45.0",			"Distance from the tree base to display balls.", CVAR_FLAGS );
-	g_hCvarCGift =		CreateConVar(	"l4d_tree_col_gift",		"255 0 0",		"Gift color. 0=Off (default Gift color). Three values between 0-255 separated by spaces. RGB: Red Green Blue.", CVAR_FLAGS );
+	g_hCvarCGift =		CreateConVar(	"l4d_tree_col_gift",		"0 183 255",		"Gift color. 0=Off (default Gift color). Three values between 0-255 separated by spaces. RGB: Red Green Blue.", CVAR_FLAGS );
 	g_hCvarCTree =		CreateConVar(	"l4d_tree_col_tree",		"0 255 0",		"Tree color. 0=Off (default Tree color). Three values between 0-255 separated by spaces. RGB: Red Green Blue.", CVAR_FLAGS );
 	g_hCvarEffects =	CreateConVar(	"l4d_tree_effects",			"15",			"0=Off. 1=Lights, 2=Balls, 4=Sparks, 8=Dissolver, 15=All. Add numbers together.", CVAR_FLAGS );
-	g_hCvarGifts =		CreateConVar(	"l4d_tree_gifts",			"6",			"How many packages to spawn under the tree.", CVAR_FLAGS );
+	g_hCvarGifts =		CreateConVar(	"l4d_tree_gifts",			"3",			"How many packages to spawn under the tree.", CVAR_FLAGS );
 	if( g_bLeft4Dead2 )
-		g_hCvarGlow =	CreateConVar(	"l4d_tree_glow",			"255 0 0",		"0=Off. L4D2 only: glow outline on gifts. Three values between 0-255 separated by spaces. RGB: Red Green Blue.", CVAR_FLAGS );
+		g_hCvarGlow =	CreateConVar(	"l4d_tree_glow",			"0 183 255",		"0=Off. L4D2 only: glow outline on gifts. Three values between 0-255 separated by spaces. RGB: Red Green Blue.", CVAR_FLAGS );
 	g_hCvarHealth =		CreateConVar(	"l4d_tree_health",			"1",			"0=Does not break or drop items. Health of gifts to break and drop items.", CVAR_FLAGS );
 	if( g_bLeft4Dead2 )
-		g_hCvarItems =	CreateConVar(	"l4d_tree_items",			"80,100,25,25,25,40,15,15,15,2,2,2,5,5,5,2,5,1,1,2,0,2,5,0,0,2,0,5,1",		"Item chance - values must be comma separated: Adrenaline, Pills, Molotov, PipeBomb, VomitJar, First Aid, Defibrillator, Explosive Ammo, Incendiary Ammo, + Weapons (see plugin thread).", CVAR_FLAGS );
+		g_hCvarItems =	CreateConVar(	"l4d_tree_items",			"80,100,25,25,40,15,15,15,2,2,2,5,5,5,2,5,1,1,2,0,2,5,0,0,2,5,5,30",		"Item chance - values must be comma separated: Adrenaline, Pills, Molotov, PipeBomb, VomitJar, First Aid, Defibrillator, Explosive Ammo, Incendiary Ammo, + Weapons (see plugin thread).", CVAR_FLAGS );
 	else
 		g_hCvarItems =	CreateConVar(	"l4d_tree_items",			"0,100,25,25,0,40,0,0,0,2,2,2,5,5,5",										"Item chance - values must be comma separated: Adrenaline, Pills, Molotov, PipeBomb, VomitJar, First Aid, Defibrillator, Explosive Ammo, Incendiary Ammo, + Weapons (see plugin thread).", CVAR_FLAGS );
 	g_hCvarRainbow =	CreateConVar(	"l4d_tree_rainbow",			"2",			"0=Off. 1=Gifts change color over time. 2=Trees change color over time. 3=Both.", CVAR_FLAGS );
