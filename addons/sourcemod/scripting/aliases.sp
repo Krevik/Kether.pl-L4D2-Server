@@ -3,7 +3,10 @@
 #include <multicolors>
 #include <sourcemod>
 #include "sdktools_functions.inc"
-
+#define FADE_COLOR_R         128
+#define FADE_COLOR_G         0
+#define FADE_COLOR_B         0
+#define FADE_ALPHA_LEVEL     128
 public Plugin myinfo = 
 {
     name = "!r alias",
@@ -27,7 +30,7 @@ public void OnPluginStart()
 
 public Action:Ready_CMD(client, args)
 {
-	if(IsValidClient(client) && GetClientTeam(client) != 1){
+	if(IsValidClient(client) && GetClientTeam(client) != 1 && args < 1){
 	
 		decl String:name[MAX_NAME_LENGTH];
 		name = "Console???";
@@ -37,6 +40,12 @@ public Action:Ready_CMD(client, args)
 		}else if(GetClientTeam(client) == 3){
 			CPrintToChatAll("{red}%s{default} : {olive}Ready!", name);
 		}
+	}
+	if(args > 0){
+	    decl String:arg[MAX_NAME_LENGTH];
+		int i = 1;
+		GetCmdArg(i, arg, sizeof(args))
+		GetClientName(client, name, sizeof(name));
 	}
 	
 	return Plugin_Handled;
@@ -58,6 +67,7 @@ public Action:NReady_CMD(client, args)
 	
 	return Plugin_Handled;
 }
+
 
 stock bool IsValidClient(int client)
 { 
