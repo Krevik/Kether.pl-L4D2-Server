@@ -1,6 +1,39 @@
 <html>
-<head><title>Kether.pl</title></head>
-<body style="margin:0px;padding:1px;background:#000000;">
-<img src="http://kether.ugu.pl/motd.png" style="width:100%;height:100%;"/>
-</body>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<style type="text/css">
+		@page { size: 21.59cm 27.94cm; margin: 2cm }
+		p { margin-bottom: 0.25cm; background: transparent; line-height: 115%; background: transparent }
+		code.western { font-family: "Liberation Mono", monospace }
+		code.cjk { font-family: "Noto Sans Mono CJK SC", monospace }
+		code.ctl { font-family: "Liberation Mono", monospace }
+		a:link { color: #000080; so-language: zxx; text-decoration: underline }
+		a:visited { color: #800000; so-language: zxx; text-decoration: underline }
+	</style>
+	<title>Satanixon's Scavenge</title>
+	<!-- AMP -->
+    <script async="" src="https://cdn.ampproject.org/v0.js"></script>
+    <link rel="canonical" href="https://starterx4.keybase.pub/papaj.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate="">body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style
+amp-boilerplate="">body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <!-- Default Statcounter code for STX4 Keybase PUB http://starterx4.keybase.pub -->
+    <script type="text/javascript">
+		var sc_project=12678730; 
+		var sc_invisible=1; 
+		var sc_security="b688d25e"; 
+		</script>
+    <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js"
+async=""></script>
+    <!-- End of Statcounter Code -->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-BWRY3DR3XJ"></script>
+    <script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'G-BWRY3DR3XJ');
+		</script>
+	<img src="https://i.imgur.com/dMAlOSo.gif">
+</head>
 </html>
