@@ -113,7 +113,10 @@ GetUprightSurvivors()
 			survivorCount++;
 			if (IsPlayerAlive(i))
 			{
-				aliveCount++;
+				if(!IsPlayerLedged(i) && !IsIncapped(i))
+				{
+					aliveCount++;
+				}
 			}
 		}
 	}
