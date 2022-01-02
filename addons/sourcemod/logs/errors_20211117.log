@@ -1,0 +1,20 @@
+L 11/17/2021 - 18:27:43: SourceMod error session started
+L 11/17/2021 - 18:27:43: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211117.log")
+L 11/17/2021 - 18:27:43: [CRASH] Accelerator uploaded crash dump: Crash ID: SISK-SYFA-4FSS
+L 11/17/2021 - 18:27:44: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/17/2021 - 18:27:48: Error log file session closed.
+L 11/17/2021 - 19:41:27: SourceMod error session started
+L 11/17/2021 - 19:41:27: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211117.log")
+L 11/17/2021 - 19:41:27: [CRASH] Accelerator uploaded crash dump: Crash ID: IJ4V-5O5P-EFTE
+L 11/17/2021 - 19:41:29: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/17/2021 - 19:41:32: Error log file session closed.
+L 11/17/2021 - 20:54:42: SourceMod error session started
+L 11/17/2021 - 20:54:42: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211117.log")
+L 11/17/2021 - 20:54:42: [CRASH] Accelerator uploaded crash dump: Crash ID: JDMN-HI6M-IGPY
+L 11/17/2021 - 20:54:44: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/17/2021 - 20:54:47: Error log file session closed.
+L 11/17/2021 - 21:34:22: SourceMod error session started
+L 11/17/2021 - 21:34:22: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211117.log")
+L 11/17/2021 - 21:34:22: [CRASH] Accelerator uploaded crash dump: Crash ID: CXFQ-4GXR-7KE6
+L 11/17/2021 - 21:34:23: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/17/2021 - 21:34:27: Error log file session closed.

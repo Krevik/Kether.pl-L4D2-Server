@@ -1,0 +1,22 @@
+L 12/04/2021 - 10:45:30: SourceMod error session started
+L 12/04/2021 - 10:45:30: Info (map "c7m1_docks") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211204.log")
+L 12/04/2021 - 10:45:30: [SM] Exception reported: Property "m_vecOrigin" not found (entity 319/predicted_viewmodel)
+L 12/04/2021 - 10:45:30: [SM] Blaming: optional/kether/l4d2_tank_support.smx
+L 12/04/2021 - 10:45:30: [SM] Call stack trace:
+L 12/04/2021 - 10:45:30: [SM]   [0] GetEntPropVector
+L 12/04/2021 - 10:45:30: [SM]   [1] Line 84, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_tank_support.sp::CreateClone
+L 12/04/2021 - 10:45:30: [SM]   [2] Line 127, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_tank_support.sp::RecreateHittableClones
+L 12/04/2021 - 10:45:30: [SM]   [3] Line 61, D:\l4d2 serv\addons\sourcemod\scripting\kether\l4d2_tank_support.sp::L4D2_OnTankPassControl
+L 12/04/2021 - 10:45:30: [SM]   [5] Call_Finish
+L 12/04/2021 - 10:45:30: [SM]   [6] Line 74, l4d2lib/tanks.sp::Tanks_ItemPickup
+L 12/04/2021 - 10:45:30: [SM]   [7] Line 191, E:\BACKUPY\l4d2 for git\kether.pl\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2lib.sp::ItemPickup_Event
+L 12/04/2021 - 10:45:45: SourceMod error session started
+L 12/04/2021 - 10:45:45: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211204.log")
+L 12/04/2021 - 10:45:45: [CRASH] Accelerator uploaded crash dump: Crash ID: 3TL3-54IH-4U24
+L 12/04/2021 - 10:45:46: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/04/2021 - 10:45:50: Error log file session closed.
+L 12/04/2021 - 19:51:06: SourceMod error session started
+L 12/04/2021 - 19:51:06: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211204.log")
+L 12/04/2021 - 19:51:06: [CRASH] Accelerator uploaded crash dump: Crash ID: SOWF-P75N-FGVP
+L 12/04/2021 - 19:51:07: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/04/2021 - 19:51:11: Error log file session closed.

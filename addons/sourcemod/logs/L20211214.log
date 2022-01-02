@@ -1,0 +1,146 @@
+L 12/14/2021 - 18:43:12: SourceMod log file session started (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/L20211214.log") (Version "1.10.0.6494")
+L 12/14/2021 - 18:43:12: [fixes/firebulletsfix.smx] Found offset for Weapon_ShootPosition 286
+L 12/14/2021 - 18:43:12: [confoglcompmod.smx] Set password on MacieQ, password 
+L 12/14/2021 - 18:43:13: [navmesh.smx] Found .NAV file in maps\c1m1_hotel.nav
+L 12/14/2021 - 18:43:13: [navmesh.smx] Is mesh analyzed: 1
+L 12/14/2021 - 18:43:13: [navmesh.smx] Nav version: 16; SubVersion: 14 (v10+); BSPSize: 32807960; MagicNumber: -17958194
+L 12/14/2021 - 18:43:13: [navmesh.smx] Place count: 0
+L 12/14/2021 - 18:43:13: [navmesh.smx] Has unnamed areas: true
+L 12/14/2021 - 18:43:13: [navmesh.smx] Population type: c1streets
+L 12/14/2021 - 18:43:13: [navmesh.smx] Area count: 1582
+L 12/14/2021 - 18:43:13: [navmesh.smx] Parsed 1582 areas in 0.018405 seconds.
+L 12/14/2021 - 18:43:13: [navmesh.smx] Ladder count: 0
+L 12/14/2021 - 18:43:28: [fixes/firebulletsfix.smx] Found offset for Weapon_ShootPosition 286
+L 12/14/2021 - 18:43:28: [confoglcompmod.smx] Set password on MacieQ, password 
+L 12/14/2021 - 18:43:32: -------- Mapchange to c1m1_hotel --------
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "confogl_match_execcfg_plugins") (value "generalfixes.cfg;confogl_plugins.cfg;sharedplugins.cfg")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d2_addons_eclipse") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_allow_wait_command") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_minrate") (value "108000")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxrate") (value "108000")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_mincmdrate") (value "108")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxcmdrate") (value "108")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_minupdaterate") (value "108")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxupdaterate") (value "108")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "nb_update_frequency") (value "0.024")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "net_splitpacket_maxrate") (value "54000")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_min_interp_ratio") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_max_interp_ratio") (value "2")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "fps_max") (value "200")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "mv_maxplayers") (value "16")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxplayers") (value "16")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_allowdownload") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_joininfected") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_joinsurvivors") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_kill") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_spectate") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_message") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_timerrepeat") (value "9999")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "vs_max_team_switches") (value "9999")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "mp_autoteambalance") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_unlag_fixstuck") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "z_brawl_chance") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxunlag") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_forcepreload") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_predict") (value "1")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_cmdrate_difference") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_sec_global") (value "10")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_sec") (value "3")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_window") (value "10")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_player_stuck_tolerance") (value "5")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_stats") (value "0")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_clockcorrection_msecs") (value "25")
+L 12/14/2021 - 18:43:33: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "tank_swing_physics_prop_force") (value "3")
+L 12/14/2021 - 18:52:43: [optional/kether/l4d2_skill_detect.smx] Clear: 8 freed 7 from 1: time: -1.00 / 1.38 -- class: smoker (with shove? 1)
+L 12/14/2021 - 18:53:07: [optional/kether/l4d2_skill_detect.smx] Clear: 6 freed 7 from 1: time: 3.28 / 5.30 -- class: smoker (with shove? 1)
+L 12/14/2021 - 18:53:48: [optional/kether/l4d2_skill_detect.smx] Clear: 8 freed 5 from 1: time: 1.44 / -1.00 -- class: hunter (with shove? 1)
+L 12/14/2021 - 18:53:52: [optional/kether/l4d2_skill_detect.smx] Clear: 8 freed 5 from 1: time: 1.57 / -1.00 -- class: hunter (with shove? 0)
+L 12/14/2021 - 18:54:21: [optional/kether/l4d2_skill_detect.smx] Clear: 0 freed 6 from 1: time: 3.32 / -1.00 -- class: jockey (with shove? 0)
+L 12/14/2021 - 18:54:43: [optional/kether/l4d2_skill_detect.smx] Charge carry start: 1 - 7 -- time: 670.87
+L 12/14/2021 - 18:54:46: [optional/kether/l4d2_skill_detect.smx] Checking charge victim: 1 - 7 - flags: 1 (alive? 1)
+L 12/14/2021 - 18:54:46: [optional/kether/l4d2_skill_detect.smx] Clear: 5 freed 7 from 1: time: 2.63 / 3.52 -- class: charger (with shove? 0)
+L 12/14/2021 - 18:57:14: [optional/kether/l4d2_skill_detect.smx] Clear: 5 freed 7 from 1: time: 4.57 / 821.98 -- class: charger (with shove? 0)
+L 12/14/2021 - 18:57:34: SourceMod log file session started (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/L20211214.log") (Version "1.10.0.6494")
+L 12/14/2021 - 18:57:34: [fixes/firebulletsfix.smx] Found offset for Weapon_ShootPosition 286
+L 12/14/2021 - 18:57:36: [navmesh.smx] Found .NAV file in maps\c1m1_hotel.nav
+L 12/14/2021 - 18:57:36: [navmesh.smx] Is mesh analyzed: 1
+L 12/14/2021 - 18:57:36: [navmesh.smx] Nav version: 16; SubVersion: 14 (v10+); BSPSize: 32807960; MagicNumber: -17958194
+L 12/14/2021 - 18:57:36: [navmesh.smx] Place count: 0
+L 12/14/2021 - 18:57:36: [navmesh.smx] Has unnamed areas: true
+L 12/14/2021 - 18:57:36: [navmesh.smx] Population type: c1streets
+L 12/14/2021 - 18:57:36: [navmesh.smx] Area count: 1582
+L 12/14/2021 - 18:57:36: [navmesh.smx] Parsed 1582 areas in 0.019108 seconds.
+L 12/14/2021 - 18:57:36: [navmesh.smx] Ladder count: 0
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "confogl_match_execcfg_plugins") (value "generalfixes.cfg;confogl_plugins.cfg;sharedplugins.cfg")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d2_addons_eclipse") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_allow_wait_command") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_minrate") (value "108000")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxrate") (value "108000")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_mincmdrate") (value "108")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxcmdrate") (value "108")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_minupdaterate") (value "108")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxupdaterate") (value "108")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "nb_update_frequency") (value "0.024")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "net_splitpacket_maxrate") (value "54000")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_min_interp_ratio") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_max_interp_ratio") (value "2")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "fps_max") (value "200")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "mv_maxplayers") (value "16")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxplayers") (value "16")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_allowdownload") (value "1")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "vs_max_team_switches") (value "9999")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "mp_autoteambalance") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_unlag_fixstuck") (value "1")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "z_brawl_chance") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxunlag") (value "1")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_forcepreload") (value "1")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_predict") (value "1")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_cmdrate_difference") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_sec_global") (value "10")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_sec") (value "3")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_window") (value "10")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_player_stuck_tolerance") (value "5")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_stats") (value "0")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_clockcorrection_msecs") (value "25")
+L 12/14/2021 - 18:57:36: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "tank_swing_physics_prop_force") (value "3")
+L 12/14/2021 - 18:57:36: [fixes/firebulletsfix.smx] Found offset for Weapon_ShootPosition 286
+L 12/14/2021 - 18:57:40: -------- Mapchange to c1m1_hotel --------
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "confogl_match_execcfg_plugins") (value "generalfixes.cfg;confogl_plugins.cfg;sharedplugins.cfg")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d2_addons_eclipse") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_allow_wait_command") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_minrate") (value "108000")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxrate") (value "108000")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_mincmdrate") (value "108")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxcmdrate") (value "108")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_minupdaterate") (value "108")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxupdaterate") (value "108")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "nb_update_frequency") (value "0.024")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "net_splitpacket_maxrate") (value "54000")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_min_interp_ratio") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_max_interp_ratio") (value "2")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "fps_max") (value "200")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "mv_maxplayers") (value "16")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxplayers") (value "16")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_allowdownload") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_joininfected") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_joinsurvivors") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_kill") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_spectate") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_message") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "l4d_nth_timerrepeat") (value "9999")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "vs_max_team_switches") (value "9999")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "mp_autoteambalance") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_unlag_fixstuck") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "z_brawl_chance") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_maxunlag") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_forcepreload") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_predict") (value "1")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_client_cmdrate_difference") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_sec_global") (value "10")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_sec") (value "3")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_max_queries_window") (value "10")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_player_stuck_tolerance") (value "5")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_stats") (value "0")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "sv_clockcorrection_msecs") (value "25")
+L 12/14/2021 - 18:57:41: [basecommands.smx] "Console<0><Console><Console>" changed cvar (cvar "tank_swing_physics_prop_force") (value "3")
+L 12/15/2021 - 16:25:14: Log file closed.

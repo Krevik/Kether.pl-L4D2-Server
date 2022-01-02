@@ -1,0 +1,35 @@
+L 11/24/2021 - 18:55:11: SourceMod error session started
+L 11/24/2021 - 18:55:11: Info (map "c1m3_mall") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211124.log")
+L 11/24/2021 - 18:55:11: [SM] Exception reported: Client 10 is not in game
+L 11/24/2021 - 18:55:11: [SM] Blaming: optional/kether/pause.smx
+L 11/24/2021 - 18:55:11: [SM] Call stack trace:
+L 11/24/2021 - 18:55:11: [SM]   [0] GetClientTeam
+L 11/24/2021 - 18:55:11: [SM]   [1] Line 887, E:\BACKUPY\l4d2 for git\kether.pl\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\pause.sp::IsPlayer
+L 11/24/2021 - 18:55:11: [SM]   [2] Line 232, E:\BACKUPY\l4d2 for git\kether.pl\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\pause.sp::Pause_Cmd
+L 11/24/2021 - 18:55:11: [SM]   [4] FakeClientCommand
+L 11/24/2021 - 18:55:11: [SM]   [5] Line 141, D:\l4d2 serv\addons\sourcemod\scripting\kether\autopause.sp::playerDisconnect
+L 11/24/2021 - 19:18:58: SourceMod error session started
+L 11/24/2021 - 19:18:58: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211124.log")
+L 11/24/2021 - 19:18:58: [CRASH] Accelerator uploaded crash dump: Crash ID: GBI3-PZDO-6EGE
+L 11/24/2021 - 19:18:59: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/24/2021 - 19:19:03: Error log file session closed.
+L 11/24/2021 - 20:13:47: SourceMod error session started
+L 11/24/2021 - 20:13:47: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211124.log")
+L 11/24/2021 - 20:13:47: [CRASH] Accelerator uploaded crash dump: Crash ID: IQYZ-3Z2R-DDBP
+L 11/24/2021 - 20:13:49: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/24/2021 - 20:13:52: Error log file session closed.
+L 11/24/2021 - 20:15:58: SourceMod error session started
+L 11/24/2021 - 20:15:58: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211124.log")
+L 11/24/2021 - 20:15:58: [CRASH] Accelerator uploaded crash dump: Crash ID: 2AJD-WETC-7JOA
+L 11/24/2021 - 20:16:00: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/24/2021 - 20:16:03: Error log file session closed.
+L 11/24/2021 - 21:12:13: SourceMod error session started
+L 11/24/2021 - 21:12:13: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211124.log")
+L 11/24/2021 - 21:12:13: [CRASH] Accelerator uploaded crash dump: Crash ID: DGHK-OVL6-RZU7
+L 11/24/2021 - 21:12:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/24/2021 - 21:12:18: Error log file session closed.
+L 11/24/2021 - 21:51:39: SourceMod error session started
+L 11/24/2021 - 21:51:39: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211124.log")
+L 11/24/2021 - 21:51:39: [CRASH] Accelerator uploaded crash dump: Crash ID: FMRX-3KBL-35PZ
+L 11/24/2021 - 21:51:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/24/2021 - 21:51:44: Error log file session closed.

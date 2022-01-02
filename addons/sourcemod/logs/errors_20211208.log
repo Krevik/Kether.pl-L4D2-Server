@@ -1,0 +1,33 @@
+L 12/08/2021 - 11:13:49: SourceMod error session started
+L 12/08/2021 - 11:13:49: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211208.log")
+L 12/08/2021 - 11:13:49: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/08/2021 - 11:13:53: Error log file session closed.
+L 12/08/2021 - 11:58:26: SourceMod error session started
+L 12/08/2021 - 11:58:26: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211208.log")
+L 12/08/2021 - 11:58:26: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/08/2021 - 11:58:30: Error log file session closed.
+L 12/08/2021 - 12:21:43: SourceMod error session started
+L 12/08/2021 - 12:21:43: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211208.log")
+L 12/08/2021 - 12:21:43: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/08/2021 - 12:21:47: Error log file session closed.
+L 12/08/2021 - 20:48:40: SourceMod error session started
+L 12/08/2021 - 20:48:40: Info (map "c5m4_quarter") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211208.log")
+L 12/08/2021 - 20:48:40: [SM] Exception reported: Client 11 is not in game
+L 12/08/2021 - 20:48:40: [SM] Blaming: optional/kether/pause.smx
+L 12/08/2021 - 20:48:40: [SM] Call stack trace:
+L 12/08/2021 - 20:48:40: [SM]   [0] GetClientTeam
+L 12/08/2021 - 20:48:40: [SM]   [1] Line 890, D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\pause.sp::IsPlayer
+L 12/08/2021 - 20:48:40: [SM]   [2] Line 235, D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\pause.sp::Pause_Cmd
+L 12/08/2021 - 20:48:40: [SM]   [4] FakeClientCommand
+L 12/08/2021 - 20:48:40: [SM]   [5] Line 141, D:\l4d2 serv\addons\sourcemod\scripting\kether\autopause.sp::playerDisconnect
+L 12/08/2021 - 20:53:14: Error log file session closed.
+L 12/08/2021 - 20:54:11: SourceMod error session started
+L 12/08/2021 - 20:54:11: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211208.log")
+L 12/08/2021 - 20:54:11: [CRASH] Accelerator uploaded crash dump: Crash ID: JFR2-QNTP-534A
+L 12/08/2021 - 20:54:13: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/08/2021 - 20:54:17: Error log file session closed.
+L 12/08/2021 - 22:13:18: SourceMod error session started
+L 12/08/2021 - 22:13:18: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211208.log")
+L 12/08/2021 - 22:13:18: [CRASH] Accelerator uploaded crash dump: Crash ID: HMTN-PRW7-O4GR
+L 12/08/2021 - 22:13:20: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/08/2021 - 22:13:23: Error log file session closed.

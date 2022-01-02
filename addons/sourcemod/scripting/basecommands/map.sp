@@ -62,6 +62,8 @@ public int MenuHandler_ChangeMap(Menu menu, MenuAction action, int param1, int p
 		Panel panel = view_as<Panel>(param2);
 		panel.SetTitle(title);
 	}
+
+	return 0;
 }
 
 public void AdminMenu_Map(TopMenu topmenu, 
@@ -121,12 +123,12 @@ public Action Command_Map(int client, int args)
 
 public Action Timer_ChangeMap(Handle timer, DataPack dp)
 {
-	char displayName[PLATFORM_MAX_PATH];
+	char map[PLATFORM_MAX_PATH];
 
 	dp.Reset();
-	dp.ReadString(displayName, sizeof(displayName));
+	dp.ReadString(map, sizeof(map));
 
-	ForceChangeLevel(displayName, "sm_map Command");
+	ForceChangeLevel(map, "sm_map Command");
 
 	return Plugin_Stop;
 }

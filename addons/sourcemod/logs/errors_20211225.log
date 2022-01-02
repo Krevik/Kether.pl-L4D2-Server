@@ -1,0 +1,108 @@
+L 12/25/2021 - 02:13:44: SourceMod error session started
+L 12/25/2021 - 02:13:44: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 02:13:44: [CRASH] Accelerator uploaded crash dump: Crash ID: 2APH-JDGM-HGNL
+L 12/25/2021 - 02:13:46: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 02:13:49: Error log file session closed.
+L 12/25/2021 - 03:27:02: SourceMod error session started
+L 12/25/2021 - 03:27:02: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 03:27:02: [CRASH] Accelerator uploaded crash dump: Crash ID: OE4C-KF6E-QJEP
+L 12/25/2021 - 03:27:04: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 03:27:07: Error log file session closed.
+L 12/25/2021 - 13:25:15: SourceMod error session started
+L 12/25/2021 - 13:25:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:25:15: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:25:18: Error log file session closed.
+L 12/25/2021 - 13:30:27: SourceMod error session started
+L 12/25/2021 - 13:30:27: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:30:27: [CRASH] Accelerator uploaded crash dump: Crash ID: IBTF-H4QI-NRG5
+L 12/25/2021 - 13:30:28: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:30:31: Error log file session closed.
+L 12/25/2021 - 13:31:46: SourceMod error session started
+L 12/25/2021 - 13:31:46: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:31:46: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:31:50: Error log file session closed.
+L 12/25/2021 - 13:33:15: SourceMod error session started
+L 12/25/2021 - 13:33:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:33:15: [CRASH] Accelerator uploaded crash dump: Crash ID: APUZ-ZMY3-S6HD
+L 12/25/2021 - 13:33:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:33:20: Error log file session closed.
+L 12/25/2021 - 13:38:22: SourceMod error session started
+L 12/25/2021 - 13:38:22: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:38:22: [CRASH] Accelerator uploaded crash dump: Crash ID: A7IS-A5CQ-RKKI
+L 12/25/2021 - 13:38:24: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:38:27: Error log file session closed.
+L 12/25/2021 - 13:42:51: SourceMod error session started
+L 12/25/2021 - 13:42:51: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:42:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:42:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 13:42:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 13:42:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 13:42:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 13:42:55: Error log file session closed.
+L 12/25/2021 - 13:44:34: SourceMod error session started
+L 12/25/2021 - 13:44:34: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:44:34: [CRASH] Accelerator uploaded crash dump: Crash ID: NZVY-6ZJ6-2PDU
+L 12/25/2021 - 13:44:36: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:44:42: SourceMod error session started
+L 12/25/2021 - 13:44:42: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:44:42: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:44:46: Error log file session closed.
+L 12/25/2021 - 13:46:50: SourceMod error session started
+L 12/25/2021 - 13:46:50: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 13:46:50: [CRASH] Accelerator uploaded crash dump: Crash ID: OFG7-TZRF-F3YE
+L 12/25/2021 - 13:46:52: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 13:46:55: Error log file session closed.
+L 12/25/2021 - 18:00:07: SourceMod error session started
+L 12/25/2021 - 18:00:07: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 18:00:07: [CRASH] Accelerator uploaded crash dump: Crash ID: LYDD-FCJW-X7SQ
+L 12/25/2021 - 18:00:09: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 18:00:09: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 18:00:09: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 18:00:09: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 18:00:09: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 18:00:13: Error log file session closed.
+L 12/25/2021 - 18:02:54: SourceMod error session started
+L 12/25/2021 - 18:02:54: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 18:02:54: [CRASH] Accelerator uploaded crash dump: Crash ID: 7PFL-4RIX-5EPM
+L 12/25/2021 - 18:02:56: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 18:02:56: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 18:02:56: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 18:02:56: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 18:02:56: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 18:03:00: Error log file session closed.
+L 12/25/2021 - 19:07:03: SourceMod error session started
+L 12/25/2021 - 19:07:03: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 19:07:03: [CRASH] Accelerator uploaded crash dump: Crash ID: JNVJ-EVGY-5X4H
+L 12/25/2021 - 19:07:04: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 19:07:04: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 19:07:04: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 19:07:04: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 19:07:04: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 19:07:08: Error log file session closed.
+L 12/25/2021 - 19:49:18: SourceMod error session started
+L 12/25/2021 - 19:49:18: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 19:49:18: [CRASH] Accelerator uploaded crash dump: Crash ID: RJQQ-DGGL-V4UM
+L 12/25/2021 - 19:49:20: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 19:49:20: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 19:49:20: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 19:49:20: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 19:49:20: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 19:49:24: Error log file session closed.
+L 12/25/2021 - 20:35:49: SourceMod error session started
+L 12/25/2021 - 20:35:49: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 20:35:49: [CRASH] Accelerator uploaded crash dump: Crash ID: 7TKI-3UBZ-FPRS
+L 12/25/2021 - 20:35:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 20:35:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 20:35:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 20:35:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 20:35:51: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 20:35:55: Error log file session closed.
+L 12/25/2021 - 21:51:15: SourceMod error session started
+L 12/25/2021 - 21:51:15: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211225.log")
+L 12/25/2021 - 21:51:15: [CRASH] Accelerator uploaded crash dump: Crash ID: AXYD-MHJS-DB47
+L 12/25/2021 - 21:51:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/25/2021 - 21:51:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/25/2021 - 21:51:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/25/2021 - 21:51:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/25/2021 - 21:51:17: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/25/2021 - 21:51:21: Error log file session closed.

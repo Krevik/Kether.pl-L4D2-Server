@@ -1,0 +1,29 @@
+L 11/25/2021 - 08:16:03: SourceMod error session started
+L 11/25/2021 - 08:16:03: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211125.log")
+L 11/25/2021 - 08:16:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_survivor_mvp_brevity_latest)
+L 11/25/2021 - 08:16:03: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm_stats_autoprint_vs_round)
+L 11/25/2021 - 08:16:06: Error log file session closed.
+L 11/25/2021 - 08:18:59: SourceMod error session started
+L 11/25/2021 - 08:18:59: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211125.log")
+L 11/25/2021 - 08:18:59: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sound_flags)
+L 11/25/2021 - 08:19:03: Error log file session closed.
+L 11/25/2021 - 08:22:49: SourceMod error session started
+L 11/25/2021 - 08:22:49: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211125.log")
+L 11/25/2021 - 08:22:49: [CRASH] Accelerator uploaded crash dump: Crash ID: WX24-6NYC-P2S3
+L 11/25/2021 - 08:22:50: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/25/2021 - 08:22:53: Error log file session closed.
+L 11/25/2021 - 16:30:06: SourceMod error session started
+L 11/25/2021 - 16:30:06: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211125.log")
+L 11/25/2021 - 16:30:06: [CRASH] Accelerator uploaded crash dump: Crash ID: B5GU-4HQC-K6D7
+L 11/25/2021 - 16:30:08: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/25/2021 - 16:30:11: Error log file session closed.
+L 11/25/2021 - 21:18:03: SourceMod error session started
+L 11/25/2021 - 21:18:03: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211125.log")
+L 11/25/2021 - 21:18:03: [CRASH] Accelerator uploaded crash dump: Crash ID: PTEP-OPE2-Q6B3
+L 11/25/2021 - 21:18:05: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/25/2021 - 21:18:08: Error log file session closed.
+L 11/25/2021 - 21:19:28: SourceMod error session started
+L 11/25/2021 - 21:19:28: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211125.log")
+L 11/25/2021 - 21:19:28: [CRASH] Accelerator uploaded crash dump: Crash ID: 3BJS-SRRX-5X63
+L 11/25/2021 - 21:19:30: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/25/2021 - 21:19:33: Error log file session closed.

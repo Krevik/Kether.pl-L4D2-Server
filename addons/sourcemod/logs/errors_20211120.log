@@ -1,0 +1,10 @@
+L 11/20/2021 - 19:01:37: SourceMod error session started
+L 11/20/2021 - 19:01:37: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211120.log")
+L 11/20/2021 - 19:01:37: [CRASH] Accelerator uploaded crash dump: Crash ID: RNVU-4H5M-EKAW
+L 11/20/2021 - 19:01:39: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/20/2021 - 19:01:42: Error log file session closed.
+L 11/20/2021 - 20:08:35: SourceMod error session started
+L 11/20/2021 - 20:08:35: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211120.log")
+L 11/20/2021 - 20:08:35: [CRASH] Accelerator uploaded crash dump: Crash ID: 775A-WCN3-UBXN
+L 11/20/2021 - 20:08:37: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/20/2021 - 20:08:40: Error log file session closed.

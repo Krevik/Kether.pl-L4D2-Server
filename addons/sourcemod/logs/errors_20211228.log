@@ -1,0 +1,9 @@
+L 12/28/2021 - 21:39:37: SourceMod error session started
+L 12/28/2021 - 21:39:37: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211228.log")
+L 12/28/2021 - 21:39:37: [CRASH] Accelerator uploaded crash dump: Crash ID: LROZ-5XOK-4FKM
+L 12/28/2021 - 21:39:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/28/2021 - 21:39:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_bonus_per_survivor_multiplier)
+L 12/28/2021 - 21:39:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_permament_health_proportion)
+L 12/28/2021 - 21:39:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_hp_factor)
+L 12/28/2021 - 21:39:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (sm2_pills_max_bonus)
+L 12/28/2021 - 21:39:45: Error log file session closed.

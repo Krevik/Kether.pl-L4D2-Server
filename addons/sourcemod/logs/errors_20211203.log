@@ -1,0 +1,10 @@
+L 12/03/2021 - 15:56:07: SourceMod error session started
+L 12/03/2021 - 15:56:07: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211203.log")
+L 12/03/2021 - 15:56:07: [CRASH] Accelerator uploaded crash dump: Crash ID: LSDK-FTWW-LVSH
+L 12/03/2021 - 15:56:09: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/03/2021 - 15:56:13: Error log file session closed.
+L 12/03/2021 - 20:51:17: SourceMod error session started
+L 12/03/2021 - 20:51:17: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211203.log")
+L 12/03/2021 - 20:51:17: [CRASH] Accelerator uploaded crash dump: Crash ID: MA3A-T3UN-Q55R
+L 12/03/2021 - 20:51:18: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 12/03/2021 - 20:51:21: Error log file session closed.

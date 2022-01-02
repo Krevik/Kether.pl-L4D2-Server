@@ -1,0 +1,25 @@
+L 11/22/2021 - 17:01:06: SourceMod error session started
+L 11/22/2021 - 17:01:06: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211122.log")
+L 11/22/2021 - 17:01:06: [CRASH] Accelerator uploaded crash dump: Crash ID: T6NW-RP6S-QKEG
+L 11/22/2021 - 17:01:07: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/22/2021 - 17:01:09: Error log file session closed.
+L 11/22/2021 - 18:05:33: SourceMod error session started
+L 11/22/2021 - 18:05:33: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211122.log")
+L 11/22/2021 - 18:05:33: [CRASH] Accelerator uploaded crash dump: Crash ID: 5LTJ-ZADB-KDFU
+L 11/22/2021 - 18:05:35: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/22/2021 - 18:05:38: Error log file session closed.
+L 11/22/2021 - 18:32:33: SourceMod error session started
+L 11/22/2021 - 18:32:33: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211122.log")
+L 11/22/2021 - 18:32:33: [CRASH] Accelerator uploaded crash dump: Crash ID: JTKH-ZYJ4-GS6I
+L 11/22/2021 - 18:32:35: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/22/2021 - 18:32:38: Error log file session closed.
+L 11/22/2021 - 20:01:39: SourceMod error session started
+L 11/22/2021 - 20:01:39: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211122.log")
+L 11/22/2021 - 20:01:39: [CRASH] Accelerator uploaded crash dump: Crash ID: AC3B-LVZ2-4NT3
+L 11/22/2021 - 20:01:41: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/22/2021 - 20:01:44: Error log file session closed.
+L 11/22/2021 - 21:13:09: SourceMod error session started
+L 11/22/2021 - 21:13:09: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211122.log")
+L 11/22/2021 - 21:13:09: [CRASH] Accelerator uploaded crash dump: Crash ID: MLLY-PKES-BSS5
+L 11/22/2021 - 21:13:10: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 11/22/2021 - 21:13:14: Error log file session closed.
