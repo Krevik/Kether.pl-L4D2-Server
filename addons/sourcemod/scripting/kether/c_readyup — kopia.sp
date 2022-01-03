@@ -614,9 +614,8 @@ public Action Vote_Callback(int client, const char[] command, int argc)
 
 public Action Ready_Cmd(int client, int args)
 {
-	if (inReadyUp && IsPlayer(client) && args == 0)
+	if (inReadyUp && IsPlayer(client))
 	{
-		PerformBlind( client, 0 );
 		isPlayerReady[client] = true;
 		if (l4d_ready_secret.BoolValue)
 			DoSecrets(client);
@@ -624,55 +623,7 @@ public Action Ready_Cmd(int client, int args)
 			InitiateLiveCountdown();
 		return Plugin_Handled;
 	}
-	if(inReadyUp && IsPlayer(client) && args == 1)
-	{
-		char argbuf[MAX_NAME_LENGTH];
-		int target;
-		char target_name[MAX_TARGET_LENGTH];
-		bool tn_is_ml;
-		int targets[16];
-		GetCmdArg(1, argbuf, sizeof(argbuf));
-		ProcessTargetString(argbuf,0,targets,MaxClients+1,COMMAND_FILTER_NO_BOTS,target_name,sizeof(target_name),tn_is_ml);
-		target = targets[0];
-		//blind target
-		if(IsPlayer(target))
-		{
-			if(!isPlayerReady[target])
-			{
-				PerformBlind( target, 240 );
-			}
-		}
-		return Plugin_Handled;
-	}
-	
 	return Plugin_Continue;
-}
-
-public void PerformBlind(int target, int amount)
-{
-	int targets[2];
-	targets[0] = target;
-	UserMsg g_FadeUserMsgId = GetUserMessageId( "Fade" );
-
-	Handle message = StartMessageEx(g_FadeUserMsgId, targets, 1);
-	BfWriteShort(message, 1536);
-	BfWriteShort(message, 1536);
-	
-	if (amount == 0)
-	{
-		BfWriteShort(message, (0x0001 | 0x0010));
-	}
-	else
-	{
-		BfWriteShort(message, (0x0002 | 0x0008));
-	}
-	
-	BfWriteByte(message, 0);
-	BfWriteByte(message, 0);
-	BfWriteByte(message, 0);
-	BfWriteByte(message, amount);
-	
-	EndMessage();
 }
 
 public Action Unready_Cmd(int client, int args)
@@ -732,12 +683,6 @@ public Action ForceStart_Cmd(int client, int args)
 			isForceStart = true;
 			InitiateLiveCountdown();
 			CPrintToChatAll("%t", "ForceStartAdmin", client);
-			for (int i = 1; i <= 16; i++)
-			{
-				if(IsClientInGame(i)){
-					PerformBlind(i, 0);
-				}
-			}
 			return Plugin_Handled;
 		}
 	}
@@ -1273,14 +1218,6 @@ bool CheckFullReady()
 			
 			if(IsClientInGame(client) && !IsFakeClient(client) && GetClientTeam(client) != 1){
 				realHumanPlayers++;
-			}
-		}
-	}
-	if(readyCount >= realHumanPlayers){
-		for (int i = 1; i <= 16; i++)
-		{
-			if(IsClientInGame(i)){
-				PerformBlind(i, 0);
 			}
 		}
 	}
