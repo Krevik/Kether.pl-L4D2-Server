@@ -1,0 +1,39 @@
+L 01/03/2022 - 13:37:56: SourceMod error session started
+L 01/03/2022 - 13:37:56: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20220103.log")
+L 01/03/2022 - 13:37:56: [CRASH] Accelerator uploaded crash dump: Crash ID: AMC6-UTQV-UQAI
+L 01/03/2022 - 13:38:08: SourceMod error session started
+L 01/03/2022 - 13:38:08: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20220103.log")
+L 01/03/2022 - 13:38:08: [SM] Unable to load extension "dhooks.ext": /home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/extensions/dhooks.ext.so: file too short
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "anticheat/l4d2_user_commands.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/l4d_backjump_fix.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/l4d_tongue_float_fix.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/l4d2_jockey_jumpcap_patch.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/FollowTarget_Detour.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [CRASH] Accelerator uploaded crash dump: Crash ID: 4L6F-2RGR-4BM3
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/l4d2_jockeyed_charger_fix.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/command_buffer.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/witch_update_nbm.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/firebulletsfix.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/witch_allow_in_safezone.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "fixes/l4d_use_priority.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "left4dhooks.smx": Required extension "dhooks" file("dhooks.ext") not running
+L 01/03/2022 - 13:38:08: [SM] Unable to load plugin "confoglcompmod.smx": Could not find required plugin "left4dhooks"
+L 01/03/2022 - 13:39:35: SourceMod error session started
+L 01/03/2022 - 13:39:35: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20220103.log")
+L 01/03/2022 - 13:39:35: [SM] Exception reported: Function signature "ZombieManager::SpawnTank" was not found.
+L 01/03/2022 - 13:39:35: [SM] Blaming: optional/kether/l4d2_tank_announce.smx
+L 01/03/2022 - 13:39:35: [SM] Call stack trace:
+L 01/03/2022 - 13:39:35: [SM]   [0] DHookCreateFromConf
+L 01/03/2022 - 13:39:35: [SM]   [1] Line 38, E:\BACKUPY\l4d2 for git\kether.pl\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_tank_announce.sp::OnPluginStart
+L 01/03/2022 - 13:39:36: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 01/03/2022 - 13:39:40: Error log file session closed.
+L 01/03/2022 - 13:40:34: SourceMod error session started
+L 01/03/2022 - 13:40:34: Info (map "c5m1_waterfront") (file "/home/k26606_s24044/server_24044/left4dead2/addons/sourcemod/logs/errors_20220103.log")
+L 01/03/2022 - 13:40:34: [CRASH] Accelerator uploaded crash dump: Crash ID: L4T6-7O3Y-X77C
+L 01/03/2022 - 13:40:36: [SM] Exception reported: Function signature "ZombieManager::SpawnTank" was not found.
+L 01/03/2022 - 13:40:36: [SM] Blaming: optional/kether/l4d2_tank_announce.smx
+L 01/03/2022 - 13:40:36: [SM] Call stack trace:
+L 01/03/2022 - 13:40:36: [SM]   [0] DHookCreateFromConf
+L 01/03/2022 - 13:40:36: [SM]   [1] Line 38, E:\BACKUPY\l4d2 for git\kether.pl\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_tank_announce.sp::OnPluginStart
+L 01/03/2022 - 13:40:38: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
+L 01/03/2022 - 13:40:41: Error log file session closed.
