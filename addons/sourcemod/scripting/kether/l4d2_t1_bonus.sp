@@ -10,6 +10,7 @@
 
 new Handle:hCvarBonusPerPills;
 new Handle:hCvarBonusPerAdrenaline;
+new Handle:hCvarBonusPerMedkit;
 new Handle:hCvarBonusPerHPSurvivor;
 
 new iTeamSize;
@@ -33,6 +34,7 @@ public OnPluginStart()
   
 	hCvarBonusPerPills = CreateConVar("sm_bonus_per_pills", "12", "Bonus per pills", FCVAR_NONE);
 	hCvarBonusPerAdrenaline = CreateConVar("sm_bonus_per_adrenaline", "12", "Bonus per adrenaline", FCVAR_NONE);
+	hCvarBonusPerMedkit = CreateConVar("sm_bonus_per_medkit", "24", "Bonus per medkit", FCVAR_NONE);
 }
 
 public Action:CMD_print_bonuses(client, args)
@@ -51,10 +53,11 @@ public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	//bonus: pills, adrenaline, HP (perm HP*1.0, tmp HP *0.5)
 	new pillsCount = RoundToNearest(countPillsAndAdrenaline());
+	new medkitsCount = RoundToNearest(countMedkits());
+	new totalBonus = RoundToNearest( GetMedkitsTotalBonus() + GetPillsTotalBonus() + float(GetTotalHealthBonus()) );
 	
-	new totalBonus = RoundToNearest( GetPillsTotalBonus() + float(GetTotalHealthBonus()) );
 	if(iSurvivalMultiplier>0){
-		CPrintToChatAll("[{green}Point Bonus{default}]{green}%d{default} survivors reached safehouse with {green}%d{default} {blue} pills/adrenaline{default}.", iSurvivalMultiplier, pillsCount);
+		CPrintToChatAll("[{green}Point Bonus{default}]{green}%d{default} survivors reached safehouse with {green}%d{default} {blue} medkits{default}, {green}%d{default} {blue} pills/adrenaline{default}.", iSurvivalMultiplier, medkitsCount, pillsCount);
 		CPrintToChatAll("[{green}Point Bonus{default}]{default}The final bonus is high as {green}%d {default}points.", totalBonus);
 
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(float(totalBonus)/iSurvivalMultiplier) );
@@ -146,6 +149,26 @@ Float:countPillsAndAdrenaline()
 	return float(totalPills);
 }
 
+Float:countMedkits()
+{	
+	new survivorCount;		
+	new totalMedkits;
+	for (new i = 1; i <= MaxClients && survivorCount < iTeamSize; i++)
+	{
+		if (IsSurvivor(i))
+		{
+			survivorCount++;
+			if (IsPlayerAlive(i))
+			{
+				if(HasMedkit(i)){
+					totalMedkits += 1;
+				}
+			}
+		}
+	}
+	return float(totalMedkits);
+}
+
 Float:GetPillsTotalBonus()
 {	
 	new survivorCount;		
@@ -162,6 +185,26 @@ Float:GetPillsTotalBonus()
 				}
 				if(HasAdrenaline(i)){
 					totalBonus += GetConVarInt(hCvarBonusPerAdrenaline);
+				}
+			}
+		}
+	}
+	return float(totalBonus);
+}
+
+Float:GetMedkitsTotalBonus()
+{	
+	new survivorCount;		
+	new totalBonus;
+	for (new i = 1; i <= MaxClients && survivorCount < iTeamSize; i++)
+	{
+		if (IsSurvivor(i))
+		{
+			survivorCount++;
+			if (IsPlayerAlive(i))
+			{
+				if(HasMedkit(i)){
+					totalBonus += GetConVarInt(hCvarBonusPerMedkit);
 				}
 			}
 		}
@@ -187,6 +230,18 @@ bool:HasPills(client)
 		decl String:buffer[64];
 		GetEdictClassname(item, buffer, sizeof(buffer));
 		return StrEqual(buffer, "weapon_pain_pills");
+	}
+	return false;
+}
+
+bool:HasMedkit(client)
+{
+	new item = GetPlayerWeaponSlot(client, 3);
+	if (IsValidEdict(item))
+	{
+		decl String:buffer[64];
+		GetEdictClassname(item, buffer, sizeof(buffer));
+		return StrEqual(buffer, "weapon_first_aid_kit");
 	}
 	return false;
 }
