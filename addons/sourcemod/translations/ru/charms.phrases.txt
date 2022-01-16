@@ -1,0 +1,60 @@
+"Phrases"
+{
+	"Charm_Off"
+	{
+		"ru"			"Плагин выключен."
+	}
+	"Charm_Invalid"
+	{
+		"ru"			"Ошибка: Неверный статус клиента."
+	}
+	"Charm_Empty"
+	{
+		"ru"			"Нет оружия."
+	}
+	"Charm_Index"
+	{
+		"#format"		"{1:d}"
+		"ru"			"Недействительный индекс амулета ({1})."
+	}
+	"Charm_Weapon"
+	{
+		"ru"			"Нельзя использовать это оружие."
+	}
+	"Charm_Remove"
+	{
+		"ru"			"убран амулет оружия."
+	}
+	"Charm_Removed"
+	{
+		"#format"		"{1:s}"
+		"ru"			"убран амулет оружия из {green}{1}."
+	}
+	"Charm_Saved"
+	{
+		"ru"			"Сохранены настройки оружия."
+	}
+	"Charm_Wait"
+	{
+		"#format"		"{1:d}"
+		"ru"			"Подождите {1} сек. перед повторным сохранением."
+	}
+	"Charm_Set"
+	{
+		"#format"		"{1:s}{2:s}"
+		"ru"			"амулет {green}{1} {default}установлен на {green}{2}."
+	}
+	"Charm_Equipped"
+	{
+		"#format"		"{1:s}"
+		"ru"			"{green}{1}{default} надет."
+	}
+	"Charm_Menu1"
+	{
+		"ru"			"Амулеты для оружия:"
+	}
+	"Charm_Menu2"
+	{
+		"ru"			"Выберите амулет"
+	}
+}
