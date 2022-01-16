@@ -14,6 +14,10 @@
 		{
 			"name" "Kether T1"
 		}
+		"kether_t1_plus"
+		{
+			"name" "Kether T1++"
+		}
 	}
 	"ZoneMod Configs"
 	{
