@@ -854,13 +854,11 @@ void PrintCmd()
 	switch (iCmd)
 	{
 		case 1: FormatEx(sCmd, sizeof(sCmd), "->1. !ready|!r / !unready|!nr");
-		case 2: FormatEx(sCmd, sizeof(sCmd), "->2. !slots #");
 		case 3: FormatEx(sCmd, sizeof(sCmd), "->3. !voteboss <tank> <witch>");
 		case 4: FormatEx(sCmd, sizeof(sCmd), "->4. !match / !rmatch");
 		case 5: FormatEx(sCmd, sizeof(sCmd), "->5. !show / !hide");
 		case 6: FormatEx(sCmd, sizeof(sCmd), "->6. !setscores <survs> <inf>");
 		case 7: FormatEx(sCmd, sizeof(sCmd), "->7. !lerps");
-		case 8: FormatEx(sCmd, sizeof(sCmd), "->8. !secondary");
 		case 9: FormatEx(sCmd, sizeof(sCmd), "->9. !forcestart / !fs");
 	}
 }
@@ -924,7 +922,7 @@ void UpdatePanel()
 	ServerNamer.GetString(ServerName, sizeof(ServerName));
 	
 	l4d_ready_cfg_name.GetString(cfgName, sizeof(cfgName));
-	Format(ServerBuffer, sizeof(ServerBuffer), "▸ Server: %s \n▸ Slots: %d/%d\n▸ Config: %s\n▸ %s, %s", ServerName, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, cfgName, tankString, witchString);
+	Format(ServerBuffer, sizeof(ServerBuffer), "▸ Server: %s \n▸ Config: %s\n▸ %s, %s", ServerName, cfgName, tankString, witchString);
 	menuPanel.DrawText(ServerBuffer);
 	
 	FormatTime(ServerBuffer, sizeof(ServerBuffer), "▸ %m/%d/%Y - %I:%M%p");

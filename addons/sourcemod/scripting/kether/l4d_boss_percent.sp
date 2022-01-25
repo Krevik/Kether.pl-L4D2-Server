@@ -665,12 +665,12 @@ public Action Timer_UpdateReadyUpFooter(Handle timer)
 		if (g_bReadyUpFooterAdded) 
 		{
 			// Ready Up footer already exists, so we can just edit it.
-			EditFooterStringAtIndex(g_iReadyUpFooterIndex, p_sNewFooter);
+			//EditFooterStringAtIndex(g_iReadyUpFooterIndex, p_sNewFooter);
 		}
 		else
 		{
 			// Ready Up footer hasn't been added yet. Must be the start of a new round! Lets add it.
-			g_iReadyUpFooterIndex = AddStringToReadyFooter(p_sNewFooter);
+			//g_iReadyUpFooterIndex = AddStringToReadyFooter(p_sNewFooter);
 			g_bReadyUpFooterAdded = true;
 		}
 	}
