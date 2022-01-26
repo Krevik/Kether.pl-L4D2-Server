@@ -7,8 +7,6 @@
 #include <left4dhooks>
 #include <l4d2lib>
 #include <colors>
-#include <l4d2_saferoom_detect>
-
 
 new Handle:hCvarBonusPerMedkit;
 new Handle:hCvarBonusPerPills;
@@ -50,18 +48,17 @@ public OnPluginEnd()
 
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
-	//empty comment
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	if(iSurvivalMultiplier>0){
-		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(GetSurvivorTotalBonus()/iSurvivalMultiplier + 25));
+		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(GetSurvivorTotalBonus()/iSurvivalMultiplier + 24));
 	}else{
-		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(25));
+		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(24));
 	}
 	new medkits = RoundToNearest(countMedkits());
 	new pills = RoundToNearest(countPillsAndAdrenaline());
 	if(iSurvivalMultiplier>0){
 		CPrintToChatAll("[{green}Point Bonus{default}]{green}%d{default} survivors reached safehouse with {green}%d{default} {blue}medkits {default}and {green}%d{default} {blue} pills/adrenaline", iSurvivalMultiplier, medkits, pills);
-		CPrintToChatAll("[{green}Point Bonus{default}]{default}The final bonus is high as {green}%d {default}points", RoundToNearest((GetSurvivorTotalBonus()/iSurvivalMultiplier + 25)*iSurvivalMultiplier));
+		CPrintToChatAll("[{green}Point Bonus{default}]{default}The final bonus is high as {green}%d {default}points", RoundToNearest((GetSurvivorTotalBonus()/iSurvivalMultiplier + 24)*iSurvivalMultiplier));
 	}
 	return Plugin_Continue;
 }
@@ -70,6 +67,11 @@ public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 bool:IsPlayerLedged(client)
 {
 	return bool:(GetEntProp(client, Prop_Send, "m_isHangingFromLedge") | GetEntProp(client, Prop_Send, "m_isFallingFromLedge"));
+}
+
+bool:IsPlayerIncapped(client)
+{
+	return bool:(GetEntProp(client, Prop_Send, "m_isIncapacitated", 1));
 }
 
 GetUprightSurvivors()
@@ -81,9 +83,11 @@ GetUprightSurvivors()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
-				aliveCount++;
+				if(!IsPlayerLedged(i) && !IsPlayerIncapped(i)){
+					aliveCount++;
+				}
 			}
 		}
 	}
@@ -99,7 +103,7 @@ Float:countPillsAndAdrenaline()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasPills(i)){
 					totalPills += 1;
@@ -122,7 +126,7 @@ Float:countMedkits()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasMedkit(i)){
 					totalMedkits += 1;
@@ -142,7 +146,7 @@ Float:GetSurvivorTotalBonus()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasPills(i)){
 					totalBonus += GetConVarInt(hCvarBonusPerPills);

@@ -7,7 +7,6 @@
 #include <left4dhooks>
 #include <l4d2lib>
 #include <colors>
-#include <l4d2_saferoom_detect>
 
 new Handle:hCvarBonusPerPills;
 new Handle:hCvarBonusPerAdrenaline;
@@ -89,7 +88,7 @@ Float:GetTotalHealthBonus(){
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i) && !IsPlayerLedged(i) && !IsIncapped(i))
 			{
 				new numberOfIncaps = GetSurvivorIncapCount(i);
 				new Float:incapsFactor = 1.0;
@@ -115,9 +114,12 @@ GetUprightSurvivors()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
+				if(!IsPlayerLedged(i) && !IsIncapped(i))
+				{
 					aliveCount++;
+				}
 			}
 		}
 	}
@@ -133,7 +135,7 @@ Float:countPillsAndAdrenaline()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasPills(i)){
 					totalPills += 1;
@@ -156,7 +158,7 @@ Float:countMedkits()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasMedkit(i)){
 					totalMedkits += 1;
@@ -176,7 +178,7 @@ Float:GetPillsTotalBonus()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasPills(i)){
 					totalBonus += GetConVarInt(hCvarBonusPerPills);
@@ -199,7 +201,7 @@ Float:GetMedkitsTotalBonus()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (IsPlayerAlive(i))
 			{
 				if(HasMedkit(i)){
 					totalBonus += GetConVarInt(hCvarBonusPerMedkit);

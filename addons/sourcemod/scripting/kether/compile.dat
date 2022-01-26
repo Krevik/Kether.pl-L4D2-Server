@@ -195,7 +195,7 @@ Age=1400676216
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d_boss_percent.sp]
 Age=1413056264
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus.sp]
-Age=1412456149
+Age=1413118635
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\c_readyup.sp]
 Age=1413056198
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\aliases.sp]
@@ -204,3 +204,7 @@ Age=1411611952
 Age=1412209048
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\charms.sp]
 Age=1412457378
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\testsuite\l4d2_medkit_pills_bonus.sp]
+Age=1413108466
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_medkit_pills_bonus.sp]
+Age=1411607997
