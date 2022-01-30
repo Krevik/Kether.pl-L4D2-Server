@@ -53,6 +53,7 @@
  */
 
 #pragma semicolon 1
+#pragma tabsize 0
 
 #include <sourcemod>
 #include <sdkhooks>
