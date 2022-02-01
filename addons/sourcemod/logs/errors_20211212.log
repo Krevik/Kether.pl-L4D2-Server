@@ -1,5 +1,0 @@
-L 12/12/2021 - 21:52:22: SourceMod error session started
-L 12/12/2021 - 21:52:22: Info (map "c1m1_hotel") (file "/home/k26606_s20329/server_20329/left4dead2/addons/sourcemod/logs/errors_20211212.log")
-L 12/12/2021 - 21:52:22: [CRASH] Accelerator uploaded crash dump: Crash ID: L6YI-ARE3-WBAA
-L 12/12/2021 - 21:52:23: [confoglcompmod.smx] [Confogl] CvarSettings: Could not find CVar specified (l4d2_tongue_delay)
-L 12/12/2021 - 21:52:27: Error log file session closed.
