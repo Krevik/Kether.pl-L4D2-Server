@@ -55,9 +55,9 @@ public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 		CPrintToChatAll("[{green}Point Bonus{default}] {green}%d{default} survivors reached safehouse with {green}%d{default} {blue}medkits{default}", iSurvivalMultiplier, medkitsCount );
 		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}HP: {green}%d{default}x{green}%d ", iSurvivalMultiplier, bonusForHP/iSurvivalMultiplier );
 		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Medkits: {green}%d{default}x{green}%d", medkitsCount, RoundToNearest(GetBonusForMedkit()) );
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}", RoundToNearest(totalBonus) );
+		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(RoundToNearest(totalBonus)/float(iSurvivalMultiplier)) );
 
-		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(totalBonus/iSurvivalMultiplier) );
+		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(RoundToNearest(totalBonus)/float(iSurvivalMultiplier)) );
 	}else{
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(0));
 	}
