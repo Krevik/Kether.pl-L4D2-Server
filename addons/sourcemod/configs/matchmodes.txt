@@ -10,20 +10,24 @@
 		{
 			"name" "Kether Realism Versus"
 		}
+		"kether_t1"
+		{
+			"name" "Kether T1"
+		}
+		"kether_t1_plus"
+		{
+			"name" "Kether T1++"
+		}
 	}
 	"ZoneMod Configs"
 	{
 		"zonemod"
 		{
-			"name" "ZoneMod 2.2"
+			"name" "ZoneMod 2.5.4"
 		}
 		"zoneretro"
 		{
-			"name" "ZoneMod Retro 2.2"
-		}
-		"zonemodold"
-		{
-			"name" "ZoneMod 1.9.16"
+			"name" "ZoneMod Retro 2.5.4"
 		}
 		"zm3v3"
 		{
@@ -64,6 +68,25 @@
 			"name" "Promod Elite 1.1"
 		}
 	}
+	"Acemod Revamped Configs"
+	{
+		"acemodrv"
+		{
+			"name" "Acemod RV 1"
+		}
+		"amrv3v3"
+		{
+			"name" "3v3 Acemod RV"
+		}
+		"amrv2v2"
+		{
+			"name" "2v2 Acemod RV"
+		}
+		"amrv1v1"
+		{
+			"name" "1v1 Acemod RV"
+		}
+	}
 	"EQ Configs"
 	{
 		"eq"
@@ -94,7 +117,7 @@
 	{
 		"zonehunters"
 		{
-			"name" "ZoneHunters 2.2"
+			"name" "ZoneHunters 2.5.4"
 		}
 		"zh3v3"
 		{
@@ -109,4 +132,11 @@
 			"name" "1v1 ZoneHunters"
 		}
 	}
+	"Satanixon's Configs"
+	{
+        "kether_turbo_t2"
+        {
+            "name" "Turbo T2 Versus"
+        }
+    }
 }

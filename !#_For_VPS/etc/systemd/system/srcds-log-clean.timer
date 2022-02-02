@@ -1,0 +1,11 @@
+[Unit]
+Description=clear L4D2 srcds logs every 3 days
+
+[Timer]
+OnCalendar=*-*-* 5:00
+RandomizedDelaySec=72h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+

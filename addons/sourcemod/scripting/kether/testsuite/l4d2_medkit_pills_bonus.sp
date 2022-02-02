@@ -7,6 +7,8 @@
 #include <left4dhooks>
 #include <l4d2lib>
 #include <colors>
+#include <l4d2_saferoom_detect>
+
 
 new Handle:hCvarBonusPerMedkit;
 new Handle:hCvarBonusPerPills;
@@ -48,6 +50,7 @@ public OnPluginEnd()
 
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
+	//empty comment
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	if(iSurvivalMultiplier>0){
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(GetSurvivorTotalBonus()/iSurvivalMultiplier + 25));
@@ -78,7 +81,7 @@ GetUprightSurvivors()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (IsPlayerAlive(i))
+			if (L4D_IsInLastCheckpoint(i))
 			{
 				aliveCount++;
 			}
@@ -96,7 +99,7 @@ Float:countPillsAndAdrenaline()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (IsPlayerAlive(i))
+			if (L4D_IsInLastCheckpoint(i))
 			{
 				if(HasPills(i)){
 					totalPills += 1;
@@ -119,7 +122,7 @@ Float:countMedkits()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (IsPlayerAlive(i))
+			if (L4D_IsInLastCheckpoint(i))
 			{
 				if(HasMedkit(i)){
 					totalMedkits += 1;
@@ -139,7 +142,7 @@ Float:GetSurvivorTotalBonus()
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (IsPlayerAlive(i))
+			if (L4D_IsInLastCheckpoint(i))
 			{
 				if(HasPills(i)){
 					totalBonus += GetConVarInt(hCvarBonusPerPills);

@@ -1,0 +1,11 @@
+[Unit]
+Description=clear L4D2 srcds logs
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/find /home/steam/Steam/steamapps/common/l4d2/left4dead2/{logs,addons/sourcemod/logs} -type f -name "*.log" -mtime +5 | /usr/bin/xargs rm -f
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+Alias=srcds-log-clean.service

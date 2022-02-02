@@ -27,7 +27,7 @@ public void OnPluginStart()
 
 public Action:Ready_CMD(client, args)
 {
-	if(IsValidClient(client) && GetClientTeam(client) != 1){
+	if(IsValidClient(client) && GetClientTeam(client) != 1 && args == 0){
 	
 		decl String:name[MAX_NAME_LENGTH];
 		name = "Console???";

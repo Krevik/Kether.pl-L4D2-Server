@@ -53,6 +53,7 @@
  */
 
 #pragma semicolon 1
+#pragma tabsize 0
 
 #include <sourcemod>
 #include <sdkhooks>
@@ -341,6 +342,7 @@ new     Handle:         g_hCvarWitchHealth                                  = IN
 new     Handle:         g_hCvarMaxPounceDistance                            = INVALID_HANDLE;   // z_pounce_damage_range_max
 new     Handle:         g_hCvarMinPounceDistance                            = INVALID_HANDLE;   // z_pounce_damage_range_min
 new     Handle:         g_hCvarMaxPounceDamage                              = INVALID_HANDLE;   // z_hunter_max_pounce_bonus_damage;
+new     Handle:         g_hCvarReportDeadStop                               = INVALID_HANDLE;   // cvar whether to report deadstops at all
 
 
 /*
@@ -528,7 +530,10 @@ public OnPluginStart()
     g_hCvarBHopMinStreak = CreateConVar(    "sm_skill_bhopstreak",          "3", "The lowest bunnyhop streak that will be reported.", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopMinInitSpeed = CreateConVar( "sm_skill_bhopinitspeed",     "150", "The minimal speed of the first jump of a bunnyhopstreak (0 to allow 'hops' from standstill).", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopContSpeed = CreateConVar(    "sm_skill_bhopkeepspeed",     "300", "The minimal speed at which hops are considered succesful even if not speed increase is made.", FCVAR_NONE, true, 0.0, false );
-
+	g_hCvarReportDeadStop = CreateConVar(    "sm_skill_reportdeadstops",     "1", "Whether to report deadstops.", FCVAR_NONE, true, 0.0, false );
+	
+	
+	
     // cvars: built in
     g_hCvarPounceInterrupt = FindConVar("z_pounce_damage_interrupt");
     HookConVarChange(g_hCvarPounceInterrupt, CvarChange_PounceInterrupt);
@@ -2507,7 +2512,7 @@ stock HandleLevelHurt( attacker, victim, damage )
 stock HandleDeadstop( attacker, victim )
 {
     // report?
-    if ( GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_DEADSTOP )
+    if ( GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_DEADSTOP && GetConVarInt(g_hCvarReportDeadStop))
     {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
         {
