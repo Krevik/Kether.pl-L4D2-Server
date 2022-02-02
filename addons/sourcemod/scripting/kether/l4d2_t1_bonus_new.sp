@@ -30,10 +30,10 @@ public OnPluginStart()
 
 public Action:CMD_print_bonuses(client, args)
 {
-	CPrintToChat(client, "[{green}Point Bonus{default}] Map Distance Multiplier: {green}%d", GetMapDistanceMultiplier());	
-	CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", GetMaximumBonusPerSurvivor());	
-	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 medkit for the map: {green}%d", GetBonusForMedkit());	
-
+	CPrintToChat(client, "[{green}Point Bonus{default}] Map Distance Multiplier: {green}%d", RoundToNearest(GetMapDistanceMultiplier()));	
+	CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(GetMaximumBonusPerSurvivor()));	
+	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 medkit for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
+	
 	return Plugin_Handled;
 }
 
@@ -45,21 +45,19 @@ public OnPluginEnd()
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
 	new iSurvivalMultiplier = GetUprightSurvivors();
-	new medkitsCount = float(countMedkits());
-	new bonusForHP = float(GetTotalHealthBonus());
-	new dividedBonusForHP = float(GetTotalHealthBonus()/iSurvivalMultiplier);
-	new bonusForMedkit = float(GetBonusForMedkit());
+	new medkitsCount = RoundToNearest(countMedkits());
+	new bonusForHP = GetTotalHealthBonus();
 	
 	
-	new totalBonus = bonusForHP+(float(bonusForMedkit)*medkitsCount);
+	new totalBonus = bonusForHP+(GetBonusForMedkit()*medkitsCount);
 	
 	if(iSurvivalMultiplier>0){
-		CPrintToChatAll("[{green}Point Bonus{default}] {green}%d{default} survivors reached safehouse with {green}%d{default} {blue} medkits{default}", iSurvivalMultiplier, medkitsCount);
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}HP: {green}%d{default}x{green}%d ", iSurvivalMultiplier, dividedBonusForHP);
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Medkits: {green}%d{default}x{green}%d", medkitsCount, bonusForMedkit);
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}.", totalBonus);
+		CPrintToChatAll("[{green}Point Bonus{default}] {green}%d{default} survivors reached safehouse with {green}%d{default} {blue}medkits{default}", iSurvivalMultiplier, medkitsCount );
+		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}HP: {green}%d{default}x{green}%d ", iSurvivalMultiplier, bonusForHP/iSurvivalMultiplier );
+		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Medkits: {green}%d{default}x{green}%d", medkitsCount, RoundToNearest(GetBonusForMedkit()) );
+		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}", RoundToNearest(totalBonus) );
 
-		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(totalBonus));
+		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(totalBonus/iSurvivalMultiplier) );
 	}else{
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(0));
 	}
@@ -72,11 +70,11 @@ Float:GetMapDistanceMultiplier(){
 }
 
 Float:GetMaximumBonusPerSurvivor(){
-	return (100/4)*GetMapDistanceMultiplier();				
+	return (100.0/4.0)*GetMapDistanceMultiplier();				
 }
 
 Float:GetBonusForMedkit(){
-	return float(GetMapMaxScore()/8.0*GetMapDistanceMultiplier());
+	return GetMaximumBonusPerSurvivor()*0.8;
 }
 
 Float:GetTotalHealthBonus(){
