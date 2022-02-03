@@ -33,7 +33,8 @@ public Action:CMD_print_bonuses(client, args)
 	CPrintToChat(client, "[{green}Point Bonus{default}] Map Distance Multiplier: {green}%d", RoundToNearest(GetMapDistanceMultiplier()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(GetMaximumBonusPerSurvivor()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 medkit for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
-	
+	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 pills/adrenaline for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
+
 	return Plugin_Handled;
 }
 
@@ -46,15 +47,17 @@ public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	new medkitsCount = RoundToNearest(countMedkits());
+	new pillsCount = RoundToNearest(countPillsAndAdrenaline());
 	new bonusForHP = GetTotalHealthBonus();
 	
 	
-	new totalBonus = bonusForHP+(GetBonusForMedkit()*medkitsCount);
+	new totalBonus = bonusForHP + ( (GetBonusForMedkit()*medkitsCount) + (GetBonusForPillsAdrenaline()*pillsCount) );
 	
 	if(iSurvivalMultiplier>0){
 		CPrintToChatAll("[{green}Point Bonus{default}] {green}%d{default} survivors reached safehouse with {green}%d{default} {blue}medkits{default}", iSurvivalMultiplier, medkitsCount );
 		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}HP: {green}%d{default}x{green}%d ", iSurvivalMultiplier, bonusForHP/iSurvivalMultiplier );
 		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Medkits: {green}%d{default}x{green}%d", medkitsCount, RoundToNearest(GetBonusForMedkit()) );
+		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Pills/Adrenaline: {green}%d{default}x{green}%d", pillsCount, RoundToNearest(GetBonusForPillsAdrenaline()) );
 		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(RoundToNearest(totalBonus)/float(iSurvivalMultiplier)) );
 
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(RoundToNearest(totalBonus)/float(iSurvivalMultiplier)) );
@@ -74,7 +77,11 @@ Float:GetMaximumBonusPerSurvivor(){
 }
 
 Float:GetBonusForMedkit(){
-	return GetMaximumBonusPerSurvivor()*0.8;
+	return GetMaximumBonusPerSurvivor()*1.26;
+}
+
+Float:GetBonusForPillsAdrenaline(){
+	return 8.0*GetMapDistanceMultiplier();
 }
 
 Float:GetTotalHealthBonus(){
@@ -90,11 +97,9 @@ Float:GetTotalHealthBonus(){
 			{
 				new numberOfIncaps = GetSurvivorIncapCount(i);
 				new Float:incapsFactor = 1.0;
-				if(numberOfIncaps == 1) {incapsFactor = 0.5;}
-				if(numberOfIncaps >= 2) {incapsFactor = 0.0;}
+				if(numberOfIncaps >= 1) {incapsFactor = 0.0;}
 				
-				new Float:bonusForPermHealth = GetSurvivorPermanentHealth(i)/2*incapsFactor;				
-				//new Float:bonusForTmpHealth = GetSurvivorTempHealth(i)*0.25*incapsFactor;				
+				new Float:bonusForPermHealth = GetSurvivorPermanentHealth(i)/4.0;				
 				new Float:totalBonusToAdd = (bonusForPermHealth)*mapDistanceMultiplier;
 				totalBonus = totalBonus + totalBonusToAdd;
 			}
@@ -141,6 +146,26 @@ Float:countMedkits()
 	return float(totalMedkits);
 }
 
+Float:countPillsAndAdrenaline()
+{	
+	new survivorCount;		
+	new totalPills;
+	for (new i = 1; i <= MaxClients && survivorCount < iTeamSize; i++)
+	{
+		if (IsSurvivor(i))
+		{
+			survivorCount++;
+			if (L4D_IsInLastCheckpoint(i))
+			{
+				if(HasPills(i) || HasAdrenaline(i)){
+					totalPills += 1;
+				}
+			}
+		}
+	}
+	return float(totalPills);
+}
+
 /************/
 /** Stocks **/
 /************/
@@ -158,6 +183,30 @@ bool:HasMedkit(client)
 		decl String:buffer[64];
 		GetEdictClassname(item, buffer, sizeof(buffer));
 		return StrEqual(buffer, "weapon_first_aid_kit");
+	}
+	return false;
+}
+
+bool:HasPills(client)
+{
+	new item = GetPlayerWeaponSlot(client, 4);
+	if (IsValidEdict(item))
+	{
+		decl String:buffer[64];
+		GetEdictClassname(item, buffer, sizeof(buffer));
+		return StrEqual(buffer, "weapon_pain_pills");
+	}
+	return false;
+}
+
+bool:HasAdrenaline(client)
+{
+	new item = GetPlayerWeaponSlot(client, 4);
+	if (IsValidEdict(item))
+	{
+		decl String:buffer[64];
+		GetEdictClassname(item, buffer, sizeof(buffer));
+		return StrEqual(buffer, "weapon_adrenaline");
 	}
 	return false;
 }
