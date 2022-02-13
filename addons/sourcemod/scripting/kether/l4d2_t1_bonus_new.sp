@@ -33,7 +33,7 @@ public Action:CMD_print_bonuses(client, args)
 	CPrintToChat(client, "[{green}Point Bonus{default}] Map Distance Multiplier: {green}%d", RoundToNearest(GetMapDistanceMultiplier()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(GetMaximumBonusPerSurvivor()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 medkit for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
-	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 pills/adrenaline for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
+	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 pills/adrenaline for the map: {green}%d", RoundToNearest(GetBonusForPillsAdrenaline()));	
 
 	return Plugin_Handled;
 }
