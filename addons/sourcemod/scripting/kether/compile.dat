@@ -197,7 +197,7 @@ Age=1413056264
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus.sp]
 Age=1413118635
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\c_readyup.sp]
-Age=1413056198
+Age=1415806258
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\aliases.sp]
 Age=1411611952
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_tank_announce.sp]
@@ -220,3 +220,5 @@ Age=1413458041
 Age=1413565577
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus_new.sp]
 Age=1414373737
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\fortnite_emotes_extended.sp]
+Age=1415806316
