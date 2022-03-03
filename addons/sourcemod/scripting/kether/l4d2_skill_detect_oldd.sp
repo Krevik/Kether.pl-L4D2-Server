@@ -53,6 +53,7 @@
  */
 
 #pragma semicolon 1
+#pragma tabsize 0
 
 #include <sourcemod>
 #include <sdkhooks>
@@ -341,6 +342,7 @@ new     Handle:         g_hCvarWitchHealth                                  = IN
 new     Handle:         g_hCvarMaxPounceDistance                            = INVALID_HANDLE;   // z_pounce_damage_range_max
 new     Handle:         g_hCvarMinPounceDistance                            = INVALID_HANDLE;   // z_pounce_damage_range_min
 new     Handle:         g_hCvarMaxPounceDamage                              = INVALID_HANDLE;   // z_hunter_max_pounce_bonus_damage;
+new     Handle:         g_hCvarReportDeadStop                               = INVALID_HANDLE;   // cvar whether to report deadstops at all
 
 
 /*
@@ -528,7 +530,10 @@ public OnPluginStart()
     g_hCvarBHopMinStreak = CreateConVar(    "sm_skill_bhopstreak",          "3", "The lowest bunnyhop streak that will be reported.", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopMinInitSpeed = CreateConVar( "sm_skill_bhopinitspeed",     "150", "The minimal speed of the first jump of a bunnyhopstreak (0 to allow 'hops' from standstill).", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopContSpeed = CreateConVar(    "sm_skill_bhopkeepspeed",     "300", "The minimal speed at which hops are considered succesful even if not speed increase is made.", FCVAR_NONE, true, 0.0, false );
-
+	g_hCvarReportDeadStop = CreateConVar(    "sm_skill_reportdeadstops",     "1", "Whether to report deadstops.", FCVAR_NONE, true, 0.0, false );
+	
+	
+	
     // cvars: built in
     g_hCvarPounceInterrupt = FindConVar("z_pounce_damage_interrupt");
     HookConVarChange(g_hCvarPounceInterrupt, CvarChange_PounceInterrupt);
@@ -2441,11 +2446,11 @@ stock HandlePop( attacker, victim, shoveCount, Float:timeAlive )
     {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
         {
-		    CPrintToChatAll( "{green}★{olive}%N {blue}popped {olive}%N", attacker, victim );
+		    CPrintToChatAll( "{green}★ {olive}%N {blue}popped {olive}%N {default}making all the survivors clean.", attacker, victim );
         }
         else if ( IS_VALID_INGAME(attacker) )
         {
-			CPrintToChatAll( "{green}★{olive}%N {blue}popped {olive}a boomer", attacker );
+			CPrintToChatAll( "{green}★ {olive}%N {blue}popped {olive}a boomer {default}making all the survivors clean.", attacker );
         }
     }
 
@@ -2507,7 +2512,7 @@ stock HandleLevelHurt( attacker, victim, damage )
 stock HandleDeadstop( attacker, victim )
 {
     // report?
-    if ( GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_DEADSTOP )
+    if ( GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_DEADSTOP && GetConVarInt(g_hCvarReportDeadStop))
     {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
         {
@@ -2557,7 +2562,7 @@ stock HandleSkeet( attacker, victim, bool:bMelee = false, bool:bSniper = false, 
         {
             // team skeet sets to -2
             if ( IS_VALID_INGAME(victim) && !IsFakeClient(victim) ) {
-				CPrintToChatAll( "{green}★ {olive}%N {blue}was team-skeeted ", victim );
+				CPrintToChatAll( "{green}★★ {olive}%N {blue}was team-skeeted ", victim );
             } else {
                 CPrintToChatAll( "{green}★★ {olive}A {blue}hunter {olive}was {blue}team-skeeted." );
             }
@@ -2665,10 +2670,10 @@ HandleCrown( attacker, damage )
     {
         if ( IS_VALID_INGAME(attacker) )
         {
-			CPrintToChatAll( "{green}★★★★★ {olive}%N {blue}crowned a witch {default}({green}%i {default}damage).", attacker, damage );
+			CPrintToChatAll( "{green}♔ {olive}%N {blue}crowned a witch {default}({green}%i {default}damage).", attacker, damage );
         }
         else {
-            PrintToChatAll( "★★★★★ A witch was crowned." );
+			CPrintToChatAll( "{green}♔ {blue}A witch was crowned.");
         }
     }
 
@@ -2686,7 +2691,7 @@ HandleDrawCrown( attacker, damage, chipdamage )
     {
         if ( IS_VALID_INGAME(attacker) )
         {
-			CPrintToChatAll( "{green}★★★★★ {olive}%N {blue}draw-crowned a witch {default}(\x03%i\x01 damage, \x05%i\x01 chip {default}).", attacker, damage, chipdamage );
+			CPrintToChatAll( "{green}♔ {olive}%N {blue}draw-crowned a witch {default}(\x03%i\x01 damage, \x05%i\x01 chip {default}).", attacker, damage, chipdamage );
         }
         else {
             PrintToChatAll( "A witch was draw-crowned (\x03%i\x01 damage, \x05%i\x01 chip).", damage, chipdamage );
@@ -2709,11 +2714,11 @@ HandleTongueCut( attacker, victim )
     {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
         {
-            CPrintToChatAll( "{green}★★★ {olive}%N {blue}cut {olive}%N{default}'s tongue", attacker, victim );
+            CPrintToChatAll( "{green}★★ {olive}%N {blue}cut {olive}%N{default}'s tongue", attacker, victim );
         }
         else if ( IS_VALID_INGAME(attacker) )
         {
-            CPrintToChatAll( "{green}★★★ {olive}%N {blue}cut {default}smoker tongue", attacker );
+            CPrintToChatAll( "{green}★★ {olive}%N {blue}cut {default}smoker tongue", attacker );
         }
     }
 
@@ -2755,6 +2760,7 @@ HandleRockEaten( attacker, victim )
     Call_PushCell(victim);
     Call_Finish();
 }
+
 HandleRockSkeeted( attacker, victim )
 {
     // report?
@@ -2772,7 +2778,6 @@ HandleRockSkeeted( attacker, victim )
 // highpounces
 stock HandleHunterDP( attacker, victim, actualDamage, Float:calculatedDamage, Float:height, bool:playerIncapped = false )
 {
-    // report?
     if (GetConVarBool(g_hCvarReport)
         &&  height >= GetConVarFloat(g_hCvarHunterDPThresh)
         &&  !playerIncapped
@@ -2806,7 +2811,7 @@ stock HandleJockeyDP( attacker, victim, Float:height )
     ) {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(attacker) )
         {
-            CPrintToChatAll( "{green}★★★ {olive}%N {red}high-pounced {olive}%N {default}({red}height{default}: {red}%i{default})", attacker,  victim, RoundFloat(height) );
+            CPrintToChatAll( "{green}★★★ {red}%N {red}high-pounced {olive}%N {default}({red}height{default}: {red}%i{default})", attacker,  victim, RoundFloat(height) );
         }
         else if ( IS_VALID_INGAME(victim) )
         {
@@ -2831,7 +2836,7 @@ stock HandleDeathCharge( attacker, victim, Float:height, Float:distance, bool:bC
     ) {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(attacker) )
         {
-            CPrintToChatAll( "{green}★★★★ {olive}%N {red}death-charged {olive}%N{default} %s({red}height{default}: {red}%i{default})",
+            CPrintToChatAll( "{green}♔ {olive}%N {red}death-charged {olive}%N{default} %s({red}height{default}: {red}%i{default})",
                     attacker,
                     victim,
                     (bCarried) ? "" : "by bowling ",
@@ -2840,7 +2845,7 @@ stock HandleDeathCharge( attacker, victim, Float:height, Float:distance, bool:bC
         }
         else if ( IS_VALID_INGAME(victim) )
         {
-            CPrintToChatAll( "{green}★★★★ {olive}A charger {red}death-charged {olive}%N{default} %s({red}height{default}: {red}%i{default})",
+            CPrintToChatAll( "{green}♔ {olive}A charger {red}death-charged {olive}%N{default} %s({red}height{default}: {red}%i{default})",
                     victim,
                     (bCarried) ? "" : "by bowling ",
                     RoundFloat(height) 
@@ -2928,12 +2933,11 @@ stock HandleVomitLanded( attacker, boomCount )
 {
     Call_StartForward(g_hForwardVomitLanded);
 	if(boomCount == 4){
-                    CPrintToChatAll( "{green}★ {olive}%N {blue}vomited on 4 survivors)",
-                            attacker);
+		CPrintToChatAll( "{green}★ {olive}%N {blue}vomited on all 4 survivors.", attacker);
 	}
 
     Call_PushCell(attacker);
-    Call_PushCell(boomCount);
+	Call_PushCell(boomCount);
     Call_Finish();
 }
 
@@ -2964,20 +2968,16 @@ stock HandleCarAlarmTriggered( survivor, infected, reason )
             IS_VALID_INGAME(survivor) && !IsFakeClient(survivor)
     ) {
         if ( reason == CALARM_HIT ) {
-            PrintToChatAll( "\x05%N\x01 triggered an alarm with a hit.", survivor );
+			//TODO check if survivor doesn't has special ammo on him
+			CPrintToChatAll( "{olive}%N {green} triggered an alarm with a hit.", survivor );
         }
         else if ( reason == CALARM_TOUCHED )
         {
-            // if a survivor touches an alarmed car, it might be due to a special infected...
             if ( IS_VALID_INFECTED(infected) )
             {
                 if ( !IsFakeClient(infected) )
                 {
-                    PrintToChatAll( "\x04%N\x01 made \x05%N\x01 trigger an alarm.", infected, survivor );
-					
-					CPrintToChatAll("{green}★ {blue}%N {default}made {blue}%N {olive}trigger an alarm.)",
-								infected,
-								survivor);
+					CPrintToChatAll("{olive}%N {default}made {olive}%N {blue}trigger an alarm.", infected, survivor);
                 }
                 else {
                     switch ( GetEntProp(infected, Prop_Send, "m_zombieClass") )
@@ -2991,25 +2991,26 @@ stock HandleCarAlarmTriggered( survivor, infected, reason )
             }
             else
             {
-                PrintToChatAll( "\x05%N\x01 touched an alarmed car.", survivor );
+				CPrintToChatAll( "{olive}%N {green} touched an alarm car.", survivor );
+
             }
         }
         else if ( reason == CALARM_EXPLOSION ) {
-            PrintToChatAll( "\x05%N\x01 triggered an alarm with an explosion.", survivor );
+			CPrintToChatAll( "{olive}%N {green} triggered an alarm with an explosion.", survivor );
         }
         else if ( reason == CALARM_BOOMER )
         {
             if ( IS_VALID_INFECTED(infected) && !IsFakeClient(infected) )
             {
-                PrintToChatAll( "\x05%N\x01 triggered an alarm by killing a boomer \x04%N\x01.", survivor, infected );
+				CPrintToChatAll( "{olive}%N {green} triggered an alarm by killing a boomer {olive}%N.", survivor, infected );
             }
             else
             {
-                PrintToChatAll( "\x05%N\x01 triggered an alarm by shooting a boomer.", survivor );
+				CPrintToChatAll( "{olive}%N {green} triggered an alarm by killing a {olive}boomer.", survivor );
             }
         }
         else {
-            PrintToChatAll( "\x05%N\x01 triggered an alarm.", survivor );
+			CPrintToChatAll( "{olive}%N {green} triggered an alarm.", survivor );
         }
     }
 
