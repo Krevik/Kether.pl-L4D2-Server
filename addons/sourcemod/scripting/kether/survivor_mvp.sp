@@ -1099,8 +1099,6 @@ String: GetMVPString()
     //  2. common kills
     
     // SI MVP
-    if (!(iBrevityFlags & BREV_SI))
-    {
         mvp_SI = findMVPSI();
         if (mvp_SI > 0)
         {
@@ -1119,11 +1117,8 @@ String: GetMVPString()
         } else {
             mvp_SI_name = "(nobody)";
         }
-    }
     
     // Common MVP
-    if (!(iBrevityFlags & BREV_CI))
-    {
         mvp_Common = findMVPCommon();
         if (mvp_Common > 0)
         {
@@ -1142,7 +1137,6 @@ String: GetMVPString()
         } else {
             mvp_Common_name = "(nobody)";
         }
-    }
 	
 	   // Revives MVP
         mvp_Revives = findMVPRevives();
@@ -1164,9 +1158,6 @@ String: GetMVPString()
             mvp_Revives_name = "(nobody)";
         }
     
-    // FF LVP
-    if (!(iBrevityFlags & BREV_FF) && bTrackFF)
-    {
         mvp_FF = findLVPFF();
         if (mvp_FF > 0)
         {
@@ -1185,7 +1176,6 @@ String: GetMVPString()
         } else {
             mvp_FF_name = "(nobody)";
         }
-    }
     
     // report
     
@@ -1196,8 +1186,6 @@ String: GetMVPString()
     }
     else
     {
-        if (!(iBrevityFlags & BREV_SI))
-        {
             if (mvp_SI > 0)
             {
                 if (iBrevityFlags & BREV_PERCENT) {
@@ -1213,10 +1201,7 @@ String: GetMVPString()
             {
                 StrCat(printBuffer, sizeof(printBuffer), "{blue}[{default}MVP{blue}] SI: {blue}({default}nobody{blue}){default}\n");
             }
-        }
         
-        if (!(iBrevityFlags & BREV_CI))
-        {
             if (mvp_Common > 0)
             {
                 if (iBrevityFlags & BREV_PERCENT) {
@@ -1228,7 +1213,6 @@ String: GetMVPString()
                 }
                 StrCat(printBuffer, sizeof(printBuffer), tmpBuffer);
             }
-        }
 		
 		//revives
             if (mvp_Revives > 0)
@@ -1239,8 +1223,6 @@ String: GetMVPString()
     }
     
     // FF
-    if (!(iBrevityFlags & BREV_FF) && bTrackFF)
-    {
         if (mvp_FF == 0)
         {
             Format(tmpBuffer, sizeof(tmpBuffer), "{blue}[{default}LVP{blue}] FF{default}: {green}no friendly fire at all!{default}\n");
@@ -1257,7 +1239,6 @@ String: GetMVPString()
             }
             StrCat(printBuffer, sizeof(printBuffer), tmpBuffer);
         }
-    }
     
     return printBuffer;
 }

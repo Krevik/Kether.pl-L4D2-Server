@@ -600,7 +600,7 @@ public OnPluginStart()
         );
     g_hCvarAutoPrintVs = CreateConVar(
             "sm_stats_autoprint_vs_round",
-            "8325",                                     // default = 1 (mvpchat) + 4 (mvpcon-round) + 128 (special round) = 133 + (funfact round) 8192 = 8325
+            "8324",                                     // default = 1 (mvpchat) + 4 (mvpcon-round) + 128 (special round) = 133 + (funfact round) 8192 = 8325
             "Flags for automatic print [versus round] (show 1,4:MVP-chat, 4,8,16:MVP-console, 32,64:FF, 128,256:special, 512,1024,2048,4096:accuracy).",
             FCVAR_NONE, true, 0.0, false
         );
