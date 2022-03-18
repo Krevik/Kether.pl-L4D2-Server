@@ -1,6 +1,6 @@
 /*
 *	Left 4 DHooks Direct - TESTER
-*	Copyright (C) 2022 Silvers
+*	Copyright (C) 2021 Silvers
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 
 
-#define PLUGIN_VERSION		"1.87"
+#define PLUGIN_VERSION		"1.79"
 
 /*=======================================================================================
 	Plugin Info:
@@ -31,35 +31,6 @@
 
 ========================================================================================
 	Change Log:
-
-1.87 (05-Feb-2022)
-	- Added native "L4D_LobbyIsReserved" to return if players connected from the lobby and reserved the server.
-	- Added natives "L4D_GetLobbyReservation" and "L4D_SetLobbyReservation" to get and set the lobby reservation ID.
-
-	- Added new weapon attribute. Requested by "vikingo12".
-		- L4D2FloatWeaponAttributes: "L4D2FWA_ReloadDuration".
-
-	- L4D2: now dynamically generates the "CTerrorGameRules::IsRealism" signature to future proof against updates breaking the signature.
-
-	- Updated: Plugin.
-	- Updated: "left4dhooks.inc" Include file.
-	- Updated: "left4dhooks.l4d1.txt" and "left4dhooks.l4d2.txt" GameData files.
-
-1.86 (02-Feb-2022)
-	- Added forward "L4D_OnServerHibernationUpdate" to report when server hibernation status changes. Requested by ProjectSky".
-	- Added new weapon attribute. Requested by "A1m".
-		- L4D2FloatWeaponAttributes: "L4D2FWA_GainRange".
-
-	- Fixed broken signatures in L4D1 and L4D2 due to game updates.
-
-	- Updated: Plugin.
-	- Updated: "left4dhooks.inc" Include file.
-	- Updated: "left4dhooks.l4d1.txt" and "left4dhooks.l4d2.txt" GameData files.
-
-1.82 (06-Dec-2021)
-	- Added new weapon attributes. Thanks to "iaNanaNana" for requesting and giving offsets.
-		- L4D2IntWeaponAttributes: "L4D2IWA_Bucket" (both games) and "L4D2IWA_Tier" (L4D2 only).
-		- L4D2FloatWeaponAttributes: "L4D2FWA_VerticalPunch" and "L4D2FWA_HorizontalPunch".
 
 1.79 (23-Nov-2021)
 	- Changed forward "L4D_OnSpawnSpecial_Post" prototype to remove the reference variable.
@@ -406,9 +377,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	}
 
 	if( g_bLeft4Dead2 )
-		g_iForwardsMax = 79;
+		g_iForwardsMax = 78;
 	else
-		g_iForwardsMax = 62;
+		g_iForwardsMax = 61;
 
 	return APLRes_Success;
 }
@@ -1427,59 +1398,49 @@ public Action sm_l4dd(int client, int args)
 		PrintToServer("L4D2_SetIntMeleeAttribute knife (DamageFlags): %d",						L4D2_GetIntMeleeAttribute(meleeID, L4D2IMWA_DamageFlags));
 		PrintToServer("");
 		PrintToServer("");
-	}
 
-	PrintToServer("L4D2_IsValidWeapon weapon_rifle: %d",									L4D2_IsValidWeapon("weapon_rifle"));
-	PrintToServer("L4D2_IsValidWeapon weapon_autoshotgun: %d",								L4D2_IsValidWeapon("weapon_autoshotgun"));
-	PrintToServer("L4D2_IsValidWeapon weapon_smg: %d",										L4D2_IsValidWeapon("weapon_smg"));
-	PrintToServer("L4D2_IsValidWeapon smg: %d",												L4D2_IsValidWeapon("smg")); // Changed to support this without "weapon_" required
-	PrintToServer("");
-	PrintToServer("");
+		PrintToServer("L4D2_IsValidWeapon weapon_rifle: %d",									L4D2_IsValidWeapon("weapon_rifle"));
+		PrintToServer("L4D2_IsValidWeapon weapon_autoshotgun: %d",								L4D2_IsValidWeapon("weapon_autoshotgun"));
+		PrintToServer("L4D2_IsValidWeapon weapon_smg: %d",										L4D2_IsValidWeapon("weapon_smg"));
+		PrintToServer("L4D2_IsValidWeapon smg: %d",												L4D2_IsValidWeapon("smg")); // Changed to support this without "weapon_" required
+		PrintToServer("");
+		PrintToServer("");
 
-	PrintToServer("L4D_GetWeaponID weapon_rifle: %d",										L4D_GetWeaponID("weapon_rifle"));
-	PrintToServer("L4D_GetWeaponID weapon_tank_claw: %d",									L4D_GetWeaponID("weapon_tank_claw"));
-	PrintToServer("L4D_GetWeaponID weapon_smg: %d",											L4D_GetWeaponID("weapon_smg"));
-	PrintToServer("L4D_GetWeaponID smg: %d",												L4D_GetWeaponID("smg"));
-	PrintToServer("");
-	PrintToServer("");
+		PrintToServer("L4D_GetWeaponID weapon_rifle: %d",										L4D_GetWeaponID("weapon_rifle"));
+		PrintToServer("L4D_GetWeaponID weapon_tank_claw: %d",									L4D_GetWeaponID("weapon_tank_claw"));
+		PrintToServer("L4D_GetWeaponID weapon_smg: %d",											L4D_GetWeaponID("weapon_smg"));
+		PrintToServer("L4D_GetWeaponID smg: %d",												L4D_GetWeaponID("smg"));
+		PrintToServer("");
+		PrintToServer("");
 
-	PrintToServer("L4D2_GetFloatWeaponAttribute_A weapon_rifle (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_ReloadDuration));
-	L4D2_SetFloatWeaponAttribute("weapon_rifle",											L4D2FWA_ReloadDuration, 0.5);
-	PrintToServer("L4D2_SetFloatWeaponAttribute_A weapon_rifle (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_ReloadDuration));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_A weapon_rifle (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MaxPlayerSpeed));
+		L4D2_SetFloatWeaponAttribute("weapon_rifle",											L4D2FWA_MaxPlayerSpeed, 300.0);
+		PrintToServer("L4D2_SetFloatWeaponAttribute_A weapon_rifle (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MaxPlayerSpeed));
 
-	PrintToServer("L4D2_GetFloatWeaponAttribute_A weapon_rifle (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MaxPlayerSpeed));
-	L4D2_SetFloatWeaponAttribute("weapon_rifle",											L4D2FWA_MaxPlayerSpeed, 300.0);
-	PrintToServer("L4D2_SetFloatWeaponAttribute_A weapon_rifle (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MaxPlayerSpeed));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_B weapon_rifle (Range): %f",				L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_Range));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_C weapon_rifle (MinInAirSpread): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MinInAirSpread));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_D weapon_rifle (MaxMovementSpread): %f",	L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MaxMovementSpread));
+		PrintToServer("");
+		PrintToServer("");
 
-	PrintToServer("L4D2_GetFloatWeaponAttribute_B weapon_rifle (Range): %f",				L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_Range));
-	PrintToServer("L4D2_GetFloatWeaponAttribute_C weapon_rifle (MinInAirSpread): %f",		L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MinInAirSpread));
-	PrintToServer("L4D2_GetFloatWeaponAttribute_D weapon_rifle (MaxMovementSpread): %f",	L4D2_GetFloatWeaponAttribute("weapon_rifle", L4D2FWA_MaxMovementSpread));
-	PrintToServer("");
-	PrintToServer("");
+		PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (Bullets): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Bullets));
+		PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (ClipSize): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_ClipSize));
+		PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (Damage): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Damage));
+		L4D2_SetIntWeaponAttribute("weapon_rifle",												L4D2IWA_ClipSize, 100);
+		PrintToServer("");
+		PrintToServer("");
+		L4D2_SetIntWeaponAttribute("weapon_rifle",												L4D2IWA_Damage, 100);
+		PrintToServer("L4D2_SetIntWeaponAttribute weapon_rifle (Damage): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Damage));
+		PrintToServer("");
+		PrintToServer("");
 
-	PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (Bullets): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Bullets));
-	PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (ClipSize): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_ClipSize));
-	PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (Bucket): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Bucket));
-	if( g_bLeft4Dead2 )
-		PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (Tier): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Tier));
-	PrintToServer("L4D2_GetIntWeaponAttribute weapon_rifle (Damage): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Damage));
-	L4D2_SetIntWeaponAttribute("weapon_rifle",												L4D2IWA_ClipSize, 100);
-	PrintToServer("");
-	PrintToServer("");
-	L4D2_SetIntWeaponAttribute("weapon_rifle",												L4D2IWA_Damage, 100);
-	PrintToServer("L4D2_SetIntWeaponAttribute weapon_rifle (Damage): %d",					L4D2_GetIntWeaponAttribute("weapon_rifle", L4D2IWA_Damage));
-	PrintToServer("");
-	PrintToServer("");
+		PrintToServer("L4D2_GetFloatWeaponAttribute_CA weapon_smg (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_MaxPlayerSpeed));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_CB weapon_smg (Range): %f",					L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_Range));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_CC weapon_smg (MinInAirSpread): %f",		L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_MinInAirSpread));
+		PrintToServer("L4D2_GetFloatWeaponAttribute_CD weapon_smg (MaxMovementSpread): %f",		L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_MaxMovementSpread));
+		PrintToServer("");
+		PrintToServer("");
 
-	PrintToServer("L4D2_GetFloatWeaponAttribute_CA weapon_smg (MaxPlayerSpeed): %f",		L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_MaxPlayerSpeed));
-	PrintToServer("L4D2_GetFloatWeaponAttribute_CB weapon_smg (Range): %f",					L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_Range));
-	PrintToServer("L4D2_GetFloatWeaponAttribute_CC weapon_smg (MinInAirSpread): %f",		L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_MinInAirSpread));
-	PrintToServer("L4D2_GetFloatWeaponAttribute_CD weapon_smg (MaxMovementSpread): %f",		L4D2_GetFloatWeaponAttribute("weapon_smg", L4D2FWA_MaxMovementSpread));
-	PrintToServer("");
-	PrintToServer("");
-
-	if( g_bLeft4Dead2 )
-	{
 		// Test attribute tag mis-match
 		// PrintToServer("L4D2_GetIntWeaponAttribute_DD: %d",		L4D2_GetIntWeaponAttribute("weapon_smg", L4D2FWA_MaxPlayerSpeed));
 
@@ -1578,31 +1539,9 @@ public Action sm_l4dd(int client, int args)
 	PrintToServer("");
 	// */
 
-
-
-	// WORKING
-	/*
-	char sTemp[20];
-	L4D_GetLobbyReservation(sTemp, sizeof(sTemp));
-	PrintToServer("L4D_GetLobbyReservation_A %s", sTemp);
-
-	sTemp = "1BADFAD1337D34D";
-	L4D_SetLobbyReservation(sTemp);
-	PrintToServer("L4D_SetLobbyReservation %s", sTemp);
-
-	L4D_GetLobbyReservation(sTemp, sizeof(sTemp));
-	PrintToServer("L4D_GetLobbyReservation_B %s", sTemp);
-	PrintToServer("L4D_LobbyIsReserved == %d", L4D_LobbyIsReserved());
-
-	ServerCommand("status");
-	ServerExecute();
-
-	// PrintToServer("L4D_LobbyUnreserve_A %d", L4D_LobbyUnreserve()); // Comment this to see "status" output otherwise this triggers before it can execute.
-
-	L4D_GetLobbyReservation(sTemp, sizeof(sTemp));
-	PrintToServer("L4D_GetLobbyReservation_C %s", sTemp);
-	PrintToServer("L4D_LobbyIsReserved_B == %d", L4D_LobbyIsReserved());
-	*/
+	//DEPRECATED
+	// L4D_GetCampaignScores
+	// PrintToServer("L4D_LobbyUnreserve %d",					L4D_LobbyUnreserve()); // WORKING
 
 
 
@@ -3287,18 +3226,6 @@ public Action L4D2_OnChangeFinaleStage(int &finaleType, const char[] arg)
 	// return Plugin_Handled;
 
 	return Plugin_Continue;
-}
-
-public void L4D_OnServerHibernationUpdate(bool hibernating)
-{
-	static int called;
-	if( called < MAX_CALLS )
-	{
-		if( called == 0 ) g_iForwards++;
-		called++;
-
-		ForwardCalled("\"L4D_OnServerHibernationUpdate\" %d", hibernating);
-	}
 }
 
 public Action L4D2_OnClientDisableAddons(const char[] SteamID)

@@ -23,14 +23,6 @@ public void OnPluginStart()
 	delete data;
 	
 	Patch(true);
-	
-	RegAdminCmd("sm_boomer_ladder_fix_toggle", sm_boomer_ladder_fix_toggle, ADMFLAG_ROOT);
-}
-
-public Action sm_boomer_ladder_fix_toggle( int client, int args )
-{
-	Patch(3);
-	return Plugin_Handled;
 }
 
 void Patch( int state )

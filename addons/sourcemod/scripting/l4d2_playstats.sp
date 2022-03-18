@@ -643,6 +643,7 @@ public void OnPluginStart()
 
 	// commands:
 	RegConsoleCmd("sm_stats", Cmd_StatsDisplayGeneral, "Prints stats for survivors");
+	RegConsoleCmd("sm_mvp", Cmd_StatsDisplayGeneral, "Prints MVP stats for survivors");
 	RegConsoleCmd("sm_skill", Cmd_StatsDisplayGeneral, "Prints special skills stats for survivors");
 	RegConsoleCmd("sm_ff", Cmd_StatsDisplayGeneral, "Prints friendly fire stats stats");
 	RegConsoleCmd("sm_acc", Cmd_StatsDisplayGeneral, "Prints accuracy stats for survivors");
