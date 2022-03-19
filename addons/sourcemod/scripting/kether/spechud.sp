@@ -516,7 +516,12 @@ public void OnRoundIsLive()
 	}
 }
 
-//public void L4D2_OnEndVersusModeRound_Post() { if (!InSecondHalfOfRound()) iFirstHalfScore = L4D_GetTeamScore(GetRealTeam(0) + 1); }
+public void L4D2_OnEndVersusModeRound_Post() {
+	if (g_bAnnounceTankDamage)
+	{
+		PrintTankDamage();
+	}
+}
 
 // ======================================================================
 //  Events
@@ -542,7 +547,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 public void PrintTankDamage()
 {
 		if(damage_connected > 0.0){
-				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%s{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
+				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		}
 }
