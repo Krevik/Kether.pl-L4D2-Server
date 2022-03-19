@@ -51,6 +51,13 @@ public Plugin myinfo =
 // ======================================================================
 //  Plugin Vars
 // ======================================================================
+char Tank_UpTime[20];
+int UpTime;
+int punch_connected;
+int rock_connected;
+int prop_connected;
+int damage_connected;
+
 enum L4D2Gamemode
 {
 	L4D2Gamemode_None,
@@ -171,11 +178,14 @@ public void OnPluginStart()
 	
 	RegConsoleCmd("sm_spechud", ToggleSpecHudCmd);
 	RegConsoleCmd("sm_tankhud", ToggleTankHudCmd);
-	
+	RegConsoleCmd("sm_hide", ToggleTankHudCmd);
+
 	HookEvent("round_start",			view_as<EventHook>(Event_RoundStart), EventHookMode_PostNoCopy);
 	HookEvent("player_death",			Event_PlayerDeath);
 	HookEvent("witch_killed",			Event_WitchDeath);
 	HookEvent("player_team",			Event_PlayerTeam);
+	HookEvent("tank_spawn", tank_spawn);//to calculate tank spawn time
+	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Pre); //to get punch, rock, prop, totaldamage
 	
 	GetGameCvars();
 	GetNetworkCvars();
@@ -195,6 +205,46 @@ public void OnPluginStart()
 	
 	CreateTimer(SPECHUD_DRAW_INTERVAL, HudDrawTimer, _, TIMER_REPEAT);
 }
+
+public Action tank_spawn(Handle event, const char[] name, bool dontBroadcast) {
+    UpTime = GetTime();
+    punch_connected = 0;
+    rock_connected = 0;
+    prop_connected = 0;
+    damage_connected = 0;
+}
+
+public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadcast) {
+    int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+    int victim = GetClientOfUserId(GetEventInt(event, "userid"));
+
+    if (!attacker) {
+        return Plugin_Continue;
+    }
+
+    if (GetEventInt(event, "dmg_health") < 1) {
+        return Plugin_Continue;
+    }
+    if (victim == attacker) {
+        return Plugin_Continue;
+    }
+
+    char weapon[16];
+    GetEventString(event, "weapon", weapon, sizeof(weapon));
+    if (GetEntProp(attacker, Prop_Send, "m_zombieClass") == 8 && GetClientTeam(victim) == 2) {
+        damage_connected = damage_connected + GetEventInt(event, "dmg_health");
+
+        if (StrEqual(weapon, "tank_claw")) {
+            punch_connected = punch_connected + 1;
+        } else if (StrEqual(weapon, "tank_rock")) {
+                rock_connected = rock_connected + 1;
+            } else {
+                prop_connected = prop_connected + 1;
+        }
+    }
+    return Plugin_Continue;
+}
+
 
 /**********************************************************************************************/
 
@@ -1116,6 +1166,18 @@ void FillInfectedInfo(Panel &hSpecHud)
 	}
 }
 
+stock void UpdateTankUpTime() {
+    char str_uptime_temp[8];
+    int Current_UpTime = GetTime() - UpTime;
+    int Days = RoundToFloor(Current_UpTime / 86400.0);
+    Current_UpTime -= Days * 86400;
+    Tank_UpTime = "";
+    int Hours = RoundToFloor(Current_UpTime / 3600.0);
+    Current_UpTime -= Hours * 3600;
+    FormatTime(str_uptime_temp, sizeof(str_uptime_temp), "%M:%S", Current_UpTime);
+    StrCat(view_as < char > (Tank_UpTime), sizeof(Tank_UpTime), str_uptime_temp);
+}
+
 bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 {
 	int tank = FindTank();
@@ -1128,9 +1190,14 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	if (bTankHUD)
 	{
 		FormatEx(info, sizeof(info), "%s :: Tank HUD", sReadyCfgName);
-		DrawPanelText(hSpecHud, info);
-		
+		DrawPanelText(hSpecHud, info);		
 		int len = strlen(info);
+		for (int i = 0; i < len; ++i) info[i] = '_';
+		DrawPanelText(hSpecHud, info);
+		Format(info, sizeof(info), "Punches: %i | Rocks: %i | Objects: %i", punch_connected, rock_connected, prop_connected);
+        DrawPanelText(hSpecHud, info);
+        Format(info, sizeof(info), "Total Damage: %i", damage_connected);
+        DrawPanelText(hSpecHud, info);
 		for (int i = 0; i < len; ++i) info[i] = '_';
 		DrawPanelText(hSpecHud, info);
 	}
@@ -1139,7 +1206,7 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 		DrawPanelText(hSpecHud, " ");
 		DrawPanelText(hSpecHud, "->3. Tank");
 	}
-
+	
 	// Draw owner & pass counter
 	int passCount = L4D2Direct_GetTankPassedCount();
 	switch (passCount)
@@ -1186,7 +1253,12 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 		info = "Frustr.  : AI";
 	}
 	DrawPanelText(hSpecHud, info);
-
+	
+    //Draw Spawn Time
+    UpdateTankUpTime();
+	Format(info, sizeof(info), "Spawn: (%s)", Tank_UpTime);
+    DrawPanelText(hSpecHud, info);
+	
 	// Draw network
 	if (!IsFakeClient(tank))
 	{
