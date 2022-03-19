@@ -2873,7 +2873,7 @@ stock HandleVomitLanded( attacker, boomCount )
 {
     Call_StartForward(g_hForwardVomitLanded);
 	if(boomCount == 4){
-		CPrintToChatAll( "{green}★ {olive}%N {blue}vomited on all 4 survivors.", attacker);
+		CPrintToChatAll( "{green}★ {olive}%N {default}vomited on all {blue}4 {default}survivors.", attacker);
 	}
     Call_PushCell(attacker);
     Call_PushCell(boomCount);
