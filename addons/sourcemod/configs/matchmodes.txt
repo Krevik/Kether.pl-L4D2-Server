@@ -10,10 +10,6 @@
 		{
 			"name" "Kether Versus"
 		}
-		"kether_realism"
-		{
-			"name" "Kether Realism Versus"
-		}
 		"kether_t1"
 		{
 			"name" "Kether T1"
@@ -37,6 +33,14 @@
 		"gauntlet"
 		{
 			"name" "Gauntlet (!playermode)"
+		}
+		"kether_realism"
+		{
+			"name" "Kether Realism Versus"
+		}
+		"kether_survival"
+		{
+			"name" "Kether Survival"
 		}
 	}
 	"ZoneMod Configs"
