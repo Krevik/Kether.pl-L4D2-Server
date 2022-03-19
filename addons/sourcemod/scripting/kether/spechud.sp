@@ -148,6 +148,7 @@ bool bSpecHudActive[MAXPLAYERS+1], bTankHudActive[MAXPLAYERS+1];
 bool bSpecHudHintShown[MAXPLAYERS+1], bTankHudHintShown[MAXPLAYERS+1];
 
 bool isPassing = false;
+bool g_bAnnounceTankDamage = false;            // Whether or not tank damage should be announced
 
 /**********************************************************************************************/
 
@@ -181,6 +182,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_hide", ToggleTankHudCmd);
 
 	HookEvent("round_start",			view_as<EventHook>(Event_RoundStart), EventHookMode_PostNoCopy);
+	HookEvent("round_end", 				Event_RoundEnd);
 	HookEvent("player_death",			Event_PlayerDeath);
 	HookEvent("witch_killed",			Event_WitchDeath);
 	HookEvent("player_team",			Event_PlayerTeam);
@@ -204,6 +206,14 @@ public void OnPluginStart()
 	bPendingArrayRefresh = true;
 	
 	CreateTimer(SPECHUD_DRAW_INTERVAL, HudDrawTimer, _, TIMER_REPEAT);
+}
+
+public Action Event_RoundEnd(Handle event, const char[] name, bool dontBroadcast)
+{
+	if (g_bAnnounceTankDamage)
+	{
+		PrintTankDamage();
+	}
 }
 
 public Action tank_spawn(Handle event, const char[] name, bool dontBroadcast) {
@@ -511,17 +521,26 @@ public void OnRoundIsLive()
 // ======================================================================
 //  Events
 // ======================================================================
-public void Event_RoundStart() { bRoundLive = false; bPendingArrayRefresh = true; }
+public void Event_RoundStart() { 
+g_bAnnounceTankDamage = true;
+bRoundLive = false; bPendingArrayRefresh = true; 
+}
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (!client || !IsInfected(client)) return;
-	
+	g_bAnnounceTankDamage = false;
 	if (GetInfectedClass(client) == ZC_Tank)
 	{
 		if (iTankCount > 0) iTankCount--;
 		if (!RoundHasFlowTank()) bFlowTankActive = false;
+		PrintTankDamage();
+	}
+}
+
+public void PrintTankDamage()
+{
 		if(damage_connected > 0.0){
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%s{default} damage.", damage_connected );
 				if(rock_connected > 0.0){
@@ -535,7 +554,6 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 				}
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		}
-	}
 }
 
 public void Event_WitchDeath(Event event, const char[] name, bool dontBroadcast)
@@ -1211,8 +1229,6 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
         DrawPanelText(hSpecHud, info);
         Format(info, sizeof(info), "Total Damage: %i", damage_connected);
         DrawPanelText(hSpecHud, info);
-		for (int i = 0; i < len; ++i) info[i] = '_';
-		DrawPanelText(hSpecHud, info);
 	}
 	else
 	{
