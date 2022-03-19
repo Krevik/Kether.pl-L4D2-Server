@@ -2,6 +2,10 @@
 {
 	"Krevik's Confings"
 	{
+		"kether_coop"
+		{
+			"name" "Kether Campaign"
+		}
 		"kether"
 		{
 			"name" "Kether Versus"
