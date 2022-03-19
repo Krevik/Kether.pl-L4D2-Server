@@ -542,16 +542,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 public void PrintTankDamage()
 {
 		if(damage_connected > 0.0){
-				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%s{default} damage.", damage_connected );
-				if(rock_connected > 0.0){
-					CPrintToChatAll( "[{olive}Tank Report{default}] {olive}%s{default} rocks, ", rock_connected );
-				}
-				if(punch_connected > 0.0){
-					CPrintToChatAll( "[{olive}Tank Report{default}] {olive}%s{default} punches, ", punch_connected );
-				}
-				if(prop_connected > 0.0){
-					CPrintToChatAll( "[{olive}Tank Report{default}] {olive}%s{default} object hits, ", prop_connected );
-				}
+				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%s{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		}
 }
