@@ -182,7 +182,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_hide", ToggleTankHudCmd);
 
 	HookEvent("round_start",			view_as<EventHook>(Event_RoundStart), EventHookMode_PostNoCopy);
-	HookEvent("round_end", 				Event_RoundEnd);
+	HookEvent("round_end", 				view_as<EventHook>(Event_RoundEnd), EventHookMode_PostNoCopy);
 	HookEvent("player_death",			Event_PlayerDeath);
 	HookEvent("witch_killed",			Event_WitchDeath);
 	HookEvent("player_team",			Event_PlayerTeam);
@@ -468,6 +468,7 @@ public void OnClientDisconnect(int client)
 public void OnMapStart() { bRoundLive = false; }
 public void OnRoundIsLive()
 {
+	g_bAnnounceTankDamage = true;
 	FillReadyConfig();
 	
 	bRoundLive = true;
@@ -516,13 +517,6 @@ public void OnRoundIsLive()
 	}
 }
 
-public void L4D2_OnEndVersusModeRound_Post() {
-	if (g_bAnnounceTankDamage)
-	{
-		PrintTankDamage();
-	}
-}
-
 // ======================================================================
 //  Events
 // ======================================================================
@@ -535,21 +529,28 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (!client || !IsInfected(client)) return;
-	g_bAnnounceTankDamage = false;
 	if (GetInfectedClass(client) == ZC_Tank)
 	{
 		if (iTankCount > 0) iTankCount--;
 		if (!RoundHasFlowTank()) bFlowTankActive = false;
-		PrintTankDamage();
+		if(g_bAnnounceTankDamage){
+			PrintTankDamage();
+		}
 	}
 }
 
 public void PrintTankDamage()
 {
+    CreateTimer(4.0, delayedTankStatsPrint);
+}
+
+public Action delayedTankStatsPrint(Handle timer)
+{
+		CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		if(damage_connected > 0.0){
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
-				CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		}
+		g_bAnnounceTankDamage = false;
 }
 
 public void Event_WitchDeath(Event event, const char[] name, bool dontBroadcast)

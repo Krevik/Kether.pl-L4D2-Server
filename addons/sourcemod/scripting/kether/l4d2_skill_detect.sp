@@ -510,7 +510,7 @@ public OnPluginStart()
     
     // cvars: config
     
-    g_hCvarReport = CreateConVar(           "sm_skill_report_enable" ,      "0", "Whether to report in chat (see sm_skill_report_flags).", FCVAR_NONE, true, 0.0, true, 1.0 );
+    g_hCvarReport = CreateConVar(           "sm_skill_report_enable" ,      "1", "Whether to report in chat (see sm_skill_report_flags).", FCVAR_NONE, true, 0.0, true, 1.0 );
     
     g_hCvarAllowMelee = CreateConVar(       "sm_skill_skeet_allowmelee",    "1", "Whether to count/forward melee skeets.", FCVAR_NONE, true, 0.0, true, 1.0 );
     g_hCvarAllowSniper = CreateConVar(      "sm_skill_skeet_allowsniper",   "1", "Whether to count/forward sniper/magnum headshots as skeets.", FCVAR_NONE, true, 0.0, true, 1.0 );
@@ -521,7 +521,7 @@ public OnPluginStart()
     g_hCvarJockeyDPThresh = CreateConVar(   "sm_skill_jockeydp_height",   "300", "How much height distance a jockey must make for his 'DP' to count as a reportable highpounce.", FCVAR_NONE, true, 0.0, false );
     g_hCvarHideFakeDamage = CreateConVar(   "sm_skill_hidefakedamage",      "0", "If set, any damage done that exceeds the health of a victim is hidden in reports.", FCVAR_NONE, true, 0.0, true, 1.0 );
     g_hCvarDeathChargeHeight = CreateConVar("sm_skill_deathcharge_height","400", "How much height distance a charger must take its victim for a deathcharge to be reported.", FCVAR_NONE, true, 0.0, false );
-    g_hCvarInstaTime = CreateConVar(        "sm_skill_instaclear_time",     "0.75", "A clear within this time (in seconds) counts as an insta-clear.", FCVAR_NONE, true, 0.0, false );
+    g_hCvarInstaTime = CreateConVar(        "sm_skill_instaclear_time",     "1.0", "A clear within this time (in seconds) counts as an insta-clear.", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopMinStreak = CreateConVar(    "sm_skill_bhopstreak",          "3", "The lowest bunnyhop streak that will be reported.", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopMinInitSpeed = CreateConVar( "sm_skill_bhopinitspeed",     "150", "The minimal speed of the first jump of a bunnyhopstreak (0 to allow 'hops' from standstill).", FCVAR_NONE, true, 0.0, false );
     g_hCvarBHopContSpeed = CreateConVar(    "sm_skill_bhopkeepspeed",     "300", "The minimal speed at which hops are considered succesful even if not speed increase is made.", FCVAR_NONE, true, 0.0, false );
@@ -2437,14 +2437,14 @@ public Action: L4D_OnCThrowActivate ( ability )
 // boomer pop
 stock HandlePop( attacker, victim, shoveCount, Float:timeAlive )
 {
-        if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
-        {
-		    CPrintToChatAll( "{green}★ {olive}%N {blue}popped {olive}%N {default}making all the survivors clean.", attacker, victim );
-        }
-        else if ( IS_VALID_INGAME(attacker) )
-        {
-			CPrintToChatAll( "{green}★ {olive}%N {blue}popped {olive}a boomer {default}making all the survivors clean.", attacker );
-        }
+    if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
+    {
+		CPrintToChatAll( "{green}★ {olive}%N {blue}popped {olive}%N {default}making all the survivors clean.", attacker, victim );
+    }
+    else if ( IS_VALID_INGAME(attacker) )
+    {
+		CPrintToChatAll( "{green}★ {olive}%N {blue}popped {olive}a boomer {default}making all the survivors clean.", attacker );
+    }
     
     Call_StartForward(g_hForwardBoomerPop);
     Call_PushCell(attacker);
@@ -2457,14 +2457,14 @@ stock HandlePop( attacker, victim, shoveCount, Float:timeAlive )
 // charger level
 stock HandleLevel( attacker, victim )
 {
-        if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
-        {
-            CPrintToChatAll( "{green}★★★ {olive}%N {blue}fully {default}leveled {olive}%N", attacker, victim );
-        }
-        else if ( IS_VALID_INGAME(attacker) )
-        {
-            CPrintToChatAll( "{green}★★★ {olive}%N {blue}fully {default}leveled {olive}a charger", attacker );
-        }
+    if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
+    {
+        CPrintToChatAll( "{green}★★★ {olive}%N {blue}fully {default}leveled {olive}%N", attacker, victim );
+    }
+    else if ( IS_VALID_INGAME(attacker) )
+    {
+        CPrintToChatAll( "{green}★★★ {olive}%N {blue}fully {default}leveled {olive}a charger", attacker );
+    }
     
     // call forward
     Call_StartForward(g_hForwardLevel);
@@ -2475,14 +2475,14 @@ stock HandleLevel( attacker, victim )
 // charger level hurt
 stock HandleLevelHurt( attacker, victim, damage )
 {
-        if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
-        {
-            CPrintToChatAll( "{green}★ {olive}%N {blue}chip-leveled {olive}%N {default}({blue}%i dmg{default})", attacker, victim, damage );
-        }
-        else if ( IS_VALID_INGAME(attacker) )
-        {
-            CPrintToChatAll( "{green}★ {olive}%N {blue}chip-leveled {default}a charger ({blue}%i dmg{default})", attacker, damage );
-        }
+    if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
+    {
+        CPrintToChatAll( "{green}★ {olive}%N {blue}chip-leveled {olive}%N {default}({blue}%i dmg{default})", attacker, victim, damage );
+    }
+    else if ( IS_VALID_INGAME(attacker) )
+    {
+        CPrintToChatAll( "{green}★ {olive}%N {blue}chip-leveled {default}a charger ({blue}%i dmg{default})", attacker, damage );
+    }
     
     // call forward
     Call_StartForward(g_hForwardLevelHurt);
@@ -2495,19 +2495,6 @@ stock HandleLevelHurt( attacker, victim, damage )
 // deadstops
 stock HandleDeadstop( attacker, victim )
 {
-    // report?
-    /*if (GetConVarBool(g_hCvarReport))
-    {
-        if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
-        {
-            CPrintToChatAll( "{green}★ {olive}%N {blue}deadstopped {olive}%N", attacker, victim );
-        }
-        else if ( IS_VALID_INGAME(attacker) )
-        {
-            CPrintToChatAll( "{green}★ {olive}%N {blue}deadstopped {olive}a hunter", attacker );
-        }
-    }*/
-    
     Call_StartForward(g_hForwardHunterDeadstop);
     Call_PushCell(attacker);
     Call_PushCell(victim);
@@ -2516,19 +2503,6 @@ stock HandleDeadstop( attacker, victim )
 
 stock HandleShove( attacker, victim, zombieClass )
 {
-    /* report?
-    if ( GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_SHOVE )
-    {
-        if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(victim) )
-        {
-            PrintToChatAll( "\x04%N\x01 shoved \x05%N\x01.", attacker, victim );
-        }
-        else if ( IS_VALID_INGAME(attacker) )
-        {
-            PrintToChatAll( "\x04%N\x01 shoved an SI.", attacker );
-        }
-    }*/
-    
     Call_StartForward(g_hForwardSIShove);
     Call_PushCell(attacker);
     Call_PushCell(victim);
@@ -2716,6 +2690,8 @@ HandleSmokerSelfClear( attacker, victim, bool:withShove = false )
 // rocks
 HandleRockEaten( attacker, victim )
 {
+    //CPrintToChatAll( "{green}★ {olive}%N {blue}skeeted {default}a tank rock", attacker );
+
     Call_StartForward(g_hForwardRockEaten);
     Call_PushCell(attacker);
     Call_PushCell(victim);
@@ -2723,11 +2699,8 @@ HandleRockEaten( attacker, victim )
 }
 HandleRockSkeeted( attacker, victim )
 {
-    // report?
-    if ( GetConVarBool(g_hCvarReport) & REP_ROCKSKEET )
-    {
-        CPrintToChatAll( "{green}★ {olive}%N {blue}skeeted {default}a tank rock", attacker );
-    }
+    CPrintToChatAll( "{green}★ {olive}%N {blue}skeeted {default}a tank rock", attacker );
+    
     Call_StartForward(g_hForwardRockSkeeted);
     Call_PushCell(attacker);
     Call_PushCell(victim);
@@ -2761,6 +2734,7 @@ stock HandleHunterDP( attacker, victim, actualDamage, Float:calculatedDamage, Fl
 
 stock HandleJockeyDP( attacker, victim, Float:height )
 {
+    
     Call_StartForward(g_hForwardJockeyDP);
     Call_PushCell(attacker);
     Call_PushCell(victim);
@@ -2772,7 +2746,6 @@ stock HandleJockeyDP( attacker, victim, Float:height )
 // deathcharges
 stock HandleDeathCharge( attacker, victim, Float:height, Float:distance, bool:bCarried = true )
 {
-    // report?
     if ( height >= GetConVarFloat(g_hCvarDeathChargeHeight) ) {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(attacker) )
         {
@@ -2811,7 +2784,7 @@ stock HandleClear( attacker, victim, pinVictim, zombieClass, Float:clearTimeA, F
     
     PrintDebug(0, "Clear: %i freed %i from %i: time: %.2f / %.2f -- class: %s (with shove? %i)", attacker, pinVictim, victim, clearTimeA, clearTimeB, g_csSIClassName[zombieClass], bWithShove );
     
-    if ( attacker != pinVictim )
+    if ( attacker != pinVictim && GetConVarBool(g_hCvarReport))
     {
         new Float: fMinTime = GetConVarFloat(g_hCvarInstaTime);
         new Float: fClearTime = clearTimeA;
@@ -2871,10 +2844,11 @@ stock HandleClear( attacker, victim, pinVictim, zombieClass, Float:clearTimeA, F
 // booms
 stock HandleVomitLanded( attacker, boomCount )
 {
-    Call_StartForward(g_hForwardVomitLanded);
 	if(boomCount == 4){
-		CPrintToChatAll( "{green}★ {olive}%N {default}vomited on all {blue}4 {default}survivors.", attacker);
+		CPrintToChatAll( "{green}★ {olive}%N {default}vomited {blue}4 {default}survivors.", attacker);
 	}
+	
+    Call_StartForward(g_hForwardVomitLanded);
     Call_PushCell(attacker);
     Call_PushCell(boomCount);
     Call_Finish();
@@ -2903,7 +2877,9 @@ stock HandleBHopStreak( survivor, streak, Float: maxVelocity )
 // car alarms
 stock HandleCarAlarmTriggered( survivor, infected, reason )
 {
-    if ( IS_VALID_INGAME(survivor) && !IsFakeClient(survivor) ) {
+    /*if (    GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_CARALARM &&
+            IS_VALID_INGAME(survivor) && !IsFakeClient(survivor)
+    ) {
         if ( reason == CALARM_HIT ) {
             PrintToChatAll( "\x05%N\x01 triggered an alarm with a hit.", survivor );
         }
@@ -2948,7 +2924,7 @@ stock HandleCarAlarmTriggered( survivor, infected, reason )
         else {
             PrintToChatAll( "\x05%N\x01 triggered an alarm.", survivor );
         }
-    }
+    }*/
     
     Call_StartForward(g_hForwardAlarmTriggered);
     Call_PushCell(survivor);
