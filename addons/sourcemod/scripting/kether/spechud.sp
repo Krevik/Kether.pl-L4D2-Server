@@ -222,6 +222,7 @@ public Action tank_spawn(Handle event, const char[] name, bool dontBroadcast) {
     rock_connected = 0;
     prop_connected = 0;
     damage_connected = 0;
+	g_bAnnounceTankDamage = true;
 }
 
 public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadcast) {
@@ -468,7 +469,6 @@ public void OnClientDisconnect(int client)
 public void OnMapStart() { bRoundLive = false; }
 public void OnRoundIsLive()
 {
-	g_bAnnounceTankDamage = true;
 	FillReadyConfig();
 	
 	bRoundLive = true;
