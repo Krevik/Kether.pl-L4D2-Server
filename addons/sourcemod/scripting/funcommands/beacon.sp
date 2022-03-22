@@ -31,17 +31,17 @@
  * Version: $Id$
  */
 
-int g_BeaconSerial[MAXPLAYERS+1] = { 0, ... };
+new g_BeaconSerial[MAXPLAYERS+1] = { 0, ... };
 
 ConVar g_Cvar_BeaconRadius;
 
-void CreateBeacon(int client)
+CreateBeacon(client)
 {
 	g_BeaconSerial[client] = ++g_Serial_Gen;
 	CreateTimer(1.0, Timer_Beacon, client | (g_Serial_Gen << 7), DEFAULT_TIMER_FLAGS);	
 }
 
-void KillBeacon(int client)
+KillBeacon(client)
 {
 	g_BeaconSerial[client] = 0;
 
@@ -51,15 +51,15 @@ void KillBeacon(int client)
 	}
 }
 
-void KillAllBeacons()
+KillAllBeacons()
 {
-	for (int i = 1; i <= MaxClients; i++)
+	for (new i = 1; i <= MaxClients; i++)
 	{
 		KillBeacon(i);
 	}
 }
 
-void PerformBeacon(int client, int target)
+PerformBeacon(client, target)
 {
 	if (g_BeaconSerial[target] == 0)
 	{
@@ -73,10 +73,10 @@ void PerformBeacon(int client, int target)
 	}
 }
 
-public Action Timer_Beacon(Handle timer, any value)
+public Action:Timer_Beacon(Handle:timer, any:value)
 {
-	int client = value & 0x7f;
-	int serial = value >> 7;
+	new client = value & 0x7f;
+	new serial = value >> 7;
 
 	if (!IsClientInGame(client)
 		|| !IsPlayerAlive(client)
@@ -85,6 +85,8 @@ public Action Timer_Beacon(Handle timer, any value)
 		KillBeacon(client);
 		return Plugin_Stop;
 	}
+	
+	int team = GetClientTeam(client);
 
 	float vec[3];
 	GetClientAbsOrigin(client, vec);
@@ -92,21 +94,22 @@ public Action Timer_Beacon(Handle timer, any value)
 	
 	if (g_BeamSprite > -1 && g_HaloSprite > -1)
 	{
-		int teamBeaconColor[4];
-
-		switch (GetClientTeam(client))
-		{
-			case 1: teamBeaconColor = g_Team1BeaconColor;
-			case 2: teamBeaconColor = g_Team2BeaconColor;
-			case 3: teamBeaconColor = g_Team3BeaconColor;
-			case 4: teamBeaconColor = g_Team4BeaconColor;
-			default: teamBeaconColor = g_TeamUnknownBeaconColor;
-		}
-
-		TE_SetupBeamRingPoint(vec, 10.0, g_Cvar_BeaconRadius.FloatValue, g_BeamSprite, g_HaloSprite, 0, 15, 0.5, 5.0, 0.0, g_ExternalBeaconColor, 10, 0);
+		TE_SetupBeamRingPoint(vec, 10.0, g_Cvar_BeaconRadius.FloatValue, g_BeamSprite, g_HaloSprite, 0, 15, 0.5, 5.0, 0.0, greyColor, 10, 0);
 		TE_SendToAll();
-
-		TE_SetupBeamRingPoint(vec, 10.0, g_Cvar_BeaconRadius.FloatValue, g_BeamSprite, g_HaloSprite, 0, 10, 0.6, 10.0, 0.5, teamBeaconColor, 10, 0);
+		
+		if (team == 2)
+		{
+			TE_SetupBeamRingPoint(vec, 10.0, g_Cvar_BeaconRadius.FloatValue, g_BeamSprite, g_HaloSprite, 0, 10, 0.6, 10.0, 0.5, redColor, 10, 0);
+		}
+		else if (team == 3)
+		{
+			TE_SetupBeamRingPoint(vec, 10.0, g_Cvar_BeaconRadius.FloatValue, g_BeamSprite, g_HaloSprite, 0, 10, 0.6, 10.0, 0.5, blueColor, 10, 0);
+		}
+		else
+		{
+			TE_SetupBeamRingPoint(vec, 10.0, g_Cvar_BeaconRadius.FloatValue, g_BeamSprite, g_HaloSprite, 0, 10, 0.6, 10.0, 0.5, greenColor, 10, 0);
+		}
+		
 		TE_SendToAll();
 	}
 	
@@ -119,12 +122,12 @@ public Action Timer_Beacon(Handle timer, any value)
 	return Plugin_Continue;
 }
 
-public void AdminMenu_Beacon(TopMenu topmenu, 
-					  TopMenuAction action,
-					  TopMenuObject object_id,
-					  int param,
-					  char[] buffer,
-					  int maxlength)
+public AdminMenu_Beacon(Handle:topmenu, 
+					  TopMenuAction:action,
+					  TopMenuObject:object_id,
+					  param,
+					  String:buffer[],
+					  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -136,11 +139,11 @@ public void AdminMenu_Beacon(TopMenu topmenu,
 	}
 }
 
-void DisplayBeaconMenu(int client)
+DisplayBeaconMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_Beacon);
+	Menu menu = CreateMenu(MenuHandler_Beacon);
 	
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T:", "Beacon player", client);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -150,7 +153,7 @@ void DisplayBeaconMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Beacon(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Beacon(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -165,8 +168,8 @@ public int MenuHandler_Beacon(Menu menu, MenuAction action, int param1, int para
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32];
-		int userid, target;
+		decl String:info[32];
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info));
 		userid = StringToInt(info);
@@ -181,7 +184,7 @@ public int MenuHandler_Beacon(Menu menu, MenuAction action, int param1, int para
 		}
 		else
 		{
-			char name[MAX_NAME_LENGTH];
+			new String:name[32];
 			GetClientName(target, name, sizeof(name));
 			
 			PerformBeacon(param1, target);
@@ -194,11 +197,9 @@ public int MenuHandler_Beacon(Menu menu, MenuAction action, int param1, int para
 			DisplayBeaconMenu(param1);
 		}
 	}
-	
-	return 0;
 }
 
-public Action Command_Beacon(int client, int args)
+public Action:Command_Beacon(client, args)
 {
 	if (args < 1)
 	{
@@ -206,12 +207,11 @@ public Action Command_Beacon(int client, int args)
 		return Plugin_Handled;
 	}
 
-	char arg[65];
+	decl String:arg[65];
 	GetCmdArg(1, arg, sizeof(arg));
 
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,
@@ -227,7 +227,7 @@ public Action Command_Beacon(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	for (int i = 0; i < target_count; i++)
+	for (new i = 0; i < target_count; i++)
 	{
 		PerformBeacon(client, target_list[i]);
 	}

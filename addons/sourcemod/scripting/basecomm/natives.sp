@@ -31,9 +31,9 @@
  * Version: $Id$
  */
  
- public int Native_IsClientGagged(Handle hPlugin, int numParams)
+ public Native_IsClientGagged(Handle:hPlugin, numParams)
 {
-	int client = GetNativeCell(1);
+	new client = GetNativeCell(1);
 	if (client < 1 || client > MaxClients)
 	{
 		return ThrowNativeError(SP_ERROR_NATIVE, "Invalid client index %d", client);
@@ -44,12 +44,12 @@
 		return ThrowNativeError(SP_ERROR_NATIVE, "Client %d is not in game", client);
 	}
 	
-	return playerstate[client].isGagged;
+	return g_Gagged[client];
 }
 
-public int Native_IsClientMuted(Handle hPlugin, int numParams)
+public Native_IsClientMuted(Handle:hPlugin, numParams)
 {
-	int client = GetNativeCell(1);
+	new client = GetNativeCell(1);
 	if (client < 1 || client > MaxClients)
 	{
 		return ThrowNativeError(SP_ERROR_NATIVE, "Invalid client index %d", client);
@@ -60,12 +60,12 @@ public int Native_IsClientMuted(Handle hPlugin, int numParams)
 		return ThrowNativeError(SP_ERROR_NATIVE, "Client %d is not in game", client);
 	}
 	
-	return playerstate[client].isMuted;
+	return g_Muted[client];
 }
 
-public int Native_SetClientGag(Handle hPlugin, int numParams)
+public Native_SetClientGag(Handle:hPlugin, numParams)
 {
-	int client = GetNativeCell(1);
+	new client = GetNativeCell(1);
 	if (client < 1 || client > MaxClients)
 	{
 		return ThrowNativeError(SP_ERROR_NATIVE, "Invalid client index %d", client);
@@ -76,11 +76,11 @@ public int Native_SetClientGag(Handle hPlugin, int numParams)
 		return ThrowNativeError(SP_ERROR_NATIVE, "Client %d is not in game", client);
 	}
 	
-	bool gagState = GetNativeCell(2);
+	new bool:gagState = GetNativeCell(2);
 	
 	if (gagState)
 	{
-		if (playerstate[client].isGagged)
+		if (g_Gagged[client])
 		{
 			return false;
 		}
@@ -89,7 +89,7 @@ public int Native_SetClientGag(Handle hPlugin, int numParams)
 	}
 	else
 	{
-		if (!playerstate[client].isGagged)
+		if (!g_Gagged[client])
 		{
 			return false;
 		}
@@ -100,9 +100,9 @@ public int Native_SetClientGag(Handle hPlugin, int numParams)
 	return true;
 }
 
-public int Native_SetClientMute(Handle hPlugin, int numParams)
+public Native_SetClientMute(Handle:hPlugin, numParams)
 {
-	int client = GetNativeCell(1);
+	new client = GetNativeCell(1);
 	if (client < 1 || client > MaxClients)
 	{
 		return ThrowNativeError(SP_ERROR_NATIVE, "Invalid client index %d", client);
@@ -113,11 +113,11 @@ public int Native_SetClientMute(Handle hPlugin, int numParams)
 		return ThrowNativeError(SP_ERROR_NATIVE, "Client %d is not in game", client);
 	}
 	
-	bool muteState = GetNativeCell(2);
+	new bool:muteState = GetNativeCell(2);
 	
 	if (muteState)
 	{
-		if (playerstate[client].isMuted)
+		if (g_Muted[client])
 		{
 			return false;
 		}
@@ -126,7 +126,7 @@ public int Native_SetClientMute(Handle hPlugin, int numParams)
 	}
 	else
 	{
-		if (!playerstate[client].isMuted)
+		if (!g_Muted[client])
 		{
 			return false;
 		}

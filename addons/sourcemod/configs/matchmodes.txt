@@ -163,4 +163,11 @@
             "name" "Turbo T2 Versus"
         }
     }
+	"Gauntlet"
+	{
+		"gauntlet"
+		{
+			"name" "Gauntlet (!playermode)"
+		}
+	}
 }

@@ -31,23 +31,23 @@
  * Version: $Id$
  */
 
-char g_NewName[MAXPLAYERS+1][MAX_NAME_LENGTH];
+new String:g_NewName[MAXPLAYERS+1][MAX_NAME_LENGTH];
 
-void PerformRename(int client, int target)
+PerformRename(client, target)
 {
-	LogAction(client, target, "\"%L\" renamed \"%L\" (to \"%s\")", client, target, g_NewName[target]);
+	LogAction(client, target, "\"%L\" renamed \"%L\" to \"%s\")", client, target, g_NewName[target]);
 
 	SetClientName(target, g_NewName[target]);
 
 	g_NewName[target][0] = '\0';
 }
 
-public void AdminMenu_Rename(TopMenu topmenu, 
-					  TopMenuAction action,
-					  TopMenuObject object_id,
-					  int param,
-					  char[] buffer,
-					  int maxlength)
+public AdminMenu_Rename(Handle:topmenu, 
+					  TopMenuAction:action,
+					  TopMenuObject:object_id,
+					  param,
+					  String:buffer[],
+					  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -59,9 +59,9 @@ public void AdminMenu_Rename(TopMenu topmenu,
 	}
 }
 
-void DisplayRenameTargetMenu(int client)
+DisplayRenameTargetMenu(int client)
 {
-	Menu menu = new Menu(MenuHandler_Rename);
+	Menu menu = CreateMenu(MenuHandler_Rename);
 	
 	char title[100];
 	Format(title, sizeof(title), "%T:", "Rename player", client);
@@ -73,7 +73,7 @@ void DisplayRenameTargetMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Rename(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Rename(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -88,8 +88,8 @@ public int MenuHandler_Rename(Menu menu, MenuAction action, int param1, int para
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32];
-		int userid, target;
+		decl String:info[32];
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info));
 		userid = StringToInt(info);
@@ -104,7 +104,7 @@ public int MenuHandler_Rename(Menu menu, MenuAction action, int param1, int para
 		}
 		else
 		{
-			char name[MAX_NAME_LENGTH];
+			decl String:name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 
 			RandomizeName(target);
@@ -113,26 +113,24 @@ public int MenuHandler_Rename(Menu menu, MenuAction action, int param1, int para
 		}		
 		DisplayRenameTargetMenu(param1);
 	}
-
-	return 0;
 }
 
-void RandomizeName(int client)
+RandomizeName(client)
 {
-	char name[MAX_NAME_LENGTH];
+	decl String:name[MAX_NAME_LENGTH];
 	GetClientName(client, name, sizeof(name));
 
-	int len = strlen(name);
+	new len = strlen(name);
 	g_NewName[client][0] = '\0';
 
-	for (int i = 0; i < len; i++)
+	for (new i = 0; i < len; i++)
 	{
 		g_NewName[client][i] = name[GetRandomInt(0, len - 1)];
 	}
 	g_NewName[client][len] = '\0';
 }
 
-public Action Command_Rename(int client, int args)
+public Action:Command_Rename(client, args)
 {
 	if (args < 1)
 	{
@@ -140,10 +138,10 @@ public Action Command_Rename(int client, int args)
 		return Plugin_Handled;
 	}
 
-	char arg[MAX_NAME_LENGTH], arg2[MAX_NAME_LENGTH];
+	decl String:arg[MAX_NAME_LENGTH], String:arg2[MAX_NAME_LENGTH];
 	GetCmdArg(1, arg, sizeof(arg));
 
-	bool randomize;
+	new bool:randomize;
 	if (args > 1)
 	{
 		GetCmdArg(2, arg2, sizeof(arg2));
@@ -153,9 +151,8 @@ public Action Command_Rename(int client, int args)
 		randomize = true;
 	}
 	
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,
@@ -176,22 +173,20 @@ public Action Command_Rename(int client, int args)
 			ShowActivity2(client, "[SM] ", "%t", "Renamed target", "_s", target_name);
 		}
 
-		for (int i = 0; i < target_count; i++)
+		if (target_count > 1) /* We cannot name everyone the same thing. */
 		{
-			if (randomize)
+			randomize = true;
+		}
+
+		for (new i = 0; i < target_count; i++)
+		{
+			if(randomize)
 			{
 				RandomizeName(target_list[i]);
 			}
 			else
 			{
-				if (target_count > 1)
-				{
-					Format(g_NewName[target_list[i]], MAX_NAME_LENGTH, "%s %i", arg2, i+1);
-				}
-				else
-				{
-					Format(g_NewName[target_list[i]], MAX_NAME_LENGTH, "%s", arg2);
-				}
+				Format(g_NewName[target_list[i]], MAX_NAME_LENGTH, "%s", arg2);
 			}
 			PerformRename(client, target_list[i]);
 		}

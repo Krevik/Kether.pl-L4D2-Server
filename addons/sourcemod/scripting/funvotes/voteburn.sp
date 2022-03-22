@@ -31,7 +31,7 @@
  * Version: $Id$
  */
 
-void DisplayVoteBurnMenu(int client, int target, char[] name)
+DisplayVoteBurnMenu(client, target, String:name[])
 {
 	if (!IsPlayerAlive(target))
 	{
@@ -39,16 +39,15 @@ void DisplayVoteBurnMenu(int client, int target, char[] name)
 		return;
 	}
 	
-	g_voteTarget = GetClientUserId(target);
-	
+	g_voteClient[VOTE_CLIENTID] = target;
 	GetClientName(target, g_voteInfo[VOTE_NAME], sizeof(g_voteInfo[]));
 
 	LogAction(client, target, "\"%L\" initiated a burn vote against \"%L\"", client, target);
 	ShowActivity2(client, "[SM] ", "%t", "Initiated Vote Burn", g_voteInfo[VOTE_NAME]);
 	
-	g_voteType = burn;
+	g_voteType = voteType:burn;
 	
-	g_hVoteMenu = new Menu(Handler_VoteCallback, MENU_ACTIONS_ALL);
+	g_hVoteMenu = CreateMenu(Handler_VoteCallback, MenuAction:MENU_ACTIONS_ALL);
 	g_hVoteMenu.SetTitle("Voteburn player");
 	g_hVoteMenu.AddItem(VOTE_YES, "Yes");
 	g_hVoteMenu.AddItem(VOTE_NO, "No");
@@ -56,11 +55,11 @@ void DisplayVoteBurnMenu(int client, int target, char[] name)
 	g_hVoteMenu.DisplayVoteToAll(20);
 }
 
-void DisplayBurnTargetMenu(int client)
+DisplayBurnTargetMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_Burn);
+	Menu menu = CreateMenu(MenuHandler_Burn);
 	
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T:", "Burn vote", client);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -70,12 +69,12 @@ void DisplayBurnTargetMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public void AdminMenu_VoteBurn(TopMenu topmenu, 
-							  TopMenuAction action,
-							  TopMenuObject object_id,
-							  int param,
-							  char[] buffer,
-							  int maxlength)
+public AdminMenu_VoteBurn(Handle:topmenu, 
+							  TopMenuAction:action,
+							  TopMenuObject:object_id,
+							  param,
+							  String:buffer[],
+							  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -92,7 +91,7 @@ public void AdminMenu_VoteBurn(TopMenu topmenu,
 	}
 }
 
-public int MenuHandler_Burn(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Burn(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -107,8 +106,8 @@ public int MenuHandler_Burn(Menu menu, MenuAction action, int param1, int param2
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32], name[32];
-		int userid, target;
+		decl String:info[32], String:name[32];
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info), _, name, sizeof(name));
 		userid = StringToInt(info);
@@ -130,11 +129,9 @@ public int MenuHandler_Burn(Menu menu, MenuAction action, int param1, int param2
 			DisplayVoteBurnMenu(param1, target, name);
 		}
 	}
-
-	return 0;
 }
 
-public Action Command_VoteBurn(int client, int args)
+public Action:Command_VoteBurn(client, args)
 {
 	if (args < 1)
 	{
@@ -153,14 +150,13 @@ public Action Command_VoteBurn(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	char text[256], arg[64];
+	decl String:text[256], String:arg[64];
 	GetCmdArgString(text, sizeof(text));
 	
 	BreakString(text, arg, sizeof(arg));
 	
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,

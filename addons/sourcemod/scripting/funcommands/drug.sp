@@ -31,32 +31,32 @@
  * Version: $Id$
  */
 
-Handle g_DrugTimers[MAXPLAYERS+1];
-float g_DrugAngles[20] = {0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 20.0, 15.0, 10.0, 5.0, 0.0, -5.0, -10.0, -15.0, -20.0, -25.0, -20.0, -15.0, -10.0, -5.0};
+new Handle:g_DrugTimers[MAXPLAYERS+1];
+new Float:g_DrugAngles[20] = {0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 20.0, 15.0, 10.0, 5.0, 0.0, -5.0, -10.0, -15.0, -20.0, -25.0, -20.0, -15.0, -10.0, -5.0};
 
-void CreateDrug(int client)
+CreateDrug(client)
 {
 	g_DrugTimers[client] = CreateTimer(1.0, Timer_Drug, client, TIMER_REPEAT);	
 }
 
-void KillDrug(int client)
+KillDrug(client)
 {
 	KillDrugTimer(client);
 	
-	float angs[3];
+	new Float:angs[3];
 	GetClientEyeAngles(client, angs);
 	
 	angs[2] = 0.0;
 	
 	TeleportEntity(client, NULL_VECTOR, angs, NULL_VECTOR);	
 	
-	int clients[2];
+	new clients[2];
 	clients[0] = client;
 
-	int duration = 1536;
-	int holdtime = 1536;
-	int flags = (0x0001 | 0x0010);
-	int color[4] = { 0, 0, 0, 0 };
+	new duration = 1536;
+	new holdtime = 1536;
+	new flags = (0x0001 | 0x0010);
+	new color[4] = { 0, 0, 0, 0 };
 
 	Handle message = StartMessageEx(g_FadeUserMsgId, clients, 1);
 	if (GetUserMessageType() == UM_Protobuf)
@@ -82,15 +82,15 @@ void KillDrug(int client)
 	EndMessage();
 }
 
-void KillDrugTimer(int client)
+KillDrugTimer(client)
 {
 	KillTimer(g_DrugTimers[client]);
 	g_DrugTimers[client] = null;	
 }
 
-void KillAllDrugs()
+KillAllDrugs()
 {
-	for (int i = 1; i <= MaxClients; i++)
+	for (new i = 1; i <= MaxClients; i++)
 	{
 		if (g_DrugTimers[i] != null)
 		{
@@ -106,7 +106,7 @@ void KillAllDrugs()
 	}
 }
 
-void PerformDrug(int client, int target, int toggle)
+PerformDrug(client, target, toggle)
 {
 	switch (toggle)
 	{
@@ -144,7 +144,7 @@ void PerformDrug(int client, int target, int toggle)
 	}
 }
 
-public Action Timer_Drug(Handle timer, any client)
+public Action:Timer_Drug(Handle:timer, any:client)
 {
 	if (!IsClientInGame(client))
 	{
@@ -160,20 +160,20 @@ public Action Timer_Drug(Handle timer, any client)
 		return Plugin_Handled;
 	}
 	
-	float angs[3];
+	new Float:angs[3];
 	GetClientEyeAngles(client, angs);
 	
 	angs[2] = g_DrugAngles[GetRandomInt(0,100) % 20];
 	
 	TeleportEntity(client, NULL_VECTOR, angs, NULL_VECTOR);
 	
-	int clients[2];
+	new clients[2];
 	clients[0] = client;	
 	
-	int duration = 255;
-	int holdtime = 255;
-	int flags = 0x0002;
-	int color[4] = { 0, 0, 0, 128 };
+	new duration = 255;
+	new holdtime = 255;
+	new flags = 0x0002;
+	new color[4] = { 0, 0, 0, 128 };
 	color[0] = GetRandomInt(0,255);
 	color[1] = GetRandomInt(0,255);
 	color[2] = GetRandomInt(0,255);
@@ -203,12 +203,12 @@ public Action Timer_Drug(Handle timer, any client)
 	return Plugin_Handled;
 }
 
-public void AdminMenu_Drug(TopMenu topmenu, 
-					  TopMenuAction action,
-					  TopMenuObject object_id,
-					  int param,
-					  char[] buffer,
-					  int maxlength)
+public AdminMenu_Drug(Handle:topmenu, 
+					  TopMenuAction:action,
+					  TopMenuObject:object_id,
+					  param,
+					  String:buffer[],
+					  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -220,11 +220,11 @@ public void AdminMenu_Drug(TopMenu topmenu,
 	}
 }
 
-void DisplayDrugMenu(int client)
+DisplayDrugMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_Drug);
+	Menu menu = CreateMenu(MenuHandler_Drug);
 	
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T:", "Drug player", client);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -234,7 +234,7 @@ void DisplayDrugMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Drug(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Drug(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -249,8 +249,8 @@ public int MenuHandler_Drug(Menu menu, MenuAction action, int param1, int param2
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32];
-		int userid, target;
+		decl String:info[32];
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info));
 		userid = StringToInt(info);
@@ -265,7 +265,7 @@ public int MenuHandler_Drug(Menu menu, MenuAction action, int param1, int param2
 		}
 		else
 		{
-			char name[MAX_NAME_LENGTH];
+			new String:name[32];
 			GetClientName(target, name, sizeof(name));
 			
 			PerformDrug(param1, target, 2);
@@ -278,11 +278,9 @@ public int MenuHandler_Drug(Menu menu, MenuAction action, int param1, int param2
 			DisplayDrugMenu(param1);
 		}
 	}
-
-	return 0;
 }
 
-public Action Command_Drug(int client, int args)
+public Action:Command_Drug(client, args)
 {
 	if (args < 1)
 	{
@@ -290,13 +288,13 @@ public Action Command_Drug(int client, int args)
 		return Plugin_Handled;
 	}
 
-	char arg[65];
+	decl String:arg[65];
 	GetCmdArg(1, arg, sizeof(arg));
 	
-	int toggle = 2;
+	new toggle = 2;
 	if (args > 1)
 	{
-		char arg2[2];
+		decl String:arg2[2];
 		GetCmdArg(2, arg2, sizeof(arg2));
 		if (StringToInt(arg2))
 		{
@@ -308,9 +306,8 @@ public Action Command_Drug(int client, int args)
 		}
 	}
 
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,
@@ -326,7 +323,7 @@ public Action Command_Drug(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	for (int i = 0; i < target_count; i++)
+	for (new i = 0; i < target_count; i++)
 	{
 		PerformDrug(client, target_list[i], toggle);
 	}

@@ -31,20 +31,20 @@
  * Version: $Id$
  */
 
-void DisplayVoteBanMenu(int client, int target)
+DisplayVoteBanMenu(client, target)
 {
-	g_voteTarget = GetClientUserId(target);
+	g_voteClient[VOTE_CLIENTID] = target;
+	g_voteClient[VOTE_USERID] = GetClientUserId(target);
 
 	GetClientName(target, g_voteInfo[VOTE_NAME], sizeof(g_voteInfo[]));
-	GetClientAuthId(target, AuthId_Steam2, g_voteInfo[VOTE_AUTHID], sizeof(g_voteInfo[]));
 	GetClientIP(target, g_voteInfo[VOTE_IP], sizeof(g_voteInfo[]));
 
 	LogAction(client, target, "\"%L\" initiated a ban vote against \"%L\"", client, target);
 	ShowActivity2(client, "[SM] ", "%t", "Initiated Vote Ban", g_voteInfo[VOTE_NAME]);
 
-	g_voteType = ban;
+	g_voteType = voteType:ban;
 	
-	g_hVoteMenu = new Menu(Handler_VoteCallback, MENU_ACTIONS_ALL);
+	g_hVoteMenu = CreateMenu(Handler_VoteCallback, MenuAction:MENU_ACTIONS_ALL);
 	g_hVoteMenu.SetTitle("Voteban Player");
 	g_hVoteMenu.AddItem(VOTE_YES, "Yes");
 	g_hVoteMenu.AddItem(VOTE_NO, "No");
@@ -52,11 +52,11 @@ void DisplayVoteBanMenu(int client, int target)
 	g_hVoteMenu.DisplayVoteToAll(20);
 }
 
-void DisplayBanTargetMenu(int client)
+DisplayBanTargetMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_Ban);
+	Menu menu = CreateMenu(MenuHandler_Ban);
 	
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T:", "Ban vote", client);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -66,12 +66,12 @@ void DisplayBanTargetMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public void AdminMenu_VoteBan(TopMenu topmenu, 
-							  TopMenuAction action,
-							  TopMenuObject object_id,
-							  int param,
-							  char[] buffer,
-							  int maxlength)
+public AdminMenu_VoteBan(Handle:topmenu, 
+							  TopMenuAction:action,
+							  TopMenuObject:object_id,
+							  param,
+							  String:buffer[],
+							  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -88,7 +88,7 @@ public void AdminMenu_VoteBan(TopMenu topmenu,
 	}
 }
 
-public int MenuHandler_Ban(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Ban(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -103,8 +103,8 @@ public int MenuHandler_Ban(Menu menu, MenuAction action, int param1, int param2)
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32], name[32];
-		int userid, target;
+		decl String:info[32], String:name[32];
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info), _, name, sizeof(name));
 		userid = StringToInt(info);
@@ -123,11 +123,9 @@ public int MenuHandler_Ban(Menu menu, MenuAction action, int param1, int param2)
 			DisplayVoteBanMenu(param1, target);
 		}
 	}
-
-	return 0;
 }
 
-public Action Command_Voteban(int client, int args)
+public Action:Command_Voteban(client, args)
 {
 	if (args < 1)
 	{
@@ -146,10 +144,10 @@ public Action Command_Voteban(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	char text[256], arg[64];
+	decl String:text[256], String:arg[64];
 	GetCmdArgString(text, sizeof(text));
 	
-	int len = BreakString(text, arg, sizeof(arg));
+	new len = BreakString(text, arg, sizeof(arg));
 	
 	if (len != -1)
 	{
@@ -160,9 +158,8 @@ public Action Command_Voteban(int client, int args)
 		g_voteArg[0] = '\0';
 	}
 	
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,

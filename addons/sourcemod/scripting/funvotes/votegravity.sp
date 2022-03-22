@@ -31,14 +31,15 @@
  * Version: $Id$
  */
 
-void DisplayVoteGravityMenu(int client, int count, char[][] items)
+
+DisplayVoteGravityMenu(client,count,String:items[5][])
 {
 	LogAction(client, -1, "\"%L\" initiated a gravity vote.", client);
 	ShowActivity2(client, "[SM] ", "%t", "Initiated Vote Gravity");
 	
-	g_voteType = gravity;
+	g_voteType = voteType:gravity;
 	
-	g_hVoteMenu = new Menu(Handler_VoteCallback, MENU_ACTIONS_ALL);
+	g_hVoteMenu = CreateMenu(Handler_VoteCallback, MenuAction:MENU_ACTIONS_ALL);
 	
 	if (count == 1)
 	{
@@ -53,7 +54,7 @@ void DisplayVoteGravityMenu(int client, int count, char[][] items)
 		g_voteInfo[VOTE_NAME][0] = '\0';
 		
 		g_hVoteMenu.SetTitle("Gravity Vote");
-		for (int i = 0; i < count; i++)
+		for (new i = 0; i < count; i++)
 		{
 			g_hVoteMenu.AddItem(items[i], items[i]);
 		}	
@@ -63,12 +64,12 @@ void DisplayVoteGravityMenu(int client, int count, char[][] items)
 	g_hVoteMenu.DisplayVoteToAll(20);
 }
 
-public void AdminMenu_VoteGravity(TopMenu topmenu, 
-							  TopMenuAction action,
-							  TopMenuObject object_id,
-							  int param,
-							  char[] buffer,
-							  int maxlength)
+public AdminMenu_VoteGravity(Handle:topmenu, 
+							  TopMenuAction:action,
+							  TopMenuObject:object_id,
+							  param,
+							  String:buffer[],
+							  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -77,7 +78,7 @@ public void AdminMenu_VoteGravity(TopMenu topmenu,
 	else if (action == TopMenuAction_SelectOption)
 	{
 		/* Might need a better way of selecting the list of pre-defined gravity choices */
-		char items[5][5] ={"200","400","800","1600","3200"};
+		new String:items[5][5] ={"200","400","800","1600","3200"};
 		DisplayVoteGravityMenu(param,5, items);
 	}
 	else if (action == TopMenuAction_DrawOption)
@@ -87,7 +88,7 @@ public void AdminMenu_VoteGravity(TopMenu topmenu,
 	}
 }
 
-public Action Command_VoteGravity(int client, int args)
+public Action:Command_VoteGravity(client, args)
 {
 	if (args < 1)
 	{
@@ -106,18 +107,18 @@ public Action Command_VoteGravity(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	char text[256];
+	decl String:text[256];
 	GetCmdArgString(text, sizeof(text));
 
-	char items[5][64];
-	int count;	
-	int len, pos;
+	decl String:items[5][64];
+	new count;	
+	new len, pos;
 	
 	while (pos != -1 && count < 5)
 	{	
 		pos = BreakString(text[len], items[count], sizeof(items[]));
 		
-		float temp;
+		decl Float:temp;
 		if (StringToFloatEx(items[count], temp) == 0)
 		{
 			ReplyToCommand(client, "[SM] %t", "Invalid Amount");

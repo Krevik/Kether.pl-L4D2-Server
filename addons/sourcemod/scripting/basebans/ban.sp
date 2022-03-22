@@ -31,9 +31,9 @@
  * Version: $Id$
  */
 
-void PrepareBan(int client, int target, int time, const char[] reason)
+PrepareBan(client, target, time, const String:reason[])
 {
-	int originalTarget = GetClientOfUserId(playerinfo[client].banTargetUserId);
+	new originalTarget = GetClientOfUserId(g_BanTargetUserId[client]);
 
 	if (originalTarget != target)
 	{
@@ -49,7 +49,7 @@ void PrepareBan(int client, int target, int time, const char[] reason)
 		return;
 	}
 
-	char name[MAX_NAME_LENGTH];
+	new String:name[32];
 	GetClientName(target, name, sizeof(name));
 
 	if (!time)
@@ -57,20 +57,14 @@ void PrepareBan(int client, int target, int time, const char[] reason)
 		if (reason[0] == '\0')
 		{
 			ShowActivity(client, "%t", "Permabanned player", name);
-		}
-		else
-		{
+		} else {
 			ShowActivity(client, "%t", "Permabanned player reason", name, reason);
 		}
-	}
-	else
-	{
+	} else {
 		if (reason[0] == '\0')
 		{
 			ShowActivity(client, "%t", "Banned player", name, time);
-		}
-		else
-		{
+		} else {
 			ShowActivity(client, "%t", "Banned player reason", name, time, reason);
 		}
 	}
@@ -87,26 +81,26 @@ void PrepareBan(int client, int target, int time, const char[] reason)
 	}
 }
 
-void DisplayBanTargetMenu(int client)
+DisplayBanTargetMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_BanPlayerList);
+	Menu menu = CreateMenu(MenuHandler_BanPlayerList);
 
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T:", "Ban player", client);
 	menu.SetTitle(title);
-	menu.ExitBackButton = CheckCommandAccess(client, "sm_admin", ADMFLAG_GENERIC, false);
+	menu.ExitBackButton = true;
 
 	AddTargetsToMenu2(menu, client, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-void DisplayBanTimeMenu(int client)
+DisplayBanTimeMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_BanTimeList);
+	Menu menu = CreateMenu(MenuHandler_BanTimeList);
 
-	char title[100];
-	Format(title, sizeof(title), "%T: %N", "Ban player", client, playerinfo[client].banTarget);
+	decl String:title[100];
+	Format(title, sizeof(title), "%T: %N", "Ban player", client, g_BanTarget[client]);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
 
@@ -121,12 +115,12 @@ void DisplayBanTimeMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-void DisplayBanReasonMenu(int client)
+DisplayBanReasonMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_BanReasonList);
+	Menu menu = CreateMenu(MenuHandler_BanReasonList);
 
-	char title[100];
-	Format(title, sizeof(title), "%T: %N", "Ban reason", client, playerinfo[client].banTarget);
+	decl String:title[100];
+	Format(title, sizeof(title), "%T: %N", "Ban reason", client, g_BanTarget[client]);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
 	
@@ -134,8 +128,8 @@ void DisplayBanReasonMenu(int client)
 	menu.AddItem("", "Custom reason (type in chat)");
 	
 	//Loading configurable entries from the kv-file
-	char reasonName[100];
-	char reasonFull[255];
+	decl String:reasonName[100];
+	decl String:reasonFull[255];
 	
 	//Iterate through the kv-file
 	g_hKvBanReasons.GotoFirstSubKey(false);
@@ -155,15 +149,15 @@ void DisplayBanReasonMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public void AdminMenu_Ban(TopMenu topmenu,
-							  TopMenuAction action,
-							  TopMenuObject object_id,
-							  int param,
-							  char[] buffer,
-							  int maxlength)
+public AdminMenu_Ban(Handle:topmenu,
+							  TopMenuAction:action,
+							  TopMenuObject:object_id,
+							  param,
+							  String:buffer[],
+							  maxlength)
 {
 	//Reset chat reason first
-	playerinfo[param].isWaitingForChatReason = false;
+	g_IsWaitingForChatReason[param] = false;
 	
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -175,7 +169,7 @@ public void AdminMenu_Ban(TopMenu topmenu,
 	}
 }
 
-public int MenuHandler_BanReasonList(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_BanReasonList(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -193,23 +187,21 @@ public int MenuHandler_BanReasonList(Menu menu, MenuAction action, int param1, i
 		if(param2 == 0)
 		{
 			//Chat reason
-			playerinfo[param1].isWaitingForChatReason = true;
+			g_IsWaitingForChatReason[param1] = true;
 			PrintToChat(param1, "[SM] %t", "Custom ban reason explanation", "sm_abortban");
 		}
 		else
 		{
-			char info[64];
+			decl String:info[64];
 			
 			menu.GetItem(param2, info, sizeof(info));
 			
-			PrepareBan(param1, playerinfo[param1].banTarget, playerinfo[param1].banTime, info);
+			PrepareBan(param1, g_BanTarget[param1], g_BanTime[param1], info);
 		}
 	}
-
-	return 0;
 }
 
-public int MenuHandler_BanPlayerList(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_BanPlayerList(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -224,8 +216,8 @@ public int MenuHandler_BanPlayerList(Menu menu, MenuAction action, int param1, i
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32], name[32];
-		int userid, target;
+		decl String:info[32], String:name[32];
+		new userid, target;
 
 		menu.GetItem(param2, info, sizeof(info), _, name, sizeof(name));
 		userid = StringToInt(info);
@@ -240,16 +232,14 @@ public int MenuHandler_BanPlayerList(Menu menu, MenuAction action, int param1, i
 		}
 		else
 		{
-			playerinfo[param1].banTarget = target;
-			playerinfo[param1].banTargetUserId = userid;
+			g_BanTarget[param1] = target;
+			g_BanTargetUserId[param1] = userid;
 			DisplayBanTimeMenu(param1);
 		}
 	}
-
-	return 0;
 }
 
-public int MenuHandler_BanTimeList(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_BanTimeList(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -264,47 +254,38 @@ public int MenuHandler_BanTimeList(Menu menu, MenuAction action, int param1, int
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32];
+		decl String:info[32];
 
 		menu.GetItem(param2, info, sizeof(info));
-		playerinfo[param1].banTime = StringToInt(info);
+		g_BanTime[param1] = StringToInt(info);
 
 		DisplayBanReasonMenu(param1);
 	}
-
-	return 0;
 }
 
-public Action Command_Ban(int client, int args)
+
+public Action:Command_Ban(client, args)
 {
 	if (args < 2)
 	{
-		if ((GetCmdReplySource() == SM_REPLY_TO_CHAT) && (client != 0) && (args == 0))
-		{
-			DisplayBanTargetMenu(client);
-		}
-		else
-		{
-			ReplyToCommand(client, "[SM] Usage: sm_ban <#userid|name> <minutes|0> [reason]");
-		}
-		
+		ReplyToCommand(client, "[SM] Usage: sm_ban <#userid|name> <minutes|0> [reason]");
 		return Plugin_Handled;
 	}
 
-	int len, next_len;
-	char Arguments[256];
+	decl len, next_len;
+	decl String:Arguments[256];
 	GetCmdArgString(Arguments, sizeof(Arguments));
 
-	char arg[65];
+	decl String:arg[65];
 	len = BreakString(Arguments, arg, sizeof(arg));
 
-	int target = FindTarget(client, arg, true);
+	new target = FindTarget(client, arg, true);
 	if (target == -1)
 	{
 		return Plugin_Handled;
 	}
 
-	char s_time[12];
+	decl String:s_time[12];
 	if ((next_len = BreakString(Arguments[len], s_time, sizeof(s_time))) != -1)
 	{
 		len += next_len;
@@ -315,9 +296,10 @@ public Action Command_Ban(int client, int args)
 		Arguments[0] = '\0';
 	}
 
-	playerinfo[client].banTargetUserId = GetClientUserId(target);
+	new time = StringToInt(s_time);
 
-	int time = StringToInt(s_time);
+	g_BanTargetUserId[client] = GetClientUserId(target);
+
 	PrepareBan(client, target, time, Arguments[len]);
 
 	return Plugin_Handled;

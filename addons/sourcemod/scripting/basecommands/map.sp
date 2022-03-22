@@ -31,7 +31,7 @@
  * Version: $Id$
  */
  
-public int MenuHandler_ChangeMap(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_ChangeMap(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_Cancel)
 	{
@@ -42,7 +42,7 @@ public int MenuHandler_ChangeMap(Menu menu, MenuAction action, int param1, int p
 	}
 	else if (action == MenuAction_Select)
 	{
-		char map[PLATFORM_MAX_PATH];
+		decl String:map[64];
 		
 		menu.GetItem(param2, map, sizeof(map));
 	
@@ -50,28 +50,24 @@ public int MenuHandler_ChangeMap(Menu menu, MenuAction action, int param1, int p
 
 		LogAction(param1, -1, "\"%L\" changed map to \"%s\"", param1, map);
 
-		DataPack dp;
+		new Handle:dp;
 		CreateDataTimer(3.0, Timer_ChangeMap, dp);
-		dp.WriteString(map);
+		WritePackString(dp, map);
 	}
 	else if (action == MenuAction_Display)
 	{
-		char title[128];
+		decl String:title[128];
 		Format(title, sizeof(title), "%T", "Please select a map", param1);
-
-		Panel panel = view_as<Panel>(param2);
-		panel.SetTitle(title);
+		SetPanelTitle(Handle:param2, title);
 	}
-
-	return 0;
 }
 
-public void AdminMenu_Map(TopMenu topmenu, 
-							  TopMenuAction action,
-							  TopMenuObject object_id,
-							  int param,
-							  char[] buffer,
-							  int maxlength)
+public AdminMenu_Map(Handle:topmenu, 
+							  TopMenuAction:action,
+							  TopMenuObject:object_id,
+							  param,
+							  String:buffer[],
+							  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -83,67 +79,57 @@ public void AdminMenu_Map(TopMenu topmenu,
 	}
 }
 
-public Action Command_Map(int client, int args)
+public Action:Command_Map(client, args)
 {
 	if (args < 1)
 	{
-		if ((GetCmdReplySource() == SM_REPLY_TO_CHAT) && (client != 0))
-		{
-			g_MapList.SetTitle("%T", "Choose Map", client);
-			g_MapList.Display(client, MENU_TIME_FOREVER);
-		}
-		else 
-		{
-			ReplyToCommand(client, "[SM] Usage: sm_map <map>");
-		}
+		ReplyToCommand(client, "[SM] Usage: sm_map <map>");
 		return Plugin_Handled;
 	}
 
-	char map[PLATFORM_MAX_PATH];
-	char displayName[PLATFORM_MAX_PATH];
+	decl String:map[64];
 	GetCmdArg(1, map, sizeof(map));
 
-	if (FindMap(map, displayName, sizeof(displayName)) == FindMap_NotFound)
+	if (!IsMapValid(map))
 	{
 		ReplyToCommand(client, "[SM] %t", "Map was not found", map);
 		return Plugin_Handled;
 	}
 
-	GetMapDisplayName(displayName, displayName, sizeof(displayName));
+	ShowActivity2(client, "[SM] ", "%t", "Changing map", map);
 
-	ShowActivity2(client, "[SM] ", "%t", "Changing map", displayName);
-	LogAction(client, -1, "\"%L\" changed map to \"%s\"", client, displayName);
+	LogAction(client, -1, "\"%L\" changed map to \"%s\"", client, map);
 
-	DataPack dp;
+	new Handle:dp;
 	CreateDataTimer(3.0, Timer_ChangeMap, dp);
-	dp.WriteString(displayName);
+	WritePackString(dp, map);
 
 	return Plugin_Handled;
 }
 
-public Action Timer_ChangeMap(Handle timer, DataPack dp)
+public Action:Timer_ChangeMap(Handle:timer, Handle:dp)
 {
-	char map[PLATFORM_MAX_PATH];
+	decl String:map[65];
 
-	dp.Reset();
-	dp.ReadString(map, sizeof(map));
+	ResetPack(dp);
+	ReadPackString(dp, map, sizeof(map));
 
 	ForceChangeLevel(map, "sm_map Command");
 
 	return Plugin_Stop;
 }
 
-Handle g_map_array = null;
-int g_map_serial = -1;
+new Handle:g_map_array = null;
+new g_map_serial = -1;
 
 int LoadMapList(Menu menu)
 {
-	Handle map_array;
+	new Handle:map_array;
 	
 	if ((map_array = ReadMapList(g_map_array,
 			g_map_serial,
 			"sm_map menu",
-			MAPLIST_FLAG_CLEARARRAY|MAPLIST_FLAG_MAPSFOLDER))
+			MAPLIST_FLAG_CLEARARRAY|MAPLIST_FLAG_NO_DEFAULT|MAPLIST_FLAG_MAPSFOLDER))
 		!= null)
 	{
 		g_map_array = map_array;
@@ -154,17 +140,15 @@ int LoadMapList(Menu menu)
 		return 0;
 	}
 	
-	menu.RemoveAllItems();
+	RemoveAllMenuItems(menu);
 	
-	char map_name[PLATFORM_MAX_PATH];
+	char map_name[64];
 	int map_count = GetArraySize(g_map_array);
 	
 	for (int i = 0; i < map_count; i++)
 	{
-		char displayName[PLATFORM_MAX_PATH];
 		GetArrayString(g_map_array, i, map_name, sizeof(map_name));
-		GetMapDisplayName(map_name, displayName, sizeof(displayName));
-		menu.AddItem(map_name, displayName);
+		menu.AddItem(map_name, map_name);
 	}
 	
 	return map_count;

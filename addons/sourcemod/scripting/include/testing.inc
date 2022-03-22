@@ -9,7 +9,7 @@
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, version 3.0, as published by the
  * Free Software Foundation.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -30,66 +30,43 @@
  * Version: $Id$
  */
 
-static int TestNumber = 0;
-static char TestContext[255];
+static TestNumber = 0;
+static String:TestContext[255];
 
-stock void SetTestContext(const char[] context)
+SetTestContext(const String:context[])
 {
 	strcopy(TestContext, sizeof(TestContext), context);
 }
 
-stock void AssertEq(const char[] text, int cell1, int cell2)
+AssertEq(const String:text[], cell1, cell2)
 {
 	TestNumber++;
-	if (cell1 == cell2)
-	{
+	if (cell1 == cell2) {
 		PrintToServer("[%d] %s: %s == %d OK", TestNumber, TestContext, text, cell2);
-	}
-	else
-	{
+	} else {
 		PrintToServer("[%d] %s FAIL: %s should be %d, got %d", TestNumber, TestContext, text, cell2, cell1);
 		ThrowError("test %d (%s in %s) failed", TestNumber, text, TestContext);
 	}
 }
 
-stock void AssertFalse(const char[] text, bool value)
+AssertFalse(const String:text[], bool:value)
 {
 	TestNumber++;
-	if (!value)
-	{
+	if (!value) {
 		PrintToServer("[%d] %s: %s == false OK", TestNumber, TestContext, text, value);
-	}
-	else
-	{
+	} else {
 		PrintToServer("[%d] %s FAIL: %s should be false, got true", TestNumber, TestContext, text);
 		ThrowError("test %d (%s in %s) failed", TestNumber, text, TestContext);
 	}
 }
 
-stock void AssertTrue(const char[] text, bool value)
+AssertTrue(const String:text[], bool:value)
 {
 	TestNumber++;
-	if (value)
-	{
+	if (value) {
 		PrintToServer("[%d] %s: %s == true OK", TestNumber, TestContext, text, value);
-	}
-	else
-	{
+	} else {
 		PrintToServer("[%d] %s FAIL: %s should be true, got false", TestNumber, TestContext, text);
-		ThrowError("test %d (%s in %s) failed", TestNumber, text, TestContext);
-	}
-}
-
-stock void AssertStrEq(const char[] text, const char[] value, const char[] expected)
-{
-	TestNumber++;
-	if (StrEqual(value, expected))
-	{
-		PrintToServer("[%d] %s: '%s' == '%s' OK", TestNumber, TestContext, text, expected);
-	}
-	else
-	{
-		PrintToServer("[%d] %s FAIL: %s should be '%s', got '%s'", TestNumber, TestContext, text, expected, value);
 		ThrowError("test %d (%s in %s) failed", TestNumber, text, TestContext);
 	}
 }

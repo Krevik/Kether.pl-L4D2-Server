@@ -31,17 +31,17 @@
  * Version: $Id$
  */
  
-int g_SlapDamage[MAXPLAYERS+1];
+new g_SlapDamage[MAXPLAYERS+1];
 
-void PerformSlap(int client, int target, int damage)
+PerformSlap(client, target, damage)
 {
 	LogAction(client, target, "\"%L\" slapped \"%L\" (damage \"%d\")", client, target, damage);
 	SlapPlayer(target, damage, true);
 }
 
-void DisplaySlapDamageMenu(int client)
+DisplaySlapDamageMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_SlapDamage);
+	Menu menu = CreateMenu(MenuHandler_SlapDamage);
 	
 	char title[100];
 	Format(title, sizeof(title), "%T:", "Slap damage", client);
@@ -59,9 +59,9 @@ void DisplaySlapDamageMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-void DisplaySlapTargetMenu(int client)
+DisplaySlapTargetMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_Slap);
+	Menu menu = CreateMenu(MenuHandler_Slap);
 	
 	char title[100];
 	Format(title, sizeof(title), "%T: %d damage", "Slap player", client, g_SlapDamage[client]);
@@ -73,12 +73,12 @@ void DisplaySlapTargetMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public void AdminMenu_Slap(TopMenu topmenu, 
-					  TopMenuAction action,
-					  TopMenuObject object_id,
-					  int param,
-					  char[] buffer,
-					  int maxlength)
+public AdminMenu_Slap(Handle:topmenu, 
+					  TopMenuAction:action,
+					  TopMenuObject:object_id,
+					  param,
+					  String:buffer[],
+					  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -90,7 +90,7 @@ public void AdminMenu_Slap(TopMenu topmenu,
 	}
 }
 
-public int MenuHandler_SlapDamage(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_SlapDamage(Menu menu, MenuAction action, param1, param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -112,11 +112,9 @@ public int MenuHandler_SlapDamage(Menu menu, MenuAction action, int param1, int 
 		
 		DisplaySlapTargetMenu(param1);
 	}
-
-	return 0;
 }
 
-public int MenuHandler_Slap(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Slap(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -132,7 +130,7 @@ public int MenuHandler_Slap(Menu menu, MenuAction action, int param1, int param2
 	else if (action == MenuAction_Select)
 	{
 		char info[32];
-		int userid, target;
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info));
 		userid = StringToInt(info);
@@ -151,7 +149,7 @@ public int MenuHandler_Slap(Menu menu, MenuAction action, int param1, int param2
 		}	
 		else
 		{
-			char name[MAX_NAME_LENGTH];
+			decl String:name[32];
 			GetClientName(target, name, sizeof(name));
 			PerformSlap(param1, target, g_SlapDamage[param1]);
 			ShowActivity2(param1, "[SM] ", "%t", "Slapped target", "_s", name);
@@ -159,11 +157,9 @@ public int MenuHandler_Slap(Menu menu, MenuAction action, int param1, int param2
 		
 		DisplaySlapTargetMenu(param1);
 	}
-
-	return 0;
 }
 
-public Action Command_Slap(int client, int args)
+public Action:Command_Slap(client, args)
 {
 	if (args < 1)
 	{
@@ -171,13 +167,13 @@ public Action Command_Slap(int client, int args)
 		return Plugin_Handled;
 	}
 
-	char arg[65];
+	decl String:arg[65];
 	GetCmdArg(1, arg, sizeof(arg));
 
-	int damage = 0;
+	new damage = 0;
 	if (args > 1)
 	{
-		char arg2[20];
+		decl String:arg2[20];
 		GetCmdArg(2, arg2, sizeof(arg2));
 		if (StringToIntEx(arg2, damage) == 0 || damage < 0)
 		{
@@ -186,9 +182,8 @@ public Action Command_Slap(int client, int args)
 		}
 	}
 	
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,
@@ -204,7 +199,7 @@ public Action Command_Slap(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	for (int i = 0; i < target_count; i++)
+	for (new i = 0; i < target_count; i++)
 	{
 		PerformSlap(client, target_list[i], damage);
 	}

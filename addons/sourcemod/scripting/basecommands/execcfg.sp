@@ -33,7 +33,7 @@
 
 Menu g_ConfigMenu = null;
 
-void PerformExec(int client, char[] path)
+PerformExec(client, String:path[])
 {
 	if (!FileExists(path))
 	{
@@ -48,12 +48,12 @@ void PerformExec(int client, char[] path)
 	ServerCommand("exec \"%s\"", path[4]);
 }
 
-public void AdminMenu_ExecCFG(TopMenu topmenu, 
-					  TopMenuAction action,
-					  TopMenuObject object_id,
-					  int param,
-					  char[] buffer,
-					  int maxlength)
+public AdminMenu_ExecCFG(Handle:topmenu, 
+					  TopMenuAction:action,
+					  TopMenuObject:object_id,
+					  param,
+					  String:buffer[],
+					  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -65,7 +65,7 @@ public void AdminMenu_ExecCFG(TopMenu topmenu,
 	}
 }
 
-public int MenuHandler_ExecCFG(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_ExecCFG(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_Cancel)
 	{
@@ -76,7 +76,7 @@ public int MenuHandler_ExecCFG(Menu menu, MenuAction action, int param1, int par
 	}
 	else if (action == MenuAction_Select)
 	{
-		char path[256];
+		decl String:path[256];
 		
 		menu.GetItem(param2, path, sizeof(path));
 	
@@ -84,17 +84,13 @@ public int MenuHandler_ExecCFG(Menu menu, MenuAction action, int param1, int par
 	}
 	else if (action == MenuAction_Display)
 	{
-		char title[128];
+		decl String:title[128];
 		Format(title, sizeof(title), "%T", "Choose Config", param1);
-
-		Panel panel = view_as<Panel>(param2);
-		panel.SetTitle(title);
+		SetPanelTitle(Handle:param2, title);
 	}
-
-	return 0;
 }
 
-public Action Command_ExecCfg(int client, int args)
+public Action:Command_ExecCfg(client, args)
 {
 	if (args < 1)
 	{
@@ -102,7 +98,7 @@ public Action Command_ExecCfg(int client, int args)
 		return Plugin_Handled;
 	}
 
-	char path[64] = "cfg/";
+	new String:path[64] = "cfg/";
 	GetCmdArg(1, path[4], sizeof(path)-4);
 
 	PerformExec(client, path);
@@ -111,7 +107,7 @@ public Action Command_ExecCfg(int client, int args)
 }
 
 SMCParser config_parser;
-void ParseConfigs()
+ParseConfigs()
 {
 	if (!config_parser)
 		config_parser = new SMCParser();
@@ -125,11 +121,11 @@ void ParseConfigs()
 		delete g_ConfigMenu;
 	}
 	
-	g_ConfigMenu = new Menu(MenuHandler_ExecCFG, MenuAction_Display);
+	g_ConfigMenu = CreateMenu(MenuHandler_ExecCFG, MenuAction_Display);
 	g_ConfigMenu.SetTitle("%T", "Choose Config", LANG_SERVER);
 	g_ConfigMenu.ExitBackButton = true;
 	
-	char configPath[256];
+	decl String:configPath[256];
 	BuildPath(Path_SM, configPath, sizeof(configPath), "configs/adminmenu_cfgs.txt");
 	
 	if (!FileExists(configPath))
@@ -143,7 +139,7 @@ void ParseConfigs()
 	SMCError err = config_parser.ParseFile(configPath, line);
 	if (err != SMCError_Okay)
 	{
-		char error[256];
+		decl String:error[256];
 		SMC_GetErrorString(err, error, sizeof(error));
 		LogError("Could not parse file (line %d, file \"%s\"):", line, configPath);
 		LogError("Parser encountered error: %s", error);
@@ -154,17 +150,15 @@ void ParseConfigs()
 
 public SMCResult NewSection(SMCParser smc, const char[] name, bool opt_quotes)
 {
-	return SMCParse_Continue;
+
 }
 
 public SMCResult KeyValue(SMCParser smc, const char[] key, const char[] value, bool key_quotes, bool value_quotes)
 {
 	g_ConfigMenu.AddItem(key, value);
-
-	return SMCParse_Continue;
 }
 
 public SMCResult EndSection(SMCParser smc)
 {
-	return SMCParse_Continue;
+	
 }

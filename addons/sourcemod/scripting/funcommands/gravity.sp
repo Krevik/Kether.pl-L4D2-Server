@@ -31,20 +31,20 @@
  * Version: $Id$
  */
 
-int g_GravityTarget[MAXPLAYERS+1];
+new g_GravityTarget[MAXPLAYERS+1];
 
-void PerformGravity(int client, int target, float amount)
+PerformGravity(client, target, Float:amount)
 {
 	SetEntityGravity(target, amount);
-	LogAction(client, target, "\"%L\" set gravity on \"%L\" (amount \"%f\")", client, target, amount);
+	LogAction(client, target, "\"%L\" set gravity on \"%L\" to %f.", client, target, amount);
 }
 
-public void AdminMenu_Gravity(TopMenu topmenu, 
-					  TopMenuAction action,
-					  TopMenuObject object_id,
-					  int param,
-					  char[] buffer,
-					  int maxlength)
+public AdminMenu_Gravity(Handle:topmenu, 
+					  TopMenuAction:action,
+					  TopMenuObject:object_id,
+					  param,
+					  String:buffer[],
+					  maxlength)
 {
 	if (action == TopMenuAction_DisplayOption)
 	{
@@ -56,11 +56,11 @@ public void AdminMenu_Gravity(TopMenu topmenu,
 	}
 }
 
-void DisplayGravityMenu(int client)
+DisplayGravityMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_Gravity);
+	Menu menu = CreateMenu(MenuHandler_Gravity);
 	
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T:", "Gravity player", client);
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -70,11 +70,11 @@ void DisplayGravityMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-void DisplayGravityAmountMenu(int client)
+DisplayGravityAmountMenu(client)
 {
-	Menu menu = new Menu(MenuHandler_GravityAmount);
+	Menu menu = CreateMenu(MenuHandler_GravityAmount);
 	
-	char title[100];
+	decl String:title[100];
 	Format(title, sizeof(title), "%T: %N", "Gravity amount", client, GetClientOfUserId(g_GravityTarget[client]));
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -88,7 +88,7 @@ void DisplayGravityAmountMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_Gravity(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_Gravity(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -103,8 +103,8 @@ public int MenuHandler_Gravity(Menu menu, MenuAction action, int param1, int par
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32];
-		int userid, target;
+		decl String:info[32];
+		new userid, target;
 		
 		menu.GetItem(param2, info, sizeof(info));
 		userid = StringToInt(info);
@@ -121,7 +121,7 @@ public int MenuHandler_Gravity(Menu menu, MenuAction action, int param1, int par
 		{
 			g_GravityTarget[param1] = userid;
 			DisplayGravityAmountMenu(param1);
-			return 0;	// Return, because we went to a new menu and don't want the re-draw to occur.
+			return;	// Return, because we went to a new menu and don't want the re-draw to occur.
 		}
 		
 		/* Re-draw the menu if they're still valid */
@@ -130,11 +130,11 @@ public int MenuHandler_Gravity(Menu menu, MenuAction action, int param1, int par
 			DisplayGravityMenu(param1);
 		}
 	}
-
-	return 0;
+	
+	return;
 }
 
-public int MenuHandler_GravityAmount(Menu menu, MenuAction action, int param1, int param2)
+public MenuHandler_GravityAmount(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
 	{
@@ -149,9 +149,8 @@ public int MenuHandler_GravityAmount(Menu menu, MenuAction action, int param1, i
 	}
 	else if (action == MenuAction_Select)
 	{
-		char info[32];
-		float amount;
-		int target;
+		decl String:info[32];
+		new Float:amount, target;
 		
 		menu.GetItem(param2, info, sizeof(info));
 		amount = StringToFloat(info);
@@ -166,7 +165,7 @@ public int MenuHandler_GravityAmount(Menu menu, MenuAction action, int param1, i
 		}
 		else
 		{
-			char name[MAX_NAME_LENGTH];
+			new String:name[32];
 			GetClientName(target, name, sizeof(name));
 			
 			PerformGravity(param1, target, amount);
@@ -179,11 +178,9 @@ public int MenuHandler_GravityAmount(Menu menu, MenuAction action, int param1, i
 			DisplayGravityMenu(param1);
 		}
 	}
-
-	return 0;
 }
 
-public Action Command_Gravity(int client, int args)
+public Action:Command_Gravity(client, args)
 {
 	if (args < 1)
 	{
@@ -191,13 +188,13 @@ public Action Command_Gravity(int client, int args)
 		return Plugin_Handled;
 	}
 
-	char arg[65];
+	decl String:arg[65];
 	GetCmdArg(1, arg, sizeof(arg));
 	
-	float amount = 1.0;
+	new Float:amount = 1.0;
 	if (args > 1)
 	{
-		char arg2[20];
+		decl String:arg2[20];
 		GetCmdArg(2, arg2, sizeof(arg2));
 		if (StringToFloatEx(arg2, amount) == 0)
 		{
@@ -211,9 +208,8 @@ public Action Command_Gravity(int client, int args)
 		}
 	}
 
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
+	decl String:target_name[MAX_TARGET_LENGTH];
+	decl target_list[MAXPLAYERS], target_count, bool:tn_is_ml;
 	
 	if ((target_count = ProcessTargetString(
 			arg,
@@ -229,7 +225,7 @@ public Action Command_Gravity(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	for (int i = 0; i < target_count; i++)
+	for (new i = 0; i < target_count; i++)
 	{
 		PerformGravity(client, target_list[i], amount);
 	}

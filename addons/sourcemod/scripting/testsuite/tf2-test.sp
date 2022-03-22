@@ -41,7 +41,10 @@ public Action:Command_Class(client, args)
 
 public Action:Command_Remove(client, args)
 {
-	new one = GetCmdArgInt(1);
+	decl String:text[10];
+	GetCmdArg(1, text, sizeof(text));
+	
+	new one = StringToInt(text);
 	
 	TF2_RemoveWeaponSlot(client, one);
 	
@@ -61,7 +64,10 @@ public Action:Command_Remove(client, args)
 
 public Action:Command_ChangeClass(client, args)
 {
-	new one = GetCmdArgInt(1);
+	decl String:text[10];
+	GetCmdArg(1, text, sizeof(text));
+	
+	new one = StringToInt(text);
 	
 	PrintToChat(client, "Current class is :%i", TF2_GetPlayerClass(client));
 	
@@ -98,8 +104,13 @@ public Action:Command_Disguise(client, args)
 		return Plugin_Handled;	
 	}
 	
-	new one = GetCmdArgInt(1);
-	new two = GetCmdArgInt(2);
+	decl String:text[10];
+	decl String:text2[10];
+	GetCmdArg(1, text, sizeof(text));
+	GetCmdArg(2, text2, sizeof(text2));
+	
+	new one = StringToInt(text);
+	new two = StringToInt(text2);
 
 	TF2_DisguisePlayer(client, TFTeam:one, TFClassType:two);
 	
@@ -190,7 +201,10 @@ public Action:Command_SetPowerPlay(client, args)
 		return Plugin_Handled;
 	}
 	
-	new bool:one = GetCmdArgInt(1) != 0;
+	decl String:text[10];
+	GetCmdArg(1, text, sizeof(text));
+	
+	new bool:one = bool:StringToInt(text);
 	
 	TF2_SetPlayerPowerPlay(client, one);
 	

@@ -2686,7 +2686,7 @@ HandleSmokerSelfClear( attacker, victim, bool:withShove = false )
 // rocks
 HandleRockEaten( attacker, victim )
 {
-    CPrintToChatAll( "{red}-★ {olive}%N {blue}ate {default}a tank rock", attacker );
+    //CPrintToChatAll( "{green}-★ {olive}%N {blue}ate {default}a tank rock", attacker );
 
     Call_StartForward(g_hForwardRockEaten);
     Call_PushCell(attacker);
