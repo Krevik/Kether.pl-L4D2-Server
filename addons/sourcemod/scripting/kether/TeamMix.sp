@@ -251,6 +251,14 @@ public Action:MixVotingSuccess(Handle:timer)
 		CPrintToChatAll("{blue}[{default}Team Mix{blue}] {default}Mix not allowed on live round.");
         return Plugin_Handled;
     }
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i)){
+			if(IsPlayer(i)){
+				FakeClientCommand(i, "sm_stopfortnite");
+			}
+		}
+	}
     new mixConditions;
     mixConditions = COND_START_MIX_ADMIN;
 
@@ -280,6 +288,12 @@ public Action:MixVotingSuccess(Handle:timer)
 
     }
     return Plugin_Handled;
+}
+
+stock bool IsPlayer(int client)
+{
+	int team = GetClientTeam(client);
+	return (team == L4D2Team_Survivor || team == L4D2Team_Infected);
 }
 
 public Action Cmd_MixStart(int client, int args)
