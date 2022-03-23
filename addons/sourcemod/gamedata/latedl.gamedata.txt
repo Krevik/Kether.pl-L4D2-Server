@@ -1,0 +1,25 @@
+"Games"
+{
+	"tf"
+	{
+		"Signatures"
+		{
+			"CNetChan::IsFileInWaitingList"
+			{
+				"library"	"engine"
+				"linux"	"@_ZN8CNetChan19IsFileInWaitingListEPKc" // \x55\xB8\x01\x00\x00\x00\x89\xE5\x57\x56\x53\x83\xEC\x2C
+			}
+		}
+	}
+	"left4dead2"
+	{
+		"Signatures"
+		{
+			"CNetChan::IsFileInWaitingList"
+			{
+				"library"	"engine"
+				"linux"	"@_ZN8CNetChan19IsFileInWaitingListEPKc" // \x55\x89\xE5\x57\x56\x53\x83\xEC\x1C\x8B\x75\x0C\x85\xF6
+			}
+		}
+	}
+}
