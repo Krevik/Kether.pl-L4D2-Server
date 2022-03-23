@@ -20,26 +20,19 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
 
 public void OnPluginStart()
 {
-	RegConsoleCmd("sm_V", Vip_CMD, "Let's print those commands!");
 	RegConsoleCmd("sm_v", Vip_CMD, "Let's print those commands!");
-	RegConsoleCmd("sm_Vip", Vip_CMD, "Let's print those commands!");
 	RegConsoleCmd("sm_vip", Vip_CMD, "Let's print those commands!");
-
 }
 
 public Action:Vip_CMD(client, args)
 {
 	if(IsValidClient(client) && GetClientTeam(client) != 1 && args == 0){
-	
-		decl String:name[MAX_NAME_LENGTH];
-		name = "Console???";
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!hat ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!wskin ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!dances ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!dances ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!spray [size] ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!bspray [size] ");
-
 	}
 	
 	return Plugin_Handled;
