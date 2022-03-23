@@ -208,7 +208,6 @@ public Action Timer_CheckIfSprayIsReady(Handle timer, int client)
 
 	if (g_Players[client].bSprayHasBeenProcessed && !g_Players[client].bIsReadyToSpray && GetRequesterCount(client) <= 0 && GetSprayQueueCount(client) <= 0) {
 		g_Players[client].bIsReadyToSpray = true;
-		PrintToChat(client, "[SM] Your spray is ready! Type /spray %d to make big sprays.", RoundToZero(cv_fMaxSprayScale.FloatValue));
 		return Plugin_Stop;
 	} else {
 		if (!g_Players[client].bSprayHasBeenProcessed) {
