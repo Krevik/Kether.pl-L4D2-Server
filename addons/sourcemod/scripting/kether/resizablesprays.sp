@@ -166,8 +166,6 @@ public void OnClientPostAdminCheck(int client)
 	if ((!cv_bEnabled.BoolValue) || StrEqual(g_Logos[client].sLogoFileShort, NULL_STRING))
 		return;
 
-	PrintToChat(client, "[SM] Preparing your spray for resizing...");
-
 	CreateTimer(2.0, Timer_CheckIfSprayIsReady, client, TIMER_REPEAT);
 }
 
