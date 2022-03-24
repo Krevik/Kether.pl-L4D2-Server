@@ -104,7 +104,7 @@ public VoteActionHandler(Handle:vote, BuiltinVoteAction:action, param1, param2)
 	}
 }
 
-public SpecVoteResultHandler(Handle:vote, num_votes, num_clients, const client_info[][2], num_items, const item_info[][2])
+public void SpecVoteResultHandler(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info)
 {
 	for (new i=0; i<num_items; i++)
 	{
@@ -129,10 +129,12 @@ public SpecVoteResultHandler(Handle:vote, num_votes, num_clients, const client_i
 
 public Action:Spectate(client, args)
 {
+	FakeClientCommand(client, "sm_stopfortnite");
 	if(GetConVarInt(CommandSpectate))
 	{
 		ChangeClientTeam(client, 1);
 	}
+	FakeClientCommand(client, "sm_stopfortnite");
 	return Plugin_Handled;
 }
 

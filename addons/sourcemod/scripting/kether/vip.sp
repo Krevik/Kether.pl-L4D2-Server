@@ -30,7 +30,7 @@ public Action:Vip_CMD(client, args)
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!hat ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!wskin ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!dances ");
-		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!dances ");
+		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!randomdance ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!spray [size] ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!bspray [size] ");
 	}

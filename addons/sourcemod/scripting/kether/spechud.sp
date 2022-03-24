@@ -179,7 +179,7 @@ public void OnPluginStart()
 	
 	RegConsoleCmd("sm_spechud", ToggleSpecHudCmd);
 	RegConsoleCmd("sm_tankhud", ToggleTankHudCmd);
-	RegConsoleCmd("sm_hide", ToggleTankHudCmd);
+	RegConsoleCmd("sm_hide", ToggleTankHudCmdHide);
 
 	HookEvent("round_start",			view_as<EventHook>(Event_RoundStart), EventHookMode_PostNoCopy);
 	HookEvent("round_end", 				view_as<EventHook>(Event_RoundEnd), EventHookMode_PostNoCopy);
@@ -546,10 +546,10 @@ public void PrintTankDamage()
 
 public Action delayedTankStatsPrint(Handle timer)
 {
-		CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
+		/*CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		if(damage_connected > 0.0){
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
-		}
+		}*/
 		g_bAnnounceTankDamage = false;
 }
 
@@ -680,6 +680,7 @@ public Action ToggleSpecHudCmd(int client, int args)
 
 public Action ToggleTankHudCmd(int client, int args) 
 {
+	
 	int team = GetClientTeam(client);
 	if (team == TEAM_SURVIVOR)
 		return;
@@ -705,6 +706,37 @@ public Action ToggleTankHudCmd(int client, int args)
 	}
 	
 	CPrintToChat(client, "<{olive}HUD{default}> Tank HUD is now %s.", (bTankHudActive[client] ? "{blue}on{default}" : "{red}off{default}"));
+}
+
+public Action ToggleTankHudCmdHide(int client, int args) 
+{
+	if(!IsInReady()){
+		int team = GetClientTeam(client);
+		if (team == TEAM_SURVIVOR)
+			return;
+		
+		if (bTankHudActive[client])
+		{
+			bTankHudActive[client] = false;
+			
+			int index = hTankHudViewers.FindValue(client);
+			if (index != -1)
+				hTankHudViewers.Erase(index);
+		}
+		else
+		{
+			bTankHudActive[client] = true;
+			
+			if (!bSpecHudActive[client] || team == TEAM_INFECTED)
+			{
+				int index = hTankHudViewers.FindValue(client);
+				if (index == -1)
+					hTankHudViewers.Push(client);
+			}
+		}
+		
+		CPrintToChat(client, "<{olive}HUD{default}> Tank HUD is now %s.", (bTankHudActive[client] ? "{blue}on{default}" : "{red}off{default}"));
+	}
 }
 
 /**********************************************************************************************/

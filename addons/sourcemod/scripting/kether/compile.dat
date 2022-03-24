@@ -187,7 +187,7 @@ Age=1400715392
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d_voice_pitch.sp]
 Age=1400584933
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_skill_detect.sp]
-Age=1417040604
+Age=1417177700
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\witch_and_tankifier.sp]
 Age=1400676216
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d_boss_vote.sp]
@@ -221,7 +221,7 @@ Age=1413565577
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus_new.sp]
 Age=1414373737
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\fortnite_emotes_extended.sp]
-Age=1415806316
+Age=1417180148
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\survivor_mvp.sp]
 Age=1415809925
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_playstats.sp]
@@ -229,7 +229,7 @@ Age=1415810451
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_skill_detect_oldd.sp]
 Age=1413379814
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spechud.sp]
-Age=1416928316
+Age=1417177580
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\TeamMix.sp]
 Age=1417046939
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\playermode.sp]
@@ -237,4 +237,8 @@ Age=1417048384
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\resizablesprays.sp]
 Age=1417103822
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\vip.sp]
-Age=1417103225
+Age=1417180219
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d_tank_damage_announce.sp]
+Age=1417177673
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spec.sp]
+Age=1417179274

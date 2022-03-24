@@ -92,8 +92,10 @@ public void OnPluginStart() {
 	RegConsoleCmd("sm_emotes", Command_Menu, "");
 	RegConsoleCmd("sm_emote", Command_Menu, "");
 	RegConsoleCmd("sm_dances", Command_Menu, "");
+	RegConsoleCmd("sm_randomdance", RandomEmoteCMD, "Let's play random dance");
+	RegConsoleCmd("sm_randomemote", RandomEmoteCMD, "Let's play random dance");
 	RegConsoleCmd("sm_dance", Command_Menu, "");
-	RegConsoleCmd("sm_stopfortnite", stop_fornite_cmd, "Let's get ready!");
+	RegConsoleCmd("sm_stopfortnite", StopFortniteCMD, "Let's stop those dances!");
 	RegAdminCmd("sm_setemotes", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]", "");
 	RegAdminCmd("sm_setemote", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]", "");
 	RegAdminCmd("sm_setdances", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]", "");
@@ -104,6 +106,8 @@ public void OnPluginStart() {
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Pre);
 
 	HookEvent("round_start", Event_Start);
+	HookEvent("player_team", Event_PlayerChangeTeam);
+	HookEvent("player_bot_replace",			Event_BotReplace);
 
 	/**
 		Convars
@@ -143,11 +147,27 @@ public void OnPluginEnd()
 			}
 }
 
-public Action stop_fornite_cmd(int client, int args)
+public Action RandomEmoteCMD(int i, int args){
+	RandomEmote(i);
+	return Plugin_Handled;
+}
+
+public Action StopFortniteCMD(int i, int args)
 {
-    if (IsValidClient(client) && g_bClientDancing[client]) {
-		StopEmote(client);
+	if (IsValidClient(i) && g_bClientDancing[i])
+	{
+		ResetCam(i);
+		//StopEmote(i);
+		WeaponUnblock(i);
+				
+		g_bClientDancing[i] = false;
 	}
+	return Plugin_Handled;
+}
+
+public void Event_BotReplace(Event event, const char[] name, bool dontBroadcast)
+{
+
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -370,7 +390,10 @@ public Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcas
 	return Plugin_Continue;
 }
 
-
+public Action Event_PlayerChangeTeam(Event event, const char[] name, bool dontBroadcast)
+{
+	return Plugin_Continue;
+}
 
 public Action Event_Start(Event event, const char[] name, bool dontBroadcast)
 {

@@ -29,6 +29,13 @@ new             Handle: g_hCvarDifficulty           = INVALID_HANDLE;
 new             Handle: g_hCvarSurvivorLimit        = INVALID_HANDLE;
 new Handle:fwdOnTankDeath                = INVALID_HANDLE;
 
+char Tank_UpTime[20];
+int UpTime;
+int punch_connected;
+int rock_connected;
+int prop_connected;
+int damage_connected;
+
 /*
 * Version 0.6.6
 * - Better looking Output.
@@ -46,9 +53,9 @@ new Handle:fwdOnTankDeath                = INVALID_HANDLE;
 public Plugin:myinfo =
 {
 	name = "Tank Damage Announce L4D2",
-	author = "Griffin and Blade",
+	author = "Griffin and Blade, Krevik",
 	description = "Announce damage dealt to tanks by survivors",
-	version = "0.6.7",
+	version = "0.7.0",
 }
 
 public OnPluginStart()
@@ -135,6 +142,18 @@ CalculateTankHealth()
 	}
 }
 
+stock void UpdateTankUpTime() {
+    char str_uptime_temp[8];
+    int Current_UpTime = GetTime() - UpTime;
+    int Days = RoundToFloor(Current_UpTime / 86400.0);
+    Current_UpTime -= Days * 86400;
+    Tank_UpTime = "";
+    int Hours = RoundToFloor(Current_UpTime / 3600.0);
+    Current_UpTime -= Hours * 3600;
+    FormatTime(str_uptime_temp, sizeof(str_uptime_temp), "%M:%S", Current_UpTime);
+    StrCat(view_as < char > (Tank_UpTime), sizeof(Tank_UpTime), str_uptime_temp);
+}
+
 public Event_PlayerHurt(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if (!g_bIsTankInPlay) return; // No tank in play; no damage to record
@@ -154,6 +173,20 @@ public Event_PlayerHurt(Handle:event, const String:name[], bool:dontBroadcast)
 	
 	g_iDamage[attacker] += GetEventInt(event, "dmg_health");
 	g_iLastTankHealth = GetEventInt(event, "health");
+	
+	char weapon[16];
+    GetEventString(event, "weapon", weapon, sizeof(weapon));
+    if (GetEntProp(attacker, Prop_Send, "m_zombieClass") == 8 && GetClientTeam(victim) == 2) {
+        damage_connected = damage_connected + GetEventInt(event, "dmg_health");
+
+        if (StrEqual(weapon, "tank_claw")) {
+            punch_connected = punch_connected + 1;
+        } else if (StrEqual(weapon, "tank_rock")) {
+                rock_connected = rock_connected + 1;
+            } else {
+                prop_connected = prop_connected + 1;
+        }
+    }
 }
 
 public Event_PlayerKilled(Handle:event, const String:name[], bool:dontBroadcast)
@@ -189,6 +222,12 @@ public Event_TankSpawn(Handle:event, const String:name[], bool:dontBroadcast)
 	g_bIsTankInPlay = true;
 	// Set health for damage print in case it doesn't get set by player_hurt (aka no one shoots the tank)
 	g_iLastTankHealth = GetClientHealth(client);
+	
+	UpTime = GetTime();
+    punch_connected = 0;
+    rock_connected = 0;
+    prop_connected = 0;
+    damage_connected = 0;
 }
 
 public Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
@@ -213,6 +252,7 @@ public Event_RoundEnd(Handle:event, const String:name[], bool:dontBroadcast)
 
 public Action:Timer_CheckTank(Handle:timer, any:oldtankclient)
 {
+	UpdateTankUpTime();
 	if (g_iTankClient != oldtankclient) return; // Tank passed
 	
 	new tankclient = FindTankClient();
@@ -326,6 +366,16 @@ PrintTankDamage()
 				CPrintToChat(i, "{blue}[{default}%d{blue}] ({default}%i%%{blue}) {olive}%N", damage, percent_damage, client);
 			}
 		}
+	}
+	
+	CreateTimer(1.0, delayedTankStatsPrint);
+}
+
+public Action delayedTankStatsPrint(Handle timer)
+{
+	CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
+	if(damage_connected > 0.0){
+		CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
 	}
 }
 

@@ -2873,9 +2873,7 @@ stock HandleBHopStreak( survivor, streak, Float: maxVelocity )
 // car alarms
 stock HandleCarAlarmTriggered( survivor, infected, reason )
 {
-    /*if (    GetConVarBool(g_hCvarReport) && GetConVarInt(g_hCvarReportFlags) & REP_CARALARM &&
-            IS_VALID_INGAME(survivor) && !IsFakeClient(survivor)
-    ) {
+    if (IS_VALID_INGAME(survivor) && !IsFakeClient(survivor)) {
         if ( reason == CALARM_HIT ) {
             PrintToChatAll( "\x05%N\x01 triggered an alarm with a hit.", survivor );
         }
@@ -2920,7 +2918,7 @@ stock HandleCarAlarmTriggered( survivor, infected, reason )
         else {
             PrintToChatAll( "\x05%N\x01 triggered an alarm.", survivor );
         }
-    }*/
+    }
     
     Call_StartForward(g_hForwardAlarmTriggered);
     Call_PushCell(survivor);
