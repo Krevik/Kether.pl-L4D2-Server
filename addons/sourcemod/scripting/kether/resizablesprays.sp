@@ -418,6 +418,7 @@ public Action Command_Spray(int client, int args)
 	}
 
 	scaleReal = GetRealSprayScale(client, spray.iOwner, g_Players[client].fScale);
+	
 	WriteVmtMaterialName(spray, scaleReal, vmtFilename, sizeof(vmtFilename));
 
 
@@ -532,8 +533,9 @@ public Action Command_SprayInfo(int client, int args)
 
 float GetRealSprayScale(int sprayer, int owner, float scale)
 {
-	if (!IsAdmin(sprayer) && scale > cv_fMaxSprayScale.FloatValue)
+	if (scale > cv_fMaxSprayScale.FloatValue){
 		scale = cv_fMaxSprayScale.FloatValue;
+	}
 
 	if (FloatEqual(g_Players[sprayer].fScale, 0.0, 0.001)) {
 		scale = 1.0;

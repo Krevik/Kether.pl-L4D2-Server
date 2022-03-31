@@ -521,8 +521,7 @@ public void OnRoundIsLive()
 //  Events
 // ======================================================================
 public void Event_RoundStart() { 
-g_bAnnounceTankDamage = true;
-bRoundLive = false; bPendingArrayRefresh = true; 
+	bRoundLive = false; bPendingArrayRefresh = true; 
 }
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -533,24 +532,35 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	{
 		if (iTankCount > 0) iTankCount--;
 		if (!RoundHasFlowTank()) bFlowTankActive = false;
-		if(g_bAnnounceTankDamage){
-			PrintTankDamage();
-		}
+		CreateTimer(0.1, Timer_CheckTank, client); // Use a delayed timer due to bugs where the tank passes to another player
 	}
+}
+
+public Action Timer_CheckTank(Handle timer, any oldtankclient)
+{
+	UpdateTankUpTime();
+	
+	int tankclient = FindTankClient();
+	if (tankclient != oldtankclient && tankclient > 0)
+	{		
+		return; // Found tank, done
+	}
+	
+	PrintTankDamage();
 }
 
 public void PrintTankDamage()
 {
     CreateTimer(4.0, delayedTankStatsPrint);
+	g_bAnnounceTankDamage = false;
 }
 
 public Action delayedTankStatsPrint(Handle timer)
 {
-		/*CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
-		if(damage_connected > 0.0){
-				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
-		}*/
-		g_bAnnounceTankDamage = false;
+	CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
+	if(damage_connected > 0.0){
+			CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
+	}
 }
 
 public void Event_WitchDeath(Event event, const char[] name, bool dontBroadcast)
@@ -581,6 +591,21 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 // ======================================================================
 //  Player Arrays & Custom Sorting
 // ======================================================================
+int FindTankClient()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client) ||
+			GetClientTeam(client) != 3 ||
+		!IsPlayerAlive(client) ||
+		GetEntProp(client, Prop_Send, "m_zombieClass") != 8)
+		continue;
+		
+		return client; // Found tank, return
+	}
+	return 0;
+}
+
 stock void BuildPlayerArrays()
 {
 	hSpecHudViewers.Clear();

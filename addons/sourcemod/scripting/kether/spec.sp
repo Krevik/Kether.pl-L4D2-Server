@@ -129,34 +129,28 @@ public void SpecVoteResultHandler(Handle vote, int num_votes, int num_clients, c
 
 public Action:Spectate(client, args)
 {
-	FakeClientCommand(client, "sm_stopfortnite");
 	if(GetConVarInt(CommandSpectate))
 	{
 		ChangeClientTeam(client, 1);
 	}
-	FakeClientCommand(client, "sm_stopfortnite");
 	return Plugin_Handled;
 }
 
 public Action:JoinTeam2(client, args)
 {
-	FakeClientCommand(client, "sm_stopfortnite");
 	if(GetConVarInt(CommandSurvivors))
 	{
 		FakeClientCommand(client,"jointeam 2");
 	}
-	FakeClientCommand(client, "sm_stopfortnite");
 	return Plugin_Handled;
 }
 
 public Action:JoinTeam3(client, args)
 {
-	FakeClientCommand(client, "sm_stopfortnite");
 	if(GetConVarInt(CommandInfected))
 	{
 		FakeClientCommand(client,"jointeam 3");
 	}
-	FakeClientCommand(client, "sm_stopfortnite");
 	return Plugin_Handled;
 }
 
