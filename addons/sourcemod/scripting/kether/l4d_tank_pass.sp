@@ -631,7 +631,7 @@ void TankPass(int tank, int target, int admin = 0)
 			if (i != target && IsInfected(i) && !IsFakeClient(i))
 				L4D2Direct_SetTankTickets(i, 0);
 
-		L4D2Direct_SetTankTickets(target, 10000);
+		L4D2Direct_SetTankTickets(target, 20000);
 		SetPassCount(tank, true);
 		L4D2Direct_TryOfferingTankBot(tank, false);
 	}
