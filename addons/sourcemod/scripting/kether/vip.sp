@@ -29,10 +29,6 @@ public Action:Vip_CMD(client, args)
 	if(IsValidClient(client) && GetClientTeam(client) != 1 && args == 0){
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!hat ");
 		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!wskin ");
-		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!dances ");
-		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!randomdance ");
-		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!spray [size] ");
-		CPrintToChat(client, "[{green}Vip Commands{default}] {olive}!bspray [size] ");
 	}
 	
 	return Plugin_Handled;

@@ -57,8 +57,6 @@ int punch_connected;
 int rock_connected;
 int prop_connected;
 int damage_connected;
-bool g_bIsTankInPlay = false;            // Whether or not the tank is active
-int  g_iTankClient = 0;                // Which client is currently playing as tank
 
 enum L4D2Gamemode
 {
@@ -190,8 +188,7 @@ public void OnPluginStart()
 	HookEvent("player_team",			Event_PlayerTeam);
 	HookEvent("tank_spawn", tank_spawn);//to calculate tank spawn time
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Pre); //to get punch, rock, prop, totaldamage
-	HookEvent("player_death", Event_PlayerKilled);
-
+	
 	GetGameCvars();
 	GetNetworkCvars();
 	
@@ -207,48 +204,25 @@ public void OnPluginStart()
 	hTankHudViewers = new ArrayList();
 	
 	bPendingArrayRefresh = true;
-	g_iTankClient = 0;
-	g_bIsTankInPlay = false;
-	ClearTankDamage();
-	g_bAnnounceTankDamage = false;
+	
 	CreateTimer(SPECHUD_DRAW_INTERVAL, HudDrawTimer, _, TIMER_REPEAT);
 }
 
 public Action Event_RoundEnd(Handle event, const char[] name, bool dontBroadcast)
 {
-	PrintTankDamage();
-}
-
-public Action Event_PlayerKilled(Handle event, const char[] name, bool dontBroadcast)
-{
-	if (!g_bIsTankInPlay) return; // No tank in play; no damage to record
-	
-	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-	if (victim != g_iTankClient) return;
-	
-	// Award the killing blow's damage to the attacker; we don't award
-	// damage from player_hurt after the tank has died/is dying
-	// If we don't do it this way, we get wonky/inaccurate damage values
-	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	
-	// Damage announce could probably happen right here...
-	CreateTimer(0.1, Timer_CheckTank, victim); // Use a delayed timer due to bugs where the tank passes to another player
+	if (g_bAnnounceTankDamage)
+	{
+		PrintTankDamage();
+	}
 }
 
 public Action tank_spawn(Handle event, const char[] name, bool dontBroadcast) {
-	UpTime = GetTime();
-	punch_connected = 0;
+    UpTime = GetTime();
+    punch_connected = 0;
     rock_connected = 0;
     prop_connected = 0;
     damage_connected = 0;
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	g_iTankClient = client;
-	
-	if (g_bIsTankInPlay) return; // Tank passed
-	
-	// New tank, damage has not been announced
 	g_bAnnounceTankDamage = true;
-	g_bIsTankInPlay = true;
 }
 
 public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadcast) {
@@ -280,11 +254,6 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
         }
     }
     return Plugin_Continue;
-}
-
-void ClearTankDamage()
-{
-	g_bAnnounceTankDamage = false;
 }
 
 
@@ -497,12 +466,6 @@ public void OnClientDisconnect(int client)
 	bTankHudHintShown[client] = false;
 }
 
-public void OnClientDisconnect_Post(int client)
-{
-	if (!g_bIsTankInPlay || client != g_iTankClient) return;
-	CreateTimer(0.1, Timer_CheckTank, client); // Use a delayed timer due to bugs where the tank passes to another player
-}
-
 public void OnMapStart() { bRoundLive = false; }
 public void OnRoundIsLive()
 {
@@ -559,7 +522,6 @@ public void OnRoundIsLive()
 // ======================================================================
 public void Event_RoundStart() { 
 	bRoundLive = false; bPendingArrayRefresh = true; 
-	g_iTankClient = 0;
 }
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -576,11 +538,11 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 
 public Action Timer_CheckTank(Handle timer, any oldtankclient)
 {
-	if (g_iTankClient != oldtankclient) return; // Tank passed
+	UpdateTankUpTime();
+	
 	int tankclient = FindTankClient();
 	if (tankclient != oldtankclient && tankclient > 0)
 	{		
-		g_iTankClient = tankclient;
 		return; // Found tank, done
 	}
 	
@@ -589,20 +551,16 @@ public Action Timer_CheckTank(Handle timer, any oldtankclient)
 
 public void PrintTankDamage()
 {
-	CreateTimer(4.0, delayedTankStatsPrint);
+    CreateTimer(4.0, delayedTankStatsPrint);
+	g_bAnnounceTankDamage = false;
 }
 
 public Action delayedTankStatsPrint(Handle timer)
 {
-	if(g_bAnnounceTankDamage){
-		UpdateTankUpTime();
-		CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
-		if(damage_connected > 0.0){
-				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
-		}
-		g_bAnnounceTankDamage = false;
+	CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
+	if(damage_connected > 0.0){
+			CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
 	}
-	return Plugin_Continue;
 }
 
 public void Event_WitchDeath(Event event, const char[] name, bool dontBroadcast)
@@ -633,22 +591,6 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 // ======================================================================
 //  Player Arrays & Custom Sorting
 // ======================================================================
-int GetTankClient()
-{
-	if (!g_bIsTankInPlay) return 0;
-	
-	new tankclient = g_iTankClient;
-	
-	if (!IsClientInGame(tankclient)) // If tank somehow is no longer in the game (kicked, hence events didn't fire)
-	{
-		tankclient = FindTankClient(); // find the tank client
-		if (!tankclient) return 0;
-		g_iTankClient = tankclient;
-	}
-	
-	return tankclient;
-}
-
 int FindTankClient()
 {
 	for (int client = 1; client <= MaxClients; client++)

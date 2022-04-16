@@ -90,7 +90,7 @@ public void OnPluginStart()
 	cVar.GetString(SZF(g_sCvarCmd));
 	cVar.AddChangeHook(OnCvarChange_Exec);
 
-	cVar = CreateConVar("l4d_tank_pass_replace", "0", "0=Kill the alive player before the Tank pass, 1=Replace the alive player with an infected bot before the Tank pass.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	cVar = CreateConVar("l4d_tank_pass_replace", "1", "0=Kill the alive player before the Tank pass, 1=Replace the alive player with an infected bot before the Tank pass.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_bCvarReplace = cVar.BoolValue;
 	cVar.AddChangeHook(OnCvarChange_Replace);
 
@@ -106,7 +106,7 @@ public void OnPluginStart()
 	g_bCvarExtinguish = cVar.BoolValue;
 	cVar.AddChangeHook(OnCvarChange_Extinguish);
 
-	cVar = CreateConVar("l4d_tank_pass_takeover", "0", "Sets the Tank passed count according convar value when taking control of the Tank AI. If >1 the tank will be replaced with a bot when the his frustration reaches 0.", FCVAR_NOTIFY, true, 1.0, true, 2.0);
+	cVar = CreateConVar("l4d_tank_pass_takeover", "1", "Sets the Tank passed count according convar value when taking control of the Tank AI. If >1 the tank will be replaced with a bot when the his frustration reaches 0.", FCVAR_NOTIFY, true, 1.0, true, 2.0);
 	g_iTakeOverPassedCount = cVar.IntValue;
 	cVar.AddChangeHook(OnCvarChange_TakeOver);
 
@@ -620,7 +620,7 @@ void TankPass(int tank, int target, int admin = 0)
 
 	bool isOnFire = IsOnFire(tank);
 
-	if (!g_bCvarQuickPass){
+	if (g_bIsFinale || !g_bCvarQuickPass){
 		if (IsMustIgnite(isOnFire))
 			g_bIsIgnited[tank] = true;
 

@@ -197,7 +197,7 @@ Age=1413056264
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus.sp]
 Age=1413118635
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\c_readyup.sp]
-Age=1417319019
+Age=1417645504
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\aliases.sp]
 Age=1411611952
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_tank_announce.sp]
@@ -221,7 +221,7 @@ Age=1413565577
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus_new.sp]
 Age=1414373737
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\fortnite_emotes_extended.sp]
-Age=1417180148
+Age=1417646296
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\survivor_mvp.sp]
 Age=1415809925
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_playstats.sp]
@@ -229,7 +229,7 @@ Age=1415810451
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_skill_detect_oldd.sp]
 Age=1413379814
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spechud.sp]
-Age=1417641824
+Age=1418346902
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\TeamMix.sp]
 Age=1417642001
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\playermode.sp]
@@ -237,8 +237,16 @@ Age=1417048384
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\resizablesprays.sp]
 Age=1417580267
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\vip.sp]
-Age=1417180219
+Age=1418742620
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d_tank_damage_announce.sp]
 Age=1417580187
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spec.sp]
-Age=1417641985
+Age=1417645700
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\name_changer.sp]
+Age=1417776820
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spechud_to_fix.sp]
+Age=1418237547
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spechud_new_test.sp]
+Age=1411610037
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d_tank_pass.sp]
+Age=1418361472

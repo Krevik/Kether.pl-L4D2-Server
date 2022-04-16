@@ -92,10 +92,8 @@ public void OnPluginStart() {
 	RegConsoleCmd("sm_emotes", Command_Menu, "");
 	RegConsoleCmd("sm_emote", Command_Menu, "");
 	RegConsoleCmd("sm_dances", Command_Menu, "");
-	RegConsoleCmd("sm_randomdance", RandomEmoteCMD, "Let's play random dance");
-	RegConsoleCmd("sm_randomemote", RandomEmoteCMD, "Let's play random dance");
 	RegConsoleCmd("sm_dance", Command_Menu, "");
-	RegConsoleCmd("sm_stopfortnite", StopFortniteCMD, "Let's stop those dances!");
+	RegConsoleCmd("sm_stopfortnite", Command_Stop_Fortnite, "");
 	RegAdminCmd("sm_setemotes", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]", "");
 	RegAdminCmd("sm_setemote", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]", "");
 	RegAdminCmd("sm_setdances", Command_Admin_Emotes, ADMFLAG_GENERIC, "[SM] Usage: sm_setemotes <#userid|name> [Emote ID]", "");
@@ -106,8 +104,8 @@ public void OnPluginStart() {
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Pre);
 
 	HookEvent("round_start", Event_Start);
-	HookEvent("player_team", Event_PlayerChangeTeam);
-	HookEvent("player_bot_replace",			Event_BotReplace);
+	
+	HookEvent("player_team", Event_Player_Team_Change);
 
 	/**
 		Convars
@@ -138,36 +136,12 @@ public void OnPluginStart() {
 	g_EmoteForward_Pre = CreateGlobalForward("fnemotes_OnEmote_Pre", ET_Event, Param_Cell);
 }
 
-
 public void OnPluginEnd()
 {
 	for (int i = 1; i <= MaxClients; i++)
             if (IsValidClient(i) && g_bClientDancing[i]) {
 				StopEmote(i);
 			}
-}
-
-public Action RandomEmoteCMD(int i, int args){
-	RandomEmote(i);
-	return Plugin_Handled;
-}
-
-public Action StopFortniteCMD(int i, int args)
-{
-	if (IsValidClient(i) && g_bClientDancing[i])
-	{
-		ResetCam(i);
-		//StopEmote(i);
-		WeaponUnblock(i);
-				
-		g_bClientDancing[i] = false;
-	}
-	return Plugin_Handled;
-}
-
-public void Event_BotReplace(Event event, const char[] name, bool dontBroadcast)
-{
-
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -390,11 +364,6 @@ public Action Event_PlayerHurt(Event event, const char[] name, bool dontBroadcas
 	return Plugin_Continue;
 }
 
-public Action Event_PlayerChangeTeam(Event event, const char[] name, bool dontBroadcast)
-{
-	return Plugin_Continue;
-}
-
 public Action Event_Start(Event event, const char[] name, bool dontBroadcast)
 {
 	for (int i = 1; i <= MaxClients; i++)
@@ -425,6 +394,27 @@ public Action Command_Menu(int client, int args)
 	}
 	else CPrintToChat(client, "%t", "NO_DANCES_ACCESS_FLAG");	
 
+	return Plugin_Handled;
+}
+
+
+public Action Event_Player_Team_Change(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = event.GetInt("userid");
+	if (IsValidClient(client))
+	{
+		ResetCam(client);
+		StopEmote(client);
+	}
+	return Plugin_Continue;
+}
+
+public Action Command_Stop_Fortnite(int client, int args){
+	if (IsValidClient(client))
+	{
+		ResetCam(client);
+		StopEmote(client);
+	}
 	return Plugin_Handled;
 }
 
@@ -1939,7 +1929,7 @@ void CPrintToChat(int client, char[] message, any ...)
 {
 	static char buffer[256];
 	SetGlobalTransTarget(client);
-	VFormat(buffer, sizeof(buffer), message, 3);
+	VFormat(buffer, sizeof(buffer), message, 2);
 	ReplaceColor(buffer, sizeof(buffer));
 	PrintToChat(client, buffer);
 }
