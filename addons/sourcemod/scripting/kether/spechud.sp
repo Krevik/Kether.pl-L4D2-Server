@@ -243,11 +243,11 @@ public Action tank_spawn(Handle event, const char[] name, bool dontBroadcast) {
     damage_connected = 0;
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	g_iTankClient = client;
-	
+	g_bAnnounceTankDamage = true;
+
 	if (g_bIsTankInPlay) return; // Tank passed
 	
 	// New tank, damage has not been announced
-	g_bAnnounceTankDamage = true;
 	g_bIsTankInPlay = true;
 }
 
