@@ -185,7 +185,6 @@ public void OnPluginStart()
 
 	HookEvent("round_start",			view_as<EventHook>(Event_RoundStart), EventHookMode_PostNoCopy);
 	HookEvent("round_end", 				view_as<EventHook>(Event_RoundEnd), EventHookMode_PostNoCopy);
-	HookEvent("player_death",			Event_PlayerDeath);
 	HookEvent("witch_killed",			Event_WitchDeath);
 	HookEvent("player_team",			Event_PlayerTeam);
 	HookEvent("tank_spawn", tank_spawn);//to calculate tank spawn time
@@ -230,9 +229,6 @@ public Action Event_PlayerKilled(Handle event, const char[] name, bool dontBroad
 	// damage from player_hurt after the tank has died/is dying
 	// If we don't do it this way, we get wonky/inaccurate damage values
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	
-	// Damage announce could probably happen right here...
-	CreateTimer(0.1, Timer_CheckTank, victim); // Use a delayed timer due to bugs where the tank passes to another player
 }
 
 public Action tank_spawn(Handle event, const char[] name, bool dontBroadcast) {
@@ -500,7 +496,6 @@ public void OnClientDisconnect(int client)
 public void OnClientDisconnect_Post(int client)
 {
 	if (!g_bIsTankInPlay || client != g_iTankClient) return;
-	CreateTimer(0.1, Timer_CheckTank, client); // Use a delayed timer due to bugs where the tank passes to another player
 }
 
 public void OnMapStart() { bRoundLive = false; }
@@ -562,34 +557,14 @@ public void Event_RoundStart() {
 	g_iTankClient = 0;
 }
 
-public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (!client || !IsInfected(client)) return;
-	if (GetInfectedClass(client) == ZC_Tank)
-	{
-		if (iTankCount > 0) iTankCount--;
-		if (!RoundHasFlowTank()) bFlowTankActive = false;
-		CreateTimer(0.1, Timer_CheckTank, client); // Use a delayed timer due to bugs where the tank passes to another player
-	}
-}
-
-public Action Timer_CheckTank(Handle timer, any oldtankclient)
-{
-	if (g_iTankClient != oldtankclient) return; // Tank passed
-	int tankclient = FindTankClient();
-	if (tankclient != oldtankclient && tankclient > 0)
-	{		
-		g_iTankClient = tankclient;
-		return; // Found tank, done
-	}
-	
-	PrintTankDamage();
-}
-
 public void PrintTankDamage()
 {
 	CreateTimer(4.0, delayedTankStatsPrint);
+}
+
+public void OnTankDeath()
+{
+	PrintTankDamage();
 }
 
 public Action delayedTankStatsPrint(Handle timer)
