@@ -2,7 +2,7 @@ HUDTable <-
 {
 	Fields = 
 	{
-		logo = { slot = HUD_FAR_RIGHT, dataval = "Kether", flags = HUD_FLAG_ALIGN_LEFT | HUD_FLAG_NOBG, name = "logo" }
+		logo = { slot = HUD_FAR_RIGHT, dataval = "Kether.pl", flags = HUD_FLAG_ALIGN_LEFT | HUD_FLAG_NOBG, name = "logo" }
 	}
 }
 
