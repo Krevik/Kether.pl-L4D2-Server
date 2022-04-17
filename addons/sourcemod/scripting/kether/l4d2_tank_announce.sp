@@ -1,8 +1,7 @@
 #pragma semicolon 1
 #pragma newdecls required
-
-#define L4D2Team_Infected 3
-#define L4D2Infected_Tank 8
+int L4D2Team_Infected = 3;          
+int L4D2Infected_Tank = 8;                // Zombie class of the tank, used to find tank after he have been passed to another player
 
 #include <sourcemod>
 #include <sdktools_sound>
