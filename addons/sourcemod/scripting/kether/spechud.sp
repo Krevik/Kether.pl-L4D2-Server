@@ -272,7 +272,9 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
         } else if (StrEqual(weapon, "tank_rock")) {
                 rock_connected = rock_connected + 1;
             } else {
-                prop_connected = prop_connected + 1;
+				if(GetEventInt(event, "dmg_health") > 1.0){
+					prop_connected = prop_connected + 1;
+				}
         }
     }
     return Plugin_Continue;
