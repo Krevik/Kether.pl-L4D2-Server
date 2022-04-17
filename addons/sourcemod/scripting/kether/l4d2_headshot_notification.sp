@@ -26,21 +26,23 @@ public Plugin:myinfo = {
 
 public OnPluginStart()
 {
-	HookEvent("infected_death", InfectedDeath_Event) 
+	HookEvent("player_death", PlayerDeath_Event) 
 }
 
 public OnMapStart()
 {
 }
 
-public InfectedDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
+public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "attacker")) 
-	new infected_id = GetClientOfUserId(GetEventInt(event, "infected_id")) 
+	new infected_id = GetClientOfUserId(GetEventInt(event, "userid")) 
 	new bool:IsHeadshot = GetEventBool(event, "headshot") 
 	new SI_CLASS_ID = GetEntProp(infected_id, Prop_Send, "m_zombieClass");
-	if (IsSurvivor(client) && IsHeadshot == true && IsInfected(SI_CLASS_ID) ) {
-		PrintCenterText(client, "HEADSHOT!");
+	if(GetClientTeam(infected_id) == 3 && infected_id >= 0){
+		if (IsSurvivor(client) && IsHeadshot == true && IsInfected(SI_CLASS_ID) ) {
+			PrintCenterText(client, "HEADSHOT!");
+		}
 	}
 }
 
