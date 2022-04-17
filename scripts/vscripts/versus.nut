@@ -7,5 +7,5 @@ HUDTable <-
 }
 
 HUDSetLayout(HUDTable) //Applies a HUD to the screen
-//HUDPlace(HUD_FAR_RIGHT, 0.8 , 0.04 , 0.5 , 0.1) //Uncomment this line if you want to configure the text box: make it larger or change it on the screen 
+//HUDPlace(HUD_FAR_RIGHT, 0.90 , 0.0 , 0.05 , 0.03) //Uncomment this line if you want to configure the text box: make it larger or change it on the screen 
 g_ModeScript // Global reference to the Mode Script scope
