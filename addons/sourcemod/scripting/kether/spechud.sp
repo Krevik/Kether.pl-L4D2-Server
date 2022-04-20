@@ -265,14 +265,15 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
     char weapon[16];
     GetEventString(event, "weapon", weapon, sizeof(weapon));
     if (GetEntProp(attacker, Prop_Send, "m_zombieClass") == 8 && GetClientTeam(victim) == 2) {
-        damage_connected = damage_connected + GetEventInt(event, "dmg_health");
-
+		if(GetEventInt(event, "dmg_health") > 10.0){
+			damage_connected = damage_connected + GetEventInt(event, "dmg_health");
+		}
         if (StrEqual(weapon, "tank_claw")) {
             punch_connected = punch_connected + 1;
         } else if (StrEqual(weapon, "tank_rock")) {
                 rock_connected = rock_connected + 1;
             } else {
-				if(GetEventInt(event, "dmg_health") > 1.0){
+				if(GetEventInt(event, "dmg_health") > 10.0){
 					prop_connected = prop_connected + 1;
 				}
         }

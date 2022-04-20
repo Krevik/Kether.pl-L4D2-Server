@@ -197,7 +197,7 @@ Age=1413056264
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_t1_bonus.sp]
 Age=1413118635
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\c_readyup.sp]
-Age=1417645504
+Age=1418830242
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\aliases.sp]
 Age=1411611952
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_tank_announce.sp]
@@ -229,7 +229,7 @@ Age=1415810451
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_skill_detect_oldd.sp]
 Age=1413379814
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\spechud.sp]
-Age=1418828051
+Age=1418829574
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\TeamMix.sp]
 Age=1417642001
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\playermode.sp]
@@ -253,4 +253,10 @@ Age=1418361472
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_pass.sp]
 Age=1411609996
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_headshot_notification.sp]
-Age=1418827940
+Age=1419020015
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_fix_spawn_order_fix.sp]
+Age=1418873160
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order.sp]
+Age=1419027638
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order_new.sp]
+Age=1419022807

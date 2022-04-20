@@ -37,11 +37,13 @@ public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "attacker")) 
 	new infected_id = GetClientOfUserId(GetEventInt(event, "userid")) 
-	if(GetClientTeam(client) == 2 && GetClientTeam(infected_id) == 3){
-		new SI_CLASS_ID = GetEntProp(infected_id, Prop_Send, "m_zombieClass");
-		new bool:IsHeadshot = GetEventBool(event, "headshot") 
-		if (IsSurvivor(client) && IsHeadshot == true && IsInfected(SI_CLASS_ID) ) {
-			PrintCenterText(client, "HEADSHOT!");
+	if(client > 0 && infected_id > 0){
+		if(GetClientTeam(client) == 2 && GetClientTeam(infected_id) == 3){
+			new SI_CLASS_ID = GetEntProp(infected_id, Prop_Send, "m_zombieClass");
+			new bool:IsHeadshot = GetEventBool(event, "headshot") 
+			if (IsSurvivor(client) && IsHeadshot == true && IsInfected(SI_CLASS_ID) ) {
+				PrintCenterText(client, "HEADSHOT!");
+			}
 		}
 	}
 }

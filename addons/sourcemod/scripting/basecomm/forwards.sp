@@ -31,32 +31,32 @@
  * Version: $Id$
  */
  
- FireOnClientMute(client, bool:muteState)
- {
- 	static Handle:hForward;
+void FireOnClientMute(int client, bool muteState)
+{
+ 	static GlobalForward hForward;
 	
 	if(hForward == null)
 	{
-		hForward = CreateGlobalForward("BaseComm_OnClientMute", ET_Ignore, Param_Cell, Param_Cell);
+		hForward = new GlobalForward("BaseComm_OnClientMute", ET_Ignore, Param_Cell, Param_Cell);
 	}
 	
 	Call_StartForward(hForward);
 	Call_PushCell(client);
 	Call_PushCell(muteState);
 	Call_Finish();
- }
+}
  
- FireOnClientGag(client, bool:gagState)
- {
- 	static Handle:hForward;
+void FireOnClientGag(int client, bool gagState)
+{
+ 	static GlobalForward hForward;
 	
 	if(hForward == null)
 	{
-		hForward = CreateGlobalForward("BaseComm_OnClientGag", ET_Ignore, Param_Cell, Param_Cell);
+		hForward = new GlobalForward("BaseComm_OnClientGag", ET_Ignore, Param_Cell, Param_Cell);
 	}
 	
 	Call_StartForward(hForward);
 	Call_PushCell(client);
 	Call_PushCell(gagState);
 	Call_Finish();
- }
+}

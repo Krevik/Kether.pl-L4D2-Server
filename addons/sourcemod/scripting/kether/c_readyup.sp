@@ -1282,12 +1282,6 @@ bool CheckFullReady()
 			}
 		}
 	}
-	for (int i = 1; i <= 16; i++)
-	{
-		if(IsClientInGame(i)){
-			FakeClientCommand(i, "sm_stopfortnite");
-		}
-	}
 	return readyCount >= realHumanPlayers;
 }
 
