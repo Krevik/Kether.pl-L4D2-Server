@@ -44,7 +44,7 @@ static const char g_csSIClassName[][] =
 	"Hunter",
 	"(Spitter)",
 	"Jockey",
-	"Charger",
+	"Czaraka",
 	"",
 	""
 };

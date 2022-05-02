@@ -8,7 +8,7 @@
 #include "readyup"
 
 
-Handle spawnList;
+ArrayList spawnList;
 int storedSILastAssignedSpawn[MAXPLAYERS + 1];
 
 // Ready-up
@@ -21,27 +21,13 @@ bool bLive;
 enum {
 	SI_None=0,
 	SI_Smoker=1,
-	SI_Boomer,
-	SI_Hunter,
-	SI_Spitter,
-	SI_Jockey,
-	SI_Charger,
-	SI_Witch,
-	SI_Tank,
-	
-	SI_MAX_SIZE
-};
-
-char g_sSIClassNames[SI_MAX_SIZE][] = {
-	"",
-	"Smoker",
-	"Boomer",
-	"Hunter",
-	"Spitter",
-	"Jockey",
-	"Charger",
-	"Witch",
-	"Tank"
+	SI_Boomer=2,
+	SI_Hunter=3,
+	SI_Spitter=4,
+	SI_Jockey=5,
+	SI_Charger=6,
+	SI_Witch=7,
+	SI_Tank=8,
 };
 
 public Plugin myinfo =
@@ -61,7 +47,7 @@ public void OnPluginStart()
 	HookEvent("player_death", PlayerDeathEvent);
 
 	// Array
-	spawnList = CreateArray(16);
+	spawnList = new ArrayList();
 }
 
 // Ready-up Checks
@@ -72,14 +58,16 @@ public void OnAllPluginsLoaded()
 
 public void OnLibraryRemoved(const char[] name)
 {
-	if (StrEqual(name, "readyup"))
+	if (StrEqual(name, "readyup")){
 		readyUpIsAvailable = false;
+	}
 }
 
 public void OnLibraryAdded(const char[] name)
 {
-	if (StrEqual(name, "readyup"))
+	if (StrEqual(name, "readyup")){
 		readyUpIsAvailable = true;
+	}
 }
 
 public void OnTankDeath()
@@ -116,7 +104,7 @@ public void TeamChange_Event(Handle event, const char[] name, bool dontBroadcast
 		int client = GetClientOfUserId(GetEventInt(event, "userid"));
 		if(IsValidClient(client)){
 			int old_team = GetEventInt(event, "oldteam");
-			if( (old_team == 3 && GetEntProp(client, Prop_Send, "m_isGhost") == 1) ){
+			if( (old_team == 3) ){
 				int class = storedSILastAssignedSpawn[client];
 				if(class >= SI_Smoker && class <= SI_Charger){
 					if(FindValueInArray(spawnList, class) == -1){
@@ -128,6 +116,11 @@ public void TeamChange_Event(Handle event, const char[] name, bool dontBroadcast
 			}
 		}
 	}
+	PrintToChatAll("Team Change event called. Current array content: ");
+	char[] arrayContent = "";
+	getArrayContentString(arrayContent);
+	PrintToChatAll(arrayContent);
+
 }
 
 public void PlayerDeathEvent(Handle event, const char[] name, bool dontBroadcast)
@@ -135,6 +128,7 @@ public void PlayerDeathEvent(Handle event, const char[] name, bool dontBroadcast
 	if(bLive){
 		int client = GetClientOfUserId(GetEventInt(event, "userid"));
 		int class = storedSILastAssignedSpawn[client];
+		PrintToChatAll("Player Death event called. Client [%d] died, he's assigned with: [%d] SI Class", client, class);
 		if(GetClientTeam(client) == 3){
 			if(class >= SI_Smoker && class <= SI_Charger){
 				if(IsTankInPlay()){
@@ -144,6 +138,10 @@ public void PlayerDeathEvent(Handle event, const char[] name, bool dontBroadcast
 				}else{
 					PushArrayCell(spawnList, class);
 				}
+				PrintToChatAll("Player Death caused spawn list push. Current array content: ");
+				char[] arrayContent = "";
+				getArrayContentString(arrayContent);
+				PrintToChatAll(arrayContent);
 			}
 		}
 		storedSILastAssignedSpawn[client] = SI_None;
@@ -171,6 +169,10 @@ public Action L4D_OnFirstSurvivorLeftSafeArea(int client)
 		}
 		RefillArray();
 	}
+	PrintToChatAll("Round just got live. Current array content: ");
+	char[] arrayContent = "";
+	getArrayContentString(arrayContent);
+	PrintToChatAll(arrayContent);
 	return Plugin_Continue;
 }
 
@@ -182,6 +184,11 @@ public void L4D_OnEnterGhostState(int client)
 			L4D_SetClass(client, SI_class);
 			storedSILastAssignedSpawn[client] = SI_class;
 			RemoveFromArray(spawnList, 0);
+			PrintToChatAll("Player [%d] just entered ghost state. Assigned him [%d] class", client, SI_class);
+			PrintToChatAll("Current array content: ");
+			char[] arrayContent = "";
+			getArrayContentString(arrayContent);
+			PrintToChatAll(arrayContent);
 		}
 	}
 }
@@ -233,4 +240,13 @@ bool IsValidClient(int client)
 	}
 
     return IsClientInGame(client);
+}
+
+void getArrayContentString(char[] buffer){
+	char[] tmpNumber = "";
+	for(int x = 0; x <= spawnList.Length; x++){
+		IntToString(spawnList.Get(x), tmpNumber, 16);
+		StrCat(buffer, 256, tmpNumber);
+		StrCat(buffer, 256, ",");
+	}
 }
