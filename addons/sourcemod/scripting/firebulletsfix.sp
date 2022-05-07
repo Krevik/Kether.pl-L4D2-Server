@@ -1,6 +1,3 @@
-#pragma newdecls required
-#pragma semicolon 1 
-
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
@@ -14,9 +11,9 @@ float  g_vecOldWeaponShootPos[MAXPLAYERS + 1][3];
 public Plugin myinfo =
 {
 	name = "Bullet position fix",
-	author = "xutaxkamay",
+	author = "xutaxkamay,LuckyServ",
 	description = "Fixes shoot position",
-	version = "1.0",
+	version = "1.1",
 	url = "https://forums.alliedmods.net/showthread.php?p=2646571"
 };
 
@@ -54,7 +51,7 @@ public void OnPluginStart()
 		SetFailState("[FireBullets Fix] failed to find offset");
 	}
 
-	LogMessage("Found offset for Weapon_ShootPosition %d", offset);
+	//LogMessage("Found offset for Weapon_ShootPosition %d", offset);
 
 	g_hWeapon_ShootPosition = DHookCreate(offset, HookType_Entity, ReturnType_Vector, ThisPointer_CBaseEntity);
 
@@ -79,7 +76,7 @@ public void OnClientPutInServer(int client)
 
 public Action OnPlayerRunCmd(int client)
 {	
-	if (IsClientConnected(client) && IsClientInGame(client) && !IsFakeClient(client))
+	if (IsSurvivor(client) && IsClientConnected(client) && !IsFakeClient(client))
 	{
 		GetClientEyePosition(client, g_vecOldWeaponShootPos[client]);
 		/*
@@ -94,20 +91,16 @@ public Action OnPlayerRunCmd(int client)
 
 public MRESReturn Weapon_ShootPosition_Post(int client, Handle hReturn)
 {
-	/*
-	if (!g_bCallingWeapon_ShootPosition)
-	{
-	*/
-		// At this point we always want to use our old origin.
-		DHookSetReturnVector(hReturn, g_vecOldWeaponShootPos[client]);
-		return MRES_Supercede;
-	/*
-	}
-	else 
-	{
-		// Otherwhise we just let it call.
-		return MRES_Ignored;
-	}
-	*/
+    if (IsSurvivor(client)) 
+    {
+        // At this point we always want to use our old origin.
+        DHookSetReturnVector(hReturn, g_vecOldWeaponShootPos[client]);
+        return MRES_Supercede;
+    }
+    return MRES_Ignored;
 }
 
+public bool IsSurvivor(client)
+{
+    return client > 0 && client <= MaxClients && IsClientInGame(client) && GetClientTeam(client) == 2;
+}
