@@ -199,7 +199,7 @@ Age=1413118635
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\c_readyup.sp]
 Age=1418830242
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\aliases.sp]
-Age=1411611952
+Age=1420199634
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_tank_announce.sp]
 Age=1418822314
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\charms.sp]
@@ -257,7 +257,7 @@ Age=1419020015
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_fix_spawn_order_fix.sp]
 Age=1418873160
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order.sp]
-Age=1419678737
+Age=1420006984
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order_new.sp]
 Age=1419022807
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order_original_edited.sp]
@@ -266,3 +266,5 @@ Age=1419670370
 Age=1418149391
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order_agent.sp]
 Age=1419673125
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order_anti_double.sp]
+Age=1420140973

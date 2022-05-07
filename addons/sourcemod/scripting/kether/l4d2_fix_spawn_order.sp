@@ -8,9 +8,8 @@
 #include "readyup"
 
 
-ArrayList spawnList;
+Handle spawnList;
 int storedSILastAssignedSpawn[MAXPLAYERS + 1];
-
 // Ready-up
 bool readyUpIsAvailable;
 bool bLive;
@@ -47,7 +46,7 @@ public void OnPluginStart()
 	HookEvent("player_death", PlayerDeathEvent);
 
 	// Array
-	spawnList = new ArrayList();
+	spawnList = CreateArray(1,6);
 }
 
 // Ready-up Checks
@@ -117,9 +116,6 @@ public void TeamChange_Event(Handle event, const char[] name, bool dontBroadcast
 		}
 	}
 	PrintToChatAll("Team Change event called. Current array content: ");
-	char[] arrayContent = "";
-	getArrayContentString(arrayContent);
-	PrintToChatAll(arrayContent);
 
 }
 
@@ -127,7 +123,7 @@ public void PlayerDeathEvent(Handle event, const char[] name, bool dontBroadcast
 {
 	if(bLive){
 		int client = GetClientOfUserId(GetEventInt(event, "userid"));
-		int class = storedSILastAssignedSpawn[client];
+		int class = GetEntProp(client, Prop_Send, "m_zombieClass");
 		PrintToChatAll("Player Death event called. Client [%d] died, he's assigned with: [%d] SI Class", client, class);
 		if(GetClientTeam(client) == 3){
 			if(class >= SI_Smoker && class <= SI_Charger){
@@ -139,9 +135,6 @@ public void PlayerDeathEvent(Handle event, const char[] name, bool dontBroadcast
 					PushArrayCell(spawnList, class);
 				}
 				PrintToChatAll("Player Death caused spawn list push. Current array content: ");
-				char[] arrayContent = "";
-				getArrayContentString(arrayContent);
-				PrintToChatAll(arrayContent);
 			}
 		}
 		storedSILastAssignedSpawn[client] = SI_None;
@@ -170,9 +163,6 @@ public Action L4D_OnFirstSurvivorLeftSafeArea(int client)
 		RefillArray();
 	}
 	PrintToChatAll("Round just got live. Current array content: ");
-	char[] arrayContent = "";
-	getArrayContentString(arrayContent);
-	PrintToChatAll(arrayContent);
 	return Plugin_Continue;
 }
 
@@ -180,21 +170,21 @@ public void L4D_OnEnterGhostState(int client)
 {
 	if(bLive){
 		if(GetClientTeam(client) == 3){
-			int SI_class = GetArrayCell(spawnList, 0);
-			L4D_SetClass(client, SI_class);
-			storedSILastAssignedSpawn[client] = SI_class;
-			RemoveFromArray(spawnList, 0);
-			PrintToChatAll("Player [%d] just entered ghost state. Assigned him [%d] class", client, SI_class);
-			PrintToChatAll("Current array content: ");
-			char[] arrayContent = "";
-			getArrayContentString(arrayContent);
-			PrintToChatAll(arrayContent);
+			if(storedSILastAssignedSpawn[client] == SI_None){
+				int SI_class = GetArrayCell(spawnList, 0);
+				L4D_SetClass(client, SI_class);
+				storedSILastAssignedSpawn[client] = SI_class;
+				RemoveFromArray(spawnList, 0);
+				PrintToChatAll("Player [%d] just entered ghost state. Assigned him [%d] class", client, SI_class);
+				PrintToChatAll("Current array content: ");
+			}
 		}
 	}
 }
 
 public RefillArray(){
-	spawnList = CreateArray(16);
+	//on array list
+	spawnList = CreateArray(1, 6);
 	ClearArray(spawnList);
 	//fill the array with all the possible spawns
 	for(int x = SI_Smoker; x <= SI_Charger; x++){
@@ -240,13 +230,4 @@ bool IsValidClient(int client)
 	}
 
     return IsClientInGame(client);
-}
-
-void getArrayContentString(char[] buffer){
-	char[] tmpNumber = "";
-	for(int x = 0; x <= spawnList.Length; x++){
-		IntToString(spawnList.Get(x), tmpNumber, 16);
-		StrCat(buffer, 256, tmpNumber);
-		StrCat(buffer, 256, ",");
-	}
 }
