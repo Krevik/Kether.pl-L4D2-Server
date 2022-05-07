@@ -42,6 +42,10 @@
 		{
 			"name" "Kether Survival"
 		}
+		"kether_test"
+		{
+			"name" "Kether Test"
+		}
 	}
 	"ZoneMod Configs"
 	{
