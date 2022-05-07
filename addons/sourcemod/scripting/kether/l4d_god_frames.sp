@@ -1,4 +1,24 @@
-#define PLUGIN_VERSION 		"1.5"
+/*
+*	God Frames Patch
+*	Copyright (C) 2022 Silvers
+*
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
+*
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*
+*	You should have received a copy of the GNU General Public License
+*	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
+
+#define PLUGIN_VERSION 		"1.6"
 
 /*======================================================================================
 	Plugin Info:
@@ -11,6 +31,12 @@
 
 ========================================================================================
 	Change Log:
+
+1.6 (29-Apr-2022)
+	- Added cvar "l4d_god_frames_incapacitated" to control damage on Incapacitated players. Requested by "ZBzibing".
+	- Changed cvar "l4d_god_frames_allow" to allow the value "2" which only enables the forward.
+	- Changed forward "OnTakeDamage_Invulnerable" params to show the damage type.
+	- Potentially fixed reviving players instantly being incapacitated. Thanks to "Eyal282" for reporting.
 
 1.5 (10-May-2020)
 	- Added better error log message when gamedata file is missing.
@@ -58,15 +84,15 @@
 #define MAX_CVARS			12
 
 
-ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog;
+ConVar g_hCvarAllow, g_hCvarMPGameMode, g_hCvarModes, g_hCvarModesOff, g_hCvarModesTog, g_hCvarIncap;
 ConVar g_hCvarDmg[MAX_CVARS], g_hCvarDel[MAX_CVARS];
 float g_fCvarDmg[MAX_CVARS], g_fCvarDel[MAX_CVARS];
 float g_fLastHit[MAXPLAYERS+1][MAX_CVARS];
-bool g_bCvarAllow, g_bMapStarted;
+bool g_bCvarAllow, g_bCvarFoward, g_bMapStarted, g_bLateLoad, g_bLeft4Dead2, g_bCvarIncap;
 
 Handle g_hDetour, g_hForwardInvul;
 bool g_bInvulnerable[MAXPLAYERS+1];
-bool g_bLateLoad, g_bLeft4Dead2;
+float g_fIncapacitated[MAXPLAYERS+1];
 int m_invulnerabilityTimer, g_iClassTank;
 float g_fInvulDurr[MAXPLAYERS+1];
 float g_fInvulTime[MAXPLAYERS+1];
@@ -98,7 +124,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 	RegPluginLibrary("l4d_god_frames");
 
-	g_hForwardInvul = CreateGlobalForward("OnTakeDamage_Invulnerable", ET_Hook, Param_Cell, Param_Cell, Param_FloatByRef);
+	g_hForwardInvul = CreateGlobalForward("OnTakeDamage_Invulnerable", ET_Hook, Param_Cell, Param_Cell, Param_FloatByRef, Param_CellByRef);
 
 	g_bLateLoad = late;
 	return APLRes_Success;
@@ -134,7 +160,7 @@ public void OnPluginStart()
 	// ====================================================================================================
 	// CVARS
 	// ====================================================================================================
-	g_hCvarAllow = CreateConVar(	"l4d_god_frames_allow",				"1",			"0=Plugin off, 1=Plugin on.", CVAR_FLAGS );
+	g_hCvarAllow = CreateConVar(	"l4d_god_frames_allow",				"1",			"0=Plugin off, 1=Plugin on, 2=Enable forward only.", CVAR_FLAGS );
 	g_hCvarDmg[0] = CreateConVar(	"l4d_god_frames_damage_survivor",	"1.0",			"0.0=None. 1.0=Full. Scale damage dealt by other Survivors.", CVAR_FLAGS );
 	g_hCvarDmg[1] = CreateConVar(	"l4d_god_frames_damage_world",		"1.0",			"0.0=None. 1.0=Full. Scale damage dealt by World.", CVAR_FLAGS );
 	g_hCvarDmg[2] = CreateConVar(	"l4d_god_frames_damage_fire",		"1.0",			"0.0=None. 1.0=Full. Scale damage dealt by Fire.", CVAR_FLAGS );
@@ -161,10 +187,12 @@ public void OnPluginStart()
 	g_hCvarDmg[10] = CreateConVar(	"l4d_god_frames_damage_jockey",		"1.0",			"0.0=None. 1.0=Full. Scale damage dealt by Jockey.", CVAR_FLAGS );
 	g_hCvarDmg[11] = CreateConVar(	"l4d_god_frames_damage_charger",	"1.0",			"0.0=None. 1.0=Full. Scale damage dealt by Charger.", CVAR_FLAGS );
 
-	g_hCvarDel[9] = CreateConVar(	"l4d_god_frames_delay_spitter",		"0.5",			"0.0=None. Minimum time before damage can be dealt again by Spitter.", CVAR_FLAGS );
+	g_hCvarDel[9] = CreateConVar(	"l4d_god_frames_delay_spitter",		"0.0",			"0.0=None. Minimum time before damage can be dealt again by Spitter.", CVAR_FLAGS );
 	g_hCvarDel[10] = CreateConVar(	"l4d_god_frames_delay_jockey",		"0.0",			"0.0=None. Minimum time before damage can be dealt again by Jockey.", CVAR_FLAGS );
 	g_hCvarDel[11] = CreateConVar(	"l4d_god_frames_delay_charger",		"0.0",			"0.0=None. Minimum time before damage can be dealt again by Charger.", CVAR_FLAGS );
 	}
+
+	g_hCvarIncap = CreateConVar(	"l4d_god_frames_incapacitated",		"0",			"0=Remove God Frames from incapacitated players, 1=Allow God Frames.", CVAR_FLAGS );
 
 	g_hCvarModes = CreateConVar(	"l4d_god_frames_modes",				"",				"Turn on the plugin in these game modes, separate by commas (no spaces). (Empty = all).", CVAR_FLAGS );
 	g_hCvarModesOff = CreateConVar(	"l4d_god_frames_modes_off",			"",				"Turn off the plugin in these game modes, separate by commas (no spaces). (Empty = none).", CVAR_FLAGS );
@@ -186,6 +214,8 @@ public void OnPluginStart()
 		g_hCvarDel[i].AddChangeHook(ConVarChanged_Cvars);
 	}
 
+	g_hCvarIncap.AddChangeHook(ConVarChanged_Cvars);
+
 	g_iClassTank = g_bLeft4Dead2 ? 13 : 10;
 }
 
@@ -203,11 +233,21 @@ public void OnMapEnd()
 {
 	g_bMapStarted = false;
 
-	for( int i = 0; i <= MAXPLAYERS; i++ )
-		for( int x = 0; x < MAX_CVARS; x++ )
-			g_fLastHit[i][x] = 0.0;
+	ResetPlugin();
 }
 
+void ResetPlugin()
+{
+	for( int i = 0; i <= MAXPLAYERS; i++ )
+	{
+		g_fIncapacitated[i] = 0.0;
+
+		for( int x = 0; x < MAX_CVARS; x++ )
+		{
+			g_fLastHit[i][x] = 0.0;
+		}
+	}
+}
 
 
 // ====================================================================================================
@@ -231,6 +271,8 @@ void GetCvars()
 		g_fCvarDmg[i] = g_hCvarDmg[i].FloatValue;
 		g_fCvarDel[i] = g_hCvarDel[i].FloatValue;
 	}
+
+	g_bCvarIncap = g_hCvarIncap.BoolValue;
 }
 
 public void ConVarChanged_Allow(Handle convar, const char[] oldValue, const char[] newValue)
@@ -240,6 +282,7 @@ public void ConVarChanged_Allow(Handle convar, const char[] oldValue, const char
 
 void IsAllowed()
 {
+	g_bCvarFoward = g_hCvarAllow.IntValue == 2;
 	bool bCvarAllow = g_hCvarAllow.BoolValue;
 	bool bAllowMode = IsAllowedGameMode();
 	GetCvars();
@@ -248,6 +291,9 @@ void IsAllowed()
 	{
 		DetourAddress(true);
 		g_bCvarAllow = true;
+
+		HookEvent("round_start",		Event_RoundStart);
+		HookEvent("revive_success",		Event_Revive);
 
 		if( g_bLateLoad ) // Only on lateload, or if re-enabled.
 		{
@@ -266,6 +312,9 @@ void IsAllowed()
 		DetourAddress(false);
 		g_bCvarAllow = false;
 		g_bLateLoad = true; // So SDKHooks can re-hook damage if re-enabled.
+
+		UnhookEvent("round_start",		Event_RoundStart);
+		UnhookEvent("revive_success",	Event_Revive);
 
 		for( int i = 1; i <= MaxClients; i++ )
 		{
@@ -352,6 +401,24 @@ public void OnGamemode(const char[] output, int caller, int activator, float del
 
 
 // ====================================================================================================
+//					EVENTS
+// ====================================================================================================
+public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	ResetPlugin();
+}
+
+public void Event_Revive(Event event, const char[] name, bool dontBroadcast)
+{
+	if( event.GetInt("ledge_hang") == 1 ) return;
+
+	int client = GetClientOfUserId(event.GetInt("subject"));
+	g_fIncapacitated[client] = GetGameTime() + 0.1;
+}
+
+
+
+// ====================================================================================================
 //					DAMAGE
 // ====================================================================================================
 public void OnClientPutInServer(int client)
@@ -363,6 +430,12 @@ public void OnClientPutInServer(int client)
 
 public Action OnTakeDamagePre(int client, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
+	if( GetGameTime() < g_fIncapacitated[client] )
+	{
+		g_fIncapacitated[client] = 0.0;
+		return Plugin_Continue;
+	}
+
 	float timestamp = view_as<float>(LoadFromAddress(GetEntityAddress(client) + view_as<Address>(m_invulnerabilityTimer + 8), NumberType_Int32));
 	if( timestamp >= GetGameTime() )
 	{
@@ -375,7 +448,11 @@ public Action OnTakeDamagePre(int client, int &attacker, int &inflictor, float &
 		StoreToAddress(GetEntityAddress(client) + view_as<Address>(m_invulnerabilityTimer + 8), view_as<int>(0.0), NumberType_Int32);	// m_timestamp
 	}
 	else
+	{
 		g_bInvulnerable[client] = false;
+	}
+
+	return Plugin_Continue;
 }
 
 public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &damage, int &damagetype)
@@ -389,14 +466,36 @@ public Action OnTakeDamage(int client, int &attacker, int &inflictor, float &dam
 			StoreToAddress(GetEntityAddress(client) + view_as<Address>(m_invulnerabilityTimer + 8), view_as<int>(g_fInvulTime[client]), NumberType_Int32);	// m_timestamp
 		}
 
+		// Allow god frames on incapped
+		if( g_bCvarIncap && GetEntProp(client, Prop_Send, "m_isIncapacitated", 1) && GetEntProp(client, Prop_Send, "m_isHangingFromLedge", 1) == 0 )
+		{
+			damage = 0.0;
+			return Plugin_Changed;
+		}
+
+		// Allow God Frames when revived for 0.1 to prevent instant incap
+		if( GetGameTime() < g_fIncapacitated[client] )
+		{
+			g_fIncapacitated[client] = 0.0;
+			return Plugin_Continue;
+		}
+
 		// Forward
 		Action aResult = Plugin_Continue;
 		Call_StartForward(g_hForwardInvul);
 		Call_PushCell(client);
 		Call_PushCell(attacker);
 		Call_PushFloatRef(damage);
+		Call_PushCellRef(damagetype);
 		Call_Finish(aResult);
 		if( aResult != Plugin_Continue ) return aResult;
+
+		// Only trigger the forward, allow god frames
+		if( g_bCvarFoward )
+		{
+			damage = 0.0;
+			return Plugin_Changed;
+		}
 
 
 
@@ -528,6 +627,7 @@ void DetourAddress(bool patch)
 public MRESReturn IsInvulnerablePre()
 {
 	// Unused but pre hook required to prevent crashing.
+	return MRES_Ignored;
 }
 
 public MRESReturn IsInvulnerablePost(int pThis, Handle hReturn)
