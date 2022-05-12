@@ -162,7 +162,11 @@
 	}
 	"Satanixon's Configs"
 	{
-        "kether_turbo_t2"
+        "kether_versus_turbo_t1"
+        {
+            "name" "Turbo T1 (T1 2.0 Overlay)"
+        }
+	"kether_turbo_t2"
         {
             "name" "Turbo T2 Versus"
         }
