@@ -287,10 +287,6 @@
 		"start_extra_dist"  "0.000000"
 		"end_dist"          "50.000000"
 		"max_distance"      "700"
-		"ItemLimits"
-		{
-			"molotov"    "0"
-		}
 	}
 	"c7m2_barge"
 	{

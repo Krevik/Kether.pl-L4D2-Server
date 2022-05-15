@@ -1,0 +1,28 @@
+Kether 2.0:
+-based on zonemod, but with changes:
+	Kether Versus 2.0:
+	-sv_alltalk 1 by default
+	-no spitblock
+	-slightly decreased godframes for spit
+	-spit dmg increased per tick 2-->3
+	-no antibaiter
+	-no antibhaps
+	-!mix !forcemix
+	-custom scoring bonus
+	-medkits on start instead of pills
+	-hats for vips (check if really only for vips)
+	-extended spechud (tankhud) and tank damage announce (needs check)
+	-custom skill detect (with tank rock skeet info - to check)
+	-witch dmg increased (on incapped survivors) to 40 per hit (30 default?)
+	-witch presence (and always sitting)
+	-no uncommon blocker
+	-headshot notification on the screen
+	-bullets displacement by 1 tick fix
+	
+	
+	
+TODO:
+-add jockey high jump? not reliable
+-add tank pass? maybe with double spawns fix or idk
+-przejrzec pluginy wszystkie i cvary
+

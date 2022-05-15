@@ -1,61 +1,29 @@
 "MatchModes"
 {
-	"Krevik's Confings"
+	"Kether Configs"
 	{
-		"kether_coop"
+		"kether_versus_t1"
 		{
-			"name" "Kether Campaign"
+			"name" "Kether 2.0 Versus T1"
 		}
-		"kether"
+		"kether_versus_t1_realism"
 		{
-			"name" "Kether Versus"
+			"name" "Kether 2.0 Versus T1 Realism"
 		}
-		"kether_t1"
+		"kether_versus_turbo_t1"
 		{
-			"name" "Kether T1"
-		}
-		"kether_t1_1v1"
-		{
-			"name" "Kether T1 1v1"
-		}
-		"kether_t1_2v2"
-		{
-			"name" "Kether T1 2v2"
-		}
-		"kether_t1_3v3"
-		{
-			"name" "Kether T1 3v3"
-		}
-		"kether_t1_plus"
-		{
-			"name" "Kether T1++"
-		}
-		"gauntlet"
-		{
-			"name" "Gauntlet (!playermode)"
-		}
-		"kether_realism"
-		{
-			"name" "Kether Realism Versus"
-		}
-		"kether_survival"
-		{
-			"name" "Kether Survival"
-		}
-		"kether_test"
-		{
-			"name" "Kether Test"
+			"name" "Kether 2.0 Versus T1 Turbo"
 		}
 	}
 	"ZoneMod Configs"
 	{
 		"zonemod"
 		{
-			"name" "ZoneMod 2.6.2"
+			"name" "ZoneMod 2.6.5"
 		}
 		"zoneretro"
 		{
-			"name" "ZoneMod Retro 2.6.2"
+			"name" "ZoneMod Retro 2.6.5"
 		}
 		"zm3v3"
 		{
@@ -68,6 +36,13 @@
 		"zm1v1"
 		{
 			"name" "1v1 ZoneMod"
+		}
+	}
+	"NeoMod Configs"
+	{
+		"neomod"
+		{
+			"name" "NeoMod Tourney 0.4a"
 		}
 	}
 	"NextMod Configs"
@@ -145,7 +120,7 @@
 	{
 		"zonehunters"
 		{
-			"name" "ZoneHunters 2.6.2"
+			"name" "ZoneHunters 2.6.5"
 		}
 		"zh3v3"
 		{
@@ -158,24 +133,6 @@
 		"zh1v1"
 		{
 			"name" "1v1 ZoneHunters"
-		}
-	}
-	"Satanixon's Configs"
-	{
-        	"kether_versus_turbo_t1"
-        	{
-            		"name" "Turbo T1 (T1 2.0 Overlay)"
-        	}
-		"kether_turbo_t2"
-        	{
-            		"name" "Turbo T2 Versus"
-        	}
-    	}
-	"Gauntlet"
-	{
-		"gauntlet"
-		{
-			"name" "Gauntlet (!playermode)"
 		}
 	}
 }

@@ -1,14 +1,18 @@
-[D:\# GitHub\gauntlet\addons\sourcemod\scripting\nativevotes_votetest.sp]
-Age=1125733077
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\playermode.sp]
-Age=1417048197
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_fix_spawn_order.sp]
-Age=1418149391
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_fix_spawn_order_fix.sp]
-Age=1418873160
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order.sp]
-Age=1419613880
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\kether\l4d2_fix_spawn_order_original_edited.sp]
-Age=1419617261
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\si_class_announce.sp]
-Age=1419681922
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\l4d2_team_mix_harry.sp]
+Age=1420469156
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\l4d2_kether_t1_point_bonus.sp]
+Age=1414375785
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\spechud_kether.sp]
+Age=1420522095
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\l4d2_skill_detect_kether.sp]
+Age=1420512947
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\l4d_hats.sp]
+Age=1420512008
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\readyup_kether.sp]
+Age=1420590770
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\l4d2_headshot_notification.sp]
+Age=1419020015
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\fix_engine.sp]
+Age=1420538790
+[D:\Kether.pl 2.0\addons\sourcemod\scripting\fix_engine_kether.sp]
+Age=1420578153

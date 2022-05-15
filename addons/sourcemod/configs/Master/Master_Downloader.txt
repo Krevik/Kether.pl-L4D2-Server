@@ -1,2 +1,0 @@
-// Example Config
-sound/custom/join_messages/kaska.wav
