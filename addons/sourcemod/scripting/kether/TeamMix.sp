@@ -350,15 +350,17 @@ public int GetMixConditionsAfterVote(int client)
     GetClientAuthId(client, AuthId_SteamID64, clientAuthId, MAX_STR_LEN);
     hasVoted = GetTrieValue(hVoteResultsTrie, clientAuthId, dummy)
 
-    if (!SavePlayers()) {
-        return COND_NO_PLAYERS;
-    } else if (hasVoted){
-        return COND_HAS_ALREADY_VOTED;
-    } else if (++mixCallsCount >= MIN_MIX_START_COUNT) {
-        return COND_START_MIX; 
-    } else {
-        SetTrieValue(hVoteResultsTrie, clientAuthId, true);
-        return COND_NEED_MORE_VOTES;
+    if(GetClientTeam(client) != 1){
+        if (!SavePlayers()) {
+            return COND_NO_PLAYERS;
+        } else if (hasVoted){
+            return COND_HAS_ALREADY_VOTED;
+        } else if (++mixCallsCount >= MIN_MIX_START_COUNT) {
+            return COND_START_MIX; 
+        } else {
+            SetTrieValue(hVoteResultsTrie, clientAuthId, true);
+            return COND_NEED_MORE_VOTES;
+        }
     }
 }
 
