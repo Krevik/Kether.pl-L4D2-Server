@@ -18,11 +18,12 @@ Kether 2.0:
 	-no uncommon blocker
 	-headshot notification on the screen
 	-bullets displacement by 1 tick fix
-	
+	-you're able to start the game even if there's no 4v4 (readyup change)
+	-nosey parker (show dmg done to infected if it catches you or sth)
 	
 	
 TODO:
 -add jockey high jump? not reliable
 -add tank pass? maybe with double spawns fix or idk
 -przejrzec pluginy wszystkie i cvary
-
+-info dmgu tanka i czas zycia zeby zostawalo po passie 
