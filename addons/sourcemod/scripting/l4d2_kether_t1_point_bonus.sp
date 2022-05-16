@@ -30,7 +30,6 @@ public OnPluginStart()
 
 public Action:CMD_print_bonuses(client, args)
 {
-	CPrintToChat(client, "[{green}Point Bonus{default}] Map Distance Multiplier: {green}%d", RoundToNearest(GetMapDistanceMultiplier()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(GetMaximumBonusPerSurvivor()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 medkit for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 pills/adrenaline for the map: {green}%d", RoundToNearest(GetBonusForPillsAdrenaline()));	
@@ -44,6 +43,12 @@ public OnPluginEnd()
 }
 
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
+{
+	CreateTimer(3.0, printDelayedBonus);
+	return Plugin_Continue;
+}
+
+public Action printDelayedBonus(Handle timer)
 {
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	new medkitsCount = RoundToNearest(countMedkits());
@@ -64,7 +69,6 @@ public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 	}else{
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(0));
 	}
-	
 	return Plugin_Continue;
 }
 
