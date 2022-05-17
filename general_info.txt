@@ -13,7 +13,6 @@ Kether 2.0:
 	-hats for vips 
 	-extended spechud (tankhud) and tank damage announce 
 	-custom skill detect (with tank rock skeet info - to check)
-	-witch dmg increased (on incapped survivors) to 40 per hit (30 default?)
 	-witch presence (and always sitting)
 	-no uncommon blocker
 	-headshot notification on the screen
@@ -25,7 +24,9 @@ Kether 2.0:
 	-impact fix
 	-no thirdperson block
 	-when a survivor holding melee is punched by tank, the weapon won't be hid
-	
+	-witches are allowed to chase survivor in saferoom
+	-witch dmg increased (on incapped survivors) to 40 per hit (30 default?)
+
 TODO:
 -add jockey high jump? not reliable
 -add tank pass? maybe with double spawns fix or idk
