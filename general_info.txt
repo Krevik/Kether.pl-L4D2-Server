@@ -26,6 +26,8 @@ Kether 2.0:
 	-when a survivor holding melee is punched by tank, the weapon won't be hid
 	-witches are allowed to chase survivor in saferoom
 	-witch dmg increased (on incapped survivors) to 40 per hit (30 default?)
+	-tickrate 108 instead of 100
+	-fastclimb is allowed
 
 TODO:
 -add jockey high jump? not reliable
