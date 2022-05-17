@@ -28,6 +28,7 @@ Kether 2.0:
 	-witch dmg increased (on incapped survivors) to 40 per hit (30 default?)
 	-tickrate 108 instead of 100
 	-fastclimb is allowed
+	-witch damage done info
 
 TODO:
 -add jockey high jump? not reliable
