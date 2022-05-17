@@ -10,8 +10,8 @@ Kether 2.0:
 	-!mix !forcemix
 	-custom scoring bonus
 	-medkits on start instead of pills
-	-hats for vips (check if really only for vips)
-	-extended spechud (tankhud) and tank damage announce (needs check)
+	-hats for vips 
+	-extended spechud (tankhud) and tank damage announce 
 	-custom skill detect (with tank rock skeet info - to check)
 	-witch dmg increased (on incapped survivors) to 40 per hit (30 default?)
 	-witch presence (and always sitting)
@@ -22,6 +22,7 @@ Kether 2.0:
 	-nosey parker (show dmg done to infected if it catches you or sth)
 	-jockey antyteleport
 	-faster ghosts
+	-impact fix
 	
 	
 TODO:

@@ -1321,7 +1321,7 @@ public Action CmdHat(int client, int args)
 		{
 			if(IsClientInGame(client)){
 				if(IsInReady()){
-					FakeClientCommand(client, "sm_show");
+					FakeClientCommand(client, "sm_hide");
 					CPrintToChat(client, "[HATS] Your readyup menu was hid. Type !show to show it again.");
 				}
 			}
@@ -1337,6 +1337,7 @@ public int HatMenuHandler(Menu menu, MenuAction action, int client, int index)
 {
 	if( action == MenuAction_End && g_bTranslation == true && client != 0 )
 	{
+		FakeClientCommand(client, "sm_show");
 		delete menu;
 	}
 	else if( action == MenuAction_Select )
