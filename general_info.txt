@@ -7,7 +7,7 @@ Kether 2.0:
 	-spit dmg increased per tick 2-->3
 	-no antibaiter
 	-no antibhaps
-	-!mix !forcemix
+	-!mix 
 	-custom scoring bonus
 	-medkits on start instead of pills
 	-hats for vips 
@@ -23,7 +23,8 @@ Kether 2.0:
 	-jockey antyteleport
 	-faster ghosts
 	-impact fix
-	
+	-no thirdperson block
+	-when a survivor holding melee is punched by tank, the weapon won't be hid
 	
 TODO:
 -add jockey high jump? not reliable
