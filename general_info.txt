@@ -29,6 +29,11 @@ Kether 2.0:
 	-tickrate 108 instead of 100
 	-fastclimb is allowed
 	-witch damage done info
+	-admin commands:
+		teleport, incapplayer, speedplayer, sethpplayer, colorplayer, dontrush, sizeplayer, airstrike,
+		changehp, godmode, shakeplayer, ccrefresh, setexplosion, l4drain, colortarget, sizetarget, cheat,
+		cmdplayer, weaponrain, bleedplayer, wipentity, ignite, createparticle, setmodel, setmodelentity, 
+		teleportent, rcheat, grabentity, scanmodel, cchelp
 
 TODO:
 -add jockey high jump? not reliable
