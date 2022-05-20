@@ -44,7 +44,7 @@ public OnPluginEnd()
 
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
-	CreateTimer(3.0, printDelayedBonus);
+	CreateTimer(0.1, printDelayedBonus);
 	return Plugin_Continue;
 }
 
