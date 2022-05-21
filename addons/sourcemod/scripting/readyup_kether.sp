@@ -227,9 +227,14 @@ public void OnPluginStart()
 	// Ready Commands
 	RegConsoleCmd("sm_ready",			Ready_Cmd, "Mark yourself as ready for the round to go live");
 	RegConsoleCmd("sm_r",				Ready_Cmd, "Mark yourself as ready for the round to go live");
+	RegConsoleCmd("sm_R",				Ready_Cmd, "Mark yourself as ready for the round to go live");
+	RegConsoleCmd("sm_Ready",				Ready_Cmd, "Mark yourself as ready for the round to go live");
+
 	RegConsoleCmd("sm_toggleready",		ToggleReady_Cmd, "Toggle your ready status");
 	RegConsoleCmd("sm_unready",			Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
 	RegConsoleCmd("sm_nr",				Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
+	RegConsoleCmd("sm_Nr",				Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
+	RegConsoleCmd("sm_NR",				Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
 	
 	// Admin Commands
 	RegAdminCmd("sm_forcestart",		ForceStart_Cmd, ADMFLAG_BAN, "Forces the round to start regardless of player ready status.");

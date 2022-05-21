@@ -34,9 +34,9 @@ Kether 2.0:
 		changehp, godmode, shakeplayer, ccrefresh, setexplosion, l4drain, colortarget, sizetarget, cheat,
 		cmdplayer, weaponrain, bleedplayer, wipentity, ignite, createparticle, setmodel, setmodelentity, 
 		teleportent, rcheat, grabentity, scanmodel, cchelp
+	-dmg chargera 7-->10
+	-jockey can high pounce survs for max 15 dmg
 
 TODO:
--add jockey high jump? not reliable
 -add tank pass? maybe with double spawns fix or idk
--przejrzec pluginy wszystkie i cvary
 -info dmgu tanka i czas zycia zeby zostawalo po passie 
