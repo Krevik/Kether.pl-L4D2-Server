@@ -1394,9 +1394,10 @@ public int HatMenuHandler(Menu menu, MenuAction action, int client, int index)
 
 		int menupos = menu.Selection;
 		menu.DisplayAt(client, menupos, MENU_TIME_FOREVER);
-	}
-	if(IsValidClient(client)){
-		FakeClientCommand(client, "sm_show");
+	}else{
+		if(IsValidClient(client)){
+			FakeClientCommand(client, "sm_show");
+		}
 	}
 	return 0;
 }
