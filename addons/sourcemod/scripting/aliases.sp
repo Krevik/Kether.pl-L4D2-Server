@@ -23,12 +23,8 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
 public void OnPluginStart()
 {
 	RegConsoleCmd("sm_r", Ready_CMD, "Let's get ready!");
-	RegConsoleCmd("sm_R", Ready_CMD, "Let's get ready!");
-	RegConsoleCmd("sm_Ready", Ready_CMD, "Let's get ready!");
 	RegConsoleCmd("sm_ready", Ready_CMD, "Let's get ready!");
 	RegConsoleCmd("sm_nr", NReady_CMD, "Let's get ready!");
-	RegConsoleCmd("sm_Nr", NReady_CMD, "Let's get ready!");
-	RegConsoleCmd("sm_NR", NReady_CMD, "Let's get ready!");
 
 	HookEvent("round_end", RoundEndEvent);
 	initializeCanReady();
