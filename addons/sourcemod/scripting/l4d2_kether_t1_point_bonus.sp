@@ -39,16 +39,16 @@ public Action:CMD_print_bonuses(client, args)
 
 public OnPluginEnd()
 {
-	ResetConVar(hCvarValveSurvivalBonus);
+	//ResetConVar(hCvarValveSurvivalBonus);
 }
 
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
-	CreateTimer(0.1, printDelayedBonus);
+	printDelayedBonus();
 	return Plugin_Continue;
 }
 
-public Action printDelayedBonus(Handle timer)
+public void printDelayedBonus()
 {
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	new medkitsCount = RoundToNearest(countMedkits());
@@ -69,7 +69,6 @@ public Action printDelayedBonus(Handle timer)
 	}else{
 		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(0));
 	}
-	return Plugin_Continue;
 }
 
 Float:GetMapDistanceMultiplier(){
