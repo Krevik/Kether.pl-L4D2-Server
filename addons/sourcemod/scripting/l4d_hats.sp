@@ -1337,9 +1337,6 @@ public int HatMenuHandler(Menu menu, MenuAction action, int client, int index)
 {
 	if( action == MenuAction_End && g_bTranslation == true && client != 0 )
 	{
-		if(IsValidClient(client)){
-			FakeClientCommand(client, "sm_show");
-		}
 		delete menu;
 	}
 	else if( action == MenuAction_Select )
