@@ -33,7 +33,7 @@ Kether 2.0:
 		teleport, incapplayer, speedplayer, sethpplayer, colorplayer, dontrush, sizeplayer, airstrike,
 		changehp, godmode, shakeplayer, ccrefresh, setexplosion, l4drain, colortarget, sizetarget, cheat,
 		cmdplayer, weaponrain, bleedplayer, wipentity, ignite, createparticle, setmodel, setmodelentity, 
-		teleportent, rcheat, grabentity, scanmodel, cchelp
+		teleportent, rcheat, grabentity, scanmodel, cchelp, tp
 	-dmg chargera 7-->10
 	-jockey can high pounce survs for max 15 dmg
 
