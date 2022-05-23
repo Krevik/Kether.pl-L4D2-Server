@@ -842,8 +842,11 @@ void GetHatName(char sTemp[64], int index)
 
 bool IsValidClient(int client)
 {
-	if( client && IsClientInGame(client) && GetClientTeam(client) == 2 && IsPlayerAlive(client) )
-		return true;
+	if(client > 0){
+		if( client && IsClientInGame(client) && GetClientTeam(client) == 2 && IsPlayerAlive(client) ){
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -1335,7 +1338,7 @@ public Action CmdHat(int client, int args)
 
 public int HatMenuHandler(Menu menu, MenuAction action, int client, int index)
 {
-	if( action == MenuAction_End && g_bTranslation == true && client != 0 )
+	if( action == MenuAction_End && g_bTranslation == true && client > 0 )
 	{
 		delete menu;
 	}
