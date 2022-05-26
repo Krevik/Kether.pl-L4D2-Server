@@ -71,7 +71,7 @@ public Action PrintRoundEndStats(Handle timer) {
 }
 
 float GetMapDistanceMultiplier(){
-	return float(GetMapMaxScore())/500.0;
+	return float(GetMapMaxScore())/400.0;
 }
 
 Float:GetMaximumBonusPerSurvivor(){
@@ -79,11 +79,11 @@ Float:GetMaximumBonusPerSurvivor(){
 }
 
 float GetBonusForMedkit(){
-	return GetMaximumBonusPerSurvivor()*1.26;
+	return GetMaximumBonusPerSurvivor()*1.4;
 }
 
 float GetBonusForPillsAdrenaline(){
-	return 8.0*GetMapDistanceMultiplier();
+	return 10.0*GetMapDistanceMultiplier();
 }
 
 float GetTotalHealthBonus(){
