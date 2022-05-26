@@ -273,7 +273,6 @@
 #include <sdktools>
 #include <sdkhooks>
 #include <clientprefs>
-#include <readyup>
 
 #define CVAR_FLAGS			FCVAR_NOTIFY
 #define CHAT_TAG			"\x05[HATS]\x03 "
@@ -335,10 +334,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	return APLRes_Success;
 }
 
-bool g_ReadyUpAvailable;
 public void OnAllPluginsLoaded()
 {
-	g_ReadyUpAvailable = LibraryExists("readyup");
 	// Attachments API
 	if( FindConVar("attachments_api_version") == null && (FindConVar("l4d2_swap_characters_version") != null || FindConVar("l4d_csm_version") != null) )
 	{
@@ -350,16 +347,6 @@ public void OnAllPluginsLoaded()
 	{
 		LogMessage("\n==========\nWarning: You should install \"[L4D & L4D2] Use Priority Patch\" to fix attached models blocking +USE action: https://forums.alliedmods.net/showthread.php?t=327511\n==========\n");
 	}
-}
-
-public void OnLibraryRemoved(const char[] name)
-{
-	if (strcmp(name, "readyup") == 0) g_ReadyUpAvailable = false;
-}
-
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, "readyup")) g_ReadyUpAvailable = true;
 }
 
 public void OnPluginStart()
@@ -434,11 +421,11 @@ public void OnPluginStart()
 
 	// Cvars
 	g_hCvarAllow = CreateConVar(		"l4d_hats_allow",		"1",			"0=Plugin off, 1=Plugin on.", CVAR_FLAGS );
-	g_hCvarBots = CreateConVar(			"l4d_hats_bots",		"0",			"0=Disallow bots from spawning with Hats. 1=Allow bots to spawn with hats.", CVAR_FLAGS, true, 0.0, true, 1.0 );
-	g_hCvarChange = CreateConVar(		"l4d_hats_change",		"1.0",			"0=Off. Other value puts the player into thirdperson for this many seconds when selecting a hat.", CVAR_FLAGS );
+	g_hCvarBots = CreateConVar(			"l4d_hats_bots",		"1",			"0=Disallow bots from spawning with Hats. 1=Allow bots to spawn with hats.", CVAR_FLAGS, true, 0.0, true, 1.0 );
+	g_hCvarChange = CreateConVar(		"l4d_hats_change",		"1.3",			"0=Off. Other value puts the player into thirdperson for this many seconds when selecting a hat.", CVAR_FLAGS );
 	g_hCvarDetect = CreateConVar(		"l4d_hats_detect",		"0.3",			"0.0=Off. How often to detect thirdperson view. Also uses ThirdPersonShoulder_Detect plugin if available.", CVAR_FLAGS );
-	g_hCvarMake = CreateConVar(			"l4d_hats_make",		"o",			"Specify admin flags or blank to allow all players to spawn with a hat, requires the l4d_hats_random cvar to spawn.", CVAR_FLAGS );
-	g_hCvarMenu = CreateConVar(			"l4d_hats_menu",		"o",			"Specify admin flags or blank to allow all players access to the hats menu.", CVAR_FLAGS );
+	g_hCvarMake = CreateConVar(			"l4d_hats_make",		"p",				"Specify admin flags or blank to allow all players to spawn with a hat, requires the l4d_hats_random cvar to spawn.", CVAR_FLAGS );
+	g_hCvarMenu = CreateConVar(			"l4d_hats_menu",		"p",				"Specify admin flags or blank to allow all players access to the hats menu.", CVAR_FLAGS );
 	g_hCvarModes = CreateConVar(		"l4d_hats_modes",		"",				"Turn on the plugin in these game modes, separate by commas (no spaces). (Empty = all).", CVAR_FLAGS );
 	g_hCvarModesOff = CreateConVar(		"l4d_hats_modes_off",	"",				"Turn off the plugin in these game modes, separate by commas (no spaces). (Empty = none).", CVAR_FLAGS );
 	g_hCvarModesTog = CreateConVar(		"l4d_hats_modes_tog",	"",				"Turn on the plugin in these game modes. 0=All, 1=Coop, 2=Survival, 4=Versus, 8=Scavenge. Add numbers together.", CVAR_FLAGS );
@@ -842,11 +829,8 @@ void GetHatName(char sTemp[64], int index)
 
 bool IsValidClient(int client)
 {
-	if(client > 0){
-		if( client && IsClientInGame(client) && GetClientTeam(client) == 2 && IsPlayerAlive(client) ){
-			return true;
-		}
-	}
+	if( client && IsClientInGame(client) && GetClientTeam(client) == 2 && IsPlayerAlive(client) )
+		return true;
 	return false;
 }
 
@@ -1234,7 +1218,6 @@ public Action Hook_SetSpecTransmit(int entity, int client)
 // ====================================================================================================
 public Action CmdHat(int client, int args)
 {
-	
 	if( !g_bCvarAllow || !IsValidClient(client) )
 	{
 		CPrintToChat(client, "%s%T", CHAT_TAG, "No Access", client);
@@ -1320,16 +1303,6 @@ public Action CmdHat(int client, int args)
 	}
 	else
 	{
-		if(g_ReadyUpAvailable)
-		{
-			if(IsClientInGame(client)){
-				if(IsInReady()){
-					FakeClientCommand(client, "sm_hide");
-					CPrintToChat(client, "[HATS] Your readyup menu was hid. Type !show to show it again.");
-				}
-			}
-		}
-
 		ShowMenu(client);
 	}
 
@@ -1338,7 +1311,7 @@ public Action CmdHat(int client, int args)
 
 public int HatMenuHandler(Menu menu, MenuAction action, int client, int index)
 {
-	if( action == MenuAction_End && g_bTranslation == true && client > 0 )
+	if( action == MenuAction_End && g_bTranslation == true && client != 0 )
 	{
 		delete menu;
 	}
@@ -1394,11 +1367,8 @@ public int HatMenuHandler(Menu menu, MenuAction action, int client, int index)
 
 		int menupos = menu.Selection;
 		menu.DisplayAt(client, menupos, MENU_TIME_FOREVER);
-	}else{
-		if(IsValidClient(client)){
-			FakeClientCommand(client, "sm_show");
-		}
 	}
+
 	return 0;
 }
 
