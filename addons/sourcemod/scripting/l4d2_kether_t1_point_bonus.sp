@@ -11,7 +11,7 @@
 
 new iTeamSize;
 new Handle:hCvarValveSurvivalBonus;
-
+float fSurvivorBonus[2];
 public Plugin:myinfo =
 {
 	name = "L4D2 Bonus For pills",
@@ -39,39 +39,38 @@ public Action:CMD_print_bonuses(client, args)
 
 public OnPluginEnd()
 {
-	//ResetConVar(hCvarValveSurvivalBonus);
+	ResetConVar(hCvarValveSurvivalBonus);
 }
 
 public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 {
-	printDelayedBonus();
-	return Plugin_Continue;
-}
-
-public void printDelayedBonus()
-{
+	new team = InSecondHalfOfRound();
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	new medkitsCount = RoundToNearest(countMedkits());
 	new pillsCount = RoundToNearest(countPillsAndAdrenaline());
-	new bonusForHP = GetTotalHealthBonus();
+	float bonusForHP = GetTotalHealthBonus();
 	
-	
-	new totalBonus = bonusForHP + ( (GetBonusForMedkit()*medkitsCount) + (GetBonusForPillsAdrenaline()*pillsCount) );
-	
-	if(iSurvivalMultiplier>0){
-		CPrintToChatAll("[{green}Point Bonus{default}] {green}%d{default} survivors reached safehouse with {green}%d{default} {blue}medkits{default}", iSurvivalMultiplier, medkitsCount );
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}HP: {green}%d{default}x{green}%d ", iSurvivalMultiplier, bonusForHP/iSurvivalMultiplier );
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Medkits: {green}%d{default}x{green}%d", medkitsCount, RoundToNearest(GetBonusForMedkit()) );
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus for {blue}Pills/Adrenaline: {green}%d{default}x{green}%d", pillsCount, RoundToNearest(GetBonusForPillsAdrenaline()) );
-		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(RoundToNearest(totalBonus)/float(iSurvivalMultiplier)) );
+	float totalBonus = bonusForHP + ((GetBonusForMedkit()*medkitsCount) + (GetBonusForPillsAdrenaline()*pillsCount));
 
-		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(RoundToNearest(totalBonus)/float(iSurvivalMultiplier)) );
-	}else{
-		SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(0));
+	fSurvivorBonus[team] = totalBonus/float(iSurvivalMultiplier);
+	if(iSurvivalMultiplier == 0){
+		fSurvivorBonus[team] = 0.0;
 	}
+	SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(fSurvivorBonus[team]) );
+	CreateTimer(3.5, PrintRoundEndStats, _, TIMER_FLAG_NO_MAPCHANGE);
+	return Plugin_Continue;
 }
 
-Float:GetMapDistanceMultiplier(){
+public Action PrintRoundEndStats(Handle timer) {
+	new team = InSecondHalfOfRound();
+	new iSurvivalMultiplier = GetUprightSurvivors();
+	if(RoundToNearest(fSurvivorBonus[team])>0){
+		CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(fSurvivorBonus[team]) );
+	}
+	return Plugin_Stop;
+}
+
+float GetMapDistanceMultiplier(){
 	return float(GetMapMaxScore())/500.0;
 }
 
@@ -79,36 +78,32 @@ Float:GetMaximumBonusPerSurvivor(){
 	return (100.0/4.0)*GetMapDistanceMultiplier();				
 }
 
-Float:GetBonusForMedkit(){
+float GetBonusForMedkit(){
 	return GetMaximumBonusPerSurvivor()*1.26;
 }
 
-Float:GetBonusForPillsAdrenaline(){
+float GetBonusForPillsAdrenaline(){
 	return 8.0*GetMapDistanceMultiplier();
 }
 
-Float:GetTotalHealthBonus(){
-	new Float:mapDistanceMultiplier = GetMapDistanceMultiplier();
+float GetTotalHealthBonus(){
+	float mapDistanceMultiplier = GetMapDistanceMultiplier();
 	new survivorCount;		
-	new Float:totalBonus = 0;
+	float totalBonus = 0.0;
 	for (new i = 1; i <= MaxClients && survivorCount < iTeamSize; i++)
 	{
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
 			if (L4D_IsInLastCheckpoint(i))
-			{
-				new numberOfIncaps = GetSurvivorIncapCount(i);
-				new Float:incapsFactor = 1.0;
-				if(numberOfIncaps >= 1) {incapsFactor = 0.0;}
-				
-				new Float:bonusForPermHealth = GetSurvivorPermanentHealth(i)/4.0;				
-				new Float:totalBonusToAdd = (bonusForPermHealth)*mapDistanceMultiplier;
+			{	
+				float bonusForPermHealth = GetSurvivorPermanentHealth(i)/4.0;				
+				float totalBonusToAdd = (bonusForPermHealth)*mapDistanceMultiplier;
 				totalBonus = totalBonus + totalBonusToAdd;
 			}
 		}
 	}
-	return RoundToNearest(totalBonus);
+	return totalBonus;
 }
 
 GetUprightSurvivors()
@@ -129,7 +124,7 @@ GetUprightSurvivors()
 	return aliveCount;
 }
 
-Float:countMedkits()
+float countMedkits()
 {	
 	new survivorCount;		
 	new totalMedkits;
@@ -149,7 +144,7 @@ Float:countMedkits()
 	return float(totalMedkits);
 }
 
-Float:countPillsAndAdrenaline()
+float countPillsAndAdrenaline()
 {	
 	new survivorCount;		
 	new totalPills;
@@ -231,4 +226,9 @@ stock GetSurvivorIncapCount(client)
 stock GetMapMaxScore()
 {
 	return L4D_GetVersusMaxCompletionScore();
+}
+
+InSecondHalfOfRound()
+{
+	return GameRules_GetProp("m_bInSecondHalfOfRound");
 }
