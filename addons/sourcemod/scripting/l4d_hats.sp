@@ -42,7 +42,7 @@
 	- Added support for the "Ready-Up" plugin to hide or show the panel when using the Hats menu. Requested by "Krevik".
 	- Fixed hats not saving depending on the "l4d_hats_make" cvar value and clients admin flags.
 
-	- Thanks to "Krevik" and "pan0s" for help testing.
+	- Thanks to "Krevik" and "pan0s" for help lots of help and testing.
 
 	- Translation files have updated. Please update or errors will occur and the plugin won't work.
 
@@ -459,8 +459,8 @@ public void OnPluginStart()
 	g_hCvarBots = CreateConVar(			"l4d_hats_bots",		"1",			"0=Disallow bots from spawning with Hats. 1=Allow bots to spawn with hats.", CVAR_FLAGS, true, 0.0, true, 1.0 );
 	g_hCvarChange = CreateConVar(		"l4d_hats_change",		"1.3",			"0=Off. Other value puts the player into thirdperson for this many seconds when selecting a hat.", CVAR_FLAGS );
 	g_hCvarDetect = CreateConVar(		"l4d_hats_detect",		"0.3",			"0.0=Off. How often to detect thirdperson view. Also uses ThirdPersonShoulder_Detect plugin if available.", CVAR_FLAGS );
-	g_hCvarMake = CreateConVar(			"l4d_hats_make",		"o",				"Specify admin flags or blank to allow all players to spawn with a hat, requires the l4d_hats_random cvar to spawn.", CVAR_FLAGS );
-	g_hCvarMenu = CreateConVar(			"l4d_hats_menu",		"o",				"Specify admin flags or blank to allow all players access to the hats menu.", CVAR_FLAGS );
+	g_hCvarMake = CreateConVar(			"l4d_hats_make",		"",				"Specify admin flags or blank to allow all players to spawn with a hat, requires the l4d_hats_random cvar to spawn.", CVAR_FLAGS );
+	g_hCvarMenu = CreateConVar(			"l4d_hats_menu",		"",				"Specify admin flags or blank to allow all players access to the hats menu.", CVAR_FLAGS );
 	g_hCvarModes = CreateConVar(		"l4d_hats_modes",		"",				"Turn on the plugin in these game modes, separate by commas (no spaces). (Empty = all).", CVAR_FLAGS );
 	g_hCvarModesOff = CreateConVar(		"l4d_hats_modes_off",	"",				"Turn off the plugin in these game modes, separate by commas (no spaces). (Empty = none).", CVAR_FLAGS );
 	g_hCvarModesTog = CreateConVar(		"l4d_hats_modes_tog",	"",				"Turn on the plugin in these game modes. 0=All, 1=Coop, 2=Survival, 4=Versus, 8=Scavenge. Add numbers together.", CVAR_FLAGS );
@@ -496,10 +496,10 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_hats",		CmdHatMain,							"Displays a menu to customize various settings for hats.");
 	RegConsoleCmd("sm_hat",			CmdHat,								"Displays a menu of hats allowing players to change what they are wearing. Optional args: [0 - 128 or hat name or \"random\"]");
 	RegConsoleCmd("sm_hatoff",		CmdHatOff,							"Toggle to turn on or off the ability of wearing hats.");
-	RegConsoleCmd("sm_hatshow",		CmdHatShow,							"Toggle to see or hide your own hat.");
-	RegConsoleCmd("sm_hatview",		CmdHatShow,							"Toggle to see or hide your own hat.");
-	RegConsoleCmd("sm_hatshowon",	CmdHatShowOn,						"See your own hat.");
-	RegConsoleCmd("sm_hatshowoff",	CmdHatShowOff,						"Hide your own hat.");
+	RegConsoleCmd("sm_hatshow",		CmdHatShow,							"Toggle to see or hide your own hat. Applies to first person view or third person using the optional command argument 'tp' e.g. \"sm_hatshow tp\"");
+	RegConsoleCmd("sm_hatview",		CmdHatShow,							"Toggle to see or hide your own hat. Applies to first person view or third person using the optional command argument 'tp' e.g. \"sm_hatview tp\"");
+	RegConsoleCmd("sm_hatshowon",	CmdHatShowOn,						"See your own hat. Applies to first person view or third person using the optional command argument 'tp' e.g. \"sm_hatshowon tp\"");
+	RegConsoleCmd("sm_hatshowoff",	CmdHatShowOff,						"Hide your own hat. Applies to first person view or third person using the optional command argument 'tp' e.g. \"sm_hatshowoff tp\"");
 	RegConsoleCmd("sm_hatall",		CmdHatsToggle,						"Toggles the visibility of everyone's hats.");
 	RegAdminCmd("sm_hatclient",		CmdHatClient,		ADMFLAG_ROOT,	"Set a clients hat. Usage: sm_hatclient <#userid|name> [hat name or hat index: 0-128 (MAX_HATS)].");
 	RegAdminCmd("sm_hatoffc",		CmdHatOffTarget,	ADMFLAG_ROOT,	"Toggle the ability of wearing hats on specific players.");
@@ -773,6 +773,9 @@ public void OnMapEnd()
 public void OnClientPutInServer(int client)
 {
 	g_iMenuType[client] = 0;
+	g_bHatAll[client] = true;
+	g_bHatViewTP[client] = true;
+	g_bHatView[client] = false;
 }
 
 public void OnClientAuthorized(int client, const char[] sSteamID)
@@ -787,7 +790,6 @@ public void OnClientAuthorized(int client, const char[] sSteamID)
 		{
 			strcopy(g_sSteamID[client], sizeof(g_sSteamID[]), sSteamID);
 			g_bBlocked[client] = false;
-			g_bHatAll[client] = true;
 		}
 	}
 }
@@ -804,15 +806,25 @@ public void OnClientCookiesCached(int client)
 		char sCookie[4];
 
 		GetClientCookie(client, g_hCookie_All, sCookie, sizeof(sCookie));
-		g_bHatAll[client] = StringToInt(sCookie) == 1;
+		if( sCookie[0] != 0 )
+		{
+			g_bHatAll[client] = StringToInt(sCookie) == 1;
+		}
 
 		//////////////////////////////////
 		// Updated by pan0s
 		char s1On[2], s3On[2];
 		GetClientCookie(client, g_hCookie_FirstView, s1On, sizeof(s1On));
-		g_bHatView[client] = StringToInt(s1On) == 1;
+		if( s1On[0] != 0 )
+		{
+			g_bHatView[client] = StringToInt(s1On) == 1;
+		}
+
 		GetClientCookie(client, g_hCookie_ThirdView, s3On, sizeof(s3On));
-		g_bHatViewTP[client] = StringToInt(s3On) == 1;
+		if( s3On[0] != 0 )
+		{
+			g_bHatViewTP[client] = StringToInt(s3On) == 1;
+		}
 		//////////////////////////////////
 
 		// Get client cookies, set type if available or default.
@@ -1235,7 +1247,7 @@ void SetHatView(int client, bool bShowHat)
 		if( entity && (entity = EntRefToEntIndex(entity)) != INVALID_ENT_REFERENCE )
 			SDKUnhook(entity, SDKHook_SetTransmit, Hook_SetTransmit);
 	}
-	else if( !bShowHat && g_bExternalState[client] && !g_bExternalChange[client] && !g_bIsThirdPerson[client] && !g_bHatView[client] )
+	else if( !bShowHat && g_bExternalState[client] && !g_bExternalChange[client] && ((!g_bHatView[client] && !g_bIsThirdPerson[client]) || (!g_bHatViewTP[client] && g_bIsThirdPerson[client])) )
 	{
 		g_bExternalState[client] = false;
 
@@ -2726,17 +2738,16 @@ void ExternalView(int client)
 {
 	if( g_fCvarChange && g_bLeft4Dead2 )
 	{
-		g_bExternalChange[client] = true;
 		EventView(client, true);
 
-		// Survivor Thirdperson plugin sets 99999.3.
-		if( GetEntPropFloat(client, Prop_Send, "m_TimeForceExternalView") == 99999.3 )
-			return;
+		g_bExternalChange[client] = true;
 
 		delete g_hTimerView[client];
 		g_hTimerView[client] = CreateTimer(g_fCvarChange + (g_fCvarChange >= 2.0 ? 0.4 : 0.2), TimerEventView, GetClientUserId(client));
 
-		SetEntPropFloat(client, Prop_Send, "m_TimeForceExternalView", GetGameTime() + g_fCvarChange);
+		// Survivor Thirdperson plugin sets 99999.3.
+		if( GetEntPropFloat(client, Prop_Send, "m_TimeForceExternalView") != 99999.3 )
+			SetEntPropFloat(client, Prop_Send, "m_TimeForceExternalView", GetGameTime() + g_fCvarChange);
 	}
 }
 
@@ -2745,9 +2756,10 @@ public Action TimerEventView(Handle timer, any client)
 	client = GetClientOfUserId(client);
 	if( client )
 	{
-		g_bExternalChange[client] = false;
-		EventView(client, false);
 		g_hTimerView[client] = null;
+		g_bExternalChange[client] = false;
+
+		EventView(client, false);
 	}
 
 	return Plugin_Continue;
