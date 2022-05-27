@@ -117,6 +117,5 @@ public Action AllowReady(Handle timer, DataPack pack)
 	pack.Reset();
 	client = pack.ReadCell();
 	canReady[client] = true;
-	CloseHandle(timer);
-	return Plugin_Handled;
+	return Plugin_Continue;
 }
