@@ -11,14 +11,10 @@
 
 new iTeamSize;
 new Handle:hCvarValveSurvivalBonus;
-new Handle:c_VarWitchCrownBonus;
-new Handle:c_varTankKilledBonus;
 
 float fSurvivorBonus[2];
 int iSurvivorsAlive[2];
 
-bool killedTankThisRound;
-bool crownedWitchThisRound;
 public Plugin:myinfo =
 {
 	name = "L4D2 Bonus For pills",
@@ -36,41 +32,11 @@ public OnPluginStart()
 	RegConsoleCmd("sm_minfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 	RegConsoleCmd("sm_mapinfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 
-	c_VarWitchCrownBonus = CreateConVar( "sm_scoring_crown_bonus", "25.0", "Amount of bonus given for crowning a witch.", FCVAR_NONE, true, 0.0, true, 1.0 );
-	c_varTankKilledBonus = CreateConVar( "sm_scoring_tank_bonus", "25.0", "Amount of bonus given for killing the tank.", FCVAR_NONE, true, 0.0, true, 1.0 );
-
 	hCvarValveSurvivalBonus = FindConVar("vs_survival_bonus");
 	iTeamSize = GetConVarInt(FindConVar("survivor_limit"));
 
-	killedTankThisRound = false;
-	crownedWitchThisRound = false;
 
-	HookEvent("round_start",		Event_RoundStart,		EventHookMode_PostNoCopy);
-	HookEvent("map_transition",		Event_MapTransition,		EventHookMode_PostNoCopy);
 
-}
-
-public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
-{
-	killedTankThisRound = false;
-	crownedWitchThisRound = false;
-}
-
-public void Event_MapTransition(Event event, const char[] name, bool dontBroadcast)
-{
-
-}
-
-public Action L4D_OnFirstSurvivorLeftSafeArea(int client)
-{
-	killedTankThisRound = false;
-	crownedWitchThisRound = false;
-	return Plugin_Continue;
-}
-
-public void OnRoundIsLive(){
-	killedTankThisRound = false;
-	crownedWitchThisRound = false;
 }
 
 public Action:CMD_print_bonuses(client, args)
@@ -85,25 +51,25 @@ public Action:CMD_print_bonuses(client, args)
 				int aliveSurvivors = GetAliveSurvivors();
 				int totalBonus = actualBonus*aliveSurvivors;
 				if(actualBonus > 0){
-					CPrintToChat(client, "{blue}Team 1{default}: [{green}Point Bonus{default}] Actual Point Bonus: {green}%dx%d = %d", actualBonus, aliveSurvivors, totalBonus );	
+					CPrintToChat(client, "{blue}Team 1{default}: [{green}Point Bonus{default}] Current Point Bonus: {green}%d", totalBonus );	
 				}
 		}else{
 			if( RoundToNearest(fSurvivorBonus[0]) > 0 && iSurvivorsAlive[0] > 0){
 				int finalBonus = RoundToNearest(fSurvivorBonus[0] * float(iSurvivorsAlive[0]) );
-				CPrintToChat(client, "{blue}Team 1{default}: [{green}Point Bonus{default}] Point Bonus: {green}%dx%d = %d", RoundToNearest(fSurvivorBonus[0]), iSurvivorsAlive[0], finalBonus );	
+				CPrintToChat(client, "{blue}Team 1{default}: [{green}Point Bonus{default}] Point Bonus: {green}%d", finalBonus );	
 			}else{
 				CPrintToChat(client, "{blue}Team 1{default}: [{green}Point Bonus{default}] Point Bonus: {green}0" );	
 			}
 
 			if( RoundToNearest(fSurvivorBonus[1]) > 0 && iSurvivorsAlive[1] > 0){
 				int finalBonus = RoundToNearest(fSurvivorBonus[1] * float(iSurvivorsAlive[1]) );
-				CPrintToChat(client, "{blue}Team 2{default}: [{green}Point Bonus{default}] Point Bonus: {green}%dx%d = %d", RoundToNearest(fSurvivorBonus[1]), iSurvivorsAlive[1], finalBonus );
+				CPrintToChat(client, "{blue}Team 2{default}: [{green}Point Bonus{default}] Point Bonus: {green}%d", finalBonus );
 			}else{
 				int actualBonus = GetActualBonusPerAliveSurvivor();
 				int aliveSurvivors = GetAliveSurvivors();
 				int totalBonus = actualBonus*aliveSurvivors;
 				if(actualBonus > 0){
-					CPrintToChat(client, "{blue}Team 2{default}: [{green}Point Bonus{default}] Actual Point Bonus: {green}%dx%d = %d", actualBonus, aliveSurvivors, totalBonus );	
+					CPrintToChat(client, "{blue}Team 2{default}: [{green}Point Bonus{default}] Current Point Bonus: {green}%d", totalBonus );	
 				}else{
 					CPrintToChat(client, "{blue}Team 2{default}: [{green}Point Bonus{default}] Point Bonus: {green}0" );	
 				}
@@ -124,8 +90,6 @@ public Action:CMD_print_bonus_info(client, args)
 		CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(GetMaximumBonusPerSurvivor()));	
 		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 medkit for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
 		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for 1 pills/adrenaline for the map: {green}%d", RoundToNearest(GetBonusForPillsAdrenaline()));	
-		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for witch crown: {green}%d", RoundToNearest(GetConVarFloat(c_VarWitchCrownBonus)));	
-		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus for tank kill: {green}%d", RoundToNearest(GetConVarFloat(c_varTankKilledBonus)));	
 	}
 
 	return Plugin_Handled;
@@ -136,43 +100,6 @@ public OnPluginEnd()
 	ResetConVar(hCvarValveSurvivalBonus);
 }
 
-public void OnWitchDrawCrown()
-{
-	if(crownedWitchThisRound){
-
-	}else{
-		crownedWitchThisRound = true;
-		PrintWitchCrownedMessage();
-	}
-}
-
-public void OnWitchCrown()
-{
-	if(crownedWitchThisRound){
-
-	}else{
-		crownedWitchThisRound = true;
-		PrintWitchCrownedMessage();
-	}
-}
-
-public void OnTankDeath()
-{
-	if(killedTankThisRound){
-
-	}else{
-		killedTankThisRound = true;
-		PrintTankKilledMessage();
-	}
-}
-
-public void PrintTankKilledMessage(){
-	CPrintToChatAll("[{green}Point Bonus{default}] Your team killed the tank, therefore you will be awarded with additional {green}%d {default}bonus points.", RoundToNearest(GetConVarFloat(c_varTankKilledBonus)));	
-}
-
-public void PrintWitchCrownedMessage(){
-	CPrintToChatAll("[{green}Point Bonus{default}] Successfull witch crown! Additional {green}%d {default}bonus points will be added to survivor's score!", RoundToNearest(GetConVarFloat(c_VarWitchCrownBonus)));	
-}
 
 int GetActualBonusPerAliveSurvivor(){
 	new iSurvivalMultiplier = GetAliveSurvivors();
@@ -181,12 +108,6 @@ int GetActualBonusPerAliveSurvivor(){
 	float bonusForHP = GetTotalHealthBonusForAlive();
 	
 	float totalBonus = bonusForHP + ((GetBonusForMedkit()*medkitsCount) + (GetBonusForPillsAdrenaline()*pillsCount));
-	if(crownedWitchThisRound){
-		totalBonus = totalBonus + GetConVarFloat(c_VarWitchCrownBonus);
-	}
-	if(killedTankThisRound){
-		totalBonus = totalBonus + GetConVarFloat(c_varTankKilledBonus);
-	}
 	return RoundToNearest( totalBonus/float(iSurvivalMultiplier) );
 }
 
@@ -199,14 +120,6 @@ public Action:L4D2_OnEndVersusModeRound(bool:countSurvivors)
 	float bonusForHP = GetTotalHealthBonus();
 	
 	float totalBonus = bonusForHP + ((GetBonusForMedkit()*medkitsCount) + (GetBonusForPillsAdrenaline()*pillsCount));
-	if(crownedWitchThisRound){
-		totalBonus = totalBonus + GetConVarFloat(c_VarWitchCrownBonus);
-		crownedWitchThisRound = false;
-	}
-	if(killedTankThisRound){
-		totalBonus = totalBonus + GetConVarFloat(c_varTankKilledBonus);
-		killedTankThisRound = false;
-	}
 
 	fSurvivorBonus[team] = totalBonus/float(iSurvivalMultiplier);
 	if(iSurvivalMultiplier == 0){
