@@ -2802,7 +2802,7 @@ stock HandleHunterDP( attacker, victim, actualDamage, Float:calculatedDamage, Fl
 stock HandleJockeyDP( attacker, victim, Float:height )
 {
     // report?
-    if (    GetConVarBool(g_hCvarReport)
+    /*if (    GetConVarBool(g_hCvarReport)
         &&  height >= GetConVarFloat(g_hCvarJockeyDPThresh)
     ) {
         if ( IS_VALID_INGAME(attacker) && IS_VALID_INGAME(victim) && !IsFakeClient(attacker) )
@@ -2813,7 +2813,7 @@ stock HandleJockeyDP( attacker, victim, Float:height )
         {
             CPrintToChatAll( "{green}★★★ {olive}A jockey {red}high-pounced {olive}%N {default}({red}height{default}: {red}%i{default})", victim, RoundFloat(height) );
         }
-    }
+    }*/
     
     Call_StartForward(g_hForwardJockeyDP);
     Call_PushCell(attacker);
