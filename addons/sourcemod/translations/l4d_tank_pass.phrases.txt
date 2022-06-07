@@ -24,7 +24,7 @@
 	}
 	"phrase4"
 	{
-		"en"	"Who will take the Tank?"
+		"en"	"Who will take the Tank? (Will result in scoring penalty)"
 		"ru"	"Кому передать Танка?"
 		"hu"	"Ki veszi át a Tankot?"
 		"es"	"¿Quién tomará el Tanque?"
