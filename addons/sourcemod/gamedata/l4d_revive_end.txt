@@ -1,0 +1,37 @@
+"Games"
+{
+	"left4dead"
+	{
+		"Signatures"
+		{
+			/*
+			 *	CTerrorPlayer::StopRevivingSomeone(bool)
+			 */
+			"CTerrorPlayer::StopRevivingSomeone"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer19StopRevivingSomeoneEb"
+				"windows"	"\x55\x8B\xEC\xD9\xEE\x83\x2A\x2A\x53\x56\x57\x51"
+				/* 55 8B EC D9 EE 83 ? ? 53 56 57 51 */
+				/* Search: "revive_end" */
+			}
+		}
+	}
+	"left4dead2"
+	{
+		"Signatures"
+		{
+			/*
+			 *	CTerrorPlayer::StopRevivingSomeone(bool)
+			 */
+			"CTerrorPlayer::StopRevivingSomeone"
+			{
+				"library"	"server"
+				"linux"		"@_ZN13CTerrorPlayer19StopRevivingSomeoneEb"
+				"windows"	"\x55\x8B\x2A\xD9\x2A\x83\x2A\x2A\x53\x56"
+				/* 55 8B ? D9 ? 83 ? ? 53 56 */
+				/* Search: "revive_end" */
+			}
+		}
+	}
+}
