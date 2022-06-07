@@ -95,8 +95,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	if (g_iCvarEngineFlags && IsValidClient(client) && IsPlayerAlive(client) && !IsFakeClient(client)){
 		if (g_iCvarEngineFlags & NO_FALL_DAMAGE_BUG_FIX && GetClientTeam(client) == 2 && IsFallDamage(client) && buttons & IN_USE){
 
-			buttons &= ~IN_USE;
-
 			if (g_bCvarWarnEnabled && !g_bTempWarnLock[client]){
 
 				g_bTempWarnLock[client] = true;
