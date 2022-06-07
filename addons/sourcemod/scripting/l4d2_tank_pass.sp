@@ -610,7 +610,7 @@ void TankPass(int tank, int target, int admin = 0)
 
 	bool isOnFire = IsOnFire(tank);
 
-	if (g_bIsFinale || !g_bCvarQuickPass){
+	if (!g_bCvarQuickPass){
 		if (IsMustIgnite(isOnFire))
 			g_bIsIgnited[tank] = true;
 
