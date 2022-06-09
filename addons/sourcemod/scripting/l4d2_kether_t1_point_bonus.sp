@@ -135,14 +135,14 @@ public Action PrintRoundEndStats(Handle timer) {
 	new team = InSecondHalfOfRound();
 	new iSurvivalMultiplier = GetUprightSurvivors();
 	if(team == 0){
-		if(RoundToNearest(fSurvivorBonus[team])>0){
+		if(RoundToNearest(fSurvivorBonus[team])>0 && iSurvivorsAlive[team] > 0){
 			CPrintToChatAll("[{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(fSurvivorBonus[team]) );
 		}
 	}else{
-		if(RoundToNearest(fSurvivorBonus[0])>0){
-			CPrintToChatAll("{blue}Team 1{default}: [{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(fSurvivorBonus[0]) );
+		if(RoundToNearest(fSurvivorBonus[0])>0  && iSurvivorsAlive[0] > 0){
+			CPrintToChatAll("{blue}Team 1{default}: [{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivorsAlive[0], RoundToNearest(fSurvivorBonus[0]) );
 		}
-		if(RoundToNearest(fSurvivorBonus[1])>0){
+		if(RoundToNearest(fSurvivorBonus[1])>0  && iSurvivorsAlive[1] > 0){
 			CPrintToChatAll("{blue}Team 2{default}: [{green}Point Bonus{default}] Total bonus: {green}%d{default}x{green}%d", iSurvivalMultiplier, RoundToNearest(fSurvivorBonus[1]) );
 		}
 	}
