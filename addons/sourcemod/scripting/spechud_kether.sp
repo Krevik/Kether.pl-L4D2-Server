@@ -411,6 +411,11 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	bRoundLive = false;
 	bPendingArrayRefresh = true;
+	UpTime = GetTime();
+	punch_connected = 0;
+	rock_connected = 0;
+	prop_connected = 0;
+	damage_connected = 0;
 }
 
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
@@ -438,6 +443,7 @@ public Action delayedTankStatsPrint(Handle timer)
 				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
 		}
 		g_bAnnounceTankDamage = false;
+		g_bIsTankInPlay = false;
 	}
 	return Plugin_Continue;
 }
@@ -455,15 +461,13 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 }
 
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
+	if (g_bIsTankInPlay) return; // Tank passed
 	UpTime = GetTime();
 	punch_connected = 0;
 	rock_connected = 0;
 	prop_connected = 0;
 	damage_connected = 0;
 	g_bAnnounceTankDamage = true;
-
-	if (g_bIsTankInPlay) return; // Tank passed
-	
 	// New tank, damage has not been announced
 	g_bIsTankInPlay = true;
 }
