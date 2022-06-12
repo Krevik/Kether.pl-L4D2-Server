@@ -38,6 +38,14 @@
 //L4D2_OnEndVersusModeRound
 #include <left4dhooks> //#include <left4downtown>
 
+#define IS_VALID_CLIENT(%1)     (%1 > 0 && %1 <= MaxClients)
+#define IS_SURVIVOR(%1)         (GetClientTeam(%1) == 2)
+#define IS_INFECTED(%1)         (GetClientTeam(%1) == 3)
+#define IS_VALID_INGAME(%1)     (IS_VALID_CLIENT(%1) && IsClientInGame(%1))
+#define IS_VALID_SURVIVOR(%1)   (IS_VALID_INGAME(%1) && IS_SURVIVOR(%1))
+#define IS_VALID_INFECTED(%1)   (IS_VALID_INGAME(%1) && IS_INFECTED(%1))
+#define IS_SURVIVOR_ALIVE(%1)   (IS_VALID_SURVIVOR(%1) && IsPlayerAlive(%1))
+#define IS_INFECTED_ALIVE(%1)   (IS_VALID_INFECTED(%1) && IsPlayerAlive(%1))
 #define DEBUG_MODE 0
 
 Handle
@@ -107,6 +115,7 @@ public void OnPluginStart()
 	// hook events
 	HookEvent("defibrillator_used", Event_DefibUsed, EventHookMode_PostNoCopy);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
+    HookEvent("witch_killed",               Event_WitchKilled,              EventHookMode_Post);
 
 	// Chat cleaning (bequit already doing it)
 	/*AddCommandListener(Command_Say, "say");
@@ -234,8 +243,17 @@ void TankKilled()
 	ReportChange(iTankBonus);
 }
 
-public void OnWitchDrawCrown()
+
+public void Event_WitchKilled ( Handle event, const char[] name, bool dontBroadcast )
 {
+    int witch = GetEventInt(event, "witchid");
+    int attacker = GetClientOfUserId( GetEventInt(event, "userid") );
+    
+    if ( !IS_VALID_SURVIVOR(attacker) ) { return ; }
+    
+    bool bOneShot = GetEventBool(event, "oneshot");
+
+	if(bOneShot){
 	if (!g_hCvarEnabled.BoolValue) {
 		return;
 	}
@@ -255,31 +273,8 @@ public void OnWitchDrawCrown()
 	}
 
 	ReportChange(iWitchBonus);
+	}
 }
-
-public void OnWitch100BySurvivor()
-{
-	if (!g_hCvarEnabled.BoolValue) {
-		return;
-	}
-
-	int iWitchBonus = g_hCvarBonusWitch.IntValue;
-	if (iWitchBonus == 0 || g_bRoundOver[RoundNum()]) {
-		return;
-	}
-
-	g_iBonus[RoundNum()] += iWitchBonus;
-
-	if (g_bSetSameChange) {
-		g_iSameChange = iWitchBonus;
-	} else if (g_iSameChange != iWitchBonus) {
-		g_iSameChange = 0;
-		g_bSetSameChange = false;
-	}
-
-	ReportChange(iWitchBonus);
-}
-
 
 // Special Check (test)
 // --------------------
