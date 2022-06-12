@@ -1441,6 +1441,22 @@
 		"start_extra_dist"	"220.139542"
 		"end_point"			"-264.031250 8712.565430 -27.968758"
 		"end_dist"			"268.509125"
+		"tank_ban_flow"
+		{
+			"1"
+			{
+				"min"		"20"
+				"max"		"50"
+			}
+		}
+		"witch_ban_flow"
+		{
+			"1"
+			{
+				"min"		"20"
+				"max"		"50"
+			}
+		}
 	}
 	"uf2_rooftops"
 	{
