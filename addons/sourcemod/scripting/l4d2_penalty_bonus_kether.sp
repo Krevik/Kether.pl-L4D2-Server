@@ -257,7 +257,7 @@ public void OnWitchDrawCrown()
 	ReportChange(iWitchBonus);
 }
 
-public void OnWitchCrown()
+public void OnWitch100BySurvivor()
 {
 	if (!g_hCvarEnabled.BoolValue) {
 		return;
