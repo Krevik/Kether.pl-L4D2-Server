@@ -17,7 +17,7 @@ Age=1420538790
 [D:\Kether.pl 2.0\addons\sourcemod\scripting\fix_engine_kether.sp]
 Age=1420578153
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_kether_t1_point_bonus.sp]
-Age=1421625012
+Age=1422483076
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_jockey_unteleport.sp]
 Age=1420857081
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_team_mix.txt]
@@ -49,9 +49,9 @@ Age=1421630231
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_tank_pass.sp]
 Age=1422363321
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_penalty_bonus_kether.sp]
-Age=1421629831
+Age=1422885557
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_getup_fixes.sp]
-Age=1421629970
+Age=1422885605
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\autopause.sp]
 Age=1422156946
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tongue_bend_fix.sp]
@@ -64,3 +64,17 @@ Age=1422362845
 Age=1422362845
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_heal_revive_fix.sp]
 Age=1422363185
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq_kether.sp]
+Age=1422542593
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq.sp]
+Age=1421623912
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\witch_update_nbm.sp]
+Age=1422486919
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq_no_notification.sp]
+Age=1422678704
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\spechud_kether.sp]
+Age=1422681238
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_witch_damage_announce_kether.sp]
+Age=1422885444
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_spectator_prefix.sp]
+Age=1422757547

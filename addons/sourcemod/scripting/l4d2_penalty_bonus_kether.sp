@@ -115,7 +115,6 @@ public void OnPluginStart()
 	// hook events
 	HookEvent("defibrillator_used", Event_DefibUsed, EventHookMode_PostNoCopy);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
-    HookEvent("witch_killed",               Event_WitchKilled,              EventHookMode_Post);
 
 	// Chat cleaning (bequit already doing it)
 	/*AddCommandListener(Command_Say, "say");
@@ -243,17 +242,8 @@ void TankKilled()
 	ReportChange(iTankBonus);
 }
 
-
-public void Event_WitchKilled ( Handle event, const char[] name, bool dontBroadcast )
+public void OnWitch100BySurvivor()
 {
-    int witch = GetEventInt(event, "witchid");
-    int attacker = GetClientOfUserId( GetEventInt(event, "userid") );
-    
-    if ( !IS_VALID_SURVIVOR(attacker) ) { return ; }
-    
-    bool bOneShot = GetEventBool(event, "oneshot");
-
-	if(bOneShot){
 	if (!g_hCvarEnabled.BoolValue) {
 		return;
 	}
@@ -273,9 +263,7 @@ public void Event_WitchKilled ( Handle event, const char[] name, bool dontBroadc
 	}
 
 	ReportChange(iWitchBonus);
-	}
 }
-
 // Special Check (test)
 // --------------------
 public Action L4D2_OnEndVersusModeRound(bool bCountSurvivors)
