@@ -22,7 +22,6 @@ ArrayList queuedPullbackCheck;
 char queuedTankSteamId[64];
 ConVar hTankPrint, hTankDebug;
 bool casterSystemAvailable;
-Handle g_hForwardTankSpecPass = INVALID_HANDLE;
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
@@ -91,8 +90,6 @@ public void OnPluginStart()
     // Cvars
     hTankPrint = CreateConVar("tankcontrol_print_all", "0", "Who gets to see who will become the tank? (0 = Infected, 1 = Everyone)");
     hTankDebug = CreateConVar("tankcontrol_debug", "0", "Whether or not to debug to console");
-
-    g_hForwardTankSpecPass = CreateGlobalForward("OnTankSpecPassed", ET_Ignore, Param_Cell, Param_Cell );
 }
 
 public void OnAllPluginsLoaded()
@@ -204,16 +201,16 @@ public void PlayerTeam_Event(Event hEvent, const char[] name, bool dontBroadcast
             GetClientAuthId(client, AuthId_Steam2, tmpSteamId, sizeof(tmpSteamId));
             int x = FindStringInArray(queuedPullbackCheck, tmpSteamId);
             if(x > -1){
+                CPrintToChatAll("[Tank Pullback] Joined client %d is valid for pullback!", client );
                 if(L4D2_IsTankInPlay()){
-                    //tank in play we're applying a penalty (forward), adding punishment and adding player to the list who had tank
+                    //tank in play we're applying a penalty, adding punishment and adding player to the list who had tank
                     //clearing pullback list
-                        queuedPullbackCheck.Clear();
-                        Call_StartForward(g_hForwardTankSpecPass);
-                        Call_Finish();
+                    
                 }else{
                     //just queue the pullbacked player as current tank and give info on the chat
                     GetArrayString(queuedPullbackCheck, x, queuedTankSteamId, sizeof(queuedTankSteamId));
                     RequestFrame(outputTankToAll, 0);
+                    CPrintToChatAll("[Tank Pullback] Tank was not alive yet, to queued %d as next tank.", client);
                 }
                 RemoveFromArray(queuedPullbackCheck, x);
             }
@@ -227,6 +224,7 @@ public void queuePullback(int client){
     char tmpSteamId[64];
     GetClientAuthId(client, AuthId_Steam2, tmpSteamId, sizeof(tmpSteamId));
     if(strcmp(queuedTankSteamId, tmpSteamId) == 0) {
+        CPrintToChatAll("[Tank Pullback] Adding client %d to pullback chestklist", client);
         PushArrayString(queuedPullbackCheck, tmpSteamId);
     }
 }

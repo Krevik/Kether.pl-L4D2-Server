@@ -114,7 +114,6 @@ public void OnPluginStart()
 
 	// hook events
 	HookEvent("defibrillator_used", Event_DefibUsed, EventHookMode_PostNoCopy);
-	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
 
 	// Chat cleaning (bequit already doing it)
 	/*AddCommandListener(Command_Say, "say");
@@ -209,20 +208,27 @@ public Action Cmd_Bonus(int iClient, int iArgs)
 
 // Tank and Witch tracking
 // -----------------------
-public void Event_PlayerDeath(Event hEvent, const char[] sEventName, bool bDontBroadcast)
-{
-	if (!g_hCvarEnabled.BoolValue) {
+
+public void TP_OnTankPass(){
+	int iTankBonus = g_hCvarBonusTank.IntValue;
+
+	if (iTankBonus == 0 || g_bRoundOver[RoundNum()]) {
 		return;
 	}
 
-	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
+	g_iBonus[RoundNum()] += iTankBonus;
 
-	if (iClient && IsTank(iClient)) {
-		TankKilled();
+	if (g_bSetSameChange) {
+		g_iSameChange = iTankBonus;
+	} else if (g_iSameChange != iTankBonus) {
+		g_iSameChange = 0;
+		g_bSetSameChange = false;
 	}
+
+	ReportChange(iTankBonus);
 }
 
-void TankKilled()
+public void OnTankDeath()
 {
 	int iTankBonus = g_hCvarBonusTank.IntValue;
 

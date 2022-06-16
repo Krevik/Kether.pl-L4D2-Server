@@ -49,7 +49,7 @@ Age=1421630231
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_tank_pass.sp]
 Age=1422363321
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_penalty_bonus_kether.sp]
-Age=1422885557
+Age=1422951008
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_getup_fixes.sp]
 Age=1422885605
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\autopause.sp]
@@ -65,7 +65,7 @@ Age=1422362845
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_heal_revive_fix.sp]
 Age=1422363185
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq_kether.sp]
-Age=1422542593
+Age=1422950875
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq.sp]
 Age=1421623912
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\witch_update_nbm.sp]
@@ -78,3 +78,5 @@ Age=1422681238
 Age=1422885444
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_spectator_prefix.sp]
 Age=1422757547
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq_force_tank.sp]
+Age=1422937434
