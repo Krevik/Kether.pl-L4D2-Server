@@ -126,14 +126,10 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_pause", Pause_Cmd, "Pauses the game");
 	RegConsoleCmd("sm_unpause", Unpause_Cmd, "Marks your team as ready for an unpause");
 	RegConsoleCmd("sm_ready", Unpause_Cmd, "Marks your team as ready for an unpause");
-	RegConsoleCmd("sm_Ready", Unpause_Cmd, "Marks your team as ready for an unpause");
 	RegConsoleCmd("sm_r", Unpause_Cmd, "Marks your team as ready for an unpause");
-	RegConsoleCmd("sm_R", Unpause_Cmd, "Marks your team as ready for an unpause");
 
 	RegConsoleCmd("sm_unready", Unready_Cmd, "Marks your team as ready for an unpause");
 	RegConsoleCmd("sm_nr", Unready_Cmd, "Marks your team as ready for an unpause");
-	RegConsoleCmd("sm_Nr", Unready_Cmd, "Marks your team as ready for an unpause");
-	RegConsoleCmd("sm_NR", Unready_Cmd, "Marks your team as ready for an unpause");
 
 	RegConsoleCmd("sm_toggleready", ToggleReady_Cmd, "Toggles your team's ready status");
 	
@@ -141,8 +137,6 @@ public void OnPluginStart()
 	RegAdminCmd("sm_forceunpause", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
 	RegAdminCmd("sm_forcestart", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
 	RegAdminCmd("sm_fs", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
-	RegAdminCmd("sm_Fs", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
-	RegAdminCmd("sm_FS", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
 
 	RegConsoleCmd("sm_show", Show_Cmd, "Hides the pause panel so other menus can be seen");
 	RegConsoleCmd("sm_hide", Hide_Cmd, "Shows a hidden pause panel");
