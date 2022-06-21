@@ -634,10 +634,10 @@ void TankPass(int tank, int target, int admin = 0)
 			ForcePlayerSuicide(target);
 		}
 		// left4dhooks bugfix
-		float vPos[3], vAng[3];
-		GetClientAbsOrigin(tank, vPos);
-		GetClientAbsAngles(tank, vAng);
-		TeleportEntity(target, vPos, vAng, NULL_VECTOR);
+		//float vPos[3], vAng[3];
+		//GetClientAbsOrigin(tank, vPos);
+		//GetClientAbsAngles(tank, vAng);
+		//TeleportEntity(target, vPos, vAng, NULL_VECTOR);
 
 		SetPassCount(tank);
 		L4D_ReplaceTank(tank, target);
