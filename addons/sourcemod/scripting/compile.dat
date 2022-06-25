@@ -35,7 +35,7 @@ Age=1421165700
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\aliases.sp]
 Age=1421570201
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\pause_kether.sp]
-Age=1422935156
+Age=1423537864
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_jockey_high_pounce.sp]
 Age=1421166668
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\abm.sp]
@@ -80,3 +80,9 @@ Age=1422885444
 Age=1422757547
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tank_control_eq_force_tank.sp]
 Age=1422937434
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_witch_crown_detect.sp]
+Age=1423349779
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_damage_report.sp]
+Age=1423337294
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_rock_trace_unblock.sp]
+Age=1423390009
