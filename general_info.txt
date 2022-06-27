@@ -37,6 +37,7 @@ Kether 2.0:
 	-dmg chargera 7-->10
 	-jockey can high pounce survs for max 15 dmg
 	-shortened time and distance needed to respawn into ghost state
+	-pitchfork is replaced with fireaxe
 
 TODO:
 -add tank pass? maybe with double spawns fix or idk
