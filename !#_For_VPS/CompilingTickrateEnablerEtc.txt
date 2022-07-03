@@ -1,0 +1,4 @@
+CC=clang CXX=clang python3 /home/ubuntu/tickrate_enabler/configure.py --enable-optimize --symbol-files -s sdk2013
+python3 /home/ubuntu/tickrate_enabler/configure.py --enable-optimize -s sdk2013
+
+/home/ubuntu/tickrate_enabler/build2 ambuild
