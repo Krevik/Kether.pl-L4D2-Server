@@ -51,7 +51,7 @@ Age=1423283540
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_penalty_bonus_kether.sp]
 Age=1422951008
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_getup_fixes.sp]
-Age=1422885605
+Age=1423615837
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\autopause.sp]
 Age=1422156946
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_tongue_bend_fix.sp]
@@ -86,3 +86,7 @@ Age=1423349779
 Age=1423337294
 [D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_rock_trace_unblock.sp]
 Age=1423390009
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d2_ladder_editor.sp]
+Age=1423604726
+[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\sm_dev_cmds.sp]
+Age=1423604980
