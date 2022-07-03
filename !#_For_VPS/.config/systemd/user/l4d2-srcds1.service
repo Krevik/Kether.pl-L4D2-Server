@@ -1,0 +1,10 @@
+[Service]
+Type=forking
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=yes
+RemainAfterExit=no
+ExecStart=/home/steam/.config/init.d/l4d2-srcds1 start
+ExecStop=/home/steam/.config/init.d/l4d2-srcds1 stop 
