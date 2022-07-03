@@ -26,17 +26,3 @@ $RECYCLE.BIN/
 # =========================
 clientprefs-sqlite.sq3
 logs/
-*.vpk
-!ions_vocalizer*.vpk
-**
-!addons/
-!cfg/
-!\!#_For_VPS/
-!scripts/vscripts/**
-!host.txt
-!myhost.txt
-!mymotd.txt
-!motd.txt
-!LICENSE
-!.gitattributes
-!.gitignore
