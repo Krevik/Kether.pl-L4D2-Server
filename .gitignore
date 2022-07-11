@@ -18,9 +18,17 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# SourceMod spcomp's log
+compile.dat
+
+# VS Code settings
+**/.vscode/settings.json
+**/.vs/slnx.sqlite
+
 # =========================
 # Operating System Files
 # =========================
 clientprefs-sqlite.sq3
+motd_lerp.sp
+motd_lerp.smx
 logs/
-motd HTML/
