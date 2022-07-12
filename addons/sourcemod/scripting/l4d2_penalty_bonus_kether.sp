@@ -248,7 +248,29 @@ public void OnTankDeath()
 	ReportChange(iTankBonus);
 }
 
-public void OnWitch100BySurvivor()
+public void Kether_OnWitchDrawCrown(){
+	if (!g_hCvarEnabled.BoolValue) {
+		return;
+	}
+
+	int iWitchBonus = g_hCvarBonusWitch.IntValue;
+	if (iWitchBonus == 0 || g_bRoundOver[RoundNum()]) {
+		return;
+	}
+
+	g_iBonus[RoundNum()] += iWitchBonus;
+
+	if (g_bSetSameChange) {
+		g_iSameChange = iWitchBonus;
+	} else if (g_iSameChange != iWitchBonus) {
+		g_iSameChange = 0;
+		g_bSetSameChange = false;
+	}
+
+	ReportChange(iWitchBonus);
+}
+
+public void Kether_OnWitchCrown()
 {
 	if (!g_hCvarEnabled.BoolValue) {
 		return;

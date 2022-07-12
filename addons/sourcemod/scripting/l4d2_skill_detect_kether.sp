@@ -2658,13 +2658,14 @@ stock HandleNonSkeet( attacker, victim, damage, bool:bOverKill = false, bool:bMe
 // crown
 HandleCrown( attacker, damage )
 {
-        if ( IS_VALID_INGAME(attacker) )
+    /*
+    if ( IS_VALID_INGAME(attacker) )
         {
 			CPrintToChatAll( "{green}♔ {olive}%N {blue}crowned a witch {default}({green}%i {default}damage).", attacker, damage );
         }
         else {
 			CPrintToChatAll( "{green}♔ {blue}A witch was crowned.");
-        }
+        }*/
     
     // call forward
     Call_StartForward(g_hForwardCrown);
@@ -2676,13 +2677,14 @@ HandleCrown( attacker, damage )
 // drawcrown
 HandleDrawCrown( attacker, damage, chipdamage )
 {
+    /*
         if ( IS_VALID_INGAME(attacker) )
         {
 			CPrintToChatAll( "{green}♔ {olive}%N {blue}draw-crowned a witch {default}(\x03%i\x01 damage, \x05%i\x01 chip {default}).", attacker, damage, chipdamage );
         }
         else {
             PrintToChatAll( "A witch was draw-crowned (\x03%i\x01 damage, \x05%i\x01 chip).", damage, chipdamage );
-        }
+        }*/
     
     // call forward
     Call_StartForward(g_hForwardDrawCrown);
