@@ -266,21 +266,9 @@ public Action PrintAnyway(Handle timer, DataPack pack)
     char witch_dmg_key[10];
     Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
     GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
-    int OneHundredPercentDamageValue = 0;
-    int survivorsTMP = 0;
-    //firstly we need to get all the damage done to witch by SURVIVORS - it's gonna be 100% percent damage
-    for(int client = 1; client <= MAXPLAYERS; client++){
-        OneHundredPercentDamageValue += witchDamageCollector[client];
-        //optimization
-        if(GetClientTeam(client) == TEAM_SURVIVOR){
-            survivorsTMP++;
-        }
-        if(survivorsTMP >= maxSurvivors){
-            break;
-        }
-    }
+    int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
     int witchRemainingHealth = witchMaxHealth - OneHundredPercentDamageValue;
-    if(witchRemainingHealth> 1){
+    if(witchRemainingHealth > 1){
         CPrintToChatAll("{default}[{green}!{default}] {blue}Witch {default}had {olive}%d {default}health remaining", witchRemainingHealth);
     }
     CalculateAndPrintDamage(witchID);
