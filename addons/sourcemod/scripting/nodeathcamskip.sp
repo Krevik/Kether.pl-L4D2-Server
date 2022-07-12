@@ -49,12 +49,15 @@ public Action:Listener_Join(client, const String:command[], argc)
             if (Blocked[client])
             {
 
+                // Warn Others.
                 if (!bSkipPrint[client])
                 {
+                    CPrintToChatAll("{red}[{default}Exploit{red}] {olive}%N {default}tried skipping the Death Timer.", client);
                     bSkipPrint[client] = true;
                 }
 
                 // Tell Offender.
+                CPrintToChat(client, "{red}[{default}Exploit{red}] {default}You will be unable to join the Team for {red}%.1f {default}Seconds.", (fSavedTime[client] + 6.0) - GetGameTime());
                 CPrintToChat(client, "{red}[{default}Exploit{red}] {default}You will be moved automatically.");
 
                 return Plugin_Handled;
