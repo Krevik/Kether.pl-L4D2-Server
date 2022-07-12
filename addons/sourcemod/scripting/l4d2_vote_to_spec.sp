@@ -44,16 +44,23 @@ public Action Voting_CMD(int client, int args)
                 sizeof(target_name),
                 tn_is_ml)) <= 0)
         {
-            ReplyToTargetError(client, target_count);
+            ReplyToTargetError(client, target_list[0]);
             return Plugin_Handled;
         }
 
         targetSwitchClientID = target_list[0];
 
         if(GetClientTeam(targetSwitchClientID) == 1){
-            ReplyToTargetError(client, target_count);
+            ReplyToTargetError(client, target_list[0]);
             return Plugin_Handled;
         }
+
+		int voteCasterTeam = GetClientTeam(client);
+		int targetTeam = GetClientTeam(targetSwitchClientID);
+		if(voteCasterTeam != targetTeam){
+			ReplyToTargetError(client, target_list[0]);
+			return Plugin_Handled;
+		}
 
         startSwitchVoting(targetSwitchClientID, client);
 	}
@@ -78,7 +85,7 @@ public void startSwitchVoting(int target, int sender)
 	int[] iPlayers = new int[MaxClients];
 	for (int i=1; i<=MaxClients; i++)
 	{
-		if (!IsClientInGame(i) || IsFakeClient(i) || (GetClientTeam(i) == 1))
+		if (!IsClientInGame(i) || IsFakeClient(i) || (GetClientTeam(i) == 1) || GetClientTeam(i) != GetClientTeam(sender) )
 		{
 			continue;
 		}
