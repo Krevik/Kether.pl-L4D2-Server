@@ -2,8 +2,8 @@
 
 #define DEBUG
 
-#define PLUGIN_AUTHOR "FliX"
-#define PLUGIN_VERSION "0.10"
+#define PLUGIN_AUTHOR "Krevik"
+#define PLUGIN_VERSION "1.0"
 
 #include <sourcemod>
 #include <sdktools>
