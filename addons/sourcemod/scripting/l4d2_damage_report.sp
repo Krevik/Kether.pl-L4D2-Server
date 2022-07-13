@@ -8,7 +8,7 @@
 
 #define TEAM_SURVIVOR 2
 #define TEAM_INFECTED 3
-
+#define ARRAY_INDEX_TIMESTAMP 0 //DT_IntervalTimer
 int damageCollector[MAXPLAYERS + 1][MAXPLAYERS + 1]; //[infected][survivor]
 
 public Plugin myinfo =
@@ -111,8 +111,9 @@ public Action ReportDamageDoneToSmoker(Handle timer, DataPack pack)
 	pack.Reset();
     infectedAttacker = pack.ReadCell();
     survivorVictim = pack.ReadCell();
-
-    TryReportDoneDamage(infectedAttacker, survivorVictim);
+	if (IsSurvivorParalyzed(survivorVictim)) {
+		TryReportDoneDamage(infectedAttacker, survivorVictim);
+	}
 
 	return Plugin_Continue;
 }
@@ -144,4 +145,15 @@ public void L4D_OnEnterGhostState(int infected)
 public void Event_ResetAllDamage(Event event, const char[] name, bool dontBroadcast)
 {
     clearAllDamage();
+}
+
+bool IsSurvivorParalyzed(int iClient)
+{
+	int iTongueOwner = GetEntProp(iClient, Prop_Send, "m_tongueOwner");
+	if (iTongueOwner != -1) {
+		float fVictimTimer = GetGameTime() - GetEntPropFloat(iClient, Prop_Send, "m_tongueVictimTimer", ARRAY_INDEX_TIMESTAMP);
+		return (fVictimTimer >= 1.0);
+	}
+	
+	return false;
 }
