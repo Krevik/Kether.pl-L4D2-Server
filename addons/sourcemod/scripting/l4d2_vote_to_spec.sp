@@ -62,6 +62,11 @@ public Action Voting_CMD(int client, int args)
 			return Plugin_Handled;
 		}
 
+		if(!IsValidForSwitching(targetSwitchClientID)){
+			ReplyToTargetError(client, target_list[0]);
+			return Plugin_Handled;
+		}
+
         startSwitchVoting(targetSwitchClientID, client);
 	}
 	return Plugin_Handled;
@@ -100,7 +105,7 @@ public void startSwitchVoting(int target, int sender)
 	SetBuiltinVoteArgument(votingHandle, voteTitle);
 	SetBuiltinVoteInitiator(votingHandle, sender);
 	SetBuiltinVoteResultCallback(votingHandle, SwitchVoteResultHandler);
-	DisplayBuiltinVote(votingHandle, iPlayers, iNumPlayers, 20);
+	DisplayBuiltinVote(votingHandle, iPlayers, iNumPlayers, 8);
 	FakeClientCommand(sender, "Vote Yes");
 }
 
@@ -131,7 +136,7 @@ public void SwitchVoteResultHandler(Handle vote, int num_votes, int num_clients,
 	{
 		if (item_info[i][BUILTINVOTEINFO_ITEM_INDEX] == BUILTINVOTES_VOTE_YES)
 		{
-			if (item_info[i][BUILTINVOTEINFO_ITEM_VOTES] > (num_clients / 2))
+			if (item_info[i][BUILTINVOTEINFO_ITEM_VOTES] > (num_clients / 2) )
 			{
 				char targetName[256];
 				GetClientName(targetSwitchClientID, targetName, sizeof(targetName) );
@@ -153,7 +158,7 @@ public void SwitchVoteResultHandler(Handle vote, int num_votes, int num_clients,
 }
 
 bool IsValidForSwitching(int client){
-	return IsValidClient(client) && GetClientTeam(client) < 2;
+	return IsValidClient(client) && GetClientTeam(client) > 1;
 }
 
 stock bool IsValidClient(int client)
