@@ -33,5 +33,5 @@ public void FALL_DMG_LOG(Event event, const char[] name, bool dontBroadcast)
 	int reason = GetClientOfUserId(GetEventInt(event, "causer"));
 	float fallVelocitySend = GetEntPropFloat(client, Prop_Send, "m_flFallVelocity");
 	float fallVelocityData = GetEntPropFloat(client, Prop_Data, "m_flFallVelocity");
-	LogToFileEx(g_sCmdLogPath, "Client: %s || ClientName: %N || dmg: %f || reason: %d || fallVeloSend: %f || fallVeloData: %f", client, client, dmg, reason, fallVelocitySend, fallVelocityData);
+	LogToFileEx(g_sCmdLogPath, "Client: %d || ClientName: %N || dmg: %f || reason: %d || fallVeloSend: %f || fallVeloData: %f", client, client, dmg, reason, fallVelocitySend, fallVelocityData);
 }
