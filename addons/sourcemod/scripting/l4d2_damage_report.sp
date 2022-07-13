@@ -3,7 +3,7 @@
 
 #include <sourcemod>
 #include <sdktools>
-#include <colors>
+#include <multicolors>
 #include <l4d2util>
 
 #define TEAM_SURVIVOR 2
@@ -29,10 +29,12 @@ public void OnPluginStart()
 	HookEvent("player_death", Event_PlayerDeath);
 	HookEvent("round_start", Event_ResetAllDamage);
 	HookEvent("round_end", Event_ResetAllDamage);
+    HookEvent("player_hurt", Event_PlayerHurt);
+    HookEvent("tongue_grab", Event_SmokerAttackFirst);
 }
 
 bool isValidInfectedAttacker(int client){
-    return ( client > 0 && IsClientInGame(client) && GetClientTeam(client) == TEAM_INFECTED );
+    return ( client > 0 && GetClientTeam(client) == TEAM_INFECTED );
 }
 
 bool isValidSurvivorVictim(int client){
@@ -49,7 +51,7 @@ void TryReportDoneDamage(int infected, int survivor)
 	int zombieClass = GetEntProp(infected, Prop_Send, "m_zombieClass");
     int zombieHealth = GetClientHealth(infected);
 	if(damage > 0){
-        CPrintToChat(survivor, "{blue}[DmgReport] {green}%N {cyan}%s {default}took {cyan}%d {default}damage from you. Had {cyan}%d {default}HP remaining!", infected, L4D2_InfectedNames[zombieClass], damage, zombieHealth);
+        CPrintToChat(survivor, "{blue}[DmgReport] {green}%N's {olive}%s {default}took {olive}%d {default}damage from you. Had {olive}%d {default}HP remaining!", infected, L4D2_InfectedNames[zombieClass], damage, zombieHealth);
         resetDamage(infected, survivor);
     }
 }
@@ -71,17 +73,50 @@ void resetDamageDoneToInfected(int infected){
     }
 }
 
+
+
 public void Event_PlayerHurt(Event hEvent, const char[] sEventName, bool bDontBroadcast)
 {
     int infectedAttacker = GetClientOfUserId(hEvent.GetInt("userid"));
     int survivorVictim = GetClientOfUserId(hEvent.GetInt("attacker"));
     int damageDoneToInfected = hEvent.GetInt("dmg_health");
     int infectedClass = GetEntProp(infectedAttacker, Prop_Send, "m_zombieClass");
-
     if( isValidForReportCount(infectedAttacker, survivorVictim, infectedClass) ){
         damageCollector[infectedAttacker][survivorVictim] += damageDoneToInfected;
     } 
 }
+
+public void Event_SmokerAttackFirst(Event hEvent, const char[] sEventName, bool bDontBroadcast)
+{
+	int iAttackerUserid = hEvent.GetInt("userid");
+	int iAttacker = GetClientOfUserId(iAttackerUserid);
+	int iVictimUserid = hEvent.GetInt("victim");
+	int iVictim = GetClientOfUserId(iVictimUserid);
+	
+    if(isValidInfectedAttacker(iAttacker) && isValidSurvivorVictim(iVictim) )
+
+	if (iAttacker > 0 && iVictim > 0) {
+		// It takes exactly 1.0s of dragging to get paralyzed, so we'll give the timer additional 0.1s to update
+        DataPack pack;
+		CreateDataTimer(1.1, ReportDamageDoneToSmoker, pack, TIMER_FLAG_NO_MAPCHANGE | TIMER_HNDL_CLOSE);
+        pack.WriteCell(iAttacker);
+        pack.WriteCell(iVictim);
+	}
+}
+
+public Action ReportDamageDoneToSmoker(Handle timer, DataPack pack)
+{
+    int infectedAttacker;
+    int survivorVictim;
+	pack.Reset();
+    infectedAttacker = pack.ReadCell();
+    survivorVictim = pack.ReadCell();
+
+    TryReportDoneDamage(infectedAttacker, survivorVictim);
+
+	return Plugin_Continue;
+}
+
 
 public void Event_CappedPlayer(Event event, const char[] name, bool dontBroadcast)
 {
