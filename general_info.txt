@@ -38,7 +38,3 @@ Kether 2.0:
 	-jockey can high pounce survs for max 15 dmg
 	-shortened time and distance needed to respawn into ghost state
 	-pitchfork is replaced with fireaxe
-
-TODO:
--add tank pass? maybe with double spawns fix or idk
--info dmgu tanka i czas zycia zeby zostawalo po passie 
