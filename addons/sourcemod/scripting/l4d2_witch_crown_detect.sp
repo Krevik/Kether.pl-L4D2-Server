@@ -19,6 +19,8 @@ int TEAM_INFECTED = 3;
 Handle witchDamageTrie = INVALID_HANDLE;
 Handle witchHarasserTrie = INVALID_HANDLE;
 Handle witchUnharassedDamageTrie = INVALID_HANDLE;
+Handle witchShotsTrie = INVALID_HANDLE;
+Handle witchPrintedTrie = INVALID_HANDLE;
 
 Handle crownForward = INVALID_HANDLE;
 Handle drawCrownForward = INVALID_HANDLE;
@@ -36,6 +38,8 @@ public void OnPluginStart(){
 	witchDamageTrie = CreateTrie();
     witchHarasserTrie = CreateTrie();
     witchUnharassedDamageTrie = CreateTrie();
+    witchShotsTrie = CreateTrie();
+    witchPrintedTrie = CreateTrie();
 
     HookEvent("infected_hurt", WitchHurt_Event, EventHookMode_Post);
     HookEvent("witch_harasser_set", Event_WitchHarasserSet, EventHookMode_Post);
@@ -84,17 +88,21 @@ public void WitchHurt_Event(Event event, const char[] name, bool dontBroadcast)
 	{
         int witchDamageCollector[MAXPLAYERS + 1];
         int witchUnharassedDamageCollector[MAXPLAYERS + 1];
+        int witchShotsCollector[MAXPLAYERS + 1];
         bool hasHarraser = false;
         int harraserClient = -1;
         int witchID = entityID;
         char witch_dmg_key[20];
         char witch_unharassed_dmg_key[20];
         char witch_harasser_key[20];
+        char witch_shots_key[20];
         Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
         Format(witch_unharassed_dmg_key, sizeof(witch_unharassed_dmg_key), "%x_uh_dmg", witchID);
         Format(witch_harasser_key, sizeof(witch_harasser_key), "%x_harasser", witchID);
+        Format(witch_shots_key, sizeof(witch_shots_key), "%x_shots", witchID);
         GetTrieArray(witchUnharassedDamageTrie, witch_unharassed_dmg_key, witchUnharassedDamageCollector, sizeof(witchUnharassedDamageCollector) );
         GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
+        GetTrieArray(witchShotsTrie, witch_shots_key, witchShotsCollector, sizeof(witchShotsCollector));
         hasHarraser = GetTrieValue(witchHarasserTrie, witch_harasser_key, harraserClient);
 
         int attackerId = GetEventInt(event, "attacker");
@@ -104,8 +112,10 @@ public void WitchHurt_Event(Event event, const char[] name, bool dontBroadcast)
 		{
             int damageDone = GetEventInt(event, "amount");
             if(GetClientTeam(attacker) == TEAM_SURVIVOR){
+                witchShotsCollector[attacker] += 1;
                 witchDamageCollector[attacker] += damageDone;
                 SetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
+                SetTrieArray(witchShotsTrie, witch_shots_key, witchShotsCollector, sizeof(witchShotsCollector));
                 //PrintToConsoleAll("[DEBUG] Actual Witch Damage for the client %d stored: %d", attacker, witchDamageCollector[attacker]);
                 //PrintToConsoleAll("[DEBUG] Actual Witch Shots Count for the client stored: %d", witchShotsCollector[attacker]);
 
@@ -127,10 +137,14 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
     int witchID = GetEventInt(event, "witchid");
     char witch_dmg_key[20];
     char witch_unharassed_dmg_key[20];
+    char witch_shots_key[20];
     Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
     Format(witch_unharassed_dmg_key, sizeof(witch_unharassed_dmg_key), "%x_uh_dmg", witchID);
+    Format(witch_shots_key, sizeof(witch_shots_key), "%x_shots", witchID);
     int witchDamageCollector[MAXPLAYERS + 1];
+    int witchShotsCollector[MAXPLAYERS + 1];
     GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
+    GetTrieArray(witchShotsTrie, witch_shots_key, witchShotsCollector, sizeof(witchShotsCollector));
     bool oneShot = GetEventBool(event, "oneshot");
     //check if attacker was a tank
     if(IsTank(attacker)){
@@ -138,7 +152,7 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
         return;
     }
     //crown
-    if(oneShot){
+    if(oneShot || (witchShotsCollector[attacker] < 9 && getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] ) ){
         //PrintToConsoleAll("[DEBUG] Witch oneshot was detected");
         //probably timer is needed here to check firstly for drawcrown and later for crown
         HandleCrown(attacker, witchDamageCollector[attacker]);
@@ -180,14 +194,20 @@ void cleanUp(int witchID){
     char witch_dmg_key[20];
     char witch_unharassed_dmg_key[20];
     char witch_harasser_key[20];
+    char witch_shots_key[20];
+    char witch_printed_key[20];
 
     Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
     Format(witch_unharassed_dmg_key, sizeof(witch_unharassed_dmg_key), "%x_uh_dmg", witchID);
     Format(witch_harasser_key, sizeof(witch_harasser_key), "%x_harasser", witchID);
+    Format(witch_shots_key, sizeof(witch_shots_key), "%x_shots", witchID);
+    Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
 
     RemoveFromTrie(witchDamageTrie, witch_dmg_key);
     RemoveFromTrie(witchUnharassedDamageTrie, witch_unharassed_dmg_key);
     RemoveFromTrie(witchHarasserTrie, witch_harasser_key);
+    RemoveFromTrie(witchShotsTrie, witch_shots_key);
+    RemoveFromTrie(witchPrintedTrie, witch_printed_key);
 
 }
 
@@ -243,18 +263,24 @@ public void delayedPrint(int witchID){
 
 public Action PrintAnyway(Handle timer, DataPack pack)
 {
+    int printed = 0;
+    char witch_printed_key[20];
     int witchMaxHealth = GetConVarInt(FindConVar("z_witch_health"));
     int maxSurvivors = GetConVarInt(FindConVar("survivor_limit"));
     int witchID;
-	pack.Reset();
-	witchID = pack.ReadCell();
+    pack.Reset();
+    witchID = pack.ReadCell();
+    Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
+    GetTrieValue(witchPrintedTrie, witch_printed_key, printed);
 
-    int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
-    int witchRemainingHealth = witchMaxHealth - OneHundredPercentDamageValue;
-    if(witchRemainingHealth > 1){
-        CPrintToChatAll("{default}[{green}!{default}] {blue}Witch {default}had {olive}%d {default}health remaining", witchRemainingHealth);
+    if(printed == 0){
+        int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
+        int witchRemainingHealth = witchMaxHealth - OneHundredPercentDamageValue;
+        if(witchRemainingHealth > 1){
+            CPrintToChatAll("{default}[{green}!{default}] {blue}Witch {default}had {olive}%d {default}health remaining", witchRemainingHealth);
+        }
+        CalculateAndPrintDamage(witchID);
     }
-    CalculateAndPrintDamage(witchID);
     return Plugin_Continue;
 }
 
@@ -287,9 +313,13 @@ public void CalculateAndPrintDamage(int witchID){
     int damagersPercents[MAXPLAYERS + 1];
     int witchDamageCollector[MAXPLAYERS + 1];
     int witchShotsCollector[MAXPLAYERS + 1];
+    int printed = 0;
     char witch_dmg_key[20];
+    char witch_printed_key[20];
     Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
+    Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
     GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
+    GetTrieValue(witchPrintedTrie, witch_printed_key, printed);
     int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
 
     //now we can successfully calculate percent of damage done to witch by survivors
@@ -330,6 +360,8 @@ public void CalculateAndPrintDamage(int witchID){
             }
         }
     }
+    printed = 1;
+    SetTrieValue(witchPrintedTrie, witch_printed_key, printed, true);
     cleanUp(witchID);
 }
 
