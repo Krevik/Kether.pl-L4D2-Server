@@ -61,7 +61,7 @@
 	{
 		"en"		"{orange}Other vote is still not over!"
 		"ru"		"{orange}Другое голосование ещё не закончилось!"
-		"pl"		"{Orange}Inne głosowanie jeszcze wciąż trwa!""
+		"pl"		"{Orange}Inne głosowanie jeszcze wciąż trwa!"
 	}
 	"vote_started_mute_announce"
 	{
