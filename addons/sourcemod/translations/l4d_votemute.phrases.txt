@@ -1,0 +1,200 @@
+/*
+	Following named colors are supported:
+	 - {white}	(use instead of \x01 )
+	 - {cyan}	(use instead of \x03 )
+	 - {orange}	(use instead of \x04 )
+	 - {green}	(use instead of \x05 )
+*/
+
+"Phrases"
+{
+	"Player To Mute"
+	{
+		"en"			"🎤 Select player to mute/unmute:"	
+		"ru"			"Кому отключить/включить микрофон:"
+		"pl"			"🎤 Wybierz gracza do wyciszenia/odciszenia:"
+	}
+	"Player To Gag"
+	{
+		"en"			"💬 Select player to gag/ungag:"
+		"ru"			"Кому отключить/включить чат:"
+		"pl"			"💬 Wybierz gracza do zakneblowania/odkneblowania:"
+	}
+	"not_enough_players"
+	{
+		"#format"	"{1:i}"
+		"en"		"{orange}Not enough players to start the vote. {cyan}Required minimum: {1}"
+		"ru"		"{orange}Слишком мало игроков для голосования. {cyan}Нужно минимум: {1}"
+		"pl"		"{orange}Zbyt mało graczy do rozpoczęcia głosowania. {cyan} Wymagane minimum: {1}"
+	}
+	"not_in_game"
+	{
+		"en"		"{orange}Client has already disconnected."		
+		"ru"		"{orange}Клиент уже отключился."
+		"pl"		"{orange}Klient już opuścił grę."
+	}
+	"no_access_mute"
+	{
+		"en"		"{green}%N {orange}tried to disable micro of {green}%N{orange}, but has no access."
+		"ru"		"{green}%N {orange}пытается отключить микрофон у {green}%N{orange}, но не имеет доступа."
+		"pl"		"{green}%N {orange}spróbował wyciszyć gracza {green}%N{orange}, ale nie miał do tego dostępu."
+	}
+	"no_access_unmute"
+	{
+		"en"		"{green}%N {orange}tried to enable micro of {green}%N{orange}, but has no access."
+		"ru"		"{green}%N {orange}пытается включить микрофон у {green}%N{orange}, но не имеет доступа."
+		"pl"		"{green}%N {orange}spróbował odciszyć gracza {green}%N{orange}, ale nie miał do tego dostępu."
+	}
+	"no_access_gag"
+	{
+		"en"		"{green}%N {orange}tried to disable chat of {green}%N{orange}, but has no access."
+		"ru"		"{green}%N {orange}пытается отключить чат у {green}%N{orange}, но не имеет доступа."
+		"pl"		"{green}%N {orange}spróbował zakneblować gracza {green}%N{orange}, ale nie miał do tego dostępu."
+	}
+	"no_access_ungag"
+	{
+		"en"		"{green}%N {orange}tried to enable chat of {green}%N{orange}, but has no access."
+		"ru"		"{green}%N {orange}пытается включить чат у {green}%N{orange}, но не имеет доступа."
+		"pl"		"{green}%N {orange}spróbował odkneblować gracza {green}%N{orange}, ale nie miał do tego dostępu."
+	}
+	"other_vote"
+	{
+		"en"		"{orange}Other vote is still not over!"
+		"ru"		"{orange}Другое голосование ещё не закончилось!"
+		"pl"		"{Orange}Inne głosowanie jeszcze wciąż trwa!""
+	}
+	"vote_started_mute_announce"
+	{
+		"#format"	"{1:s}"
+		"en"		"Mute player: {1}?"
+		"ru"		"Отключить микрофон у: {1} ?"
+		"pl"		"Wyciszyć gracza: {1}?"
+	}
+	"vote_started_unmute_announce"
+	{
+		"#format"	"{1:s}"
+		"en"		"Unmute player: {1}?"
+		"ru"		"Включить микрофон у: {1} ?"
+		"pl"		"Odciszyć gracza: {1}?"
+	}
+	"vote_started_gag_announce"
+	{
+		"#format"	"{1:s}"
+		"en"		"Gag player: {1}?"
+		"ru"		"Отключить чат у: {1} ?"
+		"pl"		"Zakneblować gracza: {1}?"
+	}
+	"vote_started_ungag_announce"
+	{
+		"#format"	"{1:s}"
+		"en"		"Ungag player: {1}?"
+		"ru"		"Включить чат у: {1} ?"
+		"pl"		"Odkneblować gracza: {1}?"
+	}
+	"vote_started_mute"
+	{
+		"en"		"{green}%N {orange}started vote for mute: {cyan}%N"
+		"ru"		"{green}%N {orange}начал голосование за мут: {cyan}%N"
+		"pl"		"{green}%N {orange}rozpoczął głosowanie na wyciszenie: {cyan}%N"
+	}
+	"vote_started_unmute"
+	{
+		"en"		"{green}%N {orange}started vote for unmute: {cyan}%N"
+		"ru"		"{green}%N {orange}начал голосование за снятие мута: {cyan}%N"
+		"pl"		"{green}%N {orange}rozpoczął głosowanie na odciszenie: {cyan}%N"
+	}
+	"vote_started_gag"
+	{
+		"en"		"{green}%N {orange}started vote for disabling chat: {cyan}%N"
+		"ru"		"{green}%N {orange}начал голосование за отключение чата: {cyan}%N"
+		"pl"		"{green}%N {orange}rozpoczął głosowanie na zakneblowanie: {cyan}%N"
+	}
+	"vote_started_ungag"
+	{
+		"en"		"{green}%N {orange}started vote for enabling chat: {cyan}%N"
+		"ru"		"{green}%N {orange}начал голосование за включение чата: {cyan}%N"
+		"pl"		"{green}%N {orange}rozpoczął głosowanie na odkneblowanie: {cyan}%N"
+	}	
+	"Yes"
+	{
+		"en"		"Yes"
+		"ru"		"Да"
+		"pl"		"Tak"
+	}
+	"No"
+	{
+		"en"		"No"
+		"ru"		"Нет"
+		"pl"		"Nie"
+	}
+	"too_often"
+	{
+		"en"		"{orange}You can't vote too often!"
+		"ru"		"{orange}Вы не можете голосовать слишком часто!"
+		"pl"		"{orange}Nie możesz głosować zbyt często!"
+	}
+	"veto"
+	{
+		"en"		"{orange}Current vote is vetoed by {green}%N"
+		"ru"		"{green}%N {orange}наложил вето на голосование"
+		"pl"		"{green}%N {orange}nałożył weto na głosowanie"
+	}
+	"votepass"
+	{
+		"en"		"{cyan}Current vote is passed by {green}%N"
+		"ru"		"{green}%N {cyan}принудительно продвинул голосование"
+		"pl"		"{green}%N {cyan}wymusił zaliczenie głosowania"
+	}
+	"vote_failed_mute"
+	{
+		"en"		"{cyan}Vote for mute {orange}is failed."
+		"ru"		"{cyan}Голосование за мут {orange}провалилось."
+		"pl"		"{cyan}Głosowanie za wyciszeniem {orange}nieudane"
+	}
+	"vote_failed_unmute"
+	{
+		"en"		"{cyan}Vote for unmute {orange}is failed."
+		"ru"		"{cyan}Голосование за снятие мута {orange}провалилось."
+		"pl"		"{cyan}Głosowanie za odciszeniem {orange}nieudane"
+	}
+	"vote_failed_gag"
+	{
+		"en"		"{cyan}Vote for gag {orange}is failed."
+		"ru"		"{cyan}Голосование за блокировку чата {orange}провалилось."
+		"pl"		"{cyan}Głosowanie za zakneblowaniem {orange}nieudane"
+	}
+	"vote_failed_ungag"
+	{
+		"en"		"{cyan}Vote for ungag {orange}is failed."
+		"ru"		"{cyan}Голосование за снятие блокировки чата {orange}провалилось."
+		"pl"		"{cyan}Głosowanie za odkneblowaniem {orange}nieudane"
+	}
+	"vote_success_mute"
+	{
+		"#format"	"{1:s}"
+		"en"		"{green}{1} {orange} microphone is disabled"
+		"ru"		"Микрофон {green}{1} {orange} был отключён"
+		"pl"		"Gracz {green}{1} {orange}został wyciszony"
+	}
+	"vote_success_unmute"
+	{
+		"#format"	"{1:s}"
+		"en"		"{green}{1} {orange} microphone is enabled"
+		"ru"		"Микрофон {green}{1} {orange} был включён"
+		"pl"		"Gracz {green}{1} {orange}został odciszony"
+	}
+	"vote_success_gag"
+	{
+		"#format"	"{1:s}"
+		"en"		"{green}{1} {orange} chat is disabled"
+		"ru"		"Чат {green}{1} {orange} был отключён"
+		"pl"		"Gracz {green}{1} {orange}został zakneblowany"
+	}
+	"vote_success_ungag"
+	{
+		"#format"	"{1:s}"
+		"en"		"{green}{1} {orange} chat is enabled"
+		"ru"		"Чат {green}{1} {orange} был включён"
+		"pl"		"Gracz {green}{1} {orange}został odknebloway"
+	}
+}
