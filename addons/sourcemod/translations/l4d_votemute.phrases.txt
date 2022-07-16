@@ -10,15 +10,15 @@
 {
 	"Player To Mute"
 	{
-		"en"			"🎤 Select player to mute/unmute:"	
+		"en"			"Select player to mute/unmute:"	
 		"ru"			"Кому отключить/включить микрофон:"
-		"pl"			"🎤 Wybierz gracza do wyciszenia/odciszenia:"
+		"pl"			"Wybierz gracza do wyciszenia/odciszenia:"
 	}
 	"Player To Gag"
 	{
-		"en"			"💬 Select player to gag/ungag:"
+		"en"			"Select player to gag/ungag:"
 		"ru"			"Кому отключить/включить чат:"
-		"pl"			"💬 Wybierz gracza do zakneblowania/odkneblowania:"
+		"pl"			"Wybierz gracza do zakneblowania/odkneblowania:"
 	}
 	"not_enough_players"
 	{
