@@ -43,6 +43,7 @@ public PlayerDeath_Event(Handle:event, const String:name[], bool:dontBroadcast)
 			new bool:IsHeadshot = GetEventBool(event, "headshot") 
 			if (IsSurvivor(client) && IsHeadshot == true && IsInfected(SI_CLASS_ID) ) {
 				PrintCenterText(client, "HEADSHOT!");
+				PrintCenterText(infected_id, "HEADSHOTTED!");
 			}
 		}
 	}
