@@ -66,7 +66,7 @@ public void Event_WitchHarasserSet(Event event, const char[] name, bool dontBroa
 
 public void delayedAddTrie(char[] witch_harasser_key, int harasser){
 	DataPack pack;
-	CreateDataTimer(0.1, AddToTheTrie, pack);
+	CreateDataTimer(0.2, AddToTheTrie, pack);
     pack.WriteString(witch_harasser_key);
     pack.WriteCell(harasser);
 }
@@ -135,16 +135,19 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
     int attackeruserid = GetEventInt(event, "userid");
     int attacker = GetClientOfUserId(attackeruserid);
     int witchID = GetEventInt(event, "witchid");
+    int witchUnharassedDamageCollector[MAXPLAYERS + 1];
     char witch_dmg_key[20];
-    char witch_unharassed_dmg_key[20];
     char witch_shots_key[20];
+    char witch_unharassed_dmg_key[20];
     Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
     Format(witch_unharassed_dmg_key, sizeof(witch_unharassed_dmg_key), "%x_uh_dmg", witchID);
     Format(witch_shots_key, sizeof(witch_shots_key), "%x_shots", witchID);
     int witchDamageCollector[MAXPLAYERS + 1];
     int witchShotsCollector[MAXPLAYERS + 1];
-    GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
-    GetTrieArray(witchShotsTrie, witch_shots_key, witchShotsCollector, sizeof(witchShotsCollector));
+    GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector) );
+    GetTrieArray(witchShotsTrie, witch_shots_key, witchShotsCollector, sizeof(witchShotsCollector) );
+    bool unharassedDmg = GetTrieArray(witchUnharassedDamageTrie, witch_unharassed_dmg_key, witchUnharassedDamageCollector, sizeof(witchUnharassedDamageCollector) );
+    int witchUnharassedDamageByTheClient = witchUnharassedDamageCollector[attacker];
     bool oneShot = GetEventBool(event, "oneshot");
     //check if attacker was a tank
     if(IsTank(attacker)){
@@ -152,9 +155,8 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
         return;
     }
     //crown
-    if(oneShot || (witchShotsCollector[attacker] < 9 && getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] ) ){
+    if(oneShot || (witchShotsCollector[attacker] < 9 && getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] && !unharassedDmg) ){
         //PrintToConsoleAll("[DEBUG] Witch oneshot was detected");
-        //probably timer is needed here to check firstly for drawcrown and later for crown
         HandleCrown(attacker, witchDamageCollector[attacker]);
     }else{
         //potential draw crown?
@@ -164,10 +166,8 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
         //killer wears a shotgun *
         //witch didn't incap any player - we don't need to check for incaps? because it is kinda contained in harraser check
         //killer has done 100% damage of done to witch AMONG survivors *
-        int witchUnharassedDamageCollector[MAXPLAYERS + 1];
-        if( GetTrieArray(witchUnharassedDamageTrie, witch_unharassed_dmg_key, witchUnharassedDamageCollector, sizeof(witchUnharassedDamageCollector) )){
+        if( unharassedDmg ){
             //soo we have some unharassed damage. We need to check how much and if the damage comes from the harasser
-            int witchUnharassedDamageByTheClient = witchUnharassedDamageCollector[attacker];
             if(witchUnharassedDamageByTheClient > 0 && witchUnharassedDamageByTheClient < 501){
                 //harasser is the killer
                 //damage before harassing is less than 500
