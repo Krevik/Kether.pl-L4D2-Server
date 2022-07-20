@@ -14,13 +14,17 @@
 		{
 			"name" "Kether 2.0 Versus T1 Turbo"
 		}
-		"kether_test"
+		"kether_t2_backport"
 		{
-			"name" "Kether Test"
+			"name" "Kether Versus T2 (backport)"
 		}
 		"kether_versus_t1_8v8"
 		{
 			"name" "Kether Versus 8v8 T1"
+		}
+		"kether_test"
+		{
+			"name" "Kether Test"
 		}
 	}
 	"ZoneMod Configs"
