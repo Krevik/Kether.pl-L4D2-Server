@@ -30,5 +30,6 @@ compile.dat
 # =========================
 clientprefs-sqlite.sq3
 motd_lerp.sp
+Initial_Settings_Setter.sp
 motd_lerp.smx
 logs/
