@@ -29,6 +29,8 @@ compile.dat
 # Operating System Files
 # =========================
 clientprefs-sqlite.sq3
+Initial_Settings_Setter.sp
+Initial_Settings_Setter.smx
 motd_lerp.sp
 motd_lerp.smx
 logs/
