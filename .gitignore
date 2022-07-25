@@ -32,6 +32,5 @@ clientprefs-sqlite.sq3
 Initial_Settings_Setter.sp
 Initial_Settings_Setter.smx
 motd_lerp.sp
-Initial_Settings_Setter.sp
 motd_lerp.smx
 logs/
