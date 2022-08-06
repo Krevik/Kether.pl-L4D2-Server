@@ -438,9 +438,11 @@ public Action delayedTankStatsPrint(Handle timer)
 {
 	if(g_bAnnounceTankDamage){
 		UpdateTankUpTime();
-		CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		if(damage_connected > 0.0){
-				CPrintToChatAll( "[{olive}Tank Report{default}] Tank dealt a total of {olive}%d{default} damage with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", damage_connected, rock_connected, punch_connected, prop_connected );
+			CPrintToChatAll( "[{olive}Tank Report{default}] Time: {olive}%s{default} | Damage: {olive}%d{default}, with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", Tank_UpTime, damage_connected, rock_connected, punch_connected, prop_connected );
+		}
+		else{
+			CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
 		}
 		g_bAnnounceTankDamage = false;
 		g_bIsTankInPlay = false;
