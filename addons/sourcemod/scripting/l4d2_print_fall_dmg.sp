@@ -29,6 +29,11 @@ public void FALL_DMG_PRINT(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	float dmg = GetEventFloat(event, "damage"); 
 	int reason = GetClientOfUserId(GetEventInt(event, "causer"));
+	char reasonName[128];
+	GetClientName(reason, reasonName, sizeof(reasonName));
+	if(StrEqual(reasonName, "Console")){
+		reasonName = "Generic";
+	}
 	float fallVelocitySend = GetEntPropFloat(client, Prop_Send, "m_flFallVelocity");
 	//TODO calculate height
 	
