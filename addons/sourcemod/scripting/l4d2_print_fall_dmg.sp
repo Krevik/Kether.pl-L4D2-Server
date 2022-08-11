@@ -32,5 +32,5 @@ public void FALL_DMG_PRINT(Event event, const char[] name, bool dontBroadcast)
 	float fallVelocitySend = GetEntPropFloat(client, Prop_Send, "m_flFallVelocity");
 	//TODO calculate height
 	
-	CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}|| {olive}Fall Velocity: {red}%d {default}|| {olive}Reason: {red}%N", RoundToNearest(dmg), fallVelocitySend, reason);
+	CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}|| {olive}Fall Velocity: {red}%d {default}|| {olive}Reason: {red}%N", RoundToNearest(dmg), RoundToNearest(fallVelocitySend), reason);
 }
