@@ -103,24 +103,24 @@ public Action CMD_print_bonuses(int client, int args)
 		int actualTotalBonus = GetActualTotalBonus();
 		if(team == 0){
 			if(actualTotalBonus > 0  && GetAliveSurvivors() > 0){
-				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team, actualTotalBonus,
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, actualTotalBonus,
 				GetActualHealthBonus(), GetActualHealthItemsBonus(), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 			}else{
-				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team );
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team+1 );
 			}
 		}
 		if(team == 1){
 			if(RoundToNearest(fSurvivorTotalBonus[0])>0  && iSurvivorsAlive[0] > 0){
-				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 0, RoundToNearest(fSurvivorTotalBonus[0]),
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 1, RoundToNearest(fSurvivorTotalBonus[0]),
 				RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 			}else{
-				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", 0 );
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", 0 );
 			}
 			if(actualTotalBonus>0  && GetAliveSurvivors() > 0){
-				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team, actualTotalBonus,
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, actualTotalBonus,
 				GetActualHealthBonus(), GetActualHealthItemsBonus(), RoundToNearest(fSurvivorTankKillPassBonus[team]), RoundToNearest(fSurvivorWitchCrownBonus[team]));
 			}else{
-				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team );
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", team+1 );
 			}
 		}
 	}
@@ -174,24 +174,24 @@ public Action PrintRoundEndStats(Handle timer) {
 	int team = InSecondHalfOfRound();
 	if(team == 0){
 		if(RoundToNearest(fSurvivorTotalBonus[0])>0  && iSurvivorsAlive[0] > 0){
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team, RoundToNearest(fSurvivorTotalBonus[0]),
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, RoundToNearest(fSurvivorTotalBonus[0]),
 			RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 		}else{
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team );
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", team+1 );
 		}
 	}
 	if(team == 1){
 		if(RoundToNearest(fSurvivorTotalBonus[0])>0  && iSurvivorsAlive[0] > 0){
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 0, RoundToNearest(fSurvivorTotalBonus[0]),
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 1, RoundToNearest(fSurvivorTotalBonus[0]),
 			RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 		}else{
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", 0 );
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", 1 );
 		}
 		if(RoundToNearest(fSurvivorTotalBonus[1])>0  && iSurvivorsAlive[1] > 0){
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team, RoundToNearest(fSurvivorTotalBonus[1]),
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, RoundToNearest(fSurvivorTotalBonus[1]),
 			RoundToNearest(fSurvivorHealthBonus[1]), RoundToNearest(fSurvivorHealthItemsBonus[1]), RoundToNearest(fSurvivorTankKillPassBonus[1]), RoundToNearest(fSurvivorWitchCrownBonus[1]));
 		}else{
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team );
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", team+1 );
 		}
 		clearSavedBonusParameters();
 	}
