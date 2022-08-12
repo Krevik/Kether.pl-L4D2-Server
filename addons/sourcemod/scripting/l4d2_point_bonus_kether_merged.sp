@@ -188,7 +188,7 @@ public Action PrintRoundEndStats(Handle timer) {
 			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", 0 );
 		}
 		if(RoundToNearest(fSurvivorTotalBonus[1])>0  && iSurvivorsAlive[1] > 0){
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d 	{default}| {green}WB: {olive}%d{green}]", team, RoundToNearest(fSurvivorTotalBonus[1]),
+			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team, RoundToNearest(fSurvivorTotalBonus[1]),
 			RoundToNearest(fSurvivorHealthBonus[1]), RoundToNearest(fSurvivorHealthItemsBonus[1]), RoundToNearest(fSurvivorTankKillPassBonus[1]), RoundToNearest(fSurvivorWitchCrownBonus[1]));
 		}else{
 			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team );
