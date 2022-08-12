@@ -27,7 +27,7 @@ public void OnPluginStart()
 public void FALL_DMG_PRINT(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	float dmg = GetEventFloat(event, "damage"); 
+	int dmg = RoundToNearest(GetEventFloat(event, "damage")); 
 	int reason = GetClientOfUserId(GetEventInt(event, "causer"));
 	char reasonName[128];
 	if(client < 1 || client > MAXPLAYERS){
@@ -37,6 +37,7 @@ public void FALL_DMG_PRINT(Event event, const char[] name, bool dontBroadcast)
 	}
 	float fallVelocitySend = GetEntPropFloat(client, Prop_Send, "m_flFallVelocity");
 	//TODO calculate height
-	
-	CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}|| {olive}Fall Velocity: {red}%d {default}|| {olive}Reason: {red}%s", RoundToNearest(dmg), RoundToNearest(fallVelocitySend), reasonName);
+	if(dmg > 0){
+		CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}|| {olive}Fall Velocity: {red}%d {default}|| {olive}Reason: {red}%s", RoundToNearest(dmg), RoundToNearest(fallVelocitySend), reasonName);
+	}
 }
