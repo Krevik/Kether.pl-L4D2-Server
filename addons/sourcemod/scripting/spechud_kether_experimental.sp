@@ -484,11 +484,11 @@ public void TP_OnTankPass(){
 	int client = FindTankClient(1);
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
+		UpdateTankUpTime();
 		PushArrayString(timeAlive, Tank_UpTime);
 		spawnTime.Push(GetTime());
 	}
 	if (g_bIsTankInPlay){
-		UpdateTankUpTime();
 		UpTime = GetTime();
 		return; // Tank passed
 	} 
@@ -501,11 +501,11 @@ public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcas
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
+		UpdateTankUpTime();
 		PushArrayString(timeAlive, Tank_UpTime);
 		spawnTime.Push(GetTime());
 	}
 	if (g_bIsTankInPlay){
-		UpdateTankUpTime();
 		PushArrayString(timeAlive, Tank_UpTime);
 		UpTime = GetTime();
 		return; // Tank passed
