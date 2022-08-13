@@ -66,7 +66,7 @@ public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBr
 
 public void TP_OnTankPass(){
 	int team = InSecondHalfOfRound();
-	int bonus = RoundToNearest(25);
+	int bonus = 25;
 	fSurvivorTankKillPassBonus[team] += bonus;
 	CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", bonus);
 }

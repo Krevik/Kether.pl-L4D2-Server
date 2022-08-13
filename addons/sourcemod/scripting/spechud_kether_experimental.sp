@@ -477,41 +477,58 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	{
 		if (iTankCount > 0) iTankCount--;
 		if (!RoundHasFlowTank()) bFlowTankActive = false;
+		whoHadTank.Push(client);
+		PushArrayString(timeAlive, Tank_UpTime);
 	}
 }
 
-public void TP_OnTankPass(){
-	int client = FindTankClient(1);
-	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
-		whoHadTank.Push(client);
-		UpdateTankUpTime();
-		PushArrayString(timeAlive, Tank_UpTime);
-		spawnTime.Push(GetTime());
-	}
-	if (g_bIsTankInPlay){
-		UpTime = GetTime();
-		return; // Tank passed
-	} 
-	g_bAnnounceTankDamage = true;
-	// New tank, damage has not been announced
-	g_bIsTankInPlay = true;
-}
+// public void TP_OnTankPass(){
+// 	int client = FindTankClient(1);
+// 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
+// 		whoHadTank.Push(client);
+// 		UpdateTankUpTime();
+// 		PushArrayString(timeAlive, Tank_UpTime);
+// 		spawnTime.Push(GetTime());
+// 	}
+// 	if (g_bIsTankInPlay){
+// 		UpTime = GetTime();
+// 		return; // Tank passed
+// 	} 
+// 	g_bAnnounceTankDamage = true;
+// 	// New tank, damage has not been announced
+// 	g_bIsTankInPlay = true;
+// }
+
+// public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
+// 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+// 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
+// 		whoHadTank.Push(client);
+// 		UpdateTankUpTime();
+// 		PushArrayString(timeAlive, Tank_UpTime);
+// 		spawnTime.Push(GetTime());
+// 	}
+// 	if (g_bIsTankInPlay){
+// 		PushArrayString(timeAlive, Tank_UpTime);
+// 		UpTime = GetTime();
+// 		return; // Tank passed
+// 	} 
+// 	g_bAnnounceTankDamage = true;
+// 	// New tank, damage has not been announced
+// 	g_bIsTankInPlay = true;
+// }
+
 
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
-		whoHadTank.Push(client);
+	whoHadTank.Push(client);
+	//tank passed
+	if (g_bIsTankInPlay) {
+		PushArrayString(timeAlive, Tank_UpTime);
 		UpdateTankUpTime();
-		PushArrayString(timeAlive, Tank_UpTime);
-		spawnTime.Push(GetTime());
-	}
-	if (g_bIsTankInPlay){
-		PushArrayString(timeAlive, Tank_UpTime);
 		UpTime = GetTime();
-		return; // Tank passed
-	} 
+		return;
+	}
 	g_bAnnounceTankDamage = true;
-	// New tank, damage has not been announced
 	g_bIsTankInPlay = true;
 }
 
