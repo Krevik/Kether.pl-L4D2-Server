@@ -446,7 +446,7 @@ public Action delayedTankStatsPrint(Handle timer)
 		while(index <= whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
 			char livingTime[20] = "";
-			int found = GetArrayString(timeAlive, index, livingTime, 64);
+			int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
 			if(found > 0){
 				int dmg = damage_connected[clientID];
 				int punches = punch_connected[clientID];
@@ -485,10 +485,11 @@ public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcas
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
 		spawnTime.Push(GetTime());
+		UpTime = GetTime();
 	}
 	if (g_bIsTankInPlay){
 		UpdateTankUpTime();
-		timeAlive.PushString(Tank_UpTime);
+		PushArrayString(timeAlive, Tank_UpTime);
 		return; // Tank passed
 	} 
 	g_bAnnounceTankDamage = true;
