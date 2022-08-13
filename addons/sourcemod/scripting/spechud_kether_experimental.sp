@@ -443,7 +443,7 @@ public Action delayedTankStatsPrint(Handle timer)
 {
 	if(g_bAnnounceTankDamage){
 		int index = 0;
-		while(whoHadTank.Length > 0){
+		while(index < whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
 			char livingTime[20] = "0";
 			int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
@@ -456,9 +456,11 @@ public Action delayedTankStatsPrint(Handle timer)
 					//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
 					CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time Alive: {olive}%s {default}| {orange}DMG: {olive}%d {default}| {orange}Claw: {olive}%d {default}| {orange}Rock: {olive}%d {default}| {orange}Prop: {olive}%d", clientID, livingTime, dmg, punches, rocks, props);
 				}else{
-					CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", livingTime );
+					//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
+					CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time Alive: {olive}%s {default}", clientID, livingTime);
 				}
 			}
+			index++;
 		}
 		g_bAnnounceTankDamage = false;
 		g_bIsTankInPlay = false;
