@@ -1612,3 +1612,9 @@ stock bool RoundHasFlowWitch()
 {
 	return L4D2Direct_GetVSWitchToSpawnThisRound(InSecondHalfOfRound());
 }
+
+stock bool IsValidClient(int client)
+{ 
+    if (client <= 0 || client > MaxClients || !IsClientConnected(client) || !IsClientInGame(client)) return false; 
+    return true;
+}
