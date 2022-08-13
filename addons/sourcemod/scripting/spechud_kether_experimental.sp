@@ -481,6 +481,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 }
 
 public void TP_OnTankPass(){
+	PrintToChatAll("Current Tank Up Time: %s", Tank_UpTime);
 	int client = FindTankClient(1);
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
@@ -488,6 +489,7 @@ public void TP_OnTankPass(){
 	}
 	if (g_bIsTankInPlay){
 		UpdateTankUpTime();
+		PrintToChatAll("Current Tank Up Time: %s", Tank_UpTime);
 		PushArrayString(timeAlive, Tank_UpTime);
 		UpTime = GetTime();
 		return; // Tank passed
@@ -498,6 +500,7 @@ public void TP_OnTankPass(){
 }
 
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
+	PrintToChatAll("Current Tank Up Time: %s", Tank_UpTime);
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
@@ -505,6 +508,7 @@ public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcas
 	}
 	if (g_bIsTankInPlay){
 		UpdateTankUpTime();
+		PrintToChatAll("Current Tank Up Time: %s", Tank_UpTime);
 		PushArrayString(timeAlive, Tank_UpTime);
 		UpTime = GetTime();
 		return; // Tank passed
