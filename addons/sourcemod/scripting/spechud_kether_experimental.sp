@@ -443,7 +443,7 @@ public Action delayedTankStatsPrint(Handle timer)
 {
 	if(g_bAnnounceTankDamage){
 		int index = 0;
-		while(index < whoHadTank.Length){
+		while(index <= whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
 			char livingTime[20] = "0";
 			int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
@@ -488,6 +488,7 @@ public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcas
 		UpTime = GetTime();
 	}
 	if (g_bIsTankInPlay){
+		UpdateTankUpTime();
 		timeAlive.PushString(Tank_UpTime);
 		return; // Tank passed
 	} 
