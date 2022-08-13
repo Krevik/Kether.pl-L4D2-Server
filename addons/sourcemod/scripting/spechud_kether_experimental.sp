@@ -445,9 +445,7 @@ public Action delayedTankStatsPrint(Handle timer)
 		int index = 0;
 		while(index < whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
-			if(!clientID || clientID < 1 || clientID > MAXPLAYERS + 1 || IsFakeClient(clientID) || !IsClientInGame(clientID)){
-				
-			}else{
+			if(clientID && clientID > 1 && clientID < MAXPLAYERS + 1 && !IsFakeClient(clientID) && IsClientInGame(clientID)){
 				char livingTime[64] = "";
 				int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
 				if(found > 0){
@@ -462,7 +460,7 @@ public Action delayedTankStatsPrint(Handle timer)
 						//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
 						CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}", clientID, livingTime);
 					}
-				}
+				}				
 			}
 			index++;
 		}
