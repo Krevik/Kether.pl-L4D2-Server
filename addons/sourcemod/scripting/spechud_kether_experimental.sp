@@ -445,6 +445,9 @@ public Action delayedTankStatsPrint(Handle timer)
 		int index = 0;
 		while(index < whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
+			if(!clientID || clientID < 1 || clientID > MAXPLAYERS + 1 || IsFakeClient(clientID) || !IsClientInGame(clientID)){
+				return;
+			}
 			char livingTime[64] = "";
 			int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
 			if(found > 0){
