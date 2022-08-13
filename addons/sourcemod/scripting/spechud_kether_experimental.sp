@@ -481,7 +481,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 }
 
 public void TP_OnTankPass(){
-	int client = FindTankClient();
+	int client = FindTankClient(1);
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
 		spawnTime.Push(GetTime());
