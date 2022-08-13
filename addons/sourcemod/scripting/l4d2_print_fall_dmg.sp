@@ -30,14 +30,19 @@ public void FALL_DMG_PRINT(Event event, const char[] name, bool dontBroadcast)
 	int dmg = RoundToNearest(GetEventFloat(event, "damage")); 
 	int reason = GetClientOfUserId(GetEventInt(event, "causer"));
 	char reasonName[128];
+	char hostnameString[128]="";
+	GetConVarString(FindConVar("hostname"), hostnameString, sizeof(hostnameString));
 	if(client < 1 || client > MAXPLAYERS){
 		reasonName = "Generic";
 	}else{
 		GetClientName(reason, reasonName, sizeof(reasonName));
+		if(StrEqual(hostnameString, reasonName, false)){
+		reasonName = "Generic";
+		}
 	}
 	float fallVelocitySend = GetEntPropFloat(client, Prop_Send, "m_flFallVelocity");
 	//TODO calculate height
 	if(dmg > 0){
-		CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}| {olive}Fall Velocity: {red}%d {default}| {olive}Reason: {red}%s", RoundToNearest(dmg), RoundToNearest(fallVelocitySend), reasonName);
+		CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}| {olive}Fall Velocity: {red}%d {default}| {olive}Reason: {red}%s", dmg, RoundToNearest(fallVelocitySend), reasonName);
 	}
 }
