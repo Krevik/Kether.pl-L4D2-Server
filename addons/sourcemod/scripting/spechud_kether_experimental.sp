@@ -480,9 +480,25 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	}
 }
 
+public void TP_OnTankPass(){
+	int client = FindTankClient();
+	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
+		whoHadTank.Push(client);
+		spawnTime.Push(GetTime());
+		UpTime = GetTime();
+	}
+	if (g_bIsTankInPlay){
+		UpdateTankUpTime();
+		PushArrayString(timeAlive, Tank_UpTime);
+		return; // Tank passed
+	} 
+	g_bAnnounceTankDamage = true;
+	// New tank, damage has not been announced
+	g_bIsTankInPlay = true;
+}
+
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	CPrintToChatAll("New Spawn Event Fired, client: %s", client);
 	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
 		whoHadTank.Push(client);
 		spawnTime.Push(GetTime());
