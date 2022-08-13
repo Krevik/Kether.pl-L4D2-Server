@@ -445,23 +445,21 @@ public Action delayedTankStatsPrint(Handle timer)
 		int index = 0;
 		while(index < whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
-			if(clientID && clientID > 1 && clientID < MAXPLAYERS + 1 && !IsFakeClient(clientID) && IsClientInGame(clientID)){
-				char livingTime[64] = "";
-				int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
-				if(found > 0){
-					int dmg = damage_connected[clientID];
-					int punches = punch_connected[clientID];
-					int rocks = rock_connected[clientID];
-					int props = prop_connected[clientID];
-					if(dmg > 0){
-						//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
-						CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}| {orange}DMG: {olive}%d {default}| {orange}Claw: {olive}%d {default}| {orange}Rock: {olive}%d {default}| {orange}Prop: {olive}%d", clientID, livingTime, dmg, punches, rocks, props);
-					}else{
-						//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
-						CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}", clientID, livingTime);
-					}
-				}				
-			}
+			char livingTime[64] = "";
+			int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
+			if(found > 0){
+				int dmg = damage_connected[clientID];
+				int punches = punch_connected[clientID];
+				int rocks = rock_connected[clientID];
+				int props = prop_connected[clientID];
+				if(dmg > 0){
+					//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
+					CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}| {orange}DMG: {olive}%d {default}| {orange}Claw: {olive}%d {default}| {orange}Rock: {olive}%d {default}| {orange}Prop: {olive}%d", clientID, livingTime, dmg, punches, rocks, props);
+				}else{
+					//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
+					CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}", clientID, livingTime);
+				}
+			}				
 			index++;
 		}
 		g_bAnnounceTankDamage = false;
@@ -479,7 +477,6 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	{
 		if (iTankCount > 0) iTankCount--;
 		if (!RoundHasFlowTank()) bFlowTankActive = false;
-		whoHadTank.Push(client);
 		PushArrayString(timeAlive, Tank_UpTime);
 	}
 }
@@ -522,11 +519,14 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	whoHadTank.Push(client);
+	if(client && IsValidClient(client)){
+		whoHadTank.Push(client);
+	}
 	//tank passed
 	if (g_bIsTankInPlay) {
-		PushArrayString(timeAlive, Tank_UpTime);
-		UpdateTankUpTime();
+		if(client && IsValidClient(client)){
+			PushArrayString(timeAlive, Tank_UpTime);
+		}
 		UpTime = GetTime();
 		return;
 	}
