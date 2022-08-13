@@ -482,11 +482,13 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	whoHadTank.Push(client);
-	spawnTime.Push(GetTime());
+	if(client && IsClientInGame(client) && !IsFakeClient(client) && client > 0 && client < MAXPLAYERS+1){
+		whoHadTank.Push(client);
+		spawnTime.Push(GetTime());
+		UpTime = GetTime();
+	}
 	if (g_bIsTankInPlay){
 		timeAlive.PushString(Tank_UpTime);
-		UpTime = GetTime();
 		return; // Tank passed
 	} 
 	g_bAnnounceTankDamage = true;
