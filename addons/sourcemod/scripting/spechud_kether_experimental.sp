@@ -446,21 +446,22 @@ public Action delayedTankStatsPrint(Handle timer)
 		while(index < whoHadTank.Length){
 			int clientID = whoHadTank.Get(index);
 			if(!clientID || clientID < 1 || clientID > MAXPLAYERS + 1 || IsFakeClient(clientID) || !IsClientInGame(clientID)){
-				return;
-			}
-			char livingTime[64] = "";
-			int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
-			if(found > 0){
-				int dmg = damage_connected[clientID];
-				int punches = punch_connected[clientID];
-				int rocks = rock_connected[clientID];
-				int props = prop_connected[clientID];
-				if(dmg > 0){
-					//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
-					CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}| {orange}DMG: {olive}%d {default}| {orange}Claw: {olive}%d {default}| {orange}Rock: {olive}%d {default}| {orange}Prop: {olive}%d", clientID, livingTime, dmg, punches, rocks, props);
-				}else{
-					//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
-					CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}", clientID, livingTime);
+				
+			}else{
+				char livingTime[64] = "";
+				int found = GetArrayString(timeAlive, index, livingTime, sizeof(livingTime));
+				if(found > 0){
+					int dmg = damage_connected[clientID];
+					int punches = punch_connected[clientID];
+					int rocks = rock_connected[clientID];
+					int props = prop_connected[clientID];
+					if(dmg > 0){
+						//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
+						CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}| {orange}DMG: {olive}%d {default}| {orange}Claw: {olive}%d {default}| {orange}Rock: {olive}%d {default}| {orange}Prop: {olive}%d", clientID, livingTime, dmg, punches, rocks, props);
+					}else{
+						//TODO store steam names also instead of clientID because if client leaves the game after playing the tank, the name can be null or sth
+						CPrintToChatAll("[{darkred}Tank: {red}%N{default}] {orange}Time: {olive}%s {default}", clientID, livingTime);
+					}
 				}
 			}
 			index++;
