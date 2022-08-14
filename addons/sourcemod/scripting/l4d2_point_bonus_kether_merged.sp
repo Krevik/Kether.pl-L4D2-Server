@@ -221,16 +221,7 @@ public void clearSavedBonusParameters(){
 public Action L4D2_OnEndVersusModeRound(bool countSurvivors)
 {
 	CalculateSetAndPrintBonuses();
-	SetBonusForTankAndWitch();
 	return Plugin_Continue;
-}
-
-void SetBonusForTankAndWitch()
-{
-	int team = InSecondHalfOfRound();
-	int iBonus = RoundToNearest(fSurvivorTankKillPassBonus[team] + fSurvivorWitchCrownBonus[team]);
-	g_hCvarDefibPenalty.SetInt(-iBonus);
-	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
 }
 
 
@@ -243,7 +234,7 @@ public void CalculateSetAndPrintBonuses(){
 	CalculateAndSetBonusForHealthItems(team);
 	CalculateAndSetTotalBonus(team);
 
-	float fSurvivorSplitBonus = fSurvivorTotalBonus[team]/float(iSurvivorsAlive[team]);
+	float fSurvivorSplitBonus = (fSurvivorTotalBonus[team])/float(iSurvivorsAlive[team]);
 	if(iSurvivalMultiplier == 0){
 		fSurvivorSplitBonus = 0.0;
 	}
@@ -264,7 +255,10 @@ public void CalculateAndSetBonusForHealthItems(int team){
 }
 
 public void CalculateAndSetTotalBonus(int team){
-	fSurvivorTotalBonus[team] = fSurvivorHealthBonus[team] + fSurvivorHealthItemsBonus[team];
+	fSurvivorTotalBonus[team] = fSurvivorHealthBonus[team] + fSurvivorHealthItemsBonus[team] + fSurvivorTankKillPassBonus[team] + fSurvivorWitchCrownBonus[team];
+	int iBonus = RoundToNearest(fSurvivorTotalBonus[team]);
+	g_hCvarDefibPenalty.SetInt(-iBonus);
+	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
 }
 
 /************/
