@@ -259,7 +259,7 @@ public void CalculateAndSetTotalBonus(int team){
 	fSurvivorTotalBonus[team] = fSurvivorHealthBonus[team] + fSurvivorHealthItemsBonus[team] + fSurvivorTankKillPassBonus[team] + fSurvivorWitchCrownBonus[team];
 	int iBonus = RoundToNearest(fSurvivorTotalBonus[team]);
 	g_hCvarDefibPenalty.SetInt(-iBonus);
-	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, team);
+	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
 }
 
 /************/
