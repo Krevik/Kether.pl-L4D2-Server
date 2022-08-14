@@ -18,6 +18,7 @@ float fSurvivorTankKillPassBonus[2];
 float fSurvivorWitchCrownBonus[2];
 int iSurvivorsAlive[2];
 int iTeamSize;
+ConVar g_hCvarDefibPenalty = null;
 
 public Plugin myinfo =
 {
@@ -30,6 +31,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	g_hCvarDefibPenalty = FindConVar("vs_defib_penalty");
 	RegConsoleCmd("sm_bonus", CMD_print_bonuses, "Let's print those bonuses");
 	RegConsoleCmd("sm_bonusinfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 	RegConsoleCmd("sm_binfo", CMD_print_bonus_info, "Let's print those bonuses info.");
@@ -45,6 +47,7 @@ public void OnPluginStart()
 public OnPluginEnd()
 {
 	ResetConVar(hCvarValveSurvivalBonus);
+	ResetConVar(g_hCvarDefibPenalty);
 }
 
 public void OnMapStart()
@@ -218,7 +221,16 @@ public void clearSavedBonusParameters(){
 public Action L4D2_OnEndVersusModeRound(bool countSurvivors)
 {
 	CalculateSetAndPrintBonuses();
+	SetBonusForTankAndWitch();
 	return Plugin_Continue;
+}
+
+void SetBonusForTankAndWitch()
+{
+	int team = InSecondHalfOfRound();
+	int iBonus = RoundToNearest(fSurvivorTankKillPassBonus[team] + fSurvivorWitchCrownBonus[team]);
+	g_hCvarDefibPenalty.SetInt(-iBonus);
+	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
 }
 
 
@@ -252,7 +264,7 @@ public void CalculateAndSetBonusForHealthItems(int team){
 }
 
 public void CalculateAndSetTotalBonus(int team){
-	fSurvivorTotalBonus[team] = fSurvivorHealthBonus[team] + fSurvivorHealthItemsBonus[team] + fSurvivorTankKillPassBonus[team] + fSurvivorWitchCrownBonus[team];
+	fSurvivorTotalBonus[team] = fSurvivorHealthBonus[team] + fSurvivorHealthItemsBonus[team];
 }
 
 /************/
