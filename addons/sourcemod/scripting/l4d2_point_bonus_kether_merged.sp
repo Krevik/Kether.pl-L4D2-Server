@@ -105,7 +105,7 @@ public Action CMD_print_bonuses(int client, int args)
 	}else{
 		int actualTotalBonus = GetActualTotalBonus();
 		if(team == 0){
-			if(actualTotalBonus > 0  && GetAliveSurvivors() > 0){
+			if(actualTotalBonus > 0 ){
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, actualTotalBonus,
 				GetActualHealthBonus(), GetActualHealthItemsBonus(), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 			}else{
@@ -113,13 +113,13 @@ public Action CMD_print_bonuses(int client, int args)
 			}
 		}
 		if(team == 1){
-			if(RoundToNearest(fSurvivorTotalBonus[0])>0  && iSurvivorsAlive[0] > 0){
+			if(RoundToNearest(fSurvivorTotalBonus[0])>0){
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 1, RoundToNearest(fSurvivorTotalBonus[0]),
 				RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 			}else{
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", 0 );
 			}
-			if(actualTotalBonus>0  && GetAliveSurvivors() > 0){
+			if(actualTotalBonus>0){
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, actualTotalBonus,
 				GetActualHealthBonus(), GetActualHealthItemsBonus(), RoundToNearest(fSurvivorTankKillPassBonus[team]), RoundToNearest(fSurvivorWitchCrownBonus[team]));
 			}else{
@@ -176,7 +176,7 @@ public Action CMD_print_bonus_info(int client, int args)
 public Action PrintRoundEndStats(Handle timer) {
 	int team = InSecondHalfOfRound();
 	if(team == 0){
-		if(RoundToNearest(fSurvivorTotalBonus[0])>0  && iSurvivorsAlive[0] > 0){
+		if(RoundToNearest(fSurvivorTotalBonus[0])>0){
 			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, RoundToNearest(fSurvivorTotalBonus[0]),
 			RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 		}else{
@@ -184,13 +184,13 @@ public Action PrintRoundEndStats(Handle timer) {
 		}
 	}
 	if(team == 1){
-		if(RoundToNearest(fSurvivorTotalBonus[0])>0  && iSurvivorsAlive[0] > 0){
+		if(RoundToNearest(fSurvivorTotalBonus[0])>0){
 			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 1, RoundToNearest(fSurvivorTotalBonus[0]),
 			RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 		}else{
 			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", 1 );
 		}
-		if(RoundToNearest(fSurvivorTotalBonus[1])>0  && iSurvivorsAlive[1] > 0){
+		if(RoundToNearest(fSurvivorTotalBonus[1])>0){
 			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, RoundToNearest(fSurvivorTotalBonus[1]),
 			RoundToNearest(fSurvivorHealthBonus[1]), RoundToNearest(fSurvivorHealthItemsBonus[1]), RoundToNearest(fSurvivorTankKillPassBonus[1]), RoundToNearest(fSurvivorWitchCrownBonus[1]));
 		}else{
@@ -234,11 +234,12 @@ public void CalculateSetAndPrintBonuses(){
 	CalculateAndSetBonusForHealthItems(team);
 	CalculateAndSetTotalBonus(team);
 
-	float fSurvivorSplitBonus = (fSurvivorTotalBonus[team])/float(iSurvivorsAlive[team]);
-	if(iSurvivalMultiplier == 0){
-		fSurvivorSplitBonus = 0.0;
-	}
-	SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(fSurvivorSplitBonus));
+	// float fSurvivorSplitBonus = (fSurvivorTotalBonus[team])/float(iSurvivorsAlive[team]);
+	// if(iSurvivalMultiplier == 0){
+	// 	fSurvivorSplitBonus = 0.0;
+	// }
+	// SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest(fSurvivorSplitBonus));
+	SetConVarInt(hCvarValveSurvivalBonus, 0);
 	CreateTimer(3.5, PrintRoundEndStats, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -258,7 +259,7 @@ public void CalculateAndSetTotalBonus(int team){
 	fSurvivorTotalBonus[team] = fSurvivorHealthBonus[team] + fSurvivorHealthItemsBonus[team] + fSurvivorTankKillPassBonus[team] + fSurvivorWitchCrownBonus[team];
 	int iBonus = RoundToNearest(fSurvivorTotalBonus[team]);
 	g_hCvarDefibPenalty.SetInt(-iBonus);
-	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
+	GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, team);
 }
 
 /************/
