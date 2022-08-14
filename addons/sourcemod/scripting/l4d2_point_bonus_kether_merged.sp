@@ -286,7 +286,7 @@ float GetBonusForTankKillPass(){
 }
 
 float GetBonusForWitchCrown(){
-	return 25.0*GetMapDistanceMultiplier();
+	return 25.0;
 }
 
 
