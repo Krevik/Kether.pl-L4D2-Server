@@ -87,7 +87,7 @@ public void OnPluginStart()
 	cVar.GetString(SZF(g_sCvarCmd));
 	cVar.AddChangeHook(OnCvarChange_Exec);
 
-	cVar = CreateConVar("l4d_tank_pass_replace", "1", "0=Kill the alive player before the Tank pass, 1=Replace the alive player with an infected bot before the Tank pass.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	cVar = CreateConVar("l4d_tank_pass_replace", "0", "0=Kill the alive player before the Tank pass, 1=Replace the alive player with an infected bot before the Tank pass.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_bCvarReplace = cVar.BoolValue;
 	cVar.AddChangeHook(OnCvarChange_Replace);
 
