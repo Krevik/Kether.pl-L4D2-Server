@@ -166,9 +166,13 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
         //killer wears a shotgun *
         //witch didn't incap any player - we don't need to check for incaps? because it is kinda contained in harraser check
         //killer has done 100% damage of done to witch AMONG survivors *
-        if( unharassedDmg ){
+        if( witchID
+            //unharassedDmg 
+            ){
             //soo we have some unharassed damage. We need to check how much and if the damage comes from the harasser
-            if( (witchUnharassedDamageByTheClient > 0 && witchUnharassedDamageByTheClient < 501) && getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] ){
+            if( 
+                //(witchUnharassedDamageByTheClient > 0 && witchUnharassedDamageByTheClient < 501) && 
+            getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] ){
                 //harasser is the killer
                 //damage before harassing is less than 500
                 char weaponNameBuffer[128];
