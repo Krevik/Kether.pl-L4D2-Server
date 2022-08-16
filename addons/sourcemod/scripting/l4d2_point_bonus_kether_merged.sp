@@ -69,30 +69,30 @@ public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBr
 
 public void TP_OnTankPass(){
 	int team = InSecondHalfOfRound();
-	float bonus = 25.0;
+	float bonus = GetBonusForTankKillPass();
 	fSurvivorTankKillPassBonus[team] += bonus;
 	CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
 }
 
 public void OnTankDeath(){
 	int team = InSecondHalfOfRound();
-	int bonus = RoundToNearest(GetBonusForTankKillPass());
+	float bonus = GetBonusForTankKillPass();
 	fSurvivorTankKillPassBonus[team] += bonus;
-	CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", bonus);
+	CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
 }
 
 public void Kether_OnWitchDrawCrown(){
 	int team = InSecondHalfOfRound();
-	int bonus = RoundToNearest(GetBonusForWitchCrown());
+	float bonus = GetBonusForWitchCrown();
 	fSurvivorWitchCrownBonus[team] += bonus;
-	CPrintToChatAll("Witch has been draw-crowned resulting in: {olive}%d {default}points bonus", bonus);
+	CPrintToChatAll("Witch has been draw-crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
 }
 
 public void Kether_OnWitchCrown(){
 	int team = InSecondHalfOfRound();
-	int bonus = RoundToNearest(GetBonusForWitchCrown());
+	float bonus = GetBonusForWitchCrown();
 	fSurvivorWitchCrownBonus[team] += bonus;
-	CPrintToChatAll("Witch has been crowned resulting in: {olive}%d {default}points bonus", bonus);
+	CPrintToChatAll("Witch has been crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
 }
 
 //PRINT actual bonuses
