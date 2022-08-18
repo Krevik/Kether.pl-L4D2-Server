@@ -172,7 +172,7 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
             //soo we have some unharassed damage. We need to check how much and if the damage comes from the harasser
             if( 
                 //(witchUnharassedDamageByTheClient > 0 && witchUnharassedDamageByTheClient < 501) && 
-            getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] ){
+            getTotalDamageDoneToWitchBySurvivors(witchID) == witchDamageCollector[attacker] && witchShotsCollector[attacker] < 18){
                 //harasser is the killer
                 //damage before harassing is less than 500
                 char weaponNameBuffer[128];
