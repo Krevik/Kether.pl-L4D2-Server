@@ -90,16 +90,12 @@ bool bSpecHudActive[MAXPLAYERS+1], bTankHudActive[MAXPLAYERS+1];
 bool bSpecHudHintShown[MAXPLAYERS+1], bTankHudHintShown[MAXPLAYERS+1];
 
 //extended tankhud cvars
-char Tank_UpTime[64];
+char Tank_UpTime[20];
 int UpTime;
-
-Handle punch_count_store = INVALID_HANDLE;
-Handle rock_count_store = INVALID_HANDLE;
-Handle prop_count_store = INVALID_HANDLE;
-Handle damage_value_store = INVALID_HANDLE;
-ArrayList whoHadTankSteamIDs = INVALID_HANDLE;
-ArrayList whoHadTankNicknames = INVALID_HANDLE;
-
+int punch_connected;
+int rock_connected;
+int prop_connected;
+int damage_connected;
 bool g_bIsTankInPlay = false;            // Whether or not the tank is active
 bool g_bAnnounceTankDamage = false;            // Whether or not tank damage should be announced
 /**********************************************************************************************/
@@ -109,13 +105,6 @@ bool g_bAnnounceTankDamage = false;            // Whether or not tank damage sho
 // ======================================================================
 public void OnPluginStart()
 {
-	punch_count_store = CreateTrie();
-	rock_count_store = CreateTrie();
-	prop_count_store = CreateTrie();
-	damage_value_store = CreateTrie();
-	whoHadTankSteamIDs = CreateArray();
-	whoHadTankNicknames = CreateArray();
-
 	(	survivor_limit			= FindConVar("survivor_limit")			).AddChangeHook(GameConVarChanged);
 	(	z_max_player_zombies	= FindConVar("z_max_player_zombies")	).AddChangeHook(GameConVarChanged);
 	(	versus_boss_buffer		= FindConVar("versus_boss_buffer")		).AddChangeHook(GameConVarChanged);
@@ -422,7 +411,11 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	bRoundLive = false;
 	bPendingArrayRefresh = true;
-	ClearTankDamage();
+	UpTime = GetTime();
+	punch_connected = 0;
+	rock_connected = 0;
+	prop_connected = 0;
+	damage_connected = 0;
 }
 
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
@@ -445,36 +438,14 @@ public Action delayedTankStatsPrint(Handle timer)
 {
 	if(g_bAnnounceTankDamage){
 		UpdateTankUpTime();
-		CPrintToChatAll("{orange}Tank was alive for a total time of: {red}%s", Tank_UpTime);
-		//for each tank player
-		for(int x=0; x<whoHadTankSteamIDs.Length; x++){
-			char steamUsername[120] = "None";
-			GetArrayString(whoHadTankSteamIDs, x, steamUsername, sizeof(steamUsername) );
-			char userNickname[120] = "None";
-			GetArrayString(whoHadTankNicknames, x, userNickname, sizeof(userNickname) );
-			//let's load tries
-			char punch_Count_Key[120];
-			char rock_Count_Key[120];
-			char prop_Count_Key[120];
-			char total_Damage_Value_Key[120];
-			Format(punch_Count_Key, sizeof(punch_Count_Key), "%x_punch", steamUsername);
-			Format(rock_Count_Key, sizeof(rock_Count_Key), "%x_rock", steamUsername);
-			Format(prop_Count_Key, sizeof(prop_Count_Key), "%x_prop", steamUsername);
-			Format(total_Damage_Value_Key, sizeof(total_Damage_Value_Key), "%x_total_dmg", steamUsername);
-
-			int punchCount;
-			GetTrieValue(punch_count_store, punch_Count_Key, punchCount);
-			int rockCount;
-			GetTrieValue(rock_count_store, rock_Count_Key, rockCount);
-			int propCount;
-			GetTrieValue(prop_count_store, prop_Count_Key, propCount);
-			int totalDamage;
-			GetTrieValue(damage_value_store, total_Damage_Value_Key, totalDamage);
-			if(totalDamage > 0){
-				CPrintToChatAll("[{darkred}Tank: {red}%s{default}] {orange}DMG: {olive}%d {default}| {orange}Claw: {olive}%d {default}| {orangeRock: {olive}%d {default}| {orange}Prop: {olive}%d", userNickname, totalDamage, punchCount, rockCount, propCount);
-			}
+		if(damage_connected > 0.0){
+			CPrintToChatAll( "[{olive}Tank Report{default}] Time: {olive}%s{default} | Damage: {olive}%d{default}, with: {olive}%d{default} rocks, {olive}%d{default} punches, {olive}%d{default} object hits.", Tank_UpTime, damage_connected, rock_connected, punch_connected, prop_connected );
 		}
-		ClearTankDamage();
+		else{
+			CPrintToChatAll( "[{olive}Tank Report{default}] Tank was alive for a total time of: {olive}%s{default}.", Tank_UpTime );
+		}
+		g_bAnnounceTankDamage = false;
+		g_bIsTankInPlay = false;
 	}
 	return Plugin_Continue;
 }
@@ -491,53 +462,13 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	}
 }
 
-public int getInfectedPlayerBySteamId(const char[] steamId) 
-{
-    char tmpSteamId[64];
-   
-    for (int i = 1; i <= MaxClients; i++) 
-    {
-        if (!IsClientInGame(i) || GetClientTeam(i) != 3)
-            continue;
-        
-        GetClientAuthId(i, AuthId_Steam2, tmpSteamId, sizeof(tmpSteamId));     
-        
-        if (strcmp(steamId, tmpSteamId) == 0)
-            return i;
-    }
-    
-    return -1;
-}
-
 public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcast) {
-	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	//let's firstly check if we have that tank in our array. If not, let's add it.
-	char steamUsername[64] = "NOT_FOUND";
-	if(client && IsClientInGame(client) && !IsFakeClient(client)){
-		GetClientAuthId(client, AuthId_Steam2, steamUsername, sizeof(steamUsername));    
-	}
-	if(IsFakeClient(client)){
-		steamUsername = "AI";
-	}
-	int indexInArray = FindStringInArray(whoHadTankSteamIDs, steamUsername );
-	if(indexInArray == -1 && strcmp(steamUsername, "NOT_FOUND") != 0 ){
-		PushArrayString(whoHadTankSteamIDs, steamUsername);
-	}
-
-	char playerName[128] = "NOT_FOUND";
-	if(client && IsClientInGame(client) && !IsFakeClient(client)){
-		GetClientName(client, playerName, sizeof(playerName) );
-	}
-	if(IsFakeClient(client)){
-		playerName = "AI";
-	}
-	int indexInArrayNickname = FindStringInArray(whoHadTankNicknames, playerName );
-	if(indexInArrayNickname == -1 && strcmp(playerName, "NOT_FOUND") != 0){
-		PushArrayString(whoHadTankNicknames, playerName);
-	}
-
 	if (g_bIsTankInPlay) return; // Tank passed
 	UpTime = GetTime();
+	punch_connected = 0;
+	rock_connected = 0;
+	prop_connected = 0;
+	damage_connected = 0;
 	g_bAnnounceTankDamage = true;
 	// New tank, damage has not been announced
 	g_bIsTankInPlay = true;
@@ -546,82 +477,36 @@ public Action Event_TankSpawn(Handle event, const char[] name, bool dontBroadcas
 public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadcast) {
     int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
     int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-	int dmg = GetEventInt(event, "dmg_health");
-	char steamUsername[64] = "NOT_FOUND";
-    if (!attacker || !victim) {
+
+    if (!attacker) {
         return Plugin_Continue;
     }
 	
     if (victim == attacker) {
         return Plugin_Continue;
     }
-	
-	if(GetClientTeam(victim) != L4D2Team_Survivor){
-		return Plugin_Continue;
-	}
 
-	if(GetEntProp(attacker, Prop_Send, "m_zombieClass") != L4D2Infected_Tank){
-		return Plugin_Continue;
-	}
-
-	if(!IsFakeClient(attacker) && IsClientInGame(attacker)){
-		GetClientAuthId(attacker, AuthId_Steam2, steamUsername, sizeof(steamUsername));     
-	}
-
-	if(IsFakeClient(attacker)){
-		steamUsername = "AI";
-	}
-
-	//let's load tries
-	char punch_Count_Key[120];
-	char rock_Count_Key[120];
-	char prop_Count_Key[120];
-	char total_Damage_Value_Key[120];
-    Format(punch_Count_Key, sizeof(punch_Count_Key), "%x_punch", steamUsername);
-    Format(rock_Count_Key, sizeof(rock_Count_Key), "%x_rock", steamUsername);
-    Format(prop_Count_Key, sizeof(prop_Count_Key), "%x_prop", steamUsername);
-    Format(total_Damage_Value_Key, sizeof(total_Damage_Value_Key), "%x_total_dmg", steamUsername);
-
-	int punchCount;
-	GetTrieValue(punch_count_store, punch_Count_Key, punchCount);
-	int rockCount;
-	GetTrieValue(rock_count_store, rock_Count_Key, rockCount);
-	int propCount;
-	GetTrieValue(prop_count_store, prop_Count_Key, propCount);
-	int totalDamage;
-	GetTrieValue(damage_value_store, total_Damage_Value_Key, totalDamage);
-
-	//increase values
     char weapon[16];
     GetEventString(event, "weapon", weapon, sizeof(weapon));
-	totalDamage += dmg;
-	if (StrEqual(weapon, "tank_claw")) {
-		punchCount += 1;
-	} else if (StrEqual(weapon, "tank_rock")) {
-		rockCount += 1;
-	} else {
-		propCount += 1;
-	}
-
-	//update tries
-	SetTrieValue(punch_count_store, punch_Count_Key, punchCount);
-	SetTrieValue(rock_count_store, rock_Count_Key, rockCount);
-	SetTrieValue(prop_count_store, prop_Count_Key, propCount);
-	SetTrieValue(damage_value_store, total_Damage_Value_Key, totalDamage);
-
+    if (GetEntProp(attacker, Prop_Send, "m_zombieClass") == 8 && GetClientTeam(victim) == 2) {
+		damage_connected = damage_connected + GetEventInt(event, "dmg_health");
+		if(damage_connected > 1){
+			if (StrEqual(weapon, "tank_claw")) {
+				punch_connected = punch_connected + 1;
+			} else if (StrEqual(weapon, "tank_rock")) {
+				rock_connected = rock_connected + 1;
+			} else {
+				prop_connected = prop_connected + 1;
+			}
+		}
+    }
+	
     return Plugin_Continue;
 }
 
 void ClearTankDamage()
 {
-	ClearTrie(punch_count_store);
-	ClearTrie(rock_count_store);
-	ClearTrie(prop_count_store);
-	ClearTrie(damage_value_store);
-	ClearArray(whoHadTankSteamIDs);
-	ClearArray(whoHadTankNicknames);
 	g_bAnnounceTankDamage = false;
-	g_bIsTankInPlay = false;
 }
 
 public void Event_WitchDeath(Event event, const char[] name, bool dontBroadcast)
@@ -1300,34 +1185,13 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	{
 		FormatEx(info, sizeof(info), "%s :: Tank HUD", sReadyCfgName);
 		DrawPanelText(hSpecHud, info);
-
-		char steamUsername[120] = "None";
-		GetClientAuthId(tank, AuthId_Steam2, steamUsername, sizeof(steamUsername));     
-		//let's load tries
-		char punch_Count_Key[120];
-		char rock_Count_Key[120];
-		char prop_Count_Key[120];
-		char total_Damage_Value_Key[120];
-		Format(punch_Count_Key, sizeof(punch_Count_Key), "%x_punch", steamUsername);
-		Format(rock_Count_Key, sizeof(rock_Count_Key), "%x_rock", steamUsername);
-		Format(prop_Count_Key, sizeof(prop_Count_Key), "%x_prop", steamUsername);
-		Format(total_Damage_Value_Key, sizeof(total_Damage_Value_Key), "%x_total_dmg", steamUsername);
-
-		int punchCount;
-		GetTrieValue(punch_count_store, punch_Count_Key, punchCount);
-		int rockCount;
-		GetTrieValue(rock_count_store, rock_Count_Key, rockCount);
-		int propCount;
-		GetTrieValue(prop_count_store, prop_Count_Key, propCount);
-		int totalDamage;
-		GetTrieValue(damage_value_store, total_Damage_Value_Key, totalDamage);
 		
 		int len = strlen(info);
 		for (int i = 0; i < len; ++i) info[i] = '_';
 		DrawPanelText(hSpecHud, info);
-		Format(info, sizeof(info), "Punches: %i | Rocks: %i | Objects: %i", punchCount, rockCount, propCount);
+		Format(info, sizeof(info), "Punches: %i | Rocks: %i | Objects: %i", punch_connected, rock_connected, prop_connected);
 		DrawPanelText(hSpecHud, info);
-		Format(info, sizeof(info), "Total Damage: %i", totalDamage);
+		Format(info, sizeof(info), "Total Damage: %i", damage_connected);
 		DrawPanelText(hSpecHud, info);
 	}
 	else
@@ -1689,10 +1553,4 @@ stock bool RoundHasFlowTank()
 stock bool RoundHasFlowWitch()
 {
 	return L4D2Direct_GetVSWitchToSpawnThisRound(InSecondHalfOfRound());
-}
-
-stock bool IsValidClient(int client)
-{ 
-    if (client <= 0 || client > MaxClients || !IsClientConnected(client) || !IsClientInGame(client)) return false; 
-    return true;
 }
