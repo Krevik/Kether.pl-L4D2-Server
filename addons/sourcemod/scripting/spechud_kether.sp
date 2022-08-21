@@ -588,16 +588,16 @@ public Action Event_PlayerIncapacitated(Handle event, const char[] name, bool do
     if (!attacker || !victim) {
         return Plugin_Continue;
     }
-	
-    if (victim == attacker) {
+
+	if (victim == attacker) {
         return Plugin_Continue;
     }
-	
-	if(GetClientTeam(victim) != L4D2Team_Survivor){
+
+	if(GetClientTeam(attacker) != L4D2Team_Infected || GetClientTeam(victim) != L4D2Team_Survivor){
 		return Plugin_Continue;
 	}
 
-	if(GetEntProp(attacker, Prop_Send, "m_zombieClass") != L4D2Infected_Tank){
+	if(!IsTank(attacker)){
 		return Plugin_Continue;
 	}
 
@@ -660,16 +660,16 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
     if (!attacker || !victim) {
         return Plugin_Continue;
     }
-	
-    if (victim == attacker) {
+
+	if (victim == attacker) {
         return Plugin_Continue;
     }
-	
-	if(GetClientTeam(victim) != L4D2Team_Survivor){
+
+	if(GetClientTeam(attacker) != L4D2Team_Infected || GetClientTeam(victim) != L4D2Team_Survivor){
 		return Plugin_Continue;
 	}
 
-	if(GetEntProp(attacker, Prop_Send, "m_zombieClass") != L4D2Infected_Tank){
+	if(!IsTank(attacker)){
 		return Plugin_Continue;
 	}
 
