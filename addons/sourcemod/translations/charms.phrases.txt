@@ -1,0 +1,60 @@
+"Phrases"
+{
+	"Charm_Off"
+	{
+		"en"			"Plugin is off."
+	}
+	"Charm_Invalid"
+	{
+		"en"			"Error: Invalid client status."
+	}
+	"Charm_Empty"
+	{
+		"en"			"No weapon equipped."
+	}
+	"Charm_Index"
+	{
+		"#format"		"{1:d}"
+		"en"			"Invalid charm index ({1})."
+	}
+	"Charm_Weapon"
+	{
+		"en"			"Cannot use this weapon."
+	}
+	"Charm_Remove"
+	{
+		"en"			"removed weapon charm."
+	}
+	"Charm_Removed"
+	{
+		"#format"		"{1:s}"
+		"en"			"removed weapon charm from {green}{1}."
+	}
+	"Charm_Saved"
+	{
+		"en"			"Saved weapon preferences."
+	}
+	"Charm_Wait"
+	{
+		"#format"		"{1:d}"
+		"en"			"Wait {1} seconds before saving again."
+	}
+	"Charm_Set"
+	{
+		"#format"		"{1:s}{2:s}"
+		"en"			"set {green}{1} {default}charm to {green}{2}."
+	}
+	"Charm_Equipped"
+	{
+		"#format"		"{1:s}"
+		"en"			"{green}{1}{default} equipped."
+	}
+	"Charm_Menu1"
+	{
+		"en"			"Weapon Charms:"
+	}
+	"Charm_Menu2"
+	{
+		"en"			"Select Charm"
+	}
+}

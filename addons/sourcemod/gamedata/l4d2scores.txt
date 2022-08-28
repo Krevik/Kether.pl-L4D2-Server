@@ -1,0 +1,212 @@
+"Games"
+{
+	"left4dead2"
+	{
+		"Addresses"
+		{
+			"CDirector"
+			{
+				"windows"
+				{
+					"signature" "DirectorMusicBanks_OnRoundStart"				
+					"read" "12"					
+				}
+				"linux"
+				{
+					"signature" "TheDirector"
+				}
+				"read" "0"
+			}
+			"CDirectorScavengeMode" /* offset into CDirector thisptr */
+			{
+				"signature" "CDirector_AreWanderersAllowed"
+				"windows"
+				{
+					"read" "8"   /* mov ecx, [esi+568h] */
+				}
+				"linux"
+				{
+					"read" "18"  /* mov eax, [ebx+578h] */
+				}
+			}
+		}
+		
+		"Signatures"
+		{
+			/* CDirectorScavengeMode::OnBeginRoundSetupTime
+		     *  used to reset the setup timer during scavenge mode
+ 			*/
+			"CDirectorScavengeMode_OnBeginRoundSetupTime"
+			{
+				"library" 	"server"
+				"linux"		"@_ZN21CDirectorScavengeMode21OnBeginRoundSetupTimeEv"
+				"windows" 	"\x83\xEC\x10\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x84\xC0\x74\x2A\xA1\x2A\x2A\x2A\x2A\xD9\x40\x2A\x51"
+				/* 83 EC 10 56 8B F1 E8 ? ? ? ? 84 C0 74 ? A1 ? ? ? ? D9 40 ? 51 */
+			}
+
+			/*
+			 * CDirector::RestartScenarioFromVote(const char*)
+			 *
+			 * string "RestartScenarioFromVote - changing to m"
+			 */
+			"RestartScenarioFromVote"
+			{
+				"library"	"server"
+				"linux"	"@_ZN9CDirector23RestartScenarioFromVoteEPKc"
+				"windows" "\x55\x8B\xEC\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x85\xC9\x74"
+				/* 55 8B EC 56 8B F1 8B 0D ? ? ? ? 57 85 C9 74 */
+			}
+			
+			/*
+			 * CDirector::SwapTeams(void)
+			 */
+			"SwapTeams"
+			{
+				"library"	"server"
+				"linux"	"@_ZN9CDirector9SwapTeamsEv"
+				"windows" "\x55\x8B\xEC\x81\xEC\x2A\x2A\x2A\x2A\x53\x56\x8B\xF1\x8B\x8E\x2A\x2A\x2A\x2A\x57\x89\x75\x2A\xC6\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x8B"
+				/* 55 8B EC 81 EC ? ? ? ? 53 56 8B F1 8B 8E ? ? ? ? 57 89 75 ? C6 ? ? ? E8 ? ? ? ? 8B */
+			}
+			
+			/*
+			 * CDirector::AreTeamsFlipped(void)const
+			 *
+			 * got via CTerrorPlayer::UpdateTeamDesired and its String "CTerrorPlayer::UpdateTeamDesired error "
+			 *
+			 */
+			"AreTeamsFlipped"
+			{
+				"library"	"server"
+				"linux"	"@_ZNK9CDirector15AreTeamsFlippedEv"
+				"windows" "\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x84\xC0\x75\x2A\xF7"
+				/* 57 8B F9 E8 ? ? ? ? 84 C0 75 ? F7 */
+			}
+
+			/*
+			 * CDirector::StartRematchVote(void)
+			 */
+			"StartRematchVote"
+			{
+				"library"	"server"
+				"linux"	"@_ZN9CDirector16StartRematchVoteEv"
+				"windows" "\x83**\x56\x8B\xF1\x68******\xB9\x38***\xC6"
+					/* 83 ? ? 56 8B F1 68 ? ? ? ? ? ? B9 38 ? ? ? C6 */
+			}
+			
+			/*
+			 * CDirectorVersusMode::HideScoreboardNonVirtual(void)
+			 */
+			"HideVersusScoreboard"
+			{
+				"library"	"server"
+				"linux"	"@_ZN19CDirectorVersusMode24HideScoreboardNonVirtualEv"
+				"windows" "\x83\xEC*\xE8****\x84\xC0\x74\x4B\x53\x8D\x44**\x33\xDB\x50"
+					/* 83 EC ? E8 ? ? ? ? 84 C0 74 4B 53 8D 44 ? ? 33 DB 50 */
+			}
+			
+			/*
+			 * CDirectorScavengeMode::HideScoreboardNonVirtual(void)
+			 */
+			"HideScavengeScoreboard"
+			{
+				"library"	"server"
+				"linux"	"@_ZN21CDirectorScavengeMode24HideScoreboardNonVirtualEv"
+				"windows" "\x83\xEC*\xE8****\x84\xC0\x74\x26\x33\xC0\x88\x44**\x89\x44**\x8D\x04*\x50"
+					/* 83 EC ? E8 ? ? ? ? 84 C0 74 26 33 C0 88 44 ? ? 89 44 ? ? 8D 04 ? 50 */
+			}
+			
+			/* Used to get offset for CDirectorScavengeMode 
+				*(director + offset) == ptr to CDirectorScavengeMode
+ 			*/
+			"CDirector_AreWanderersAllowed"
+			{
+				"library" 	"server"
+				"linux"		"@_ZNK9CDirector19AreWanderersAllowedEv"
+				"windows" 	"\x83\xEC\x0C\x56\x8B\xF1\x8B\x8E\x2A\x2A\x2A\x2A\x8D\x2A\x2A\x2A\x50\xE8\x2A\x2A\x2A\x2A\x84\xC0"
+				/* 83 EC 0C 56 8B F1 8B 8E ? ? ? ? 8D ? ? ? 50 E8 ? ? ? ? 84 C0 */
+			}
+			
+			/* CDirectorMusicBanks::OnRoundStart, used solely to get the offset for TheDirector */
+			"DirectorMusicBanks_OnRoundStart"
+			{
+				"library"	"server"
+				"windows"       "\x55\x8B\xEC\x83\xEC\x2A\x56\x57\x8B\xF9\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x0F"
+				/* 55 8B EC 83 EC ? 56 57 8B F9 8B 0D ? ? ? ? E8 ? ? ? ? 84 C0 0F */
+			}
+
+			/* Find the Director/ZombieManager singleton classes */
+			
+			"TheDirector"
+			{
+				"library"	"server"
+				"linux"		"@TheDirector"
+			}
+
+			/*
+			 * CDirector::IsFinale(void)const
+			 */
+			"DirectorIsFinale"
+			{
+				"library"	"server"
+				"linux"	"@_ZNK9CDirector8IsFinaleEv"
+				"windows" "\x8B\x81****\x33\xC9\x83\x38*\x0F\x95\xC1\x8A\xC1\xC3"
+				/* 8B 81 ? ? ? ? 33 C9 83 38 ? 0F 95 C1 8A C1 C3 */
+			}
+			
+			/*
+			 * CDirector::FullRestart(void)
+			 */
+			"FullRestart"
+			{
+				"library"	"server"
+				"linux"	"@_ZN9CDirector11FullRestartEv"
+				"windows" "\x56\x8B\xF1\xC7\x86********\xE8****\xE8****\x8B\xCE\xE8****\x8B\x8E"
+				/* 56 8B F1 C7 86 ? ? ? ? ? ? ? ? E8 ? ? ? ? E8 ? ? ? ? 8B CE E8 ? ? ? ? 8B 8E */
+			}
+			
+			/*
+			 * CTerrorGameRules::ClearTeamScores(bool)
+			 */
+			"GameRulesClearTeamScores"
+			{
+				"library"	"server"
+				"linux"	"@_ZN16CTerrorGameRules15ClearTeamScoresEb"
+				"windows" "\x51\x53\x55\x56\x8B\xE9\x57\x33\xDB\x33\xF6\x8D\xBD\x2A\x2A\x2A\x2A\x8D\x44\x2A\x2A\x50\x56\x8D\x8D"
+				/* 51 53 55 56 8B E9 57 33 DB 33 F6 8D BD ? ? ? ? 8D 44 ? ? 50 56 8D 8D */
+			}
+			
+			/*
+			 * CTerrorGameRules::ClearScavengeScores(bool)
+			 */
+			"GameRulesClearScavengeScores"
+			{
+				"library"	"server"
+				"linux"	"@_ZN16CTerrorGameRules19ClearScavengeScoresEb"
+				"windows" "\x51\x53\x55\x56\x8B\xE9\x57\x33\xDB\x33\xF6\x8D"
+				/* 51 53 55 56 8B E9 57 33 DB 33 F6 8D ? ? ? ? ? 8D ? ? ? 50 56 8B CF 89 */
+			}
+			
+			/*
+			 * CTerrorGameRules::ClearRoundDurations(void)
+			 */
+			"GameRulesClearRoundDurations"
+			{
+				"library"	"server"
+				"linux"	"@_ZN16CTerrorGameRules19ClearRoundDurationsEv"
+				"windows" "\x51\xD9\xEE\x56\x8D\x44\x2A\x2A\xD9\x5C\x2A\x2A\x8D\xB1\x2A\x2A\x2A\x2A\x50\x6A"
+				/* 51 D9 EE 56 8D 44 ? ? D9 5C ? ? 8D B1 ? ? ? ? 50 6A */
+			}
+			
+			/*
+			 * CDirectorVersusMode::ClearTeamScoresNonVirtual(bool)
+			 */
+			"DirectorClearTeamScores"
+			{
+				"library"	"server"
+				"linux"	"@_ZN19CDirectorVersusMode25ClearTeamScoresNonVirtualEb"
+				"windows" "\x33\xC0\x38\x44\x2A\x2A\x74\x06\x89\x41\x2A\x89\x41\x2A\xC2\x04"
+				/* 33 C0 38 44 ? ? 74 06 89 41 ? 89 41 ? C2 04 */
+			}
+		}
+	}
+}

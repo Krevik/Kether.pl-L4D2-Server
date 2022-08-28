@@ -188,6 +188,24 @@ public Action Cmd_Bonus(int iClient, int iArgs)
 	return Plugin_Handled;
 }
 
+/*public Action Command_Say(int iClient, const char[] sCommand, int iArgs)
+{
+	if (!g_hCvarEnabled.BoolValue || !g_hCvarDoDisplay.BoolValue) {
+		return Plugin_Continue;
+	}
+
+	if (IsChatTrigger()) {
+		char sMessage[MAX_NAME_LENGTH];
+		GetCmdArg(1, sMessage, sizeof(sMessage));
+
+		if (strcmp(sMessage, "!bonus") == 0 || strcmp(sMessage, "!sm_bonus") == 0) {
+			return Plugin_Handled;
+		}
+	}
+
+	return Plugin_Continue;
+}*/
+
 // Tank and Witch tracking
 // -----------------------
 

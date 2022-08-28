@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Door_Open"
+	{
+		"ru"		"{olive}[Убежище] {white}открыто игроком {orange}%N"
+	}
+
+	"Door_Close"
+	{
+		"ru"		"{olive}[Убежище] {white}закрыто игроком {orange}%N"
+	}
+}
