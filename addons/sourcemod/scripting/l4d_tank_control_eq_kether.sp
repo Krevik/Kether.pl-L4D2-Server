@@ -215,7 +215,9 @@ public void PlayerTeam_Event(Event hEvent, const char[] name, bool dontBroadcast
                     GetArrayString(queuedPullbackCheck, x, queuedTankSteamId, sizeof(queuedTankSteamId));
                     RequestFrame(outputTankToAll, 0);
                 }
-                RemoveFromArray(queuedPullbackCheck, x);
+                if(GetArraySize(queuedPullbackCheck) > 1){
+                    RemoveFromArray(queuedPullbackCheck, x);
+                }
             }
         }
     }
