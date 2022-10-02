@@ -35,35 +35,12 @@
 //#undef REQUIRE_PLUGIN
 //#include <l4d2lib> //ItemTracking (commented out)
 
-<<<<<<< HEAD
-#include "modules/MapInfo.sp"
-#include "modules/WeaponInformation.sp"
-#include "modules/ReqMatch.sp"
-#include "modules/CvarSettings.sp"
-#include "modules/GhostTank.sp"
-#include "modules/WaterSlowdown.sp"
-#include "modules/UnreserveLobby.sp"
-#include "modules/GhostWarp.sp"
-#include "modules/UnprohibitBosses.sp"
-#include "modules/PasswordSystem.sp"
-#include "modules/BotKick.sp"
-//#include "modules/EntityRemover.sp"
-#include "modules/ScoreMod.sp"
-#include "modules/FinaleSpawn.sp"
-#include "modules/BossSpawning.sp"
-//#include "modules/WeaponCustomization.sp"
-#include "modules/l4dt_forwards.sp"
-#include "modules/ClientSettings.sp"
-#include "modules/ItemTracking.sp"
-//#include "modules/SpectatorHud.sp"
-=======
 #include "confoglcompmod/includes/constants.sp"
 #include "confoglcompmod/includes/functions.sp"
 #include "confoglcompmod/includes/debug.sp"
 #include "confoglcompmod/includes/survivorindex.sp"
 #include "confoglcompmod/includes/configs.sp"
 #include "confoglcompmod/includes/customtags.sp"
->>>>>>> 14e26036d (Update plugin confoglcompmod. (#538))
 
 #if MODULE_MAPINFO
 	#include "confoglcompmod/MapInfo.sp"
@@ -148,41 +125,8 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-<<<<<<< HEAD
-	Debug_OnModuleStart();
-	Configs_OnModuleStart();
-	MI_OnModuleStart();
-	SI_OnModuleStart();
-	WI_OnModuleStart();
-	
-	RM_OnModuleStart();
-	
-	CVS_OnModuleStart();
-	PS_OnModuleStart();
-	UL_OnModuleStart();
-	
-	//ER_OnModuleStart();
-	GW_OnModuleStart();
-	WS_OnModuleStart();
-	GT_OnModuleStart();
-	UB_OnModuleStart();
-	
-	BK_OnModuleStart();
-	
-	SM_OnModuleStart();
-	FS_OnModuleStart();
-	BS_OnModuleStart();
-	//WC_OnModuleStart();
-	CLS_OnModuleStart();
-	IT_OnModuleStart();
-	//SH_OnModuleStart();
-	
-	AddCustomServerTag("confogl", true);
-}
-=======
 	//Plugin functions
 	Configs_APL(); //configs
->>>>>>> 14e26036d (Update plugin confoglcompmod. (#538))
 
 	//Modules
 #if MODULE_REQMATCH
@@ -367,12 +311,8 @@ public void OnMapEnd()
 }
 #endif
 
-<<<<<<< HEAD
-public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon)
-=======
 #if MODULE_CVARSETTINGS
 public void OnConfigsExecuted()
->>>>>>> 14e26036d (Update plugin confoglcompmod. (#538))
 {
 	//Modules
 	CVS_OnConfigsExecuted(); //CvarSettings
@@ -441,9 +381,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	}
 
 	return Plugin_Continue;
-<<<<<<< HEAD
-}
-=======
 }
 #endif
 
@@ -555,4 +492,3 @@ public Action OFSLA_ForceMobSpawnTimer(Handle hTimer)
 
 	return Plugin_Stop;
 }
->>>>>>> 14e26036d (Update plugin confoglcompmod. (#538))
