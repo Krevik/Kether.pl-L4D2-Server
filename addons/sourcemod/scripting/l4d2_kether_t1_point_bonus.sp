@@ -27,6 +27,7 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	RegConsoleCmd("sm_bonus", CMD_print_bonuses, "Let's print those bonuses");
+	RegConsoleCmd("sm_health", CMD_print_bonuses, "Let's print those bonuses");
 	RegConsoleCmd("sm_bonusinfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 	RegConsoleCmd("sm_binfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 	RegConsoleCmd("sm_minfo", CMD_print_bonus_info, "Let's print those bonuses info.");
