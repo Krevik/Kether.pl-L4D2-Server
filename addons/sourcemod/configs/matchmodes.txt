@@ -27,6 +27,13 @@
 			"name" "Kether Test"
 		}
 	}
+	"Kether T2 Configs"
+	{
+		"kether_t2"
+		{
+			"name" "Kether T2" 
+		}
+	}
 	"ZoneMod Configs"
 	{
 		"zonemod"
