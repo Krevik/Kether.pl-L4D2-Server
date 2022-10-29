@@ -58,7 +58,7 @@ public Action cmdGive(int client, int args)
 	for (int iPlayer = 0; iPlayer < target_count; iPlayer++)
 	{
 		if( StrContains(item, "pump", false) > -1 || StrContains(item, "shotgun", false) > -1 || StrContains(item, "chrom", false) > -1 || StrContains(item, "uzi", false) > -1 ||
-		StrContains(item, "silenc", false) > -1 || StrContains(item, "smg", false) > -1){
+		StrContains(item, "silenc", false) > -1 || StrContains(item, "smg", false) > -1 || StrContains(item, "scout", false) > -1){
 			int iCmdFlags = GetCommandFlags("give");
 			SetCommandFlags("give", iCmdFlags & ~FCVAR_CHEAT);
 			FakeClientCommand(target_list[iPlayer], "give %s", item);
