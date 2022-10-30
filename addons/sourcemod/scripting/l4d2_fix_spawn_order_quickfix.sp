@@ -122,6 +122,15 @@ void Event_PlayerLeftStartArea(Event event, const char[] name, bool dontBroadcas
 //   2. Return zombie class, based on the player state: ghost to the beginning, materialized to the end.
 //
 
+//gotta check for all the zombies in queue.
+public void OnTankDeath(){
+	if(!bLive){
+		return;
+	}
+	g_SpawnsArray.Clear();
+	FillQueue();
+}
+
 /**
  * Queue the class of whom switched team alive, to the front if ghost, to the end if materialized.
  */
