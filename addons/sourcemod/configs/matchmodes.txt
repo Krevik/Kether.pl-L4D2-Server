@@ -29,6 +29,10 @@
 		{
 			"name" "Kether T2" 
 		}
+		"kether_t2_pure"
+		{
+			"name" "Kether T2 Pure"
+		}
 		"kether_t2_backport"
 		{
 			"name" "Kether Versus T2 (backport; use with caution)"
