@@ -26,7 +26,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	LoadTranslations("common.phrases");
-	RegAdminCmd("sm_give", cmdGive, ADMFLAG_KICK, "Gives items to players.");
+	RegConsoleCmd("sm_give", cmdGive, "Let's give him some item");
 	CreateConVar("ig_pluginversion", IG_VERSION, "Item Giver version", FCVAR_NOTIFY|FCVAR_DONTRECORD);
 }
 
@@ -43,28 +43,13 @@ public Action cmdGive(int client, int args)
 		return Plugin_Handled;
 	}
 	char item[32];
-	GetCmdArg(2, item, sizeof(item));
-	char target[32];
-	char target_name[32];
-	int target_list[MAXPLAYERS];
-	int target_count;
-	bool tn_is_ml;
-	GetCmdArg(1, target, sizeof(target));
-	if ((target_count = ProcessTargetString(target, client, target_list, MAXPLAYERS, COMMAND_FILTER_ALIVE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
-	{
-		ReplyToTargetError(client, target_count);
-		return Plugin_Handled;
+	GetCmdArg(1, item, sizeof(item));
+	if( StrContains(item, "pump", false) > -1 || StrContains(item, "shotgun", false) > -1 || StrContains(item, "chrom", false) > -1 || StrContains(item, "uzi", false) > -1 ||
+	StrContains(item, "silenc", false) > -1 || StrContains(item, "smg", false) > -1 || StrContains(item, "scout", false) > -1){
+		int iCmdFlags = GetCommandFlags("give");
+		SetCommandFlags("give", iCmdFlags & ~FCVAR_CHEAT);
+		FakeClientCommand(client, "give %s", item);
+		SetCommandFlags("give", iCmdFlags);
 	}
-	for (int iPlayer = 0; iPlayer < target_count; iPlayer++)
-	{
-		if( StrContains(item, "pump", false) > -1 || StrContains(item, "shotgun", false) > -1 || StrContains(item, "chrom", false) > -1 || StrContains(item, "uzi", false) > -1 ||
-		StrContains(item, "silenc", false) > -1 || StrContains(item, "smg", false) > -1 || StrContains(item, "scout", false) > -1){
-			int iCmdFlags = GetCommandFlags("give");
-			SetCommandFlags("give", iCmdFlags & ~FCVAR_CHEAT);
-			FakeClientCommand(target_list[iPlayer], "give %s", item);
-			SetCommandFlags("give", iCmdFlags);
-		}
-	}
-	ShowActivity2(client, "\x04[IG]\x01 ", "Gave a(n) %s to %s.", item, target_name);
 	return Plugin_Handled;
 }
