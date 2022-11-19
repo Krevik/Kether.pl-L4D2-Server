@@ -300,7 +300,7 @@ float GetTotalHealthBonus(){
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (L4D_IsInLastCheckpoint(i))
+			if (L4D_IsInLastCheckpoint(i) && IsPlayerAlive(i) && !IsIncapacitated(i))
 			{	
 				float bonusForPermHealth = GetSurvivorPermanentHealth(i)/4.0;				
 				float totalBonusToAdd = (bonusForPermHealth)*mapDistanceMultiplier;
@@ -320,7 +320,7 @@ float GetTotalHealthBonusForAlive(){
 		if (IsSurvivor(i))
 		{
 			survivorCount++;
-			if (IsPlayerAlive(i))
+			if (IsPlayerAlive(i) && !IsIncapacitated(i))
 			{	if(GetSurvivorPermanentHealth(i) <= 100){
 					float bonusForPermHealth = GetSurvivorPermanentHealth(i)/4.0;				
 					float totalBonusToAdd = (bonusForPermHealth)*mapDistanceMultiplier;
@@ -490,13 +490,9 @@ bool HasAdrenaline(int client)
 	return false;
 }
 
-GetSurvivorPermanentHealth(int client)
+stock GetSurvivorPermanentHealth(client)
 {
-	// Survivors always have minimum 1 permanent hp
-	// so that they don't faint in place just like that when all temp hp run out
-	// We'll use a workaround for the sake of fair calculations
-	// Edit 2: "Incapped HP" are stored in m_iHealth too; we heard you like workarounds, dawg, so we've added a workaround in a workaround
-	return GetEntProp(client, Prop_Send, "m_currentReviveCount") > 0 ? 0 : (GetEntProp(client, Prop_Send, "m_iHealth") > 0 ? GetEntProp(client, Prop_Send, "m_iHealth") : 0);
+    return GetEntProp(client, Prop_Send, "m_iHealth");
 }
 
 stock GetSurvivorIncapCount(int client)
@@ -504,12 +500,15 @@ stock GetSurvivorIncapCount(int client)
     return GetEntProp(client, Prop_Send, "m_currentReviveCount");
 }
 
+stock IsIncapacitated(client) return GetEntProp(client, Prop_Send, "m_isIncapacitated");
+
+
 stock GetMapMaxScore()
 {
 	return L4D_GetVersusMaxCompletionScore();
 }
 
-InSecondHalfOfRound()
+stock InSecondHalfOfRound()
 {
 	return GameRules_GetProp("m_bInSecondHalfOfRound");
 }
