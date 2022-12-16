@@ -1,6 +1,5 @@
 #include <sourcemod>
 #include <sdktools>
-#define USE_GIVEPLAYERITEM		0 // Works correctly only in the latest version of sourcemod 1.11 (GivePlayerItem sourcemod native)
 
 public Plugin:myinfo =
 {
