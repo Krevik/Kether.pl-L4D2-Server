@@ -505,12 +505,6 @@ void CreateSpotMarker(int client)
     if (!(GetTeamFlag(team) & g_iCvar_Team))
         return;
 
-    if (team == TEAM_INFECTED)
-    {
-        if (IsPlayerGhost(client))
-            return;
-    }
-
     bool hit;
     float vEndPos[3];
 
