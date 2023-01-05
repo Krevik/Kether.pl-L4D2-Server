@@ -1,6 +1,7 @@
 [Service]
 Type=forking
-Restart=no
+Restart=yes
+RestartSec=1s
 TimeoutSec=5min
 IgnoreSIGPIPE=no
 KillMode=process
