@@ -125,14 +125,4 @@
 		"cze"		"Vyhodil hrace {1} (Duvod: {2})"
 	}
 
-	"Please select a map"
-	{
-		"cze"		"Prosim zvolte mapu"
-	}
-
-	"Choose Config"
-	{
-		"cze"		"Vyberte konfiguraci"
-	}
-
 }

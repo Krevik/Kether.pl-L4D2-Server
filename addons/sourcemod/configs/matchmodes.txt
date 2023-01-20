@@ -4,15 +4,15 @@
 	{
 		"kether_versus_t1"
 		{
-			"name" "Kether 2.0 Versus T1"
+			"name" "Kether Versus T1"
 		}
 		"kether_versus_t1_realism"
 		{
-			"name" "Kether 2.0 Versus T1 Realism"
+			"name" "Kether Versus T1 Realism"
 		}
 		"kether_versus_turbo_t1"
 		{
-			"name" "Kether 2.0 Versus T1 Turbo"
+			"name" "Kether Versus T1 Turbo"
 		}
 		"kether_versus_t1_8v8"
 		{
@@ -42,11 +42,11 @@
 	{
 		"zonemod"
 		{
-			"name" "ZoneMod 2.6.6"
+			"name" "ZoneMod 2.8"
 		}
 		"zoneretro"
 		{
-			"name" "ZoneMod Retro 2.6.6"
+			"name" "ZoneMod Retro 2.8"
 		}
 		"zm3v3"
 		{
@@ -143,7 +143,7 @@
 	{
 		"zonehunters"
 		{
-			"name" "ZoneHunters 2.6.6"
+			"name" "ZoneHunters 2.8"
 		}
 		"zh3v3"
 		{
