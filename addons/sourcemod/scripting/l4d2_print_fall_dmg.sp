@@ -8,6 +8,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <multicolors>
+#include <l4d2util>
 #pragma newdecls required
 
 public Plugin myinfo = 
@@ -46,3 +47,4 @@ public void FALL_DMG_PRINT(Event event, const char[] name, bool dontBroadcast)
 		CPrintToChat(client, "You received {red}%d {olive}Fall Dmg {default}| {olive}Fall Velocity: {red}%d {default}| {olive}Reason: {red}%s", dmg, RoundToNearest(fallVelocitySend), reasonName);
 	}
 }
+
