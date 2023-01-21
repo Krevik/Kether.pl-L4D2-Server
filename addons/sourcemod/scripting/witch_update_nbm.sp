@@ -27,7 +27,7 @@
 
 #define GAMEDATA "witch_update_nbm"
 
-#define WITCH_UPDATE_FREQUENCY 0.033
+#define WITCH_UPDATE_FREQUENCY 0.05
 
 #define PLUGIN_VERSION	"1.0"
 
