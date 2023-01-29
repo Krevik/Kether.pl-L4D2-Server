@@ -72,14 +72,20 @@ public void TP_OnTankPass(){
 	int team = InSecondHalfOfRound();
 	float bonus = GetBonusForTankKillPass();
 	fSurvivorTankKillPassBonus[team] += bonus;
-	CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
+	int survs = GetUprightSurvivors();
+	if(survs > 0){
+		CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
+	}
 }
 
 public void OnTankDeath(){
 	int team = InSecondHalfOfRound();
 	float bonus = GetBonusForTankKillPass();
 	fSurvivorTankKillPassBonus[team] += bonus;
-	CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
+	int survs = GetUprightSurvivors();
+	if(survs > 0){
+		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(bonus) );
+	}
 }
 
 public void Kether_OnWitchDrawCrown(){
