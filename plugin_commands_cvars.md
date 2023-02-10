@@ -2,9 +2,10 @@
 Ready/Unready Aliases  
 *Prints Ready! on chat*
 
+<ins>Commands:</ins>
 - "**sm_r**" / "**sm_ready**": Ready!
 - "**sm_nr**": Not Ready!
-
+---
 >**autopause.smx**  
 Auto pause on player crash
 
@@ -12,7 +13,7 @@ Auto pause on player crash
 - "**autopause_enable**": Whether or not to automatically pause when a player crashes.
 - "**autopause_force**": Whether or not to force pause when a player crashes.
 - "**autopause_apdebug**": Whether or not to debug information.
-
+---
 >**autorecorder.smx**  
 Automates SourceTV recording based on player count and time of day.  
 http://forums.alliedmods.net/showthread.php?t=92072
@@ -21,6 +22,17 @@ http://forums.alliedmods.net/showthread.php?t=92072
 
 * **sm_record**: Starts a SourceTV demo
 * **sm_stoprecord**: Stops recording the current SourceTV demo
+
+<ins>CVARS:</ins>
+* **sm_autorecord_enable**: Enable automatic recording
+* **sm_autorecord_finishmap**: If 1, continue recording until the map ends
+* **sm_autorecord_ignorebots**: Ignore bots in the player count
+* **sm_autorecord_minplayers**: Minimum players on server to start recording
+* **sm_autorecord_path**: Path to store recorded demos
+* **sm_autorecord_timestart**: Hour in the day to start recording (0-23, -1 disables)
+* **sm_autorecord_timestop**: Hour in the day to stop recording (0-23, -1 disables)
+
+---
 
 > **l4d_custom_commands.smx**  
 [L4D & L4D2] New custom commands  
