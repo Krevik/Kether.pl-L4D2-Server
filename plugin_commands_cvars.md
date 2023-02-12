@@ -82,10 +82,18 @@ Current Commands on Left 4 Dead 1:
 -To obtain the full command list, please, type **!cchelp** on chat, and then check your console.
 
 <ins>CVARS:</ins>  
-- **l4d2_custom_commands_version** : Version of the plugin.
-- **l4d2_custom_commands_explosion_radius** : Radius of the explosion.
-- **l4d2_custom_commands_explosion_power** : Power of the explosion.
+- **l4d2_custom_commands_version**: Version of the plugin.
+- **l4d2_custom_commands_explosion_radius**: Radius of the explosion.
+- **l4d2_custom_commands_explosion_power**: Power of the explosion.
 - **l4d2_custom_commands_explosion_duration**: Duration of the fire trace left by the explosion (Causes damage).
 - **l4d2_custom_commands_rain_duration**: Duration of the Gnome Rain and l4d1 rain..
 - **l4d2_custom_commands_rain_radius**: Radius of the Gnome Rain, l4d1 rain and air strike commands.
 - **l4d2_custom_commands_menutype**: 0: Create a new admin menu category 1: Add commands to the default sourcemod categories
+
+---
+>**nodeathcamskip.smx**  
+Block players skipping their death time by going spec  
+https://github.com/SirPlease/L4D2-Competitive-Rework
+
+CVARS:
+* **deathcam_skip_announce**: If **1** (*default*), globally print an info about the player who tried to exploit.
