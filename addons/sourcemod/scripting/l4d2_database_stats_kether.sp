@@ -10,15 +10,17 @@ CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
  `SteamID` varchar(32) NOT NULL DEFAULT '',\
  `Hunter_Skeets` int(11) NOT NULL DEFAULT '0',\
  `Witch_Crowns` int(11) NOT NULL DEFAULT '0',\
+ `Tongue_Cuts` int(11) NOT NULL DEFAULT '0',\
+ `Smoker_Self_Clears` int(11) NOT NULL DEFAULT '0',\
+ `Tank_Rocks_Skeeted` int(11) NOT NULL DEFAULT '0',\
+ `Hunter_High_Pounces_25` int(11) NOT NULL DEFAULT '0',\
+ `Death_Charges` int(11) NOT NULL DEFAULT '0',\
  PRIMARY KEY (`SteamID`)\
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\
 "
 
 Database KETHER_STATS_DB;
 char sql_error_buffer[512];
-int database_values[MAXPLAYERS+1][16];
-#define DB_POINTER_HUNTER_SKEETS   0
-#define DB_POINTER_WITCH_CROWNS   1
 char sql_query[1024];
 char sql_query2[1024];
 
@@ -84,8 +86,6 @@ public void StatsSQLregisterClient(Handle owner, Handle handle, const char[] err
 		{
 			if (SQL_FetchRow(handle))
 			{
-				database_values[client][DB_POINTER_HUNTER_SKEETS]   = SQL_FetchInt(handle, DB_POINTER_HUNTER_SKEETS);
-				database_values[client][DB_POINTER_WITCH_CROWNS]     = SQL_FetchInt(handle, DB_POINTER_WITCH_CROWNS);
 			}
 			else
 			{
@@ -124,47 +124,11 @@ public Action SQLTimerClientPost(Handle timer, any client)
 	return Plugin_Stop;
 }
 
-void CleanLocalValues(int &client)
-{
-	database_values[client][DB_POINTER_HUNTER_SKEETS] = 0;
-	database_values[client][DB_POINTER_WITCH_CROWNS] = 0;
-}
-
 public void OnClientPostAdminCheck(int client)
 {
 	if (!IsFakeClient(client))
 	{
-		CleanLocalValues(client);
 		CreateTimer(0.5, SQLTimerClientPost, client, TIMER_FLAG_NO_MAPCHANGE);
-	}
-}
-
-public void OnClientDisconnect(int client)
-{
-	if (!IsFakeClient(client))
-	{
-		if (database_values[client][DB_POINTER_HUNTER_SKEETS])
-		{
-			if (KETHER_STATS_DB)
-			{
-				char sTeamID[24];
-
-				sql_query2[0] = '\0';
-				GetClientAuthId(client, AuthId_Steam2, sTeamID, sizeof(sTeamID)-1);
-				Format(sql_query2, sizeof(sql_query2)
-				 , "UPDATE `l4d2_stats_kether` SET \
-					Hunter_Skeets = Hunter_Skeets + %d, \
-					Witch_Crowns = Witch_Crowns + %d \
-					WHERE `SteamID` = '%s'"
-				, database_values[client][DB_POINTER_HUNTER_SKEETS]
-				, database_values[client][DB_POINTER_WITCH_CROWNS]
-				, sTeamID);
-
-				SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-			}
-		}
-
-		CleanLocalValues(client);
 	}
 }
 
@@ -186,6 +150,115 @@ public void grantWitchCrown(int clientID){
 	}
 }
 
+public void grantHunterSkeet(int clientID){
+	if(!IsFakeClient(clientID)){
+		char steamID[24];
+		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		if(KETHER_STATS_DB){
+			sql_query2[0] = '\0';
+			Format(sql_query2, sizeof(sql_query2)
+			 , "UPDATE `l4d2_stats_kether` SET \
+				Hunter_Skeets = Hunter_Skeets + %d \
+				WHERE `SteamID` = '%s'"
+			, 1
+			, steamID);
+
+			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+		}
+	}
+}
+
+public void grantTongueCut(int clientID){
+	if(!IsFakeClient(clientID)){
+		char steamID[24];
+		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		if(KETHER_STATS_DB){
+			sql_query2[0] = '\0';
+			Format(sql_query2, sizeof(sql_query2)
+			 , "UPDATE `l4d2_stats_kether` SET \
+				Tongue_Cuts = Tongue_Cuts + %d \
+				WHERE `SteamID` = '%s'"
+			, 1
+			, steamID);
+
+			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+		}
+	}
+}
+
+public void grantSmokerSelfClear(int clientID){
+	if(!IsFakeClient(clientID)){
+		char steamID[24];
+		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		if(KETHER_STATS_DB){
+			sql_query2[0] = '\0';
+			Format(sql_query2, sizeof(sql_query2)
+			 , "UPDATE `l4d2_stats_kether` SET \
+				Smoker_Self_Clears = Smoker_Self_Clears + %d \
+				WHERE `SteamID` = '%s'"
+			, 1
+			, steamID);
+
+			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+		}
+	}
+}
+
+public void grantTankRockSkeet(int clientID){
+	if(!IsFakeClient(clientID)){
+		char steamID[24];
+		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		if(KETHER_STATS_DB){
+			sql_query2[0] = '\0';
+			Format(sql_query2, sizeof(sql_query2)
+			 , "UPDATE `l4d2_stats_kether` SET \
+				Tank_Rocks_Skeeted = Tank_Rocks_Skeeted + %d \
+				WHERE `SteamID` = '%s'"
+			, 1
+			, steamID);
+
+			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+		}
+	}
+}
+
+public void grantHunterHighPounce25(int clientID){
+	if(!IsFakeClient(clientID)){
+		char steamID[24];
+		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		if(KETHER_STATS_DB){
+			sql_query2[0] = '\0';
+			Format(sql_query2, sizeof(sql_query2)
+			 , "UPDATE `l4d2_stats_kether` SET \
+				Hunter_High_Pounces_25 = Hunter_High_Pounces_25 + %d \
+				WHERE `SteamID` = '%s'"
+			, 1
+			, steamID);
+
+			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+		}
+	}
+}
+
+public void grantDeathCharge(int clientID){
+	if(!IsFakeClient(clientID)){
+		char steamID[24];
+		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		if(KETHER_STATS_DB){
+			sql_query2[0] = '\0';
+			Format(sql_query2, sizeof(sql_query2)
+			 , "UPDATE `l4d2_stats_kether` SET \
+				Death_Charges = Death_Charges + %d \
+				WHERE `SteamID` = '%s'"
+			, 1
+			, steamID);
+
+			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+		}
+	}
+}
+
+
 public void Kether_OnWitchCrown(int clientID)
 {
 	grantWitchCrown(clientID);
@@ -195,3 +268,33 @@ public void Kether_OnWitchDrawCrown(int clientID)
 {
 	grantWitchCrown(clientID);
 }
+
+public void OnSkeet(int survivor){
+	grantHunterSkeet(survivor);
+}
+
+public void OnTongueCut(int survivor){
+	grantTongueCut(survivor);
+}
+
+public void OnSmokerSelfClear(int survivor){
+	grantSmokerSelfClear(survivor);
+}
+
+public void OnTankRockSkeeted(int survivor){
+	grantTankRockSkeet(survivor);
+}
+
+public void OnHunterHighPounce(int survivor, int victim, int actualDamage){
+	if(actualDamage == 25){
+		grantHunterHighPounce25(survivor);
+	}
+}
+
+public void OnDeathCharge(int survivor){
+	grantDeathCharge(survivor);
+}
+
+
+
+
