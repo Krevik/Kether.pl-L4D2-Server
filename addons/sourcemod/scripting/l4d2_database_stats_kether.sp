@@ -7,7 +7,7 @@
 
 #define CREATE_STATS_TABLE "\
 CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
- `SteamID` varchar(32) NOT NULL DEFAULT '',\
+ `SteamID` varchar(64) NOT NULL DEFAULT '',\
  `Hunter_Skeets` int(11) NOT NULL DEFAULT '0',\
  `Witch_Crowns` int(11) NOT NULL DEFAULT '0',\
  `Tongue_Cuts` int(11) NOT NULL DEFAULT '0',\
@@ -93,7 +93,7 @@ public void StatsSQLregisterClient(Handle owner, Handle handle, const char[] err
 				sql_query[0] = '\0';
 				if (KETHER_STATS_DB)
 				{
-					GetClientAuthId(client, AuthId_Steam2, sTeamID, sizeof(sTeamID)-1);
+					GetClientAuthId(client, AuthId_SteamID64, sTeamID, sizeof(sTeamID)-1);
 					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_stats_kether` SET `SteamID` = '%s'", sTeamID);
 					SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query, 0);
 				}
@@ -110,7 +110,7 @@ public Action SQLTimerClientPost(Handle timer, any client)
 		{
 			char sTeamID[24];
 			sql_query[0] = '\0';
-			GetClientAuthId(client, AuthId_Steam2, sTeamID, sizeof(sTeamID)-1);
+			GetClientAuthId(client, AuthId_SteamID64, sTeamID, sizeof(sTeamID)-1);
 			Format(sql_query, sizeof(sql_query)-1
 			 , "SELECT \
 				Hunter_Skeets, \
@@ -135,7 +135,7 @@ public void OnClientPostAdminCheck(int client)
 public void grantWitchCrown(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
@@ -153,7 +153,7 @@ public void grantWitchCrown(int clientID){
 public void grantHunterSkeet(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
@@ -171,7 +171,7 @@ public void grantHunterSkeet(int clientID){
 public void grantTongueCut(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
@@ -189,7 +189,7 @@ public void grantTongueCut(int clientID){
 public void grantSmokerSelfClear(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
@@ -207,7 +207,7 @@ public void grantSmokerSelfClear(int clientID){
 public void grantTankRockSkeet(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
@@ -225,7 +225,7 @@ public void grantTankRockSkeet(int clientID){
 public void grantHunterHighPounce25(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
@@ -243,7 +243,7 @@ public void grantHunterHighPounce25(int clientID){
 public void grantDeathCharge(int clientID){
 	if(!IsFakeClient(clientID)){
 		char steamID[24];
-		GetClientAuthId(clientID, AuthId_Steam2, steamID, sizeof(steamID)-1);
+		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 		if(KETHER_STATS_DB){
 			sql_query2[0] = '\0';
 			Format(sql_query2, sizeof(sql_query2)
