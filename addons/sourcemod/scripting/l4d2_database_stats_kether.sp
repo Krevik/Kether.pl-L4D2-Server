@@ -115,6 +115,11 @@ public Action SQLTimerClientPost(Handle timer, any client)
 			 , "SELECT \
 				Hunter_Skeets, \
 				Witch_Crowns \
+				Tongue_Cuts \
+				Smoker_Self_Clears \
+				Tank_Rocks_Skeeted \
+				Hunter_High_Pounces_25 \
+				Death_Charges \
 				FROM `l4d2_stats_kether` WHERE `SteamID` = '%s'", sTeamID);
 
 			SQL_TQuery(KETHER_STATS_DB, StatsSQLregisterClient, sql_query, client);
