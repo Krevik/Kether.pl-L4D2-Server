@@ -434,14 +434,6 @@ public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast
 			grantFriendlyFireDone(attacker, damageDone);
 			grantFriendlyFireReceived(victim, damageDone);
         }
-		if (GetClientTeam(attacker) == TEAM_SURVIVOR && GetClientTeam(victim) == TEAM_INFECTED)
-        {
-			grantDamageDoneToSI(attacker, damageDone);
-		}
-		if (GetClientTeam(attacker) == TEAM_INFECTED && GetClientTeam(victim) == TEAM_SURVIVOR)
-        {
-			grantDamageDoneToSurvivors(attacker, damageDone);
-		}
     }
 }
 
