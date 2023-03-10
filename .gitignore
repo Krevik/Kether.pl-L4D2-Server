@@ -42,3 +42,4 @@ addons/sourcemod/scripting/.vs/scripting/v17/workspaceFileList.bin
 addons/sourcemod/scripting/.vs/scripting/v17/.suo
 addons/sourcemod/scripting/.vs/scripting/project-colors.json
 addons/sourcemod/scripting/.vs/ProjectSettings.json
+addons/sourcemod/configs/databases.cfg
