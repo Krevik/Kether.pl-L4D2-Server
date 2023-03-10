@@ -31,6 +31,7 @@ Database KETHER_STATS_DB;
 char sql_error_buffer[512];
 char sql_query[1024];
 char sql_query2[1024];
+int commonsKilled[128];
 
 public Plugin myinfo =
 {
@@ -41,6 +42,11 @@ public Plugin myinfo =
 	url = "https://kether.pl"
 };
 
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	CreateNative("AddDatabaseRecord", Native_AddDtabaseRecord);
+	return APLRes_Success;
+}
 
 public void OnPluginStart()
 {
@@ -48,6 +54,40 @@ public void OnPluginStart()
 	RegAdminCmd("sm_createStatsSQL", CMD_CreateStatsDataTable, ADMFLAG_CHEATS, "");
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
+}
+
+public int Native_AddDtabaseRecord(Handle plugin, int numParams)
+{
+	char columnName[512];
+	int clientID;
+	int amount;
+	
+	GetNativeString(1, columnName, sizeof(columnName));
+	clientID = GetNativeCell(2);
+	amount = GetNativeCell(3);
+	addDatabaseRecord(columnName, clientID, amount);
+	return -1;
+}
+
+public void addDatabaseRecord(char columnName[512], int clientID, int amount){
+	if(clientID > 0 && clientID < MaxClients +1 && amount > 0){
+		if(IsClientAndInGame(clientID)){
+			if(!IsFakeClient(clientID)){
+				char steamID[24];
+				GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
+				if(KETHER_STATS_DB){
+					sql_query2[0] = '\0';
+					Format(sql_query2, sizeof(sql_query2)
+					 , "UPDATE `l4d2_stats_kether` SET \
+						%s = %s + %d \
+						WHERE `SteamID` = '%s'"
+					, columnName, columnName, amount
+					, steamID);
+					SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+				}
+			}
+		}
+	}
 }
 
 public Action CMD_CreateStatsDataTable(int client, int args)
@@ -143,266 +183,56 @@ public void OnClientPostAdminCheck(int client)
 	}
 }
 
-public void grantWitchCrown(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Witch_Crowns = Witch_Crowns + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantHunterSkeet(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Hunter_Skeets = Hunter_Skeets + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantTongueCut(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Tongue_Cuts = Tongue_Cuts + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantSmokerSelfClear(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Smoker_Self_Clears = Smoker_Self_Clears + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantTankRockSkeet(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Tank_Rocks_Skeeted = Tank_Rocks_Skeeted + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantHunterHighPounce25(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Hunter_High_Pounces_25 = Hunter_High_Pounces_25 + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantDeathCharge(int clientID){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Death_Charges = Death_Charges + %d \
-				WHERE `SteamID` = '%s'"
-			, 1
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantKilledCommons(int clientID, int amount){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Commons_Killed = Commons_Killed + %d \
-				WHERE `SteamID` = '%s'"
-			, amount
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantFriendlyFireReceived(int clientID, int amount){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Friendly_Fire_Received = Friendly_Fire_Received + %d \
-				WHERE `SteamID` = '%s'"
-			, amount
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
-public void grantFriendlyFireDone(int clientID, int amount){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Friendly_Fire_Done = Friendly_Fire_Done + %d \
-				WHERE `SteamID` = '%s'"
-			, amount
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
-}
-
 public void grantDamageDoneToSurvivors(int clientID, int amount){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Damage_Done_To_Survivors = Damage_Done_To_Survivors + %d \
-				WHERE `SteamID` = '%s'"
-			, amount
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
+	addDatabaseRecord("Damage_Done_To_Survivors", clientID, amount);
 }
 
 public void grantDamageDoneToSI(int clientID, int amount){
-	if(!IsFakeClient(clientID)){
-		char steamID[24];
-		GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
-		if(KETHER_STATS_DB){
-			sql_query2[0] = '\0';
-			Format(sql_query2, sizeof(sql_query2)
-			 , "UPDATE `l4d2_stats_kether` SET \
-				Damage_Done_To_SI` = Damage_Done_To_SI + %d \
-				WHERE `SteamID` = '%s'"
-			, amount
-			, steamID);
-
-			SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
-		}
-	}
+	addDatabaseRecord("Damage_Done_To_SI", clientID, amount);
 }
-
-
 
 public void Kether_OnWitchCrown(int clientID)
 {
-	grantWitchCrown(clientID);
+	addDatabaseRecord("Witch_Crowns", clientID, 1);
 }
 
 public void Kether_OnWitchDrawCrown(int clientID)
 {
-	grantWitchCrown(clientID);
+	addDatabaseRecord("Witch_Crowns", clientID, 1);
 }
 
 public void OnSkeet(int survivor){
-	grantHunterSkeet(survivor);
+	addDatabaseRecord("Hunter_Skeets", survivor, 1);
 }
 
 public void OnSkeetMelee(int survivor){
-	grantHunterSkeet(survivor);
+	addDatabaseRecord("Hunter_Skeets", survivor, 1);
 }
 
 public void OnSkeetSniper(int survivor){
-	grantHunterSkeet(survivor);
+	addDatabaseRecord("Hunter_Skeets", survivor, 1);
 }
 
 public void OnTongueCut(int survivor){
-	grantTongueCut(survivor);
+	addDatabaseRecord("Tongue_Cuts", survivor, 1);
 }
 
 public void OnSmokerSelfClear(int survivor){
-	grantSmokerSelfClear(survivor);
+	addDatabaseRecord("Smoker_Self_Clears", survivor, 1);
 }
 
 public void OnTankRockSkeeted(int survivor){
-	grantTankRockSkeet(survivor);
+	addDatabaseRecord("Tank_Rocks_Skeeted", survivor, 1);
 }
 
 public void OnHunterHighPounce(int survivor, int victim, int actualDamage){
 	if(actualDamage == 25){
-		grantHunterHighPounce25(survivor);
+		addDatabaseRecord("Hunter_High_Pounces_25", survivor, 1);
 	}
 }
 
 public void OnDeathCharge(int survivor){
-	grantDeathCharge(survivor);
+	addDatabaseRecord("Death_Charges", survivor, 1);
 }
 
 public void InfectedDeath_Event(Handle event, const char[] name, bool dontBroadcast)
@@ -412,8 +242,31 @@ public void InfectedDeath_Event(Handle event, const char[] name, bool dontBroadc
     
     if (attackerId && IsClientAndInGame(attacker) && GetClientTeam(attacker) == TEAM_SURVIVOR && !IsFakeClient(attacker))
     {
-		grantKilledCommons(attacker, 1);
+		commonsKilled[attacker] += 1;
+		databaseAddKilledCommonsTimer(attacker, commonsKilled[attacker]);
     }
+}
+
+public void databaseAddKilledCommonsTimer(int client, int killedCommons){
+	DataPack pack;
+	CreateDataTimer(3.0, databaseAddKilledCommons, pack);
+	pack.WriteCell(client);
+	pack.WriteCell(killedCommons);
+}
+
+public Action databaseAddKilledCommons(Handle timer, DataPack pack)
+{
+	int client;
+	int commonsFromTimerData;
+	pack.Reset();
+	client = pack.ReadCell();
+	commonsFromTimerData = pack.ReadCell();
+	
+	if(commonsKilled[client] == commonsFromTimerData){
+		addDatabaseRecord("Commons_Killed", client, commonsKilled[client]);
+		commonsKilled[client] = 0;
+	}
+	return Plugin_Continue;
 }
 
 public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast)
@@ -431,8 +284,8 @@ public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast
     {
         if (GetClientTeam(attacker) == TEAM_SURVIVOR && GetClientTeam(victim) == TEAM_SURVIVOR)
         {
-			grantFriendlyFireDone(attacker, damageDone);
-			grantFriendlyFireReceived(victim, damageDone);
+			addDatabaseRecord("Friendly_Fire_Done", attacker, damageDone);
+			addDatabaseRecord("Friendly_Fire_Received", victim, damageDone);
         }
     }
 }
