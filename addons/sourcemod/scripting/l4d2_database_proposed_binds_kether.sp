@@ -70,8 +70,17 @@ public void addDatabaseRecord(char Content[512], int clientID){
 				GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 				if(KETHER_BINDS_DB){
 								CPrintToChatAll("{blue}DEBUG 2{default}");
-					sql_query2[0] = '\0';
+					sql_query[0] = '\0';
 					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_binds_kether` SET `SteamID` = '%s'", steamID);
+					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query, 0);
+					
+					sql_query2[0] = '\0';
+					Format(sql_query2, sizeof(sql_query2)
+					 , "UPDATE `l4d2_binds_kether` SET \
+						Content = %s \
+						WHERE `SteamID` = '%s'"
+					, Content
+					, steamID);
 					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query2, 0);
 				}
 			}
