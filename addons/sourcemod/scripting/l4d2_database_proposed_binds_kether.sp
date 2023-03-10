@@ -7,9 +7,9 @@
 
 #define BINDS_DB "l4d2_binds_kether"
 #define CREATE_STATS_TABLE "\
-CREATE TABLE IF NOT EXISTS `l4d2_binds_kether` (\
+CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
  `SteamID` varchar(64) NOT NULL DEFAULT '',\
- `Content` varchar(256) NOT NULL DEFAULT '0',\
+ `Content` varchar(256) NOT NULL DEFAULT '',\
  PRIMARY KEY (`SteamID`)\
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\
 "
