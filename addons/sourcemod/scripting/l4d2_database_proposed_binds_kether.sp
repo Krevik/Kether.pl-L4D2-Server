@@ -58,11 +58,7 @@ public void addDatabaseRecord(char Content[512], int clientID){
 				GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 				if(KETHER_BINDS_DB){
 					sql_query2[0] = '\0';
-					Format(sql_query2, sizeof(sql_query2)
-					 , "INSERT IGNORE INTO `l4d2_binds_kether` SET \
-						SteamId = %s \
-						Content = %s \
-					, steamID, Content");
+					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_binds_kether` SET `SteamID` = '%s'", sTeamID);
 					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query2, 0);
 				}
 			}
