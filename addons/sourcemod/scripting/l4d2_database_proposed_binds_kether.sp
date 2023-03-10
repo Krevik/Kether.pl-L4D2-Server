@@ -7,7 +7,8 @@
 
 #define BINDS_DB "l4d2_stats_kether"
 #define CREATE_STATS_TABLE "\
-CREATE TABLE IF NOT EXISTS `l4d2_bind_kether` (\
+CREATE TABLE IF NOT EXISTS `l4d2_binds_kether` (\
+ `LP` int(11) NOT NULL DEFAULT '0',\
  `SteamID` varchar(64) NOT NULL DEFAULT '',\
  `Content` varchar(256) NOT NULL DEFAULT '',\
  PRIMARY KEY (`SteamID`)\
@@ -57,7 +58,7 @@ public void addDatabaseRecord(char Content[512], int clientID){
 
 				CPrintToChatAll("{blue}DEBUG 4{default}");
 
-	if(clientID > 0 && clientID < MaxClients +1 && Content){
+	if(clientID > 0 && clientID < MaxClients +1){
 					CPrintToChatAll("{blue}DEBUG 5{default}");
 
 		if(IsClientAndInGame(clientID)){
