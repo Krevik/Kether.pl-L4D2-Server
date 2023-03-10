@@ -3,6 +3,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <left4dhooks>
+#include <multicolors>
 
 #define BINDS_DB "l4d2_binds_kether"
 #define CREATE_STATS_TABLE "\
