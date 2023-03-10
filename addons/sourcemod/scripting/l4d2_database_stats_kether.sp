@@ -44,7 +44,7 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-	CreateNative("AddDatabaseRecord", Native_AddDtabaseRecord);
+	CreateNative("Kether_AddDatabaseStatRecord", Kether_AddDatabaseStatRecord);
 	return APLRes_Success;
 }
 
@@ -56,7 +56,7 @@ public void OnPluginStart()
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
 }
 
-public int Native_AddDtabaseRecord(Handle plugin, int numParams)
+public int Kether_AddDatabaseStatRecord(Handle plugin, int numParams)
 {
 	char columnName[512];
 	int clientID;
