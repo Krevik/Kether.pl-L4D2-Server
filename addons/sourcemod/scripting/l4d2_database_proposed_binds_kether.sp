@@ -43,15 +43,15 @@ public void OnPluginStart()
 public Action CMD_Binds(int client, int args)
 {
 	char Content[512];
-	GetCmdArgString(Content, sizeof(Content))
-	addDatabaseRecord(Content,client)
+	GetCmdArgString(Content, sizeof(Content));
+	addDatabaseRecord(Content,client);
 	return Plugin_Handled;
 }
 
 
 public void addDatabaseRecord(char Content[512], int clientID){
 
-	if(clientID > 0 && clientID < MaxClients +1 && amount > 0){
+	if(clientID > 0 && clientID < MaxClients +1 && Content){
 		if(IsClientAndInGame(clientID)){
 			if(!IsFakeClient(clientID)){
 				char steamID[24];
@@ -62,7 +62,7 @@ public void addDatabaseRecord(char Content[512], int clientID){
 					 , "INSERT IGNORE INTO `l4d2_binds_kether` SET \
 						SteamId = %s \
 						Content = %s \
-					, steamID, Content);
+					, steamID, Content");
 					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query2, 0);
 				}
 			}
