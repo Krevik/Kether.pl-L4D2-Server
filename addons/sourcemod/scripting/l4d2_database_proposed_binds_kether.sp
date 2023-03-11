@@ -8,10 +8,10 @@
 #define BINDS_DB "l4d2_stats_kether"
 #define CREATE_STATS_TABLE "\
 CREATE TABLE IF NOT EXISTS `l4d2_binds_kether` (\
- `LP` int(11) NOT NULL DEFAULT '0',\
+ `LP` int(11) NOT NULL AUTO_INCREMENT,\
  `SteamID` varchar(64) NOT NULL DEFAULT '',\
  `Content` varchar(256) NOT NULL DEFAULT '',\
- PRIMARY KEY (`SteamID`)\
+ PRIMARY KEY (`LP`)\
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\
 "
 
@@ -39,49 +39,28 @@ public void OnPluginStart()
 {
 	KETHER_BINDS_DB = null;
 	RegAdminCmd("sm_createBindsSQL", CMD_CreateBindsDataTable, ADMFLAG_CHEATS, "");
-	RegConsoleCmd("sm_binds", CMD_Binds, "Let's add that bind");
+	RegConsoleCmd("sm_bind", CMD_Binds, "Let's add that bind");
 }
 
 public Action CMD_Binds(int client, int args)
 {
-				CPrintToChatAll("{blue}DEBUG 0{default}");
-
 	char Content[512];
 	GetCmdArgString(Content, sizeof(Content));
 	addDatabaseRecord(Content,client);
-				CPrintToChatAll("{blue}DEBUG 1{default}");
 	return Plugin_Handled;
 }
 
 
 public void addDatabaseRecord(char Content[512], int clientID){
-
-				CPrintToChatAll("{blue}DEBUG 4{default}");
-
 	if(clientID > 0 && clientID < MaxClients +1){
-					CPrintToChatAll("{blue}DEBUG 5{default}");
-
 		if(IsClientAndInGame(clientID)){
-						CPrintToChatAll("{blue}DEBUG 6{default}");
-
 			if(!IsFakeClient(clientID)){
-							CPrintToChatAll("{blue}DEBUG 3{default}");
 				char steamID[24];
 				GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 				if(KETHER_BINDS_DB){
-								CPrintToChatAll("{blue}DEBUG 2{default}");
 					sql_query[0] = '\0';
-					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_binds_kether` SET `SteamID` = '%s'", steamID);
+					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_binds_kether` (SteamID, Content) VALUES ('%s', '%s')", steamID, Content);
 					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query, 0);
-					
-					sql_query2[0] = '\0';
-					Format(sql_query2, sizeof(sql_query2)
-					 , "UPDATE `l4d2_binds_kether` SET \
-						Content = %s \
-						WHERE `SteamID` = '%s'"
-					, Content
-					, steamID);
-					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query2, 0);
 				}
 			}
 		}
