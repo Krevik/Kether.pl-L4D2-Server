@@ -1,8 +1,7 @@
 #pragma semicolon 1
-#pragma newdecls required
+#pragma newdecls optional
 #include <sourcemod>
 #include <sdktools>
-#include <left4dhooks>
 #include <multicolors>
 
 #define BINDS_DB "l4d2_stats_kether"
@@ -19,19 +18,20 @@ Database KETHER_BINDS_DB;
 char sql_error_buffer[512];
 char sql_query[1024];
 char sql_query2[1024];
-int commonsKilled[128];
+bool canPropose[MAXPLAYERS + 1];
 
 public Plugin myinfo =
 {
-	name = "[L4D2] Play Stats",
-	author = "Krevik",
-	description = "L4D2 Coop Stats",
-	version = "1.0",
+	name = "[ANY] Proposed binds database",
+	author = "Krevik, StarterX4",
+	description = "Lets players to suggest new binds to be added later in kether hall of fame.",
+	version = "1.1",
 	url = "https://kether.pl"
 };
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	MarkNativeAsOptional("GetUserMessageType");
 	return APLRes_Success;
 }
 
@@ -42,11 +42,32 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_bind", CMD_Binds, "Let's add that bind");
 }
 
+public void OnClientPutInServer(int client)
+{
+	canPropose[client] = true;
+}
+
+public void RoundEndEvent(Handle event, const char[] name, bool dontBroadcast)
+{
+	initializeCanPropose();
+}
+
 public Action CMD_Binds(int client, int args)
 {
 	char Content[512];
-	GetCmdArgString(Content, sizeof(Content));
-	addDatabaseRecord(Content,client);
+	if(IsValidClient(client) && args == 0){
+		decl String:name[MAX_NAME_LENGTH];
+		name = "No way! Console?";
+		GetClientName(client, name, sizeof(name));
+		if(canPropose[client]){
+			GetCmdArgString(Content, sizeof(Content));
+			addDatabaseRecord(Content,client);
+			delayAllowPropose(client);
+		}
+		else{
+		CPrintToChat(client, "Don't spam! Wait for 15 seconds and try again.");
+		}
+	}
 	return Plugin_Handled;
 }
 
@@ -112,6 +133,29 @@ bool IsClientAndInGame(int index)
     return (index > 0 && index <= MaxClients && IsClientInGame(index));
 }
 
+stock bool IsValidClient(int client)
+{ 
+    if (client <= 0 || client > MaxClients || !IsClientConnected(client) || !IsClientInGame(client)) return false; 
+    return true;
+}
 
+public void initializeCanPropose(){
+	for (int x = 0; x <= MaxClients; x++) {
+		canPropose[x] = true;
+	}
+}
 
+public void delayAllowPropose(int client){
+	DataPack pack;
+	CreateDataTimer(15.0, AllowPropose, pack);
+	pack.WriteCell(client);
+}
 
+public Action AllowPropose(Handle timer, DataPack pack)
+{
+	int client;
+	pack.Reset();
+	client = pack.ReadCell();
+	canPropose[client] = true;
+	return Plugin_Continue;
+}
