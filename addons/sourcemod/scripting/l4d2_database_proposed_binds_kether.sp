@@ -18,7 +18,7 @@ Database KETHER_BINDS_DB;
 char sql_error_buffer[512];
 char sql_query[1024];
 char sql_query2[1024];
-bool canPropose[MAXPLAYERS + 1];
+bool canAddNewBind[MAXPLAYERS + 1];
 
 public Plugin myinfo =
 {
@@ -29,12 +29,6 @@ public Plugin myinfo =
 	url = "https://kether.pl"
 };
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
-{
-	MarkNativeAsOptional("GetUserMessageType");
-	return APLRes_Success;
-}
-
 public void OnPluginStart()
 {
 	KETHER_BINDS_DB = null;
@@ -44,29 +38,19 @@ public void OnPluginStart()
 
 public void OnClientPutInServer(int client)
 {
-	canPropose[client] = true;
-}
-
-public void RoundEndEvent(Handle event, const char[] name, bool dontBroadcast)
-{
-	initializeCanPropose();
+	canAddNewBind[client] = true;
 }
 
 public Action CMD_Binds(int client, int args)
 {
-	char Content[512];
-	if(IsValidClient(client) && args == 0){
-		decl String:name[MAX_NAME_LENGTH];
-		name = "No way! Console?";
-		GetClientName(client, name, sizeof(name));
-		if(canPropose[client]){
-			GetCmdArgString(Content, sizeof(Content));
-			addDatabaseRecord(Content,client);
-			delayAllowPropose(client);
-		}
-		else{
-		CPrintToChat(client, "Don't spam! Wait for 15 seconds and try again.");
-		}
+	if(canAddNewBind[client]){
+		char Content[512];
+		GetCmdArgString(Content, sizeof(Content));
+		addDatabaseRecord(Content,client);
+		canAddNewBind[client] = false;
+		delayAllowBind(client);
+	}else{
+		CPrintToChat(client, "Cooldown for binds adding: 1 minute");
 	}
 	return Plugin_Handled;
 }
@@ -82,6 +66,7 @@ public void addDatabaseRecord(char Content[512], int clientID){
 					sql_query[0] = '\0';
 					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_binds_kether` (SteamID, Content) VALUES ('%s', '%s')", steamID, Content);
 					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query, 0);
+					CPrintToChat(clientID, "Successfully proposed new bind");
 				}
 			}
 		}
@@ -128,34 +113,22 @@ public void OnConfigsExecuted()
 	}
 }
 
-bool IsClientAndInGame(int index)
-{
-    return (index > 0 && index <= MaxClients && IsClientInGame(index));
-}
-
-stock bool IsValidClient(int client)
-{ 
-    if (client <= 0 || client > MaxClients || !IsClientConnected(client) || !IsClientInGame(client)) return false; 
-    return true;
-}
-
-public void initializeCanPropose(){
-	for (int x = 0; x <= MaxClients; x++) {
-		canPropose[x] = true;
-	}
-}
-
-public void delayAllowPropose(int client){
+public void delayAllowBind(int client){
 	DataPack pack;
-	CreateDataTimer(15.0, AllowPropose, pack);
+	CreateDataTimer(60.0, AllowBind, pack);
 	pack.WriteCell(client);
 }
 
-public Action AllowPropose(Handle timer, DataPack pack)
+public Action AllowBind(Handle timer, DataPack pack)
 {
 	int client;
 	pack.Reset();
 	client = pack.ReadCell();
-	canPropose[client] = true;
+	canAddNewBind[client] = true;
 	return Plugin_Continue;
+}
+
+bool IsClientAndInGame(int index)
+{
+    return (index > 0 && index <= MaxClients && IsClientInGame(index));
 }
