@@ -19,6 +19,7 @@
 #define CREATE_STATS_TABLE "\
 CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
  `SteamID` varchar(64) NOT NULL DEFAULT '',\
+ `LastKnownSteamName` varchar(256) NOT NULL DEFAULT 'Undefined',\
  `Hunter_Skeets` int(11) NOT NULL DEFAULT '0',\
  `Witch_Crowns` int(11) NOT NULL DEFAULT '0',\
  `Tongue_Cuts` int(11) NOT NULL DEFAULT '0',\
@@ -167,6 +168,7 @@ public Action SQLTimerClientPost(Handle timer, any client)
 			Format(sql_query, sizeof(sql_query)-1
 			 , "SELECT \
 				Hunter_Skeets, \
+				LastKnownSteamName \
 				Witch_Crowns \
 				Tongue_Cuts \
 				Smoker_Self_Clears \
