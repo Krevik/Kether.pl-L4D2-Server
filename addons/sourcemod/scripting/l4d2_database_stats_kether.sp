@@ -8,6 +8,14 @@
 #define TEAM_SPECTATOR          1 
 #define TEAM_SURVIVOR           2 
 #define TEAM_INFECTED           3
+#define ZC_SMOKER               1
+#define ZC_BOOMER               2
+#define ZC_HUNTER               3
+#define ZC_SPITTER              4
+#define ZC_JOCKEY               5
+#define ZC_CHARGER              6
+#define ZC_WITCH                7
+#define ZC_TANK                 8
 #define CREATE_STATS_TABLE "\
 CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
  `SteamID` varchar(64) NOT NULL DEFAULT '',\
@@ -23,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
  `Friendly_Fire_Done` int(11) NOT NULL DEFAULT '0',\
  `Damage_Done_To_Survivors` int(11) NOT NULL DEFAULT '0',\
  `Damage_Done_To_SI` int(11) NOT NULL DEFAULT '0',\
+ `Damage_Done_To_Tanks` int(11) NOT NULL DEFAULT '0',\
  PRIMARY KEY (`SteamID`)\
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\
 "
@@ -32,6 +41,9 @@ char sql_error_buffer[512];
 char sql_query[1024];
 char sql_query2[1024];
 int commonsKilled[128];
+int damageDoneToSI[128];
+int damageDoneToTank[128];
+int damageDoneToSurvivors[128];
 
 public Plugin myinfo =
 {
@@ -166,6 +178,7 @@ public Action SQLTimerClientPost(Handle timer, any client)
 				Friendly_Fire_Done \
 				Damage_Done_To_Survivors \
 				Damage_Done_To_SI \
+				 Damage_Done_To_Tanks \
 				FROM `l4d2_stats_kether` WHERE `SteamID` = '%s'", sTeamID);
 
 			SQL_TQuery(KETHER_STATS_DB, StatsSQLregisterClient, sql_query, client);
@@ -287,8 +300,93 @@ public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast
 			addDatabaseRecord("Friendly_Fire_Done", attacker, damageDone);
 			addDatabaseRecord("Friendly_Fire_Received", victim, damageDone);
         }
+
+		if (GetClientTeam(attacker) == TEAM_SURVIVOR && GetClientTeam(victim) == TEAM_INFECTED)
+        {
+			int zombieClass = GetEntProp(victim, Prop_Send, "m_zombieClass");
+			if(zombieClass != ZC_TANK && zombieClass != ZC_WITCH){
+				damageDoneToSI[attacker] += damageDone; 
+				databaseAddDamageDoneToSI(attacker, damageDoneToSI[attacker]);
+			}
+			else if(zombieClass == ZC_TANK){
+				damageDoneToTank[attacker] += damageDone;
+				databaseAddDamageDoneToTanks(attacker, damageDoneToTank[attacker]);
+			}
+        }
+
+		if(GetClientTeam(attacker) == TEAM_INFECTED && GetClientTeam(victim) == TEAM_SURVIVOR){
+			damageDoneToSurvivors[attacker] += damageDone;
+			databaseAddDamageDoneToSurvivors(attacker, damageDoneToSurvivors[attacker]);
+		}
     }
 }
+
+public void databaseAddDamageDoneToSI(int client, int damageDoneToSI){
+	DataPack pack;
+	CreateDataTimer(3.0, databaseAddSIDamage, pack);
+	pack.WriteCell(client);
+	pack.WriteCell(damageDoneToSI);
+}
+
+public Action databaseAddSIDamage(Handle timer, DataPack pack)
+{
+	int client;
+	int damageFromTimerData;
+	pack.Reset();
+	client = pack.ReadCell();
+	damageFromTimerData = pack.ReadCell();
+	
+	if(damageDoneToSI[client] == damageFromTimerData){
+		addDatabaseRecord("Damage_Done_To_SI", client, damageDoneToSI[client]);
+		damageDoneToSI[client] = 0;
+	}
+	return Plugin_Continue;
+}
+
+public void databaseAddDamageDoneToTanks(int client, int damageDoneToTank){
+	DataPack pack;
+	CreateDataTimer(3.0, databaseAddTankDamage, pack);
+	pack.WriteCell(client);
+	pack.WriteCell(damageDoneToTank);
+}
+
+public Action databaseAddTankDamage(Handle timer, DataPack pack)
+{
+	int client;
+	int dataFromTimer;
+	pack.Reset();
+	client = pack.ReadCell();
+	dataFromTimer = pack.ReadCell();
+	
+	if(damageDoneToTank[client] == dataFromTimer){
+		addDatabaseRecord("Damage_Done_To_Tanks", client, damageDoneToTank[client]);
+		damageDoneToTank[client] = 0;
+	}
+	return Plugin_Continue;
+}
+
+public void databaseAddDamageDoneToSurvivors(int client, int damageDoneToSurvivors){
+	DataPack pack;
+	CreateDataTimer(3.0, databaseAddDamageDoneToSurvivorsTimer, pack);
+	pack.WriteCell(client);
+	pack.WriteCell(damageDoneToSurvivors);
+}
+
+public Action databaseAddDamageDoneToSurvivorsTimer(Handle timer, DataPack pack)
+{
+	int client;
+	int dataFromTimer;
+	pack.Reset();
+	client = pack.ReadCell();
+	dataFromTimer = pack.ReadCell();
+	
+	if(damageDoneToSurvivors[client] == dataFromTimer){
+		addDatabaseRecord("Damage_Done_To_Survivors", client, damageDoneToSurvivors[client]);
+		damageDoneToSurvivors[client] = 0;
+	}
+	return Plugin_Continue;
+}
+
 
 bool IsClientAndInGame(int index)
 {

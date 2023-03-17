@@ -66,7 +66,7 @@ public void addDatabaseRecord(char Content[512], int clientID){
 					sql_query[0] = '\0';
 					Format(sql_query, sizeof(sql_query)-1, "INSERT IGNORE INTO `l4d2_binds_kether` (SteamID, Content) VALUES ('%s', '%s')", steamID, Content);
 					SQL_TQuery(KETHER_BINDS_DB, dbErrorLogger, sql_query, 0);
-					CPrintToChat(clientID, "Successfully proposed new bind");
+					CPrintToChatAll("{blue}%s{default} suggested a new bind: {green}%s{default}", clientID, Content);
 				}
 			}
 		}
