@@ -22,28 +22,7 @@ public Plugin myinfo = {
 
 public void OnPluginStart()
 {
-    RegConsoleCmd("sm_nexus_ak", Ak, "ak47");
     RegConsoleCmd("sm_nexus_m16", M16, "m16");
-    RegConsoleCmd("sm_nexus_rd", Rifle_desert, "desert");
-    RegConsoleCmd("sm_nexus_awp", Awp, "aap");
-    RegConsoleCmd("sm_nexus_smg", Smg, "smg");
-    RegConsoleCmd("sm_nexus_sil", Smg2, "smg2");
-    RegConsoleCmd("sm_nexus_mp5", Smg3, "smg3");
-    RegConsoleCmd("sm_nexus_pis", Pistol, "Pistol");
-    RegConsoleCmd("sm_nexus_dea", Deagle, "deagle");
-    RegConsoleCmd("sm_nexus_mi", Military, "military");
-    RegConsoleCmd("sm_nexus_hu", hunting, "hunting");
-    RegConsoleCmd("sm_nexus_sp", Spas, "spas");
-    RegConsoleCmd("sm_nexus_sc", Scout, "scout");
-    RegConsoleCmd("sm_nexus_sho", chrome, "shotgun1");
-    RegConsoleCmd("sm_nexus_au", Auto, "autoshotgun");
-    RegConsoleCmd("sm_nexus_ch", Scout, "scout");
-    RegConsoleCmd("sm_nexus_pump", pump, "shotgun2");
-    RegConsoleCmd("sm_nexus_ke", knife, "knife");
-    RegConsoleCmd("sm_nexus_gt", guitar, "guitar");
-    RegConsoleCmd("sm_nexus_mt", machete, "machete");
-    RegConsoleCmd("sm_nexus_ka", katana, "katana");
-	RegConsoleCmd("sm_nexus_ch", chainsaw, "chainsaw");
 }
 
 public void OnMapStart()
