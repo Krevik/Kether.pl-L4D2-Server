@@ -68,7 +68,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_createStatsSQL", CMD_CreateStatsDataTable, ADMFLAG_CHEATS, "");
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
-	CreateTimer(30.0, databaseUpdateGamePlayTime, TIMER_REPEAT);
+	CreateTimer(30.0, databaseUpdateGamePlayTime, _, TIMER_REPEAT);
 
 }
 
