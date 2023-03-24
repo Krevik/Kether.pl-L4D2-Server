@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS `l4d2_stats_kether` (\
  `Damage_Done_To_Survivors` int(11) NOT NULL DEFAULT '0',\
  `Damage_Done_To_SI` int(11) NOT NULL DEFAULT '0',\
  `Damage_Done_To_Tanks` int(11) NOT NULL DEFAULT '0',\
+ `Gameplay_Time` int(11) NOT NULL DEFAULT '0',\
  PRIMARY KEY (`SteamID`)\
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;\
 "
@@ -67,6 +68,8 @@ public void OnPluginStart()
 	RegAdminCmd("sm_createStatsSQL", CMD_CreateStatsDataTable, ADMFLAG_CHEATS, "");
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
+	CreateDataTimer(30.0, databaseUpdateGamePlayTime, pack);
+
 }
 
 public int Kether_AddDatabaseStatRecord(Handle plugin, int numParams)
@@ -180,7 +183,8 @@ public Action SQLTimerClientPost(Handle timer, any client)
 				Friendly_Fire_Done \
 				Damage_Done_To_Survivors \
 				Damage_Done_To_SI \
-				 Damage_Done_To_Tanks \
+				Damage_Done_To_Tanks \
+				Gameplay_Time \
 				FROM `l4d2_stats_kether` WHERE `SteamID` = '%s'", sTeamID);
 
 			SQL_TQuery(KETHER_STATS_DB, StatsSQLregisterClient, sql_query, client);
@@ -330,7 +334,7 @@ public void databaseAddDamageDoneToSI(int client, int damageDoneToSI){
 	pack.WriteCell(damageDoneToSI);
 }
 
-public Action databaseAddSIDamage(Handle timer, DataPack pack)
+public Action databaseAddSIDamage(Handle timer)
 {
 	int client;
 	int damageFromTimerData;
@@ -341,6 +345,20 @@ public Action databaseAddSIDamage(Handle timer, DataPack pack)
 	if(damageDoneToSI[client] == damageFromTimerData){
 		addDatabaseRecord("Damage_Done_To_SI", client, damageDoneToSI[client]);
 		damageDoneToSI[client] = 0;
+	}
+	return Plugin_Continue;
+}
+
+public Action databaseUpdateGamePlayTime(Handle timer, DataPack pack)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && !IsFakeClient(client)){
+			int clientTeam = GetClientTeam(client);
+			if(clientTeam == TEAM_INFECTED || clientTeam == TEAM_SURVIVOR){
+				addDatabaseRecord("Gameplay_Time",30);
+			}
+		}
 	}
 	return Plugin_Continue;
 }
