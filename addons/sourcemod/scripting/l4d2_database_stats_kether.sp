@@ -68,7 +68,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_createStatsSQL", CMD_CreateStatsDataTable, ADMFLAG_CHEATS, "");
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
-	CreateDataTimer(30.0, databaseUpdateGamePlayTime, pack);
+	CreateTimer(30.0, databaseUpdateGamePlayTime, TIMER_REPEAT);
 
 }
 
@@ -334,7 +334,7 @@ public void databaseAddDamageDoneToSI(int client, int damageDoneToSI){
 	pack.WriteCell(damageDoneToSI);
 }
 
-public Action databaseAddSIDamage(Handle timer)
+public Action databaseAddSIDamage(Handle timer, DataPack pack)
 {
 	int client;
 	int damageFromTimerData;
@@ -349,14 +349,14 @@ public Action databaseAddSIDamage(Handle timer)
 	return Plugin_Continue;
 }
 
-public Action databaseUpdateGamePlayTime(Handle timer, DataPack pack)
+public Action databaseUpdateGamePlayTime(Handle timer)
 {
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (IsClientInGame(client) && !IsFakeClient(client)){
 			int clientTeam = GetClientTeam(client);
 			if(clientTeam == TEAM_INFECTED || clientTeam == TEAM_SURVIVOR){
-				addDatabaseRecord("Gameplay_Time",30);
+				addDatabaseRecord("Gameplay_Time",client, 30);
 			}
 		}
 	}
