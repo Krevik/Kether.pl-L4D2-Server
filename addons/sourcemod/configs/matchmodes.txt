@@ -22,6 +22,10 @@
 		{
 			"name" "Kether Test"
 		}
+		"kether_versus_t1_foolsday"
+		{
+			"name" "Kether VerSus T1"
+		}
 	}
 	"Kether T2 Configs"
 	{
