@@ -17,7 +17,7 @@ Database KETHER_SUBS_DB;
 char sql_error_buffer[512];
 char sql_query[1024];
 char sql_query2[1024];
-bool canCallForSub;
+bool canCallForSub[MAXPLAYERS + 1];
 
 public Plugin myinfo =
 {
@@ -31,19 +31,23 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	KETHER_SUBS_DB = null;
-	canCallForSub=true;
 	RegAdminCmd("sm_createSubsSQL", CMD_CreateSubsDataTable, ADMFLAG_CHEATS, "");
 	RegConsoleCmd("sm_sub", CMD_Sub, "Let's call for a sub");
 }
 
+public void OnClientPutInServer(int client)
+{
+	canCallForSub[client] = true;
+}
+
 public Action CMD_Sub(int client, int args)
 {
-	if(canCallForSub){
+	if(canCallForSub[client]){
 		addDatabaseRecord(client);
-		canCallForSub = false;
+		canCallForSub[client] = false;
 		delayAllowCallForSub(client);
 	}else{
-		CPrintToChat(client, "Cooldown for calling for a sub: 10 minutes");
+		CPrintToChat(client, "Cooldown for calling for a sub: 5 minutes");
 	}
 	return Plugin_Handled;
 }
@@ -108,12 +112,16 @@ public void OnConfigsExecuted()
 
 public void delayAllowCallForSub(int client){
 	DataPack pack;
-	CreateDataTimer(600.0, AllowCallSub, pack);
+	CreateDataTimer(300.0, AllowCallSub, pack);
+	pack.WriteCell(client);
 }
 
 public Action AllowCallSub(Handle timer, DataPack pack)
 {
-	canCallForSub = true;
+	int client;
+	pack.Reset();
+	client = pack.ReadCell();
+	canCallForSub[client] = true;
 	return Plugin_Continue;
 }
 
