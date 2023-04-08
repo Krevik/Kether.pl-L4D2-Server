@@ -18,6 +18,10 @@
 		{
 			"name" "Kether Versus 8v8 T1"
 		}
+		"kether_campaign"
+		{
+			"name" "Kether Campaign"
+		}
 		"kether_test"
 		{
 			"name" "Kether Test"
