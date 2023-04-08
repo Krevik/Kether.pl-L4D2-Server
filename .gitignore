@@ -27,6 +27,11 @@ compile.dat
 # VS Code settings
 **/.vscode/settings.json
 **/.vs/slnx.sqlite
+addons/sourcemod/scripting/.vs/VSWorkspaceState.json
+addons/sourcemod/scripting/.vs/scripting/v17/workspaceFileList.bin
+addons/sourcemod/scripting/.vs/scripting/v17/.suo
+addons/sourcemod/scripting/.vs/scripting/project-colors.json
+addons/sourcemod/scripting/.vs/ProjectSettings.json
 
 # =========================
 # Operating System Files
@@ -37,9 +42,5 @@ Initial_Settings_Setter.smx
 motd_lerp.sp
 motd_lerp.smx
 logs/
-addons/sourcemod/scripting/.vs/VSWorkspaceState.json
-addons/sourcemod/scripting/.vs/scripting/v17/workspaceFileList.bin
-addons/sourcemod/scripting/.vs/scripting/v17/.suo
-addons/sourcemod/scripting/.vs/scripting/project-colors.json
-addons/sourcemod/scripting/.vs/ProjectSettings.json
 addons/sourcemod/configs/databases.cfg
+OUTDIR/
