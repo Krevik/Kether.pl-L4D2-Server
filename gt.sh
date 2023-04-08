@@ -7,6 +7,7 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+version="0.1 (kether edition)"
 function gittools() {
     while getopts ac:h"-help"psu:U: flag
     do
@@ -39,15 +40,19 @@ function gittools() {
 }
 
 function manual() {
-    echo    "Usage:"
-    echo    ""
+    echo    "______________________________________________________________"
+    echo    "--------------------|| Simple Git Tools ||--------------------"
+    echo    "¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯"
+    echo    "Usage:              v${version}"
+    echo    "  $(basename "$0") [option] [args]"
     echo    "Options:"
     echo    "  -a            Stage all changes"
     echo    "  -c MESSAGE    Commit changes with specified message"
     echo    "  -p            Push changes to remote repository"
     echo    "  -s            Sync local repository with remote repository"
     echo    "  -u NUM        Update OUTDIR with changes from last NUM commits"
-    echo    "  -U COMMIT     Update OUTDIR with changes between specified COMMITS or HEAD"
+    echo    "  -U COMMIT     Update OUTDIR with changes between specified"
+    echo    "                COMMITS or HEAD (rsync required)"
     echo    "  -h, --help    Display this help message"
     exit 0
 }
