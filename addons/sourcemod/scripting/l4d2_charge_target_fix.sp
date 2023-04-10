@@ -5,7 +5,7 @@
 #include <dhooks>
 #include <left4dhooks>
 
-#define PLUGIN_VERSION "1.5.1a"
+#define PLUGIN_VERSION "1.7"
 
 public Plugin myinfo = 
 {
@@ -116,18 +116,18 @@ MRESReturn DTR_CCharge__HandleCustomCollision(int ability, DHookReturn hReturn, 
 	if (!GetEntProp(ability, Prop_Send, "m_hasBeenUsed"))
 		return MRES_Ignored;
 	
-	int attacker = GetEntPropEnt(ability, Prop_Send, "m_owner");
-	if (attacker == -1)
+	int charger = GetEntPropEnt(ability, Prop_Send, "m_owner");
+	if (charger == -1)
 		return MRES_Ignored;
 	
-	int victim = hParams.Get(1);
-	if (!victim || victim > MaxClients)
+	int touch = hParams.Get(1);
+	if (!touch || touch > MaxClients)
 		return MRES_Ignored;
 	
-	if (g_iChargeAttacker[victim] == -1) // free for attacks
+	if (g_iChargeAttacker[touch] == -1) // free for attacks
 		return MRES_Ignored;
 	
-	if (g_iChargeAttacker[victim] == attacker) // about to slam my victim
+	if (g_iChargeAttacker[touch] == charger) // about to slam my victim
 		return MRES_Ignored;
 	
 	// basically invalid calls at here, block
@@ -150,6 +150,11 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	for (int i = 1; i <= MaxClients; ++i)
 	{
+		// clear our stuff
+		g_bNotSolid[i] = false;
+		g_iChargeVictim[i] = -1;
+		g_iChargeAttacker[i] = -1;
+		
 		if (IsClientInGame(i))
 		{
 			// ~ CDirector::RestartScenario()
@@ -166,11 +171,6 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 			L4D2_SetQueuedPummelStartTime(i, -1.0);
 			L4D2_SetQueuedPummelVictim(i, -1);
 			L4D2_SetQueuedPummelAttacker(i, -1);
-			
-			// clear our stuff
-			g_bNotSolid[i] = false;
-			g_iChargeVictim[i] = -1;
-			g_iChargeAttacker[i] = -1;
 		}
 	}
 }
@@ -200,6 +200,7 @@ void Event_PlayerIncap(Event event, const char[] name, bool dontBroadcast)
 	g_bNotSolid[client] = true;
 }
 
+// Clear arrays if the victim dies to slams
 void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -209,6 +210,13 @@ void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	int attacker = g_iChargeAttacker[client];
 	if (attacker == -1)
 		return;
+	
+	if (L4D2_IsInQueuedPummel(attacker) && L4D2_GetQueuedPummelVictim(attacker) == client)
+	{
+		int ability = GetEntPropEnt(attacker, Prop_Send, "m_customAbility");
+		SetEntPropFloat(ability, Prop_Send, "m_nextActivationTimer", 0.2, 0);
+		SetEntPropFloat(ability, Prop_Send, "m_nextActivationTimer", L4D2_GetQueuedPummelStartTime(attacker) + 0.2, 1);
+	}
 	
 	if (g_bNotSolid[client])
 	{
@@ -342,6 +350,9 @@ void HandlePlayerReplace(int replacer, int replacee)
 	if (!replacer || !IsClientInGame(replacer))
 		return;
 	
+	if (!replacee)
+		replacee = -1;
+	
 	if (GetClientTeam(replacer) == 3)
 	{
 		if (g_iChargeVictim[replacee] != -1)
@@ -430,6 +441,12 @@ public void L4D2_OnSlammedSurvivor_Post(int victim, int attacker, bool bWallSlam
 		
 		event.Cancel();
 	}
+	
+	int jockey = GetEntPropEnt(victim, Prop_Send, "m_jockeyAttacker");
+	if (jockey != -1)
+	{
+		Dismount(jockey);
+	}
 }
 
 Action Timer_KnockdownRepeat(Handle timer, int userid)
@@ -466,6 +483,14 @@ void SetPlayerSolid(int client, bool solid)
 {
 	int flags = GetEntProp(client, Prop_Data, "m_usSolidFlags");
 	SetEntProp(client, Prop_Data, "m_usSolidFlags", solid ? (flags & ~FSOLID_NOT_SOLID) : (flags | FSOLID_NOT_SOLID));
+}
+
+void Dismount(int client)
+{
+	int flags = GetCommandFlags("dismount");
+	SetCommandFlags("dismount", flags & ~FCVAR_CHEAT);
+	FakeClientCommand(client, "dismount");
+	SetCommandFlags("dismount", flags);
 }
 
 ConVar CreateConVarHook(const char[] name,
