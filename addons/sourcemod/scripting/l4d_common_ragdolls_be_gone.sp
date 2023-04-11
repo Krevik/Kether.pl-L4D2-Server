@@ -28,7 +28,7 @@ public Action Event_PlayerDeath(Event hEvent, char[] name, bool dontBroadcast) {
             RemoveEntity(victimentityid);
         }
     }
-
+    
     return Plugin_Continue;
 }
 
