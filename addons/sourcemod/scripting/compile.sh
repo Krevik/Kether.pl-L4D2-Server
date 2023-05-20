@@ -1,0 +1,1 @@
+sourcemod/compile.sh
