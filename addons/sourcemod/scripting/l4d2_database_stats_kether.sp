@@ -46,6 +46,11 @@ int commonsKilled[128];
 int damageDoneToSI[128];
 int damageDoneToTank[128];
 int damageDoneToSurvivors[128];
+ArrayList survivorsFromRoundBeggining;
+Handle commonsKilledPerRoundHandle = INVALID_HANDLE;
+Handle huntersSkeetedPerRoundHandle = INVALID_HANDLE;
+Handle damageDoneToSIPerRoundHandle = INVALID_HANDLE;
+Handle friendlyFireDonePerRoundHandle = INVALID_HANDLE;
 
 public Plugin myinfo =
 {
@@ -65,9 +70,16 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	KETHER_STATS_DB = null;
+	commonsKilledPerRoundHandle = CreateTrie();
+	huntersSkeetedPerRoundHandle = CreateTrie();
+	damageDoneToSIPerRoundHandle = CreateTrie();
+	friendlyFireDonePerRoundHandle = CreateTrie();
+	survivorsFromRoundBeggining = new ArrayList(ByteCountToCells(512));
 	RegAdminCmd("sm_createStatsSQL", CMD_CreateStatsDataTable, ADMFLAG_CHEATS, "");
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
+	HookEvent("player_left_start_area", PlayerLeftStartArea_Event, EventHookMode_PostNoCopy);
+	HookEvent("round_end", RoundEnd_Event, EventHookMode_PostNoCopy);
 	CreateTimer(30.0, databaseUpdateGamePlayTime, _, TIMER_REPEAT);
 
 }
@@ -103,6 +115,38 @@ public void addDatabaseRecord(char columnName[512], int clientID, int amount){
 				}
 			}
 		}
+	}
+}
+
+public void addCommonsKilledAverageEntry(char steamID[64], int amount){
+	if(KETHER_STATS_DB){
+		sql_query2[0] = '\0';
+		Format(sql_query2, sizeof(sql_query2)-1, "INSERT INTO `l4d2_stats_kether_commons_killed_averages` SET `SteamID` = '%s', `Commons_Killed_In_Round_Entry` = '%d' ", steamID, amount);
+		SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+	}
+}
+
+public void addHunterSkeetsAverageEntry(char steamID[64], int amount){
+	if(KETHER_STATS_DB){
+		sql_query2[0] = '\0';
+		Format(sql_query2, sizeof(sql_query2)-1, "INSERT INTO `l4d2_stats_kether_hunter_skeets_averages` SET `SteamID` = '%s', `Hunters_Skeeted_In_Round_Entry` = '%d' ", steamID, amount);
+		SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+	}
+}
+
+public void addDamageDoneToSIAverageEntry(char steamID[64], int amount){
+	if(KETHER_STATS_DB){
+		sql_query2[0] = '\0';
+		Format(sql_query2, sizeof(sql_query2)-1, "INSERT INTO `l4d2_stats_kether_damage_done_to_si_averages` SET `SteamID` = '%s', `Damage_Done_To_SI_In_Round_Entry` = '%d' ", steamID, amount);
+		SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+	}
+}
+
+public void addFriendlyFireDoneAverageEntry(char steamID[64], int amount){
+	if(KETHER_STATS_DB){
+		sql_query2[0] = '\0';
+		Format(sql_query2, sizeof(sql_query2)-1, "INSERT INTO `l4d2_stats_kether_friendly_fire_done_averages` SET `SteamID` = '%s', `Friendly_Fire_Done_In_Round_Entry` = '%d' ", steamID, amount);
+		SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
 	}
 }
 
@@ -144,6 +188,24 @@ public void OnConfigsExecuted()
 			}
 		}
 	}
+}
+
+public int getPlayerBySteamID(const char[] steamId) 
+{
+    char tmpSteamId[64];
+   
+    for (int i = 1; i <= MaxClients; i++) 
+    {
+        if (!IsClientInGame(i))
+            continue;
+        
+        GetClientAuthId(i, AuthId_Steam2, tmpSteamId, sizeof(tmpSteamId));     
+        
+        if (strcmp(steamId, tmpSteamId) == 0)
+            return i;
+    }
+    
+    return -1;
 }
 
 public void StatsSQLregisterClient(Handle owner, Handle handle, const char[] error, any data)
@@ -220,15 +282,43 @@ public void Kether_OnWitchDrawCrown(int clientID)
 	addDatabaseRecord("Witch_Crowns", clientID, 1);
 }
 
+public void addSkeetToStoreTrie(int client){
+	char playerSteamID[64];
+    GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+	
+	int huntersSkeetedTMP[MAXPLAYERS+1];
+	char huntersSkeetedPerRoundKey[128];
+	Format(huntersSkeetedPerRoundKey, sizeof(huntersSkeetedPerRoundKey), "%x_huntersSkeetedSumPerRound", playerSteamID);
+	GetTrieArray(huntersSkeetedPerRoundHandle, huntersSkeetedPerRoundKey, huntersSkeetedTMP, sizeof(huntersSkeetedTMP));
+	huntersSkeetedTMP[client] += 1;
+	SetTrieArray(huntersSkeetedPerRoundHandle, huntersSkeetedPerRoundKey, huntersSkeetedTMP, sizeof(huntersSkeetedTMP), true);
+}
+
+public void addFriendlyFireDoneToStoreTrie(int client, int amount){
+	char playerSteamID[64];
+    GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+
+	int friendlyFireDoneTMP[MAXPLAYERS+1];
+	char friendlyFireDonePerRoundKey[128];
+	Format(friendlyFireDonePerRoundKey, sizeof(friendlyFireDonePerRoundKey), "%x_friendlyFireDoneSumPerRound", playerSteamID);
+	GetTrieArray(friendlyFireDonePerRoundHandle, friendlyFireDonePerRoundKey, friendlyFireDoneTMP, sizeof(friendlyFireDoneTMP));
+	friendlyFireDoneTMP[client] += amount;
+	SetTrieArray(friendlyFireDonePerRoundHandle, friendlyFireDonePerRoundKey, friendlyFireDoneTMP, sizeof(friendlyFireDoneTMP), true);
+}
+
+
 public void OnSkeet(int survivor){
+	addSkeetToStoreTrie(survivor);
 	addDatabaseRecord("Hunter_Skeets", survivor, 1);
 }
 
 public void OnSkeetMelee(int survivor){
+	addSkeetToStoreTrie(survivor);
 	addDatabaseRecord("Hunter_Skeets", survivor, 1);
 }
 
 public void OnSkeetSniper(int survivor){
+	addSkeetToStoreTrie(survivor);
 	addDatabaseRecord("Hunter_Skeets", survivor, 1);
 }
 
@@ -282,11 +372,73 @@ public Action databaseAddKilledCommons(Handle timer, DataPack pack)
 	commonsFromTimerData = pack.ReadCell();
 	
 	if(commonsKilled[client] == commonsFromTimerData){
-		addDatabaseRecord("Commons_Killed", client, commonsKilled[client]);
-		commonsKilled[client] = 0;
+		if(IsClientAndInGame(client)){
+			//populate trie for average commons killed per round
+			char playerSteamID[64];
+			GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+
+			int commonsKilledTMP[MAXPLAYERS+1];
+			char commonsKilledTrieKey[128];
+			Format(commonsKilledTrieKey, sizeof(commonsKilledTrieKey), "%x_commonsKilledSumPerRound", playerSteamID);
+			GetTrieArray(commonsKilledPerRoundHandle, commonsKilledTrieKey, commonsKilledTMP, sizeof(commonsKilledTMP));
+			commonsKilledTMP[client] += commonsKilled[client];
+			SetTrieArray(commonsKilledPerRoundHandle, commonsKilledTrieKey, commonsKilledTMP[client], sizeof(commonsKilledTMP), true);
+			addDatabaseRecord("Commons_Killed", client, commonsKilled[client]);
+			commonsKilled[client] = 0;
+		}
 	}
 	return Plugin_Continue;
 }
+
+
+public void RoundEnd_Event(Event hEvent, const char[] eName, bool dontBroadcast)
+{
+    //check current players if their steamID was here since beggining.
+	//If yes, get proper array, populate table, and clear trie
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && !IsFakeClient(client)){
+			int clientTeam = GetClientTeam(client);
+			if(clientTeam == TEAM_SURVIVOR){
+				char playerSteamID[64];
+        		GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+				
+				//player was here since round beggining, add his commons for average calculation and clear everything
+				if(FindStringInArray(survivorsFromRoundBeggining, playerSteamID) != -1){
+					int commonsKilledTMP[MAXPLAYERS+1];
+					char commonsKilledTrieKey[128];
+					Format(commonsKilledTrieKey, sizeof(commonsKilledTrieKey), "%x_commonsKilledSumPerRound", playerSteamID);
+					GetTrieArray(commonsKilledPerRoundHandle, commonsKilledTrieKey, commonsKilledTMP, sizeof(commonsKilledTMP));
+					addCommonsKilledAverageEntry(playerSteamID, commonsKilledTMP[client]);
+
+					int huntersSkeetedTMP[MAXPLAYERS+1];
+					char huntersSkeetedPerRoundKey[128];
+					Format(huntersSkeetedPerRoundKey, sizeof(huntersSkeetedPerRoundKey), "%x_huntersSkeetedSumPerRound", playerSteamID);
+					GetTrieArray(huntersSkeetedPerRoundHandle, huntersSkeetedPerRoundKey, huntersSkeetedTMP, sizeof(huntersSkeetedTMP));
+					addHunterSkeetsAverageEntry(playerSteamID, huntersSkeetedTMP[client]);
+
+					int damageDoneToSITMP[MAXPLAYERS+1];
+					char damageDoneToSIPerRoundKey[128];
+					Format(damageDoneToSIPerRoundKey, sizeof(damageDoneToSIPerRoundKey), "%x_damageDoneToSIPerRound", playerSteamID);
+					GetTrieArray(damageDoneToSIPerRoundHandle, damageDoneToSIPerRoundKey, damageDoneToSITMP, sizeof(damageDoneToSITMP));
+					addDamageDoneToSIAverageEntry(playerSteamID, damageDoneToSITMP[client]);
+
+					int friendlyFireDoneTMP[MAXPLAYERS+1];
+					char friendlyFireDonePerRoundKey[128];
+					Format(friendlyFireDonePerRoundKey, sizeof(friendlyFireDonePerRoundKey), "%x_friendlyFireDoneSumPerRound", playerSteamID);
+					GetTrieArray(friendlyFireDonePerRoundHandle, friendlyFireDonePerRoundKey, friendlyFireDoneTMP, sizeof(friendlyFireDoneTMP));
+					addFriendlyFireDoneAverageEntry(playerSteamID, friendlyFireDoneTMP[client]);
+				}
+			}
+		}
+	}
+	survivorsFromRoundBeggining = new ArrayList(ByteCountToCells(512));
+	commonsKilledPerRoundHandle = CreateTrie();
+	huntersSkeetedPerRoundHandle = CreateTrie();
+	damageDoneToSIPerRoundHandle = CreateTrie();
+	friendlyFireDonePerRoundHandle = CreateTrie();
+}
+
 
 public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast)
 {    
@@ -305,6 +457,7 @@ public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast
         {
 			addDatabaseRecord("Friendly_Fire_Done", attacker, damageDone);
 			addDatabaseRecord("Friendly_Fire_Received", victim, damageDone);
+			addFriendlyFireDoneToStoreTrie(attacker, damageDone);
         }
 
 		if (GetClientTeam(attacker) == TEAM_SURVIVOR && GetClientTeam(victim) == TEAM_INFECTED)
@@ -327,6 +480,26 @@ public void PlayerHurt_Event(Handle event, const char[] name, bool dontBroadcast
     }
 }
 
+public void PlayerLeftStartArea_Event(Event hEvent, const char[] eName, bool dontBroadcast)
+{
+	survivorsFromRoundBeggining = new ArrayList(ByteCountToCells(512));
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && !IsFakeClient(client)){
+			int clientTeam = GetClientTeam(client);
+			if(clientTeam == TEAM_SURVIVOR){
+				char playerSteamID[64];
+        		GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+				PushArrayString(survivorsFromRoundBeggining, playerSteamID);
+			}
+		}
+	}
+	commonsKilledPerRoundHandle = CreateTrie();
+	huntersSkeetedPerRoundHandle = CreateTrie();
+	damageDoneToSIPerRoundHandle = CreateTrie();
+	friendlyFireDonePerRoundHandle = CreateTrie();
+}
+
 public void databaseAddDamageDoneToSI(int client, int damageDoneToSI){
 	DataPack pack;
 	CreateDataTimer(3.0, databaseAddSIDamage, pack);
@@ -344,6 +517,15 @@ public Action databaseAddSIDamage(Handle timer, DataPack pack)
 	
 	if(damageDoneToSI[client] == damageFromTimerData){
 		addDatabaseRecord("Damage_Done_To_SI", client, damageDoneToSI[client]);
+		char playerSteamID[64];
+        GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+		int damageDoneToSITMP[MAXPLAYERS+1];
+		char damageDoneToSIPerRoundKey[128];
+		Format(damageDoneToSIPerRoundKey, sizeof(damageDoneToSIPerRoundKey), "%x_damageDoneToSIPerRound", playerSteamID);
+		GetTrieArray(damageDoneToSIPerRoundHandle, damageDoneToSIPerRoundKey, damageDoneToSITMP, sizeof(damageDoneToSITMP));
+		damageDoneToSITMP[client] += damageDoneToSI[client];
+		SetTrieArray(damageDoneToSIPerRoundHandle, damageDoneToSIPerRoundKey, damageDoneToSITMP, sizeof(damageDoneToSITMP), true);
+
 		damageDoneToSI[client] = 0;
 	}
 	return Plugin_Continue;
