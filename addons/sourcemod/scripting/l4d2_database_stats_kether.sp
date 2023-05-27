@@ -382,7 +382,7 @@ public Action databaseAddKilledCommons(Handle timer, DataPack pack)
 			Format(commonsKilledTrieKey, sizeof(commonsKilledTrieKey), "%x_commonsKilledSumPerRound", playerSteamID);
 			GetTrieArray(commonsKilledPerRoundHandle, commonsKilledTrieKey, commonsKilledTMP, sizeof(commonsKilledTMP));
 			commonsKilledTMP[client] += commonsKilled[client];
-			SetTrieArray(commonsKilledPerRoundHandle, commonsKilledTrieKey, commonsKilledTMP[client], sizeof(commonsKilledTMP), true);
+			SetTrieArray(commonsKilledPerRoundHandle, commonsKilledTrieKey, commonsKilledTMP, sizeof(commonsKilledTMP), true);
 			addDatabaseRecord("Commons_Killed", client, commonsKilled[client]);
 			commonsKilled[client] = 0;
 		}
