@@ -43,6 +43,7 @@ public void OnClientPutInServer(int client)
 
 public Action CMD_Binds(int client, int args)
 {
+	
 	if(canAddNewBind[client]){
 		char Content[512];
 		GetCmdArgString(Content, sizeof(Content));
