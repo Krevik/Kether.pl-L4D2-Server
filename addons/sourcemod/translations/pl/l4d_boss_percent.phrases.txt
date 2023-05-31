@@ -1,0 +1,55 @@
+"Phrases"
+{
+	"TagTank"
+	{
+		"pl"	"<{olive}Tank{default}>"
+	}
+	"TagWitch"
+	{
+		"pl"	"<{olive}Witch{default}>"
+	}
+	"TankOn"
+	{
+		"pl"	"Tank: %d%%"
+	}
+	"WitchOn"
+	{
+		"pl"	"Witch: %d%%"
+	}
+	"Disabled"
+	{
+		"pl"	"Wyłączone"
+	}
+	"StaticSpawn"
+	{
+		"pl"	"StatycznE Odrodzenie"
+	}
+	"None"
+	{
+		"pl"	"Brak"
+	}
+	"TankDisabled"
+	{
+		"pl"	"Tank: Wyłączony"
+	}
+	"TankStatic"
+	{
+		"pl"	"Tank: Statyczne Odrodzenie"
+	}
+	"TankNone"
+	{
+		"pl"	"Tank: Brak"
+	}
+	"WitchDisabled"
+	{
+		"pl"	"Witch: Wyłączona"
+	}
+	"WitchStatic"
+	{
+		"pl"	"Witch: Statyczne Odrodzenie"
+	}
+	"WitchNone"
+	{
+		"pl"	"Witch: Brak"
+	}
+}

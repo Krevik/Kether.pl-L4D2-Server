@@ -1,0 +1,8 @@
+"Phrases"
+{
+	"WarnExploiting"
+	{
+		"#format"	"{1:N}"
+		"pl"		"{red}[{default}Exploit{red}] {olive}{1} {default}próbował pominąć Licznik Czasu Śmierci."
+	}
+}

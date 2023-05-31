@@ -1,0 +1,19 @@
+"Phrases"
+{
+	"Title"
+	{
+		"pl"	"{blue}[{default}Wybierak Kamienia Tanka{blue}]"
+	}
+	"Reload"
+	{
+		"pl"	"{olive}Przeładowanie{default} = {blue}2-Ręczny Z Góry{default}"
+	}
+	"Use"
+	{
+		"pl"	"{olive}Użycie{default} = {blue}Skryty Z Boku{default}"
+	}
+	"M2"
+	{
+		"pl"	"{olive}M2{default} = {blue}1-Ręczny Z Góry{default}"
+	}
+}

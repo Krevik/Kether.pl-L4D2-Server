@@ -6,6 +6,7 @@
 		"ru"	"Напишите !pass, чтобы передать Танка."
 		"hu"	"Írd be !pass hogy átad a Tankot."
 		"es"	"Escribe !pass para pasar el Tanque a otro jugador."
+		"pl"	"Wpisz !pass by podać Tanka innemu graczowi."
 	}
 	"phrase2"
 	{
@@ -13,6 +14,7 @@
 		"ru"	"Танка можно передать только на первом контроле."
 		"hu"	"A Tank átadható frusztráció előtt."
 		"es"	"El Tanque se puede entregar a otro jugador antes de que se agote el medidor de frustración."
+		"pl"	"Tank może zostać podany innemu graczowi, zanim wyczerpie się miernik Frustracji."
 	}
 	"phrase3"
 	{
@@ -21,6 +23,7 @@
 		"ru"	"{1} передал Танка игроку {2}"
 		"hu"	"{1} átadta a Tankot {2}-nak"
 		"es"	"{1} pasó el Tanque a {2}"
+		"pl"	"{1} podał Tanka do {2}"
 	}
 	"phrase4"
 	{
@@ -28,6 +31,7 @@
 		"ru"	"Кому передать Танка?"
 		"hu"	"Ki veszi át a Tankot?"
 		"es"	"¿Quién tomará el Tanque?"
+		"pl"	"Kto przejmie Tanka? (Będzie to skutkować karą punktową)"
 	}
 	"phrase5"
 	{
@@ -35,6 +39,7 @@
 		"ru"	"Вы хотите сыграть Танком?"
 		"hu"	"Szeretnél Tankként játszani?"
 		"es"	"¿Quieres jugar como el Tanque?"
+		"pl"	"Czy chcesz grać jako Tank?"
 	}
 	"phrase6"
 	{
@@ -43,6 +48,7 @@
 		"ru"	"{1} не согласился быть Танком."
 		"hu"	"{1} nem egyezett bele hogy Tank lehessen."
 		"es"	"{1} no estuvo de acuerdo en ser el Tanque."
+		"pl"	"{1} nie zgodził się zostać Tankiem."
 	}
 	"phrase7"
 	{
@@ -50,6 +56,7 @@
 		"ru"	"Передача Танка сейчас не доступна."
 		"hu"	"A Tank most még nem adható át."
 		"es"	"El Tanque no se puede pasar en este momento."
+		"pl"	"Tank nie może zostać teraz podany."
 	}
 	"phrase8"
 	{
@@ -57,6 +64,7 @@
 		"ru"	"Танка можно передать если он не горит."
 		"hu"	"A Tank átadható ha nincs felgyújtva."
 		"es"	"El Tanque no se puede pasar cuando está en llamas."
+		"pl"	"Tank nie może zostać podany, gdy płonie."
 	}
 	"phrase9"
 	{
@@ -65,6 +73,7 @@
 		"ru"	"Админ передал Танка игроку {1}"
 		"hu"	"Egy admin átadta a tankot {1}-nak"
 		"es"	"Un administrador ha pasado el Tanque a {1}"
+		"pl"	"Admin przekazał Tanka do {1}"
 	}
 	"phrase10"
 	{
@@ -72,6 +81,7 @@
 		"ru"	"Передать контроль Танка"
 		"hu"	"Add át a Tankot"
 		"es"	"Pasar el Tanque"
+		"pl"	"Podanie Tanka"
 	}
 	"phrase11"
 	{
@@ -79,6 +89,7 @@
 		"ru"	"Танка можно передать если он не получил урона."
 		"hu"	"A Tank átadható ha nem szenved el sebzést."
 		"es"	"El Tanque sólo se puede pasar cuando no ha recibido ningún daño."
+		"pl"	"Tank może zostać podany tylko wtedy, gdy nie otrzymał żadnych obrażeń."
 	}
 	"phrase12"
 	{
@@ -86,6 +97,7 @@
 		"ru"	"Взять Танка бота под контроль"
 		"hu"	"Vedd át a Bot Tankot"
 		"es"	"Control Tanque Bot"
+		"pl"	"Wziąć Tanka Bota pod kontrolę"
 	}
 	"phrase13"
 	{
@@ -93,6 +105,7 @@
 		"en"	"The Tank pass limit reached [{1}/{2}]."
 		"ru"	"Достигнут лимит передачи Танка [{1}/{2}]."
 		"es"	"Se alcanzó el límite de pases del Tanque [{1}/{2}]."
+		"pl"	"Osiągnięto limit podań Tanka [{1}/{2}]."
 	}
 	"phrase14"
 	{
@@ -101,5 +114,6 @@
 		"ru"	"{1} передал Танка игроку {2} [{3}/{4}]."
 		"hu"	"{1} átadta a Tankot {2}-nak [{3}/{4}]."
 		"es"	"{1} pasó el Tanque a {2} [{3}/{4}]."
+		"pl"	"{1} podał Tanka do {2} [{3}/{4}]."
 	}
 }
