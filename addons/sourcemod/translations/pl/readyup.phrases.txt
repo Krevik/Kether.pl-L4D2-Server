@@ -105,4 +105,40 @@
 	{
 		"pl"		"Potrzeba więcej graczy..."
 	}
+
+	"PanelSections"
+	{
+		//1: ServerName, 2: Players Count, 3: sv_maxplayers, 4: Config name
+		"pl"		"▸ Serwer: %s \n▸ Sloty: %d/%d\n▸ Konfig: %s"
+	}
+
+	"PanelCmds"
+	{
+		"pl"		"▸ Komendy:"
+	}
+
+	"PanelSurv"
+	{
+		"en"		"->%d. Ocalali"
+	}
+
+	"PanelInf"
+	{
+		"en"		"->%d. Zarażeni"
+	}
+
+	"PanelCast"
+	{
+		"en"		"->%d. Kasterzy" //%s =+ "s" if more than one
+	}
+
+	"PanelSpec"
+	{
+		"en"		"->%d. Widzowie"//%s =+ "s" if more than one
+	}
+
+	"PSMany"
+	{
+		"en"		"**Sporo** (%d)"//%d = num of specs
+	}
 }
