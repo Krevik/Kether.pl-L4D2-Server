@@ -9,9 +9,9 @@ bool canReady[MAXPLAYERS + 1];
 public Plugin myinfo = 
 {
     name = "!r alias",
-    author = "Krevik",
+    author = "Krevik, StarterX4",
     description = "changes !r to !ready",
-    version = "1.0.0",
+    version = "1.1.0",
     url = ""
 }
 
@@ -22,6 +22,8 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
 
 public void OnPluginStart()
 {
+	LoadTranslations("aliases.phrases");
+
 	RegConsoleCmd("sm_r", Ready_CMD, "Let's get ready!");
 	RegConsoleCmd("sm_ready", Ready_CMD, "Let's get ready!");
 	RegConsoleCmd("sm_nr", NReady_CMD, "Let's get ready!");
@@ -49,18 +51,18 @@ public Action:Ready_CMD(client, args)
 		GetClientName(client, name, sizeof(name));
 		if(canReady[client]){
 			if(GetClientTeam(client) == 2){
-				CPrintToChatAll("{blue}%s{default} : {olive}Ready!", name);
+				CPrintToChatAll("%t", "RSurv", name);
 				canReady[client] = false;
 				delayAllowReady(client);
 			}else if(GetClientTeam(client) == 3){
-				CPrintToChatAll("{red}%s{default} : {olive}Ready!", name);
+				CPrintToChatAll("%t", "RInf", name);
 				canReady[client] = false;
 				delayAllowReady(client);
 			}
 		}else{
 			int team = GetClientTeam(client);
 			if(team == 2 || team == 3){
-				CPrintToChat(client, "Don't spam! 3 secs of cooldown for you buddy.");
+				CPrintToChat(client, "%t", "Cooldown");
 			}
 		}
 	}
@@ -77,11 +79,11 @@ public Action:NReady_CMD(client, args)
 		GetClientName(client, name, sizeof(name));
 		if(canReady[client]){
 			if(GetClientTeam(client) == 2){
-				CPrintToChatAll("{blue}%s{default} : {Darkred}Not Ready!", name);
+				CPrintToChatAll("%t", "NRSurv", name);
 				canReady[client] = false;
 				delayAllowReady(client);
 			}else if(GetClientTeam(client) == 3){
-				CPrintToChatAll("{red}%s{default} : {Darkred}Not Ready!", name);
+				CPrintToChatAll("%t", "NRInf", name);
 				canReady[client] = false;
 				delayAllowReady(client);
 			}
