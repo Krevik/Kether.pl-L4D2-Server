@@ -119,12 +119,12 @@
 
 	"PanelSurv"
 	{
-		"en"		"->%d. Survivors"
+		"en"		"->%d. Survivors%s"//%s = team ready symbol
 	}
 
 	"PanelInf"
 	{
-		"en"		"->%d. Infected"
+		"en"		"->%d. Infected%s"
 	}
 
 	"PanelCast"

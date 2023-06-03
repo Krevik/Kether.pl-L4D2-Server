@@ -6,7 +6,7 @@
 	}
 	"ClientFullyLoaded"
 	{
-		"pl"	"{olive}%N {default}jest w pełni załadowany"
+		"pl"	"{olive}%N {default}załadował się"
 	}
 	"PauseCommand"
 	{
@@ -113,7 +113,7 @@
 	}
 	"SurvivorUnPaused"
 	{
-		"pl"	"->1. Ocalai: [√]"
+		"pl"	"->1. Ocalali: [√]"
 	}
 	"SurvivorPaused"
 	{
@@ -158,16 +158,16 @@
 	}
 	"GameisLive"
 	{
-		"pl"		"Gra jest już dostępna!"
+		"pl"		"Gra rusza!"
 	}
 	"CountdownReadyDelay"
 	{
-		"pl"		"{blue}Dostępna w{default}: {olive}%d{default}..."
+		"pl"		"{blue}Ruszamy za{default}: {olive}%d{default}..."
 	}
 	// CancelFullReady
 	"CountdownCancelled"
 	{
-		"pl"		"{olive}%N {default}anulował odliczanie!"
+		"pl"		"{olive}%N {default}zatrzymał odliczanie!"
 	}
 	// Callvote_Callback
 	"CallvoteNoSpec"

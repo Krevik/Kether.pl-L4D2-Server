@@ -1,0 +1,57 @@
+--- /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup/actio_kether.inc	2023-06-03 15:10:56.030366107 +0200
++++ /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup/action.inc.bak	2023-06-02 19:16:11.475011803 +0200
+@@ -189,25 +189,13 @@
+ 	if (readyUpMode == ReadyMode_AutoStart)
+ 		return false;
+ 	
+-	int readyCount = 0;
+-	int casterCount = 0;
+-	int realHumanPlayers = 0;
++	int survReadyCount = 0, infReadyCount = 0;
+ 	for (int i = 1; i <= MaxClients; i++)
+ 	{
+-		if (IsClientInGame(i))
++		if (IsClientInGame(i) && IsPlayerReady(i))
+ 		{
+-			if (GetClientTeam(i) == 1)
+-			{
+-				casterCount++;
+-			}
+-
+-			if ((IsPlayer(i) && isPlayerReady[i] && GetClientTeam(i) != 1))
++			switch (GetClientTeam(i))
+ 			{
+-				readyCount++;
+-			}
+-			
+-			if(IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) != 1){
+-				realHumanPlayers++;
+ 				case L4D2Team_Survivor: survReadyCount++;
+ 				case L4D2Team_Infected: infReadyCount++;
+ 			}
+@@ -217,7 +205,24 @@
+ 	if (readyUpMode == ReadyMode_TeamReady)
+ 		return survReadyCount && infReadyCount;
+ 	
+-	return readyCount >= realHumanPlayers;
++	int survLimit = survivor_limit.IntValue;
++	int zombLimit = z_max_player_zombies.IntValue;
++	
++	if (l4d_ready_unbalanced_start.BoolValue)
++	{
++		int iBaseline = l4d_ready_unbalanced_min.IntValue;
++		
++		if (iBaseline > survLimit) iBaseline = survLimit;
++		if (iBaseline > zombLimit) iBaseline = zombLimit;
++		
++		int survCount = GetTeamHumanCount(L4D2Team_Survivor);
++		int infCount = GetTeamHumanCount(L4D2Team_Infected);
++		
++		return (iBaseline <= survCount && survCount <= survReadyCount)
++			&& (iBaseline <= infCount && infCount <= infReadyCount);
++	}
++	
++	return (survReadyCount + infReadyCount) >= survLimit + zombLimit;
+ }
+ 
+ void CancelFullReady(int client, disruptType type)

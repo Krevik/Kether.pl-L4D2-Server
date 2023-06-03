@@ -119,26 +119,26 @@
 
 	"PanelSurv"
 	{
-		"en"		"->%d. Ocalali"
+		"pl"		"->%d. Ocalali%s"//%s = team ready symbol
 	}
 
 	"PanelInf"
 	{
-		"en"		"->%d. Zarażeni"
+		"pl"		"->%d. Zarażeni%s"
 	}
 
 	"PanelCast"
 	{
-		"en"		"->%d. Kasterzy" //%s =+ "s" if more than one
+		"pl"		"->%d. Kasterzy" //%s =+ "s" if more than one
 	}
 
 	"PanelSpec"
 	{
-		"en"		"->%d. Widzowie"//%s =+ "s" if more than one
+		"pl"		"->%d. Widzowie"//%s =+ "s" if more than one
 	}
 
 	"PSMany"
 	{
-		"en"		"**Sporo** (%d)"//%d = num of specs
+		"pl"		"**Sporo** (%d)"//%d = num of specs
 	}
 }
