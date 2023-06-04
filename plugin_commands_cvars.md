@@ -33,6 +33,18 @@ http://forums.alliedmods.net/showthread.php?t=92072
 * **sm_autorecord_timestop**: Hour in the day to stop recording (0-23, -1 disables)
 
 ---
+>**langselect.smx**  
+A plugin that allows players to select the language they want SourceMod to translate text into. Translations must be provided by plugins for this to have any effect on them.  
+https://forums.alliedmods.net/showthread.php?p=2785962
+
+<ins>Commands:</ins>
+* **sm_language** / **sm_lang <Country Code>**: Set your own SourceMod translation language.  
+* **sm_lang** / **sm_language**: Not specifying a country code will open the menu.  
+* **sm_getlanguage** / **sm_getlang** <Target>: Get a player's SourceMod translation language.  
+* **sm_setlanguage** / **sm_setlang <Target> <Country Code>**: Set a player's SourceMod translation language.  
+* **sm_resetlanguage** / **sm_resetlang <Target>: **Reset a player's SourceMod translation language.
+
+---
 
 > **l4d_custom_commands.smx**  
 [L4D & L4D2] New custom commands  
