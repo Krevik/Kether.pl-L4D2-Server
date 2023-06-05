@@ -1,0 +1,154 @@
+"Games"
+{
+	"#default"
+	{
+		"Offsets"
+		{
+			"CBaseClient::SendServerInfo::infotext::inst"
+			{
+				"linux" "4"
+				"windows" "1"
+			}
+		}
+		"Signatures"
+		{
+			"CBaseClient::SendServerInfo"
+			{
+				"library" "engine"
+				"linux" "@_ZN11CBaseClient14SendServerInfoEv"
+			}
+		}
+		"MemPatches"
+		{
+			"CBaseClient::SendServerInfo::infotext"
+			{
+				"signature" "CBaseClient::SendServerInfo"
+				"linux"
+				{
+					"verify" "\xC7\x44\x24\x08\x2A\x2A\x2A\x2A"
+					"patch" "\xC7\x44\x24\x08\x00\x00\x00\x00"
+				}
+				"windows"
+				{
+					"verify" "\x68\x2A\x2A\x2A\x2A"
+					"patch" "\x68\x00\x00\x00\x00"
+				}
+			}
+		}
+	}
+	"#default"
+	{
+		"#supported"
+		{
+			"game" "cstrike"
+			"game" "dod"
+			"game" "hl2mp"
+		}
+		"Signatures"
+		{
+			"CBaseClient::SendServerInfo"
+			{
+				"library" "engine"
+				"windows" "\x55\x8B\xEC\xB8\xE4\x14\x00\x00"
+			}
+		}
+		"MemPatches"
+		{
+			"CBaseClient::SendServerInfo::infotext"
+			{
+				"linux"
+				{ 
+					"offset" "D6h"
+				}
+				"windows"
+				{
+					"offset" "A0h"
+				}
+			}
+		}
+	}
+	"tf"
+	{
+		"Signatures"
+		{
+			"CBaseClient::SendServerInfo"
+			{
+				"library" "engine"
+				"windows" "\x55\x8B\xEC\xB8\xF8\x14\x00\x00"
+			}
+		}
+		"MemPatches"
+		{
+			"CBaseClient::SendServerInfo::infotext"
+			{
+				"linux"
+				{ 
+					"offset" "E8h"
+				}
+				"windows"
+				{
+					"offset" "A0h"
+				}
+			}
+		}
+	}
+	"left4dead"
+	{
+		"Offsets"
+		{
+			"CBaseClient::SendServerInfo::infotext::inst"
+			{
+				"linux" "1"
+			}
+		}
+		"Signatures"
+		{
+			"CBaseClient::SendServerInfo"
+			{
+				"library" "engine"
+				"windows" "\xB8\x18\x15\x00\x00\xE8\x2A\x2A\x2A\x2A"
+			}
+		}
+		"MemPatches"
+		{
+			"CBaseClient::SendServerInfo::infotext"
+			{
+				"linux"
+				{ 
+					"offset" "12Fh"
+					"verify" "\x8D\x83\x9C\xBA\xF6\xFF"
+					"patch" "\xB8\x00\x00\x00\x00\x90"
+				}
+				"windows"
+				{
+					"offset" "B2h"
+				}
+			}
+		}
+	}
+	"left4dead2"
+	{
+		"Signatures"
+		{
+			"CBaseClient::SendServerInfo"
+			{
+				"library" "engine"
+				"windows" "\x55\x8B\xEC\xB8\x8C\x18\x00\x00"
+			}
+		}
+		"MemPatches"
+		{
+			"CBaseClient::SendServerInfo::infotext"
+			{
+				"linux"
+				{ 
+					"offset" "10Fh"
+				}
+				"windows"
+				{
+					"offset" "D0h"
+				}
+			}
+		}
+	}
+}
