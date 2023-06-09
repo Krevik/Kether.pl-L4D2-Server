@@ -134,7 +134,8 @@ char g_sDisruptReason[disruptType_SIZE][] =
 #include "readyup/command_kether.inc"
 #include "readyup/game.inc"
 #include "readyup/native.inc"
-#include "readyup/panel_kether.inc"
+//#include "readyup/panel_kether.inc" //panel translations target bug (everyone's getting whoever's translation?)
+#include "readyup/panel.inc"
 #include "readyup/player.inc"
 #include "readyup/setup_kether.inc"
 #include "readyup/sound.inc"
