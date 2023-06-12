@@ -51,6 +51,7 @@ Handle commonsKilledPerRoundHandle = INVALID_HANDLE;
 Handle huntersSkeetedPerRoundHandle = INVALID_HANDLE;
 Handle damageDoneToSIPerRoundHandle = INVALID_HANDLE;
 Handle friendlyFireDonePerRoundHandle = INVALID_HANDLE;
+Handle friendlyRecoversPerRoundHandle = INVALID_HANDLE;
 
 public Plugin myinfo =
 {
@@ -74,12 +75,14 @@ public void OnPluginStart()
 	huntersSkeetedPerRoundHandle = CreateTrie();
 	damageDoneToSIPerRoundHandle = CreateTrie();
 	friendlyFireDonePerRoundHandle = CreateTrie();
+	friendlyRecoversPerRoundHandle = CreateTrie();
 	survivorsFromRoundBeggining = new ArrayList(ByteCountToCells(512));
 	RegAdminCmd("sm_createStatsSQL", CMD_CreateStatsDataTable, ADMFLAG_CHEATS, "");
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
 	HookEvent("player_hurt", PlayerHurt_Event, EventHookMode_Post);
 	HookEvent("player_left_start_area", PlayerLeftStartArea_Event, EventHookMode_PostNoCopy);
 	HookEvent("round_end", RoundEnd_Event, EventHookMode_PostNoCopy);
+	HookEvent("revive_success", ReviveSuccess_Event, EventHookMode_Post);
 	CreateTimer(30.0, databaseUpdateGamePlayTime, _, TIMER_REPEAT);
 
 }
@@ -146,6 +149,14 @@ public void addFriendlyFireDoneAverageEntry(char steamID[64], int amount){
 	if(KETHER_STATS_DB){
 		sql_query2[0] = '\0';
 		Format(sql_query2, sizeof(sql_query2)-1, "INSERT INTO `l4d2_stats_kether_friendly_fire_done_averages` SET `SteamID` = '%s', `Friendly_Fire_Done_In_Round_Entry` = '%d' ", steamID, amount);
+		SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
+	}
+}
+
+public void addFriendlyRecoverAverageEntry(char steamID[64], int amount){
+	if(KETHER_STATS_DB){
+		sql_query2[0] = '\0';
+		Format(sql_query2, sizeof(sql_query2)-1, "INSERT INTO `l4d2_stats_kether_friendly_recover_averages` SET `SteamID` = '%s', `Friendly_Recover_In_Round_Entry` = '%d' ", steamID, amount);
 		SQL_TQuery(KETHER_STATS_DB, dbErrorLogger, sql_query2, 0);
 	}
 }
@@ -306,6 +317,18 @@ public void addFriendlyFireDoneToStoreTrie(int client, int amount){
 	SetTrieArray(friendlyFireDonePerRoundHandle, friendlyFireDonePerRoundKey, friendlyFireDoneTMP, sizeof(friendlyFireDoneTMP), true);
 }
 
+public void addFriendlyRecoverToStoreTrie(int client){
+	char playerSteamID[64];
+    GetClientAuthId(client, AuthId_SteamID64, playerSteamID, sizeof(playerSteamID));
+
+	int friendlyRecoverTMP[MAXPLAYERS+1];
+	char friendlyRecoversPerRoundKey[128];
+	Format(friendlyRecoversPerRoundKey, sizeof(friendlyRecoversPerRoundKey), "%x_friendlyRecoverSumPerRound", playerSteamID);
+	GetTrieArray(friendlyRecoversPerRoundHandle, friendlyRecoversPerRoundKey, friendlyRecoverTMP, sizeof(friendlyRecoverTMP));
+	friendlyRecoverTMP[client] += 1;
+	SetTrieArray(friendlyRecoversPerRoundHandle, friendlyRecoversPerRoundKey, friendlyRecoverTMP, sizeof(friendlyRecoverTMP), true);
+}
+
 
 public void OnSkeet(int survivor){
 	addSkeetToStoreTrie(survivor);
@@ -428,6 +451,12 @@ public void RoundEnd_Event(Event hEvent, const char[] eName, bool dontBroadcast)
 					Format(friendlyFireDonePerRoundKey, sizeof(friendlyFireDonePerRoundKey), "%x_friendlyFireDoneSumPerRound", playerSteamID);
 					GetTrieArray(friendlyFireDonePerRoundHandle, friendlyFireDonePerRoundKey, friendlyFireDoneTMP, sizeof(friendlyFireDoneTMP));
 					addFriendlyFireDoneAverageEntry(playerSteamID, friendlyFireDoneTMP[client]);
+
+					int friendlyRecoverTMP[MAXPLAYERS+1];
+					char friendlyRecoverPerRoundKey[128];
+					Format(friendlyRecoverPerRoundKey, sizeof(friendlyRecoverPerRoundKey), "%x_friendlyRecoverSumPerRound", playerSteamID);
+					GetTrieArray(friendlyRecoversPerRoundHandle, friendlyRecoverPerRoundKey, friendlyRecoverTMP, sizeof(friendlyRecoverTMP));
+					addFriendlyRecoverAverageEntry(playerSteamID, friendlyRecoverTMP[client]);
 				}
 			}
 		}
@@ -437,6 +466,7 @@ public void RoundEnd_Event(Event hEvent, const char[] eName, bool dontBroadcast)
 	huntersSkeetedPerRoundHandle = CreateTrie();
 	damageDoneToSIPerRoundHandle = CreateTrie();
 	friendlyFireDonePerRoundHandle = CreateTrie();
+	friendlyRecoversPerRoundHandle = CreateTrie();
 }
 
 
@@ -498,6 +528,18 @@ public void PlayerLeftStartArea_Event(Event hEvent, const char[] eName, bool don
 	huntersSkeetedPerRoundHandle = CreateTrie();
 	damageDoneToSIPerRoundHandle = CreateTrie();
 	friendlyFireDonePerRoundHandle = CreateTrie();
+	friendlyRecoversPerRoundHandle = CreateTrie();
+}
+
+public void ReviveSuccess_Event(Event event, const char[] eName, bool dontBroadcast)
+{
+    int userid = GetEventInt(event, "userid");
+    int reviver = GetClientOfUserId(userid);
+    
+    int subject = GetEventInt(event, "subject");
+    int revievedPerson = GetClientOfUserId(subject);
+    
+	addFriendlyRecoverToStoreTrie(reviver);
 }
 
 public void databaseAddDamageDoneToSI(int client, int damageDoneToSI){
