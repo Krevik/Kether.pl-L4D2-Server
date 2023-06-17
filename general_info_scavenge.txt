@@ -4,6 +4,7 @@ General changes:
     • No Stripper — bug with no cans spawned on first round.
 
 Turbo:
+    • Ammo refill for M60 and Grenade Launcher (T2-only);
     • Boomer can vomit while moving;
     • Boomer's vomit extinguishes his burning teammates;
     • Charger steering with mouse movement;
