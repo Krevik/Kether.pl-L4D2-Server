@@ -1,0 +1,11 @@
+--- /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup/command_kether.inc	2023-06-03 14:59:32.279462964 +0200
++++ /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup/command.inc.bak	2023-06-02 19:16:11.475011803 +0200
+@@ -28,6 +28,8 @@
+ 	{
+ 		if (!SetPlayerReady(client, true))
+ 			PlayNotifySound(client);
++		if (l4d_ready_secret.BoolValue)
++			DoSecrets(client);
+ 		if (CheckFullReady())
+ 			InitiateLiveCountdown();
+ 		return Plugin_Handled;

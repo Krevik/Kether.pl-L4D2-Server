@@ -1,0 +1,21 @@
+--- /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup/setup_kether.inc	2023-06-02 19:57:46.118606755 +0200
++++ /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup/setup.inc.bak	2023-06-02 19:16:11.475011803 +0200
+@@ -87,18 +87,13 @@
+ 	// Ready Commands
+ 	RegConsoleCmd("sm_ready",			Ready_Cmd, "Mark yourself as ready for the round to go live");
+ 	RegConsoleCmd("sm_r",				Ready_Cmd, "Mark yourself as ready for the round to go live");
+-	RegConsoleCmd("sm_R",				Ready_Cmd, "Mark yourself as ready for the round to go live");
+-	RegConsoleCmd("sm_Ready",			Ready_Cmd, "Mark yourself as ready for the round to go live");
+ 	RegConsoleCmd("sm_toggleready",		ToggleReady_Cmd, "Toggle your ready status");
+ 	RegConsoleCmd("sm_unready",			Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
+ 	RegConsoleCmd("sm_nr",				Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
+-	RegConsoleCmd("sm_Nr",				Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
+-	RegConsoleCmd("sm_NR",				Unready_Cmd, "Mark yourself as not ready if you have set yourself as ready");
+ 	
+ 	// Admin Commands
+ 	RegAdminCmd("sm_forcestart",		ForceStart_Cmd, ADMFLAG_BAN, "Forces the round to start regardless of player ready status.");
+ 	RegAdminCmd("sm_fs",				ForceStart_Cmd, ADMFLAG_BAN, "Forces the round to start regardless of player ready status.");
+-	RegAdminCmd("sm_FS",				ForceStart_Cmd, ADMFLAG_BAN, "Forces the round to start regardless of player ready status.");
+ 
+ 	// Player Commands
+ 	RegConsoleCmd("sm_hide",			Hide_Cmd, "Hides the ready-up panel so other menus can be seen");

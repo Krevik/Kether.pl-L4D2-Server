@@ -1,12 +1,2 @@
-[C:\Users\PC\Downloads\L4D2-Competitive-Rework-master\addons\sourcemod\scripting\match_vote.sp]
-Age=1392009799
-[D:\l4d2 serv\Kether ST#60\addons\sourcemod\scripting\confoglcompmod.sp]
-Age=1393603477
-[E:\BACKUPY\krevika\l4d2 server working space\kether.pl backup 22.10.2021\addons\sourcemod\scripting\kether\l4d_tank_control_eq.sp]
-Age=1397175077
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\aliases.sp]
-Age=1400592893
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\christmas_surprise.sp]
-Age=1400326278
-[D:\Kether.pl-L4D2-Server\addons\sourcemod\scripting\l4d_christmas_tree.sp]
-Age=1400598898
+[l4d2_database_stats_kether.sp]
+Age=1455359313

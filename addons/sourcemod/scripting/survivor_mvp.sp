@@ -85,7 +85,7 @@ public Plugin:myinfo =
     name = "Survivor MVP notification",
     author = "Tabun, Artifacial",
     description = "Shows MVP for survivor team at end of round",
-    version = "0.3",
+    version = "0.3.1",
     url = "https://github.com/alexberriman/l4d2_survivor_mvp"
 };
 
@@ -103,9 +103,6 @@ new     bool:       bCountWitchDamage;
 new     bool:       bTrackFF;
 new                 iBrevityFlags;
 new     bool:       bRUPActive;
-
-new     Handle:     hGameMode = INVALID_HANDLE;
-new     String:     sGameMode[24] = "\0";
 
 new     String:     sClientName[MAXPLAYERS + 1][64];            // which name is connected to the clientId?
 
@@ -131,7 +128,7 @@ new                tankSpawned = false;                        // When tank is s
 new                 commonKilledDuringTank[MAXPLAYERS + 1];     // Common killed during the tank
 new                 ttlCommonKilledDuringTank = 0;              // Common killed during the tank
 new                 siDmgDuringTank[MAXPLAYERS + 1];            // SI killed during the tank
-new                 ttlSiDmgDuringTank = 0;                     // Total SI killed during the tank
+//new                 ttlSiDmgDuringTank = 0;                     // Total SI killed during the tank
 new                tankThrow;                                  // Whether or not the tank has thrown a rock
 new                 rocksEaten[MAXPLAYERS + 1];                 // The amount of rocks a player 'ate'.
 new                 rockIndex;                                  // The index of the rock (to detect how many times we were rocked)
@@ -234,7 +231,7 @@ public OnPluginStart()
 {
     // Round triggers
     //HookEvent("door_close", DoorClose_Event);
-    //HookEvent("finale_vehicle_leaving", FinaleVehicleLeaving_Event, EventHookMode_PostNoCopy);
+    HookEvent("finale_vehicle_leaving", FinaleEnd_Event, EventHookMode_PostNoCopy);
     HookEvent("round_start", RoundStart_Event, EventHookMode_PostNoCopy);
     HookEvent("round_end", RoundEnd_Event, EventHookMode_PostNoCopy);
     HookEvent("map_transition", RoundEnd_Event, EventHookMode_PostNoCopy);
@@ -256,9 +253,6 @@ public OnPluginStart()
     HookEvent("player_death", PlayerDeath_Event, EventHookMode_Post);
     HookEvent("infected_hurt" ,InfectedHurt_Event, EventHookMode_Post);
     HookEvent("infected_death", InfectedDeath_Event, EventHookMode_Post);
-    
-    // check gamemode (for scavenge fix)
-    hGameMode = FindConVar("mp_gamemode");
     
     // Cvars
     hPluginEnabled =    CreateConVar("sm_survivor_mvp_enabled", "1", "Enable display of MVP at end of round");
@@ -386,8 +380,6 @@ public Action:PlayerLeftStartArea(Handle:event, const String:name[], bool:dontBr
 public OnMapStart()
 {
     bPlayerLeftStartArea = false;
-    // get gamemode string for scavenge fix
-    GetConVarString(hGameMode, sGameMode, sizeof(sGameMode));
 }
 
 public OnMapEnd()
@@ -431,7 +423,7 @@ public void ScavRoundStart(Handle:event, const String:name[], bool:dontBroadcast
     //iTotalDamageWitch = 0;
     iTotalDamageAll = 0;
     iTotalFF = 0;
-    ttlSiDmgDuringTank = 0;
+    //ttlSiDmgDuringTank = 0;
     ttlCommonKilledDuringTank = 0;
     tankThrow = false;
     
@@ -480,7 +472,7 @@ public RoundStart_Event(Handle:event, const String:name[], bool:dontBroadcast)
     //iTotalDamage = 0;
     iTotalDamageAll = 0;
     iTotalFF = 0;
-    ttlSiDmgDuringTank = 0;
+    //ttlSiDmgDuringTank = 0;
     ttlCommonKilledDuringTank = 0;
     //iTotalDamageTank = 0;
     tankThrow = false;
@@ -488,20 +480,40 @@ public RoundStart_Event(Handle:event, const String:name[], bool:dontBroadcast)
     tankSpawned = false;
 }
 
-public RoundEnd_Event(Handle:event, const String:name[], bool:dontBroadcast)
+public FinaleEnd_Event(Handle:event, const String:name[], bool:dontBroadcast)
 {
-    if (StrEqual(sGameMode, "coop", false))
+    // Co-op modes.
+    if (!L4D_HasPlayerControlledZombies())
     {
         if (bInRound)
         {
             if (GetConVarBool(hPluginEnabled))
-                CreateTimer(0.01, delayedMVPPrint);   // shorter delay for scavenge.
+                CreateTimer(8.0, delayedMVPPrint);
+            bInRound = false;
+        }
+    }
+
+    // No need for versus/other modes as round_end fires just fine on them.
+    
+    tankSpawned = false;
+}
+
+
+public RoundEnd_Event(Handle:event, const String:name[], bool:dontBroadcast)
+{
+    // Co-op modes.
+    if (!L4D_HasPlayerControlledZombies())
+    {
+        if (bInRound)
+        {
+            if (GetConVarBool(hPluginEnabled))
+                CreateTimer(0.01, delayedMVPPrint);
             bInRound = false;
         }
     }
     else
     {
-        // versus or other
+        // Any scavenge/versus mode.
         if (bInRound && !StrEqual(name, "map_transition", false))
         {
             // only show / log stuff when the round is done "the first time"
@@ -872,7 +884,7 @@ public PlayerHurt_Event(Handle:event, const String:name[], bool:dontBroadcast)
                 // If the tank is up, let's store separately
                 if (tankSpawned) {
                     siDmgDuringTank[attacker] += damageDone;
-                    ttlSiDmgDuringTank += damageDone;
+                    //ttlSiDmgDuringTank += damageDone;
                 }
                 
                 iDidDamage[attacker] += damageDone;

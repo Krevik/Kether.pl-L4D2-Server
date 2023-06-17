@@ -1,0 +1,32 @@
+"Phrases" 
+{
+    "RSurv"
+    {
+        "en"    "{blue}%s{default} : {olive}Ready!"
+        "pl"    "{blue}%s{default} : {olive}Gotowy!"
+    }
+
+    "RInf"
+    {
+        "en"    "{red}%s{default} : {olive}Ready!"
+        "pl"    "{red}%s{default} : {olive}Gotowy!"
+    }
+
+    "Colldown"
+    {
+        "en"    "Don't spam! 3 secs of cooldown for you buddy."
+        "pl"    "Nie spamuj! 3 sek blokady dla ciebie ziomeczku."
+    }
+
+    "NRSurv"
+    {
+        "en"    "{blue}%s{default} : {Darkred}Not Ready!"
+        "pl"    "{blue}%s{default} : {Darkred}Niegotowy!"
+    }
+
+    "NRInf"
+    {
+        "en"    "{red}%s{default} : {Darkred}Not Ready!"
+        "pl"    "{red}%s{default} : {Darkred}Niegotowy!"
+    }
+}

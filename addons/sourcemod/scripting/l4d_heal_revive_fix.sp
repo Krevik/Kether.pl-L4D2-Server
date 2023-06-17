@@ -1,4 +1,24 @@
-#define PLUGIN_VERSION		"1.4"
+/*
+*	Heal Revive Exploit Bug Fix
+*	Copyright (C) 2021 Silvers
+*
+*	This program is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+*	(at your option) any later version.
+*
+*	This program is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*
+*	You should have received a copy of the GNU General Public License
+*	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+
+
+#define PLUGIN_VERSION		"1.4a"
 
 /*=======================================================================================
 	Plugin Info:
@@ -11,6 +31,9 @@
 
 ========================================================================================
 	Change Log:
+
+1.4a (09-Jul-2021)
+	- L4D2: GameData file updated. Thanks to "Crasher_3637" for updating.
 
 1.4 (10-May-2020)
 	- Added better error log message when gamedata file is missing.
@@ -91,10 +114,10 @@ public void OnPluginStart()
 public Action Event_Revive(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
-	CreateTimer(0.1, TmrBlock, userid);
+	CreateTimer(0.1, TimerBlock, userid);
 }
 
-public Action TmrBlock(Handle timer, any client)
+public Action TimerBlock(Handle timer, any client)
 {
 	client = GetClientOfUserId(client);
 	if( client && IsClientInGame(client) )

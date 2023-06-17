@@ -116,22 +116,9 @@ public Action Command_SetScores(int client, int args)
 	GetCmdArg(2, buffer, sizeof(buffer));
 	int tempInfectedScore = StringToInt(buffer);
 	
-	bool IsAdmin = false;
-	
-	//Determine whether the user is admin and what action to take
-	if (GetUserAdmin(client) != INVALID_ADMIN_ID) {
-		//If we are forcing admins to start votes, start a vote
-		if (!forceAdminsToVote.BoolValue) {
-			SetScores(tempSurvivorScore, tempInfectedScore, client);
-			return Plugin_Handled;
-		}
-		
-		IsAdmin = true; //else, ignore setscore_allow_player_vote convar for admins
-	}
-	
-	if (IsAdmin || allowPlayersToVote.BoolValue) {
+	if (allowPlayersToVote.BoolValue) {
 		//If players are allowed to vote, start a vote
-		StartScoreVote(tempSurvivorScore, tempInfectedScore, client, IsAdmin);
+		StartScoreVote(tempSurvivorScore, tempInfectedScore, client, false);
 	}
 	
 	return Plugin_Handled;
@@ -190,7 +177,7 @@ void StartScoreVote(const int survScore, const int infectScore, const int initia
 void SetScores(const int survScore, const int infectScore, const int iAdminIndex)
 {
 	//Determine which teams are which
-	bool bFlipped = L4D2_AreTeamsFlipped();
+	bool bFlipped = !!GameRules_GetProp("m_bAreTeamsFlipped");
 	int SurvivorTeamIndex = bFlipped ? 1 : 0;
 	int InfectedTeamIndex = bFlipped ? 0 : 1;
 	

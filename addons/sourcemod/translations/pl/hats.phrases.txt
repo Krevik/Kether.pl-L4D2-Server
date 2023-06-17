@@ -1,0 +1,132 @@
+"Phrases"
+{
+	"Hat_Wearing"
+	{
+		"pl"			"Masz teraz na sobie czapke {ORANGE}[{1}] {DEFAULT}."
+	}
+	"Hat_Changed"
+	{
+		"pl"			"Czapka zmieniona na {ORANGE}{1}{DEFAULT}."
+	}
+	"Hat_No_Index"
+	{
+		"pl"			"Nie można znaleźć indeksu kapelusza {ORANGE}{1}{DEFAULT}, wartości pomiędzy {ORANGE}1{DEFAULT} a {ORANGE}{2}{CYAN}."
+	}
+	"Hat_Not_Found"
+	{
+		"pl"			"Nie można znaleźć czapki {ORANGE}{1}{DEFAULT}."
+	}
+	"Hat_Invalid"
+	{
+		"pl"			"Wybrano nieprawidłowego gracza."
+	}
+	"Hat_Unblocked"
+	{
+		"pl"			"Odblokowano czapki dla {ORANGE}{1}{DEFAULT}."
+	}
+	"Hat_Blocked"
+	{
+		"pl"			"Zablokowano czapki dla {ORANGE}{1}{DEFAULT}."
+	}
+	"Hat_View"
+	{
+		"pl"			"Widok osobisty został zmieniony {ORANGE}{1}{DEFAULT}."
+	}
+	"Hat_Ability"
+	{
+		"pl"			"Obróciłeś {ORANGE}{1}{DEFAULT} zdolność noszenia kapeluszy."
+	}
+	"Hat_On"
+	{
+		"pl"			"włączone"
+	}
+	"Hat_Off"
+	{
+		"pl"			"wyłączone"
+	}
+	"Hat_Menu_Title"
+	{
+		"pl"			"Wybierz swoją czapke."
+	}
+	"Hat_Missing"
+	{
+		"pl"			"Nie nosisz czapki!"
+	}
+
+	"HAT_SYSTEM"
+	{
+		"pl"			"{ORANGE}[{RED}CZAPKA{ORANGE}]{DEFAULT} "
+	}
+	"HAT_NOT_RIGHT_NOW"
+	{
+		"pl"			"W tej chwili nie możesz użyć tego polecenia."
+	}
+	"ADMIN_DISABLE_HAT"
+	{
+		"pl"			"Wybierz gracza, do wyłączenia czapek:"
+	}
+	"ADMIN_CHANGE_HAT"
+	{
+		"pl"			"Wybierz gracza, do zmiany czapki:"
+	}
+	"ADMIN_VISIBILITY"
+	{
+		"pl"			"Wybierz gracza, do ustawienia widoczności czapki:"
+	}
+	"HAT_SET_ANGLE"
+	{
+		"pl"			"Ustaw kąt:"
+	}
+	"HAT_SET_POSITION"
+	{
+		"pl"			"Ustaw pozycję:"
+	}
+	"HAT_SET_SIZE"
+	{
+		"pl"			"Rozmiar zestawu:"
+	}
+	"HAT_MAIN"
+	{
+		"pl"			"Ustawienia czapki:"
+	}
+	"HAT_MENU"
+	{
+		"pl"			"Otwórz menu czapek"
+	}
+	"HAT_WORE"
+	{
+		"pl"			"Noszenie czapki"
+	}
+	"HAT_VIEWABLE"
+	{
+		"pl"			"Widok osobisty kapelusza"
+	}
+	"HAT_ENABLED"
+	{
+		"pl"			"Włączone"
+	}
+	"HAT_DISABLED"
+	{
+		"pl"			"Wyłączone"
+	}
+	"HAT_VIEWABLE_TP"
+	{
+		"pl"			"Trzeci osobisty widok czapki"
+	}
+	"HAT_VISIBILITY"
+	{
+		"pl"			"Ogólna widoczność czapki"
+	}
+	"Hat_ViewTP"
+	{
+		"pl"			"Widok czapki z trzeciej osoby został zmieniony {ORANGE}{1}{DEFAULT}."
+	}
+	"Hat_ViewSet"
+	{
+		"pl"			"Ogólna widoczność czapki dla {ORANGE}{1}{DEFAULT} została zmieniona na {ORANGE}{2}{DEFAULT}."
+	}
+	"Hat_Visibility_Set"
+	{
+		"pl"			"Zmieniłeś {ORANGE}{1}{DEFAULT} widoczność czapek."
+	}
+}

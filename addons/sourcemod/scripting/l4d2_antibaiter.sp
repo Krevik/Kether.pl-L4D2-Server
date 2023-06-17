@@ -34,19 +34,17 @@
 
 #define CDIRECTOR_GAMEDATA "l4d2_cdirector" //m_PostMobDelayTimer offset
 
-#define LEFT4FRAMEWORK_GAMEDATA "left4dhooks.l4d2" //left4dhooks gamedata
-#define CDIRECTORSCRIPTEDEVENTMANAGER "ScriptedEventManagerPtr" //left4dhooks gamedata
+//#define LEFT4FRAMEWORK_GAMEDATA "left4dhooks.l4d2" //left4dhooks gamedata
+//#define CDIRECTORSCRIPTEDEVENTMANAGER "ScriptedEventManagerPtr" //left4dhooks gamedata
 
 //#define LEFT4FRAMEWORK_GAMEDATA "l4d2_direct" //l4d2_direct gamedata
 //#define CDIRECTORSCRIPTEDEVENTMANAGER "CDirectorScriptedEventManager" //l4d2_direct gamedata
 
-Address
-	pScriptedEventManager = Address_Null;
-
 ConVar
 	hCvarTimerStartDelay,
 	hCvarHordeCountdown,
-	hCvarMinProgressThreshold;
+	hCvarMinProgressThreshold,
+	hCvarStopTimerOnBile;
 
 bool
 	IsRoundIsActive,
@@ -70,7 +68,7 @@ public Plugin myinfo =
 	name = "L4D2 Antibaiter",
 	author = "Visor, Sir (assisted by Devilesk), A1m`",
 	description = "Makes you think twice before attempting to bait that shit",
-	version = "1.3.4",
+	version = "1.3.6",
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework"
 };
 
@@ -81,8 +79,10 @@ public void OnPluginStart()
 	hCvarTimerStartDelay = CreateConVar("l4d2_antibaiter_delay", "20", "Delay in seconds before the antibait algorithm kicks in");
 	hCvarHordeCountdown = CreateConVar("l4d2_antibaiter_horde_timer", "60", "Countdown in seconds to the panic horde");
 	hCvarMinProgressThreshold = CreateConVar("l4d2_antibaiter_progress", "0.03", "Minimum progress the survivors must make to reset the antibaiter timer");
+	hCvarStopTimerOnBile = CreateConVar("l4d2_antibaiter_bile_stop", "0", "Stop timer when a player is biled?");
 
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
+	HookEvent("player_now_it", Event_PlayerBiled, EventHookMode_PostNoCopy);
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
 	HookEvent("player_left_start_area", Event_RoundGoesLive, EventHookMode_PostNoCopy);
 	
@@ -95,26 +95,6 @@ public void OnPluginStart()
 
 void InitGameData()
 {
-	Handle hGamedata = LoadGameConfigFile(LEFT4FRAMEWORK_GAMEDATA);
-	if (!hGamedata) {
-		SetFailState("Gamedata '%s' missing or corrupt", LEFT4FRAMEWORK_GAMEDATA);
-	}
-	
-	Address TheDirector = GameConfGetAddress(hGamedata, "CDirector");
-	if (!TheDirector) {
-		SetFailState("Couldn't find the 'CDirector' address.");
-	}
-	
-	int iScriptedEventManagerOffset = GameConfGetOffset(hGamedata, CDIRECTORSCRIPTEDEVENTMANAGER);
-	if (iScriptedEventManagerOffset == -1) {
-		SetFailState("Invalid offset '%s'.", CDIRECTORSCRIPTEDEVENTMANAGER);
-	}
-	
-	pScriptedEventManager = view_as<Address>(LoadFromAddress(TheDirector + view_as<Address>(iScriptedEventManagerOffset), NumberType_Int32));
-	if (!pScriptedEventManager) {
-		SetFailState("Couldn't find the 'CDirectorScriptedEventManager' address.");
-	}
-	
 	Handle hGamedata2 = LoadGameConfigFile(CDIRECTOR_GAMEDATA);
 	if (!hGamedata2) {
 		SetFailState("Gamedata '%s' missing or corrupt", CDIRECTOR_GAMEDATA);
@@ -125,7 +105,6 @@ void InitGameData()
 		SetFailState("Invalid offset '%s'.", "CDirectorScriptedEventManager->m_PostMobDelayTimer");
 	}
 	
-	delete hGamedata;
 	delete hGamedata2;
 }
 
@@ -147,6 +126,19 @@ public void Event_RoundGoesLive(Event hEvent, const char[] name, bool dontBroadc
 	StartRound();
 }
 
+public void Event_PlayerBiled(Event hEvent, const char[] name, bool dontBroadcast)
+{
+	bool byBoom = hEvent.GetBool("by_boomer");
+	if (byBoom && hCvarStopTimerOnBile.BoolValue)
+	{
+		hordeDelayChecks = 0;
+		if (IsCountdownRunning()) {
+			HideCountdown();
+			StopCountdown();
+		}
+	}
+}
+
 public void OnRoundIsLive()
 {
 	StartRound();
@@ -156,6 +148,7 @@ public void OnRoundIsLive()
 public Action RegisterSI(int client, int args)
 {
 	StartRound();
+	return Plugin_Handled;
 }
 #endif
 
@@ -359,17 +352,29 @@ void LaunchHorde()
 		}
 	}
 
-	if (client != -1) {
-		int flags = GetCommandFlags("director_force_panic_event");
-		SetCommandFlags("director_force_panic_event", flags & ~FCVAR_CHEAT);
-		FakeClientCommand(client, "director_force_panic_event");
-		SetCommandFlags("director_force_panic_event", flags);
+	if (client == -1) {
+		return;
+	}
+	
+	#if DEBUG
+	PrintToChatAll("m_PanicTimer - duration: %f, timestamp: %f", CTimer_GetDuration(PanicTimer()), CTimer_GetTimestamp(PanicTimer()));
+	#endif
+	
+	int info_director = MaxClients+1;
+	if ((info_director = FindEntityByClassname(info_director, "info_director")) != INVALID_ENT_REFERENCE)
+	{
+		AcceptEntityInput(info_director, "ForcePanicEvent");
 	}
 }
 
 CountdownTimer CountdownPointer()
 {
 	return L4D2Direct_GetScavengeRoundSetupTimer();
+}
+
+CountdownTimer PostMobDelayTimer()
+{
+	return view_as<CountdownTimer>(L4D_GetPointer(POINTER_EVENTMANAGER) + view_as<Address>(m_PostMobDelayTimerOffset));
 }
 
 /************/
@@ -392,7 +397,7 @@ float GetMaxSurvivorCompletion()
 // director_force_panic_event & car alarms etc.
 bool IsPanicEventInProgress()
 {
-	CountdownTimer pPanicCountdown = view_as<CountdownTimer>(pScriptedEventManager + view_as<Address>(m_PostMobDelayTimerOffset));
+	CountdownTimer pPanicCountdown = PostMobDelayTimer();
 	
 	#if DEBUG
 	PrintToChatAll("m_PostMobDelay - duration: %f, timestamp: %f", CTimer_GetDuration(pPanicCountdown), CTimer_GetTimestamp(pPanicCountdown));

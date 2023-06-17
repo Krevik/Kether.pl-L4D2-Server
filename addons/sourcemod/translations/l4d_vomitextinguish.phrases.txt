@@ -1,0 +1,13 @@
+"Phrases"
+{
+	"Information"
+	{
+		"en"	"Hint"
+		"ru"	"Подсказка"
+	}
+	"Vomit players"
+	{
+		"en"	"Use your vomit to put out burning teammates"
+		"ru"	"Используйте рвоту, чтобы потушить горящих зараженных"
+	}
+}

@@ -3189,15 +3189,14 @@ DisplaySetHpValueMenu(client)
 	new Handle:menu2b = CreateMenu(MenuHandler_SetHpPlayer);
 	SetMenuTitle(menu2b, "New Health:");
 	SetMenuExitBackButton(menu2b, true);
-	AddMenuItem(menu2b, "l4d2hpset100", "set 100");
-	AddMenuItem(menu2b, "l4d2hpset99", "set 99");
-	AddMenuItem(menu2b, "l4d2hpset90", "set 90");
-	AddMenuItem(menu2b, "l4d2hpadd5", "add 5");
-	AddMenuItem(menu2b, "l4d2hpadd10", "add 10");
-	AddMenuItem(menu2b, "l4d2hpadd25", "add 25");
-	AddMenuItem(menu2b, "l4d2hpadd50", "add 50");
-	AddMenuItem(menu2b, "l4d2hpadd1", "add 1");
-	AddMenuItem(menu2b, "l4d2hpset1", "set 1");
+	AddMenuItem(menu2b, "l4d2hpdouble", "x2 Health");
+	AddMenuItem(menu2b, "l4d2hptriple", "x3 Health");
+	AddMenuItem(menu2b, "l4d2hphalf", "1/2 Health");
+	AddMenuItem(menu2b, "l4d2hp3", "1/3 Health");
+	AddMenuItem(menu2b, "l4d2hp4", "1/4 Health");
+	AddMenuItem(menu2b, "l4d2hpquarter", "x4 Health");
+	AddMenuItem(menu2b, "l4d2hppls100", "+100 Health");
+	AddMenuItem(menu2b, "l4d2hppls50", "+50 Health");
 	DisplayMenu(menu2b, client, MENU_TIME_FOREVER);
 }
 
@@ -3517,55 +3516,49 @@ public MenuHandler_SetHpPlayer(Handle:menu2b, MenuAction:action, param1, param2)
 		{
 			case 0:
 			{
-				health = 100;
+				health = GetClientHealth(target) * 2;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 1:
 			{
-				health = 99;
+				health = GetClientHealth(target) * 3;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 2:
 			{
-				health = 90;
+				health = GetClientHealth(target) / 2;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 3:
 			{
-				health = GetClientHealth(target) + 5;
+				health = GetClientHealth(target) / 3;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 4:
 			{
-				health = GetClientHealth(target) + 10;
+				health = GetClientHealth(target) / 4;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 5:
 			{
-				health = GetClientHealth(target) + 25;
+				health = GetClientHealth(target) * 4;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 6:
 			{
-				health = GetClientHealth(target) + 50;
+				health = GetClientHealth(target) + 100;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}
 			case 7:
 			{
-				health = GetClientHealth(target) + 1;
-				SetHealth(target, param1, health);
-				DisplaySetHpPlayerMenu(param1);
-			}
-			case 8:
-			{
-				health = 1;
+				health = GetClientHealth(target) + 50;
 				SetHealth(target, param1, health);
 				DisplaySetHpPlayerMenu(param1);
 			}

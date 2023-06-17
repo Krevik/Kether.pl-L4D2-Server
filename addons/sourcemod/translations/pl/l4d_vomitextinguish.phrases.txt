@@ -1,0 +1,11 @@
+"Phrases"
+{
+	"Information"
+	{
+		"pl"	"Podpowiedź"
+	}
+	"Vomit players"
+	{
+		"pl"	"Użyj wymiocin, aby ugasić płonących towarzyszy"
+	}
+}

@@ -1,0 +1,19 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"pl"    "[{green}!{default}]"
+	}
+	"VotingNotEnabled"
+	{
+		"pl"	"Głosowanie nie jest włączone póki nie minie {olive}40s{default} do rundy."
+	}
+	"NotConsoleVote"
+	{
+		"pl"	"[!] Musisz być w grze by móc głosować."
+	}
+	"NotSpectatorVote"
+	{
+		"pl"	"{olive}Obserwator{default} nie może głosować."
+	}
+}

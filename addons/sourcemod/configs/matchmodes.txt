@@ -1,33 +1,80 @@
 "MatchModes"
 {
-	"Krevik's Confings"
+	"Kether Scavenge Configs"
 	{
-		"kether"
+		"kether_scavenge_t2"
 		{
-			"name" "Kether Versus"
+			"name" "Kether Scavenge T2"
 		}
-		"kether_realism"
+		"kether_scavenge_t2_turbo"
 		{
-			"name" "Kether Realism Versus"
+			"name" "Kether Scavenge T2 Turbo"
 		}
-		"kether_t1"
+		"kether_scavenge_t1"
 		{
-			"name" "Kether T1"
+			"name" "Kether Scavenge T1"
+		}
+		"kether_scavenge_t1_turbo"
+		{
+			"name" "Kether Scavenge T1 Turbo"
+		}
+		
+	}
+	"Kether Versus Configs"
+	{
+		"kether_versus_t1"
+		{
+			"name" "Kether Versus T1"
+		}
+		"kether_versus_t1_realism"
+		{
+			"name" "Kether Versus T1 Realism"
+		}
+		"kether_versus_turbo_t1"
+		{
+			"name" "Kether Versus T1 Turbo"
+		}
+		"kether_versus_t1_8v8"
+		{
+			"name" "Kether Versus 8v8 T1"
+		}
+		"kether_campaign"
+		{
+			"name" "Kether Campaign"
+		}
+		"kether_test"
+		{
+			"name" "Kether Test"
+		}
+		"kether_versus_t1_foolsday"
+		{
+			"name" "Kether VerSus T1"
+		}
+	}
+	"Kether T2 Configs"
+	{
+		"kether_t2"
+		{
+			"name" "Kether T2" 
+		}
+		"kether_t2_pure"
+		{
+			"name" "Kether T2 Pure"
+		}
+		"kether_t2_backport"
+		{
+			"name" "Kether Versus T2 (backport; use with caution)"
 		}
 	}
 	"ZoneMod Configs"
 	{
 		"zonemod"
 		{
-			"name" "ZoneMod 2.2"
+			"name" "ZoneMod 2.8.2"
 		}
 		"zoneretro"
 		{
-			"name" "ZoneMod Retro 2.2"
-		}
-		"zonemodold"
-		{
-			"name" "ZoneMod 1.9.16"
+			"name" "ZoneMod Retro 2.8.2"
 		}
 		"zm3v3"
 		{
@@ -40,6 +87,13 @@
 		"zm1v1"
 		{
 			"name" "1v1 ZoneMod"
+		}
+	}
+	"NeoMod Configs"
+	{
+		"neomod"
+		{
+			"name" "NeoMod Tourney 0.4a"
 		}
 	}
 	"NextMod Configs"
@@ -66,6 +120,25 @@
 		"pmelite"
 		{
 			"name" "Promod Elite 1.1"
+		}
+	}
+	"Acemod Revamped Configs"
+	{
+		"acemodrv"
+		{
+			"name" "Acemod RV 1.3"
+		}
+		"amrv3v3"
+		{
+			"name" "3v3 Acemod RV"
+		}
+		"amrv2v2"
+		{
+			"name" "2v2 Acemod RV"
+		}
+		"amrv1v1"
+		{
+			"name" "1v1 Acemod RV"
 		}
 	}
 	"EQ Configs"
@@ -98,7 +171,7 @@
 	{
 		"zonehunters"
 		{
-			"name" "ZoneHunters 2.2"
+			"name" "ZoneHunters 2.8.2"
 		}
 		"zh3v3"
 		{
