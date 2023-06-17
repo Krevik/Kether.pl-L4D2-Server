@@ -166,4 +166,39 @@
 			"name" "1v1 ZoneHunters"
 		}
 	}
+		"ScavOgl Configs"
+	{
+		"scavogl"
+		{
+			"name" "ScavOgl Rework v2.2"
+		}
+		"scavhunters"
+		{
+			"name" "ScavHunters Rework v2.2"
+		}
+		"scav1v1"
+		{
+			"name" "1v1 ScavOgl v2.2"
+		}
+		"scav2v2"
+		{
+			"name" "2v2 ScavOgl v2.2"
+		}
+		"scav3v3"
+		{
+			"name" "3v3 ScavOgl v2.2"
+		}
+		"scavh1v1"
+		{
+			"name" "1v1 ScavHunters v2.2"
+		}
+		"scavh2v2"
+		{
+			"name" "2v2 ScavHunters v2.2"
+		}
+		"scavh3v3"
+		{
+			"name" "3v3 ScavHunters v2.2"
+		}
+	}
 }
