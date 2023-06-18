@@ -1,0 +1,34 @@
+"Phrases"
+{
+	"on"
+	{
+		"pl"		"{blue}włączony{default}"
+	}
+	
+	"off"
+	{
+		"pl"		"{red}wyłączony{default}"
+	}
+	
+	"Notify_SpechudState"
+	{
+		"#format"	"{1:t}"
+		"pl"		"<{olive}HUD{default}> HUD Widza został {1}"
+	}
+	
+	"Notify_TankhudState"
+	{
+		"#format"	"{1:t}"
+		"pl"		"<{olive}HUD{default}> HUD Tanka został {1}"
+	}
+	
+	"Notify_SpechudUsage"
+	{
+		"pl"		"<{olive}HUD{default}> Wpisz {green}!spechud{default} na czacie by przełączyć {blue}HUD Widza"
+	}
+	
+	"Notify_TankhudUsage"
+	{
+		"pl"		"<{olive}HUD{default}> Wpisz {green}!tankhud{default} na czacie by przełączyć {red}HUD Tanka"
+	}
+}

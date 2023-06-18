@@ -1,0 +1,19 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"pl"		"[{olive}1 na 1{default}]"
+	}
+	"HealthRemaining"
+	{
+		"pl"		"{red}{1}{default} ({green}{2}{default}) miał jeszcze {olive}{3}{default} zdrowia!"
+	}
+	"AI"
+	{
+		"pl"		"AI"
+	}
+	"UMad"
+	{
+		"pl"		"Nie musisz być Mad..."
+	}
+}

@@ -116,7 +116,7 @@ public Plugin myinfo =
 {
 	name = "L4D2 Godframes Control combined with FF Plugins",
 	author = "Stabby, CircleSquared, Tabun, Visor, dcx, Sir, Spoon, A1m`",
-	version = "0.6.5",
+	version = "0.6.8",
 	description = "Allows for control of what gets godframed and what doesnt along with integrated FF Support from l4d2_survivor_ff (by dcx and Visor) and l4d2_shotgun_ff (by Visor)"
 };
 
@@ -253,7 +253,7 @@ public void OnClientPutInServer(int iClient)
 //																												   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
-public Action Timed_SetFrustration(Handle hTimer, any iClient)
+void Timed_SetFrustration(any iClient)
 {
 	if (IsTank(iClient) && IsPlayerAlive(iClient)) {
 		int iFrust = GetEntProp(iClient, Prop_Send, "m_frustration");
@@ -268,8 +268,6 @@ public Action Timed_SetFrustration(Handle hTimer, any iClient)
 		SetEntProp(iClient, Prop_Send, "m_frustration", iFrust);
 		g_iFrustrationOffset[iClient] = 0;
 	}
-
-	return Plugin_Stop;
 }
 
 public Action OnTakeDamage(int iVictim, int &iAttacker, int &iInflictor, float &fDamage, \
@@ -316,9 +314,9 @@ public Action OnTakeDamage(int iVictim, int &iAttacker, int &iInflictor, float &
 		exotic damage flag that stands for a cut enemy from HL2
 		**/
 
-		if (iDamagetype == DMG_PLASMA) {
-			return Plugin_Continue;
-		}
+		//if (iDamagetype == DMG_PLASMA) {
+		//	return Plugin_Continue;
+		//}
 		
 		fTimeLeft += g_hFF.FloatValue;
 
@@ -437,7 +435,7 @@ public Action OnTakeDamage(int iVictim, int &iAttacker, int &iInflictor, float &
 				g_iFrustrationOffset[iAttacker] = 0;
 			}
 			
-			CreateTimer(0.1, Timed_SetFrustration, iAttacker, TIMER_FLAG_NO_MAPCHANGE);
+			RequestFrame(Timed_SetFrustration, iAttacker);
 		} else if (iWeapon == 52) { //tank rock
 			if (g_hRageRock.BoolValue) {
 				g_iFrustrationOffset[iAttacker] = -100;
@@ -445,7 +443,7 @@ public Action OnTakeDamage(int iVictim, int &iAttacker, int &iInflictor, float &
 				g_iFrustrationOffset[iAttacker] = 0;
 			}
 			
-			CreateTimer(0.1, Timed_SetFrustration, iAttacker, TIMER_FLAG_NO_MAPCHANGE);
+			RequestFrame(Timed_SetFrustration, iAttacker);
 		} 
 	}
 
@@ -903,6 +901,11 @@ public void ProcessShot(ArrayStack hStack)
 	}
 	
 	if (IsClientAndInGame(iVictim) && IsClientAndInGame(iAttacker)) {
+		CountdownTimer cTimerGod = L4D2Direct_GetInvulnerabilityTimer(iVictim); // left4dhooks
+		if (cTimerGod != CTimer_Null) {
+			CTimer_Invalidate(cTimerGod); //set m_timestamp - 0.0
+		}
+		
 		// Replicate natural behaviour
 		float fMinFF = g_hCvarMinFF.FloatValue;
 		float fMaxFFCvarValue = g_hCvarMaxFF.FloatValue;
@@ -912,7 +915,7 @@ public void ProcessShot(ArrayStack hStack)
 		
 		int iNewPelletCount = RoundFloat(fDamage);
 		for (int i = 0; i < iNewPelletCount; i++) {
-			SDKHooks_TakeDamage(iVictim, iAttacker, iAttacker, 1.0, DMG_PLASMA, iWeapon);
+			SDKHooks_TakeDamage(iVictim, iAttacker, iAttacker, 1.0, DMG_BUCKSHOT, iWeapon, .bypassHooks = true);
 		}
 	}
 	
@@ -959,15 +962,18 @@ public int Native_GiveClientGodFrames(Handle hPlugin, int iNumParams)
 	float fGodFrameTime = GetNativeCell(2);
 	int iAttackerClass = GetNativeCell(3);
 	
-	g_fFakeGodframeEnd[iClient] = GetGameTime() + fGodFrameTime; //godFrameTime
+	float fNow = GetGameTime();
+	
+	g_fFakeGodframeEnd[iClient] = fNow + fGodFrameTime; //godFrameTime
 	g_iLastSI[iClient] = iAttackerClass; //attackerClass
 	
-	// make player transparent/red while godframed
-	SetEntityRenderMode(iClient, RENDER_GLOW);
-	SetEntityRenderColor(iClient, 255, 0, 0, 200);
-
-	float fTimerTime = g_fFakeGodframeEnd[iClient] - GetGameTime();
-	CreateTimer(fTimerTime, Timed_ResetGlow, iClient, TIMER_FLAG_NO_MAPCHANGE);
-
+	if (g_fFakeGodframeEnd[iClient] > fNow && g_hGodframeGlows.BoolValue) {
+		// make player transparent/red while godframed
+		SetEntityRenderMode(iClient, RENDER_GLOW);
+		SetEntityRenderColor(iClient, 255, 0, 0, 200);
+		
+		CreateTimer(g_fFakeGodframeEnd[iClient] - fNow, Timed_ResetGlow, iClient, TIMER_FLAG_NO_MAPCHANGE);
+	}
+	
 	return 1;
 }

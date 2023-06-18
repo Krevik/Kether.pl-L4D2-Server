@@ -1,0 +1,46 @@
+"Phrases"
+{
+	"Tag+"
+	{
+		"pl"	"{green}★{default}"
+	}
+	"Tag++"
+	{
+		"pl"    "{green}★★{default}"
+	}
+	"Tag+++"
+	{
+		"pl"	"{green}★★★{default}"
+	}
+	"MeleeSkeeted"
+	{
+        "#format"   "{1:N},{2:N}" // 1:victim 2:attacker
+		"pl"    	"{olive}{1}{default} został rozrzutkowany {blue}bronią białą{default}{default} przez {olive}{2}{default}"
+	}
+	"Headshotted"
+	{
+       "#format"	"{1:N},{2:N}" // 1:victim 2:attacker
+		"pl"    	"{olive}{1}{default} otrzymał {blue}strzał w głowę{default} od {olive}{2}{default}"
+	}
+	"TeamSkeeted"
+	{
+       "#format"	"{1:N},{2:N},{3:d},{4:d},{5:s},{6:s}" // 1:attacker 2:victim 3:damage 4:shots 5:shots == 1 ? "" : "s" 6:assister_string
+		"pl"    	"{olive}{1}{default} drużynowo rozrzutkował {olive}{2}{default} za {blue}{3} obrażeń{default} w {blue}{4}{default} strzałach. Wspomagany przez: {olive}{6}{default}"
+	}
+	"Skeeted"
+	{
+       "#format"	"{1:N},{2:N},{3:d},{4:s}" // 1:attacker 2:victim 3:shots 4:shots == 1 ? "" : "s"
+		"pl"    	"{olive}{1}{default} rozrzutkował {olive}{2}{default} w {blue}{3}{default} strzałach"
+	}
+	"ShutBoomer"
+	{
+       "#format"	"{1:N},{2:s},{3:.1f}" // 1:g_iBoomerKiller 2:Boomer 3:BoomerKillTime
+		"pl"    	"{olive}{1}{default} zneutralizował Boomera {olive}{2}{default} w {blue}{3}{default}"
+	}
+	"AlarmedCar"
+	{
+		"pl"		"{olive}%N{default} uruchomił {olive}Alarm Samochodowy{default}"
+	}
+}
+
+

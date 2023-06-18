@@ -1,0 +1,19 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"pl"		"{red}[{default}NoTankRush{red}]"
+	}
+	"freeze"
+	{
+		"pl"		"{red}Tank {default}pojawił się. {olive}Mrożenie {default}punktów dystansu!"
+	}
+	"unfreeze"
+	{
+		"pl"		"{red}Tank {default}jest martwy. {olive}Odmrażanie {default}punktów dystansu!"
+	}
+	"saferoom"
+	{
+		"pl"		"{red}Ocalali {default}dotarli do schronu. {olive}Odmrażanie {default}punktów dystansu!"
+	}
+}

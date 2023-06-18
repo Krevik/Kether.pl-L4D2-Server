@@ -1,0 +1,44 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"pl"    	"{blue}[{default}Sloty{blue}]{default}"
+	}
+	"NotConsoleVote"
+	{
+		"pl"		"[Sloty] Musisz być w grze."
+	}
+	"LimitSlotsAbove"
+	{
+		"pl"		"Nie można ograniczyć slotów powyżej {olive}%i{default} na tym Serwerze."
+	}
+	"LimitedSlotsTo"
+	{
+		"#format"   "{1:s},{2:i}" // 1:sName 2:Int
+		"pl"		"{olive}{1}{default} ograniczył liczbę slotów do {blue}{2}{default}"
+	}
+	"RequiredPlayers"
+	{
+		"pl"		"Nie możesz ograniczyć liczby slotów poniżej wymaganej liczby graczy."
+	}
+	"SlotsUsage"
+	{
+		"pl"		"Użycie: {olive}!slots{default} <{olive}liczba{default}> {blue}|{default} Przykład: {olive}!slots 8{default}"
+	}
+	"Spectators"
+	{
+		"pl"		"Głosowanie nie jest dozwolone dla widzów."
+	}
+	"LimitSlots"
+	{
+		"pl"		"Ograniczyć liczbę slotów do '%s'?"
+	}
+	"CannotBeStarted"
+	{
+		"pl"		"Głosowanie nie może rozpocząć się teraz."
+	}
+	"LimitingSlots"
+	{
+		"pl"		"Ograniczanie slotów..."
+	}
+}

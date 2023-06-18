@@ -1,0 +1,25 @@
+﻿"Phrases"
+{
+	"Chat Damage Text"
+	{
+		"#format"		"{1:d}"
+		"pl"			"{green}- {1} PŻ"
+	}
+	
+	"HintText Damage Text"
+	{
+		"#format"		"{1:d}"
+		"pl"			"- {1} PŻ"
+	}
+	
+	"CenterText Damage Text"
+	{
+		"#format"		"{1:d}"
+		"pl"			"- {1} PŻ"
+	}
+
+	"Cookie Show Damage"
+	{
+		"pl"			"Pokaż Obrażenia"
+	}
+}

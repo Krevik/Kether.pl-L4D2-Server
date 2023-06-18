@@ -1,0 +1,16 @@
+General changes:
+    • Alltalk OFF by default;
+    • No ReadyUP, [Auto]Pause, Boss-managment plugins;
+    • No Stripper — bug with no cans spawned on first round.
+
+Turbo:
+    • Ammo refill for M60 and Grenade Launcher (T2-only);
+    • Boomer can vomit while moving;
+    • Boomer's vomit extinguishes his burning teammates;
+    • Charger steering with mouse movement;
+    • Chargers can be shoved;
+    • Incapped survivors can crawl;
+    • Jockey jump;
+    • Smoker right click releases the victim;
+    • Smoker can drag the victim;
+    • Weapon reload interrupt.

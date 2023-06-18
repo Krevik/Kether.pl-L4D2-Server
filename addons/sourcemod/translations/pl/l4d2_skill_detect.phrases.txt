@@ -1,0 +1,269 @@
+"Phrases"
+{
+	"Tag+"
+	{
+		"pl"	"{green}★{default}"
+	}
+	"Tag++"
+	{
+		"pl"	"{green}★★{default}"
+	}
+	"Tag+++"
+	{
+		"pl"	"{green}★★★{default}"
+	}
+	"Tag++++"
+	{
+		"pl"	"{green}★★★★{default}"
+	}
+	// boomer pop
+	"Popped"
+	{
+        "#format"   "{1:N},{2:N}" // 1:attacker 2:victim
+		"pl"		"{olive}{1}{default} pyknął {olive}{2}{default}."
+	}
+	"PoppedBot"
+	{
+		"pl"		"{olive}%N{default} pyknął boomera."
+	}
+    // charger level
+	"Leveled"
+	{
+        "#format"   "{1:N},{2:N}" // 1:attacker, 2:victim
+		"pl"		"{olive}{1}{default} {blue}całkiem{default} zrównał {olive}{2}{default}"
+	}
+	"LeveledBot"
+	{
+		"pl"		"{olive}%N{default} {blue}całkiem{default} zrównał {olive}chargera{default}"
+	}
+    // charger level hurt
+	"LeveledHurt"
+	{
+        "#format"   "{1:N},{2:N},{3:i}" // 1:attacker 2:victim 3:damage
+		"pl"		"{olive}{1}{default} {blue}rozłupał{default} {olive}{2}{default} ({blue}{3} obr{default})"
+	}
+	"LeveledHurtBot"
+	{
+        "#format"   "{1:N},{2:i}" // 1:attacker 2:damage
+		"pl"		"{olive}{1}{default} {blue}rozłupał{default} chargera ({blue}{2} obr{default})"
+	}
+    // deadstops
+	"Deadstopped"
+	{
+        "#format"   "{1:N},{2:N}" // 1:attacker 2:victim
+		"pl"		"{olive}{1}{default} zatrzymał {olive}{2}{default} w {blue}martwym punkcie{default}"
+	}
+	"DeadstoppedBot"
+	{
+		"pl"		"{olive}%N{default} zatrzymał {olive}huntera{default} w  {blue}martwym punkcie{default}"
+	}
+	// shove
+	"Shoved"
+	{
+        "#format"   "{1:N},{2:N}" // 1:attacker 2:victim
+		"pl"		"{olive}{1}{default} {blue}pchnął{default} {olive}{2}{default}."
+	}
+	"ShovedBot"
+	{
+		"pl"		"{olive}%N{default} {blue}pchnął{default} {olive}SI{default}."
+	}
+    // real skeet
+	"TeamSkeeted"
+	{
+		"pl"		"{olive}%N{default} został {blue}drużynowo rozrzutkowany{default}."
+	}
+	"TeamSkeetedBot"
+	{
+		"pl"		"{olive}Hunter{default} został {blue}drużynowo rozrzutkowany{default}."
+	}
+	"Skeeted"
+	{
+        "#format"   "{1:N},{2:s},{3:N}" // 1:attacker 2:(bMelee) ? "melee-": ((bSniper) ? "headshot-" : ((bGL) ? "grenade-" : "") ) 3:victim
+		"pl"		"{olive}{1}{default} {blue}{2}rozrzutkował{default} {olive}{3}{default}."
+	}
+	"SkeetedBot"
+	{
+        "#format"   "{1:N},{2:s}" // 1:attacker 2:(bMelee) ? "melee-": ((bSniper) ? "headshot-" : ((bGL) ? "grenade-" : "") )
+		"pl"		"{olive}{1}{default} {blue}{2}rozrzutkował{default} {olive}huntera{default}."
+	}
+    // hurt skeet / non-skeet
+	"HurtSkeet"
+	{
+        "#format"   "{1:N},{2:i},{3:s}" // 1:victim 2:damage 3:(bOverKill) ? buffer : ""
+		"pl"		"{olive}{1}{default} {green}nie{default} został rozrzutkowany ({blue}{2}{default} obrażeń).{3}"
+	}
+	"HurtSkeetBot"
+	{
+        "#format"   "{1:i},{2:s}" // 1:damage 2:(bOverKill) ? buffer : ""
+		"pl"		"{olive}Hunter{default} {green}nie{default} został rozrzutkowany ({blue}{1}{default} obrażeń).{2}"
+	}
+	"Unchipped"
+	{
+		"pl"		"(Rzutkowałbyś, gdyby hunter nie został rozłupany!)"
+	}
+    // crown
+	"CrownedWitch"
+	{
+        "#format"   "{1:N},{2:i}" // 1:attacker 2:damage
+		"pl"		"{olive}{1}{default} zwieńczył Witch ({blue}{2}{default} obrażeń)."
+	}
+	"CrownedWitch2"
+	{
+		"pl"		"Witch została {blue}zwieńczona{default}."
+	}
+    // drawcrown
+	"DrawCrowned"
+	{
+        "#format"   "{1:N},{2:i},{3:i}" // 1:attacker 2:damage 3:chipdamage
+		"pl"		"{olive}{1}{default} podstępnie zwieńczył Witch ({blue}{2}{default} obrażeń, {olive}{3}{default} łup)."
+	}
+	"DrawCrowned2"
+	{
+        "#format"   "{1:i},{2:i}" // 1:damage 2:chipdamage
+		"pl"		"Witch została podstępnie zwieńczona ({blue}{1}{default} obrażeń, {olive}{2}{default} łup)."
+	}
+    // smoker clears
+	"CutTongue"
+	{
+        "#format"   "{1:N},{2:N}" // 1:attacker 2:victim
+		"pl"		"{olive}{1}{default} {blue}przeciął{default} język {olive}{2}{default}"
+	}
+	"CutTongueBot"
+	{
+		"pl"		"{olive}%N{default} {blue}przeciął{default} język smokera"
+	}
+	"SelfClearedTongue"
+	{
+        "#format"   "{1:N},{2:N},{3:s}" // 1:attacker 2:victim 3:(withShove) ? Buffer : ""
+		"pl"		"{olive}{1}{default} {blue}oczyścił się{default} z języka {olive}{2}{default} {blue}{3}{default}"
+	}
+	"SelfClearedTongueBot"
+	{
+        "#format"   "{1:N},{2:s}" // 1:attacker 2:(withShove) ? Buffer : ""
+		"pl"		"{olive}{1}{default} {blue}oczyścił się{default} z języka smokera {blue}{2}{default}"
+	}
+	"Shoving"
+	{
+		"pl"		"przez pchnięcie"
+	}
+    // rocks
+	"SkeetedRock"
+	{
+        "#format"   "{1:N},{2:N}" // 1:attacker 2:victim
+		"pl"		"{olive}{1}{default} {blue}rozrzutkował{default} kamień {olive}{2}{default}."
+	}
+	"SkeetedRockBot"
+	{
+		"pl"		"{olive}%N{default} {blue}rozrzutkował{default} kamień Tanka"
+	}
+    // highpounces
+	"HunterHP"
+	{
+        "#format"   "{1:N},{2:N},{3:i},{4:i}" // 1:attacker 2:victim 3:RoundFloat(calculatedDamage) 4:RoundFloat(height)
+		"pl"		"{olive}{1}{default} {red}wysoko skoczył{default} na {olive}{2}{default} ({red}{3}{default} obr, wysokość: {red}{4}{default})"
+	}
+	"HunterHPBot"
+	{
+        "#format"   "{1:N},{2:i},{3:i}" // 1:victim 2:RoundFloat(calculatedDamage) 3:RoundFloat(height)
+		"pl"		"A {olive}hunter{default} {red}wysoko skoczył{default} na {olive}{1}{default} ({red}{2}{default} obr, wysokość: {red}{3}{default})"
+	}
+	"JockeyHP"
+	{
+        "#format"   "{1:N},{2:N},{3:i}" // 1:attacker 2:victim 3:RoundFloat(height)
+		"pl"		"{olive}{1}{default} {red}wysoko skoczył{default} na {olive}{2}{default} ({red}wysokość{default}: {red}{3}{default})"
+	}
+	"JockeyHPBot"
+	{
+        "#format"   "{1:N},{2:i}" // 1:victim 2:RoundFloat(height)
+		"pl"		"A {olive}jockey{default} {red}wysoko skoczył{default} {olive}{1}{default} ({red}wysokość{default}: {red}{2}{default})"
+	}
+    // deathcharges
+	"DeathCharged"
+	{
+        "#format"   "{1:N},{2:N},{3:s},{4:i}" // 1:attacker 2:victim 3:(bCarried) ? "" : Buffer 4:RoundFloat(height)
+		"pl"		"{olive}{1}{default} {red}śmiertelnie-zszarżował{default} {olive}{2}{default} {3}({red}wysokość{default}: {red}{4}{default})"
+	}
+	"DeathChargedBot"
+	{
+        "#format"   "{1:N},{2:s},{3:i}" // 1:victim 2:(bCarried) ? "" : Buffer 3:RoundFloat(height)
+		"pl"		"{olive}Charger{default} {red}śmiertelnie-zszarżował{default} {olive}{1}{default} {2}({red}wysokość{default}: {red}{3}{default})"
+	}
+	"Bowling"
+	{
+		"pl"		"przez kręglowanie"
+	}
+    // SI clears    (cleartimeA = pummel/pounce/ride/choke, cleartimeB = tongue drag, charger carry)
+	"SIClear"
+	{
+        "#format"   "{1:N},{2:N},{3:N},{4:s},{5:.2f}" // 1:attacker 2:pinVictim 3:victim 4:g_csSIClassName[zombieClass] 5:fClearTime
+		"pl"		"{olive}{1}{default} {blue}oczyścił{default} {olive}{2}{default} z {4} {olive}{3}{default} ({blue}{5} {default}sekund)"
+	}
+	"SIClearTeammate"
+	{
+        "#format"   "{1:N},{2:N},{3:s},{4:.2f}" // 1:attacker 2:victim 3:g_csSIClassName[zombieClass] 4:fClearTime
+		"pl"		"{olive}{1}{default} {blue}oczyścił{default} {olive}sojusznika{default} z {3} {olive}{2}{default} ({blue}{4} {default}sekund)"
+	}
+	"SIClearBot"
+	{
+        "#format"   "{1:N},{2:N},{3:s},{4:.2f}" // 1:attacker 2:pinVictim 3:g_csSIClassName[zombieClass] 4:fClearTime
+		"pl"		"{olive}{1}{default} {blue}oczyścił{default} {olive}{2}{default} z {3} ({blue}{4} {default}sekund)"
+	}
+	"SIClearTeammateBot"
+	{
+        "#format"   "{1:N},{2:s},{3:.2f}" // 1:attacker 2:g_csSIClassName[zombieClass] 3:fClearTime)
+		"pl"		"{olive}{1}{default} {blue}oczyścił{default} {olive}sojusznika{default} z {2} ({blue}{3} {default}sekund)"
+	}
+    // bhaps
+	"BunnyHop"
+	{ 
+        "#format"   "{1:i},{2:s},{3:.1f}" // 1:streak 2:(streak > 1) ? "s" : "" 3:maxVelocity
+		"pl"		"{olive}Zrobiłeś{default} {blue}{1} bunnyhopów{2}{default} z rzędu ({blue}max szybkość{default}: {olive}{3}{default})"
+	}
+    // car alarms
+	"CalarmHit"
+	{
+		"pl"		"{olive}%N{default} uruchomił alarm przez uderzenie."
+	}
+	"CalarmTouched"
+	{
+        "#format"   "{1:N},{2:N}" // 1:infected 2:survivor
+		"pl"		"{olive}{1}{default} sprawił że {olive}{2}{default} uruchomił alarm."
+	}
+	"CalarmTouchedHunter"
+	{
+		"pl"		"{olive}Hunter{default} sprawił że {olive}%N{default}uruchomił alarm."
+	}
+	"CalarmTouchedJockey"
+	{	
+		"pl"		"{olive}Jockey{default} sprawił że {olive}%N{default} uruchomił alarm."
+	}
+	"CalarmTouchedCharger"
+	{
+		"pl"		"{olive}Charger{default} sprawił że {olive}%N{default} uruchomił alarm."
+	}
+	"CalarmTouchedInfected"
+	{
+		"pl"		"{olive}Bot zarażonych{default} sprawił że {olive}%N{default} uruchomił alarm."
+	}
+	"CalarmTouchedBot"
+	{
+		"pl"		"{olive}%N{default} dotknął zaalarmowanego samochodu."
+	}
+	"CalarmExplosion"
+	{
+		"pl"		"{olive}%N{default} uruchomił alarm eksplozją."
+	}
+	"CalarmBoomer"
+	{
+        "#format"   "{1:N},{2:N}" // 1:infected 2:survivor
+		"pl"		"{olive}{1}{default} uruchomił alarm zabijając boomera {olive}{2}{default}."
+	}
+	"CalarmBoomerBot"
+	{
+		"pl"		"{olive}%N{default} uruchomił alarm strzelając do {olive}boomera{default}."
+	}
+	"Calarm"
+	{
+		"pl"		"{olive}%N{default} uruchomił alarm."
+	}
+}

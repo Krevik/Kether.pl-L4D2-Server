@@ -1,10 +1,11 @@
-#define PLUGIN_VERSION "2.2"
+#define PLUGIN_VERSION "2.6"
 
 #pragma semicolon 1
 #pragma newdecls required
 
 #include <sourcemod>
 #include <sdktools>
+#include <regex>
 
 #define CVAR_FLAGS			FCVAR_NOTIFY
 
@@ -84,22 +85,36 @@ public void OnPluginStart()
 	
 	g_ConVarHibernate = FindConVar("sv_hibernate_when_empty");
 	
-	BuildPath(Path_SM, g_sMapListPath, sizeof(g_sMapListPath), "data/restart_empty_maps.txt");
-	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/restart.log");
+	BuildPath(Path_SM, g_sMapListPath, 	sizeof(g_sMapListPath), "data/restart_empty_maps.txt");
+	BuildPath(Path_SM, g_sLogPath, 		sizeof(g_sLogPath), 	"logs/restart.log");
 	
 	RemoveCrashLog(); // if "CRASH" folder exists, removes last crash that happen due to server restart
 	
-	RegAdminCmd("sm_time", CmdTime, ADMFLAG_ROOT, "Check the server time taking into account UTC delta ConVar");
+	RegAdminCmd("sm_restarter_ctime", 		CmdTime, 		ADMFLAG_ROOT, "Check the server time taking into account UTC delta ConVar");
+	RegAdminCmd("sm_restarter_accelerator", CmdAccelerator, ADMFLAG_ROOT, "Show auto-detected order number of Accelerator extension");
 	
 	GetCvars();
 }
 
-public Action CmdTime(int client, int args)
+Action CmdTime(int client, int args)
 {
 	char s[16];
 	int iUnix = GetTime() + RoundToCeil(g_fCvarDeltaUTC * 3600.0);
 	FormatTime(s, sizeof(s), "%H:%M", iUnix);
 	ReplyToCommand(client, s);
+	return Plugin_Handled;
+}
+
+Action CmdAccelerator(int client, int args)
+{
+	int iAccelExtNum;
+	if( (iAccelExtNum = GetAcceleratorExtNumberFromCmd()) != 0 )
+	{
+		ReplyToCommand(client, "Found Accelerator ext. under number: %i", iAccelExtNum);
+	}
+	else {
+		ReplyToCommand(client, "Coudn't found Accelerator extension!\nUse ConVar sm_restart_empty_unload_ext_num instead.");
+	}
 	return Plugin_Handled;
 }
 
@@ -152,11 +167,14 @@ public void OnConfigsExecuted()
 		g_bServerStarted = true;
 		ChangeMap("Server is restarted");
 	}
-	g_iHybernateInitial = g_ConVarHibernate.IntValue;
-	g_ConVarHibernate.SetInt(0);
+	if( g_ConVarHibernate != null )
+	{
+		g_iHybernateInitial = g_ConVarHibernate.IntValue;
+		g_ConVarHibernate.SetInt(0);
+	}
 }
 
-public Action Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
+Action Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
@@ -166,7 +184,10 @@ public Action Event_PlayerDisconnect(Event event, const char[] name, bool dontBr
 		{
 			if( IsRebootTimeAllowed() )
 			{
-				g_ConVarHibernate.SetInt(0);
+				if( g_ConVarHibernate != null )
+				{
+					g_ConVarHibernate.SetInt(0);
+				}
 				CreateTimer(g_fCvarDelay, Timer_CheckPlayers);
 				return Plugin_Continue;
 			}
@@ -240,12 +261,13 @@ bool IsRebootTimeAllowed()
 	return false;
 }
 
-public Action Timer_CheckPlayers(Handle timer, int UserId)
+Action Timer_CheckPlayers(Handle timer, int UserId)
 {
 	if( !RealPlayerExist() )
 	{
 		StartRebootSequence();
 	}
+	return Plugin_Continue;
 }
 
 void StartRebootSequence()
@@ -262,6 +284,7 @@ void StartRebootSequence()
 Action Timer_RestartServer(Handle timer)
 {
 	RestartServer();
+	return Plugin_Continue;
 }
 
 void RestartServer()
@@ -279,7 +302,10 @@ void RestartServer()
 		}
 		case 3: {
 			ChangeMap("Empty server");
-			CreateTimer(15.0, Timer_DoHybernate);
+			if( g_ConVarHibernate != null )
+			{
+				CreateTimer(15.0, Timer_DoHybernate);
+			}
 		}
 	}
 }
@@ -345,42 +371,75 @@ void KickAll()
 
 void UnloadPluginsExcludeMe()
 {
-	char buffer[64];
-	Handle pl;
-	Handle iter = GetPluginIterator();
+	char name[64];
+	Handle hPlugin;
+	Handle hIter = GetPluginIterator();
 	
-	if( iter )
+	if( hIter )
 	{
-		while( MorePlugins(iter) )
+		while( MorePlugins(hIter) )
 		{
-			pl = ReadPlugin(iter);
+			hPlugin = ReadPlugin(hIter);
 			
-			if( pl != hPluginMe )
+			if( hPlugin != hPluginMe && hPlugin != INVALID_HANDLE )
 			{
-				GetPluginFilename(pl, buffer, sizeof(buffer));
-				ServerCommand("sm plugins unload \"%s\"", buffer);
+				GetPluginFilename(hPlugin, name, sizeof(name));
+				ServerCommand("sm plugins unload \"%s\"", name);
 				ServerExecute();
 			}
 		}
-		CloseHandle(iter);
+		CloseHandle(hIter);
 	}
+}
+
+int GetAcceleratorExtNumberFromCmd() // thanks to @Forgetest
+{
+	int iExtNum = 0;
+	char responseBuffer[4096];
+	// fetch a list of sourcemod extensions
+	ServerCommandEx(responseBuffer, sizeof(responseBuffer), "sm exts list");
+	// matching ext name only should suffice
+	Regex regex = new Regex("\\[([0-9]+)\\] Accelerator");
+	// actually matched?
+	if( regex.Match(responseBuffer) > 0 && regex.CaptureCount() == 2 )
+	{
+		char sAcceleratorExtNum[4] = "0";
+		// 0 is the full string "[?] Accelerator"
+		// 1 is the matched extension number
+		if( regex.GetSubString(1, sAcceleratorExtNum, sizeof(sAcceleratorExtNum)) )
+		{
+			if( sAcceleratorExtNum[0] != 0 && IsCharNumeric(sAcceleratorExtNum[0]) )
+			{
+				iExtNum = StringToInt(sAcceleratorExtNum, 10);
+			}
+		}
+	}
+	delete regex;
+	return iExtNum;
 }
 
 void UnloadAccelerator()
 {
-	if( g_iCvarUnloadExtNum )
+	int iAccelExtNum;
+	if( (iAccelExtNum = GetAcceleratorExtNumberFromCmd()) != 0 )
+	{
+		ServerCommand("sm exts unload %i 0", iAccelExtNum);
+		ServerExecute();
+	}
+	else if( g_iCvarUnloadExtNum )
 	{
 		ServerCommand("sm exts unload %i 0", g_iCvarUnloadExtNum);
 		ServerExecute();
 	}
 }
 
-public Action Timer_DoHybernate(Handle timer)
+Action Timer_DoHybernate(Handle timer)
 {
 	if ( !RealPlayerExist() )
 	{
 		g_ConVarHibernate.SetInt(g_iHybernateInitial);
 	}
+	return Plugin_Continue;
 }
 
 bool RealPlayerExist(int iExclude = 0)

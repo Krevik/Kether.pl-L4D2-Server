@@ -1,0 +1,15 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"pl"		"[{green}!{default}]"
+	}
+	"Cvar_Invalid"
+	{
+		"pl"		"Komenda {olive}c_thirdpersonshoulder{default} jest nieprawidłowa lub chroniona."
+	}
+	"Cvar_Value1"
+	{
+		"pl"		"Aby zagrać wpisz {olive}c_thirdpersonshoulder 0{default} w swojej konsoli."
+	}
+}

@@ -1,0 +1,20 @@
+--- /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup.sp.bak	2023-06-03 15:31:55.984221334 +0200
++++ /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/readyup.sp	2023-06-02 19:16:11.475011803 +0200
+@@ -130,13 +130,13 @@
+ };
+ 
+ // Sub modules are included here
+-#include "readyup/action_kether.inc"
+-#include "readyup/command_kether.inc"
++#include "readyup/action.inc"
++#include "readyup/command.inc"
+ #include "readyup/game.inc"
+ #include "readyup/native.inc"
+-#include "readyup/panel_kether.inc"
++#include "readyup/panel.inc"
+ #include "readyup/player.inc"
+-#include "readyup/setup_kether.inc"
++#include "readyup/setup.inc"
+ #include "readyup/sound.inc"
+ #include "readyup/util.inc"
+ 

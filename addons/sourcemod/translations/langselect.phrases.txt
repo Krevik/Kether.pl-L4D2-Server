@@ -1,0 +1,895 @@
+"Phrases"
+{
+    // Pass-through phrase, but I don't have to load core.phrases.txt
+    "_s"
+    {
+        "#format" "{1:s}"
+        "en" "{1}"
+    }
+
+    "Could not load language"
+    {
+        "en" "Could not load your set language. Using default."
+    }
+
+    "Could not show prompt"
+    {
+        "en" "Could not show language selection prompt. Type !language to set your SourceMod language."
+    }
+
+    "Client not yet loaded"
+    {
+        "en" "You cannot set your language right now."
+    }
+
+    "Target not yet loaded"
+    {
+        "en" "Targeted client has not yet loaded."
+    }
+
+    "Choose a language"
+    {
+        "en" "Choose a language:"
+    }
+
+    "Reset Language"
+    {
+        "en" "Reset Language"
+    }
+
+    "Loaded default languages"
+    {
+        "#format" "{1:i}"
+        "en" "Loaded {1} languages from the default list into the language selection menu."
+    }
+
+    "Loaded languages"
+    {
+        "#format" "{1:i}"
+        "en" "Loaded {1} languages into the language selection menu."
+    }
+
+    "Invalid language menu item"
+    {
+        "#format" "{1:s}"
+        "en" "{1} (Invalid)"
+    }
+
+    "Reset language to default"
+    {
+        "#format" "{1:s}"
+        "en" "Reset your language to {1}."
+    }
+
+    "Invalid language code"
+    {
+        "#format" "{1:s}"
+        "en" "Cannot set language to invalid language code \"{1}\"."
+    }
+
+    "Language not supported"
+    {
+        "#format" "{1:s},{2:s}"
+        "en" "Cannot set language to {1} (\"{2}\") because it is missing from the server's languages.cfg"
+    }
+
+    "Set language"
+    {
+        "#format" "{1:s}"
+        "en" "Set your language to {1}."
+    }
+
+    "sm_language usage"
+    {
+        "en" "Usage: sm_language <Optional Country Code>"
+    }
+
+    "Custom languages not allowed"
+    {
+        "en" "Custom language codes are not allowed. Please select a language that is available on the menu."
+    }
+
+    "sm_getlanguage usage"
+    {
+        "en" "Usage: sm_getlanguage <Target>"
+    }
+
+    "Get target language"
+    {
+        "#format" "{1:s},{2:t}"
+        "en" "{1}'s language setting is {2}."
+    }
+
+    "sm_setlanguage usage"
+    {
+        "en" "Usage: sm_setlanguage <Target> <Country Code>"
+    }
+
+    "Set target language"
+    {
+        "#format" "{1:s},{2:t}"
+        "en" "Set {1}'s language to {2}."
+    }
+
+    "sm_resetlanguage usage"
+    {
+        "en" "Usage: sm_resetlanguage <Target>"
+    }
+
+    "Reset target language"
+    {
+        "#format" "{1:s}"
+        "en" "Reset {1}'s language."
+    }
+
+
+    // Language names that sourcemod uses that aren't ISO 639-1 compliant.
+    "pt"
+    {
+        "en" "Brazilian Portuguese"
+    }
+    "cze"
+    {
+        "en" "Czech"
+    }
+    "pt_p"
+    {
+        "en" "Portuguese"
+    }
+    "chi"
+    {
+        "en" "Simplified Chinese"
+    }
+    "zho"
+    {
+        "en" "Traditional Chinese"
+    }
+
+
+    // Language names that sourcemod uses that are ISO 3166-1 (?)
+    // why the fuck, sourcemod.
+    "jp"
+    {
+        "en" "Japanese"
+    }
+    "ua"
+    {
+        "en" "Ukrainian"
+    }
+
+
+
+    // ISO 639-1 Language names (phrase is 2-letter ISO code)
+    "ab"
+    {
+        "en" "Abkhazian"
+    }
+    "aa"
+    {
+        "en" "Afar"
+    }
+    "af"
+    {
+        "en" "Afrikaans"
+    }
+    "ak"
+    {
+        "en" "Akan"
+    }
+    "sq"
+    {
+        "en" "Albanian"
+    }
+    "am"
+    {
+        "en" "Amharic"
+    }
+    "ar"
+    {
+        "en" "Arabic"
+    }
+    "an"
+    {
+        "en" "Aragonese"
+    }
+    "hy"
+    {
+        "en" "Armenian"
+    }
+    "as"
+    {
+        "en" "Assamese"
+    }
+    "av"
+    {
+        "en" "Avaric"
+    }
+    "ae"
+    {
+        "en" "Avestan"
+    }
+    "ay"
+    {
+        "en" "Aymara"
+    }
+    "az"
+    {
+        "en" "Azerbaijani"
+    }
+    "bm"
+    {
+        "en" "Bambara"
+    }
+    "ba"
+    {
+        "en" "Bashkir"
+    }
+    "eu"
+    {
+        "en" "Basque"
+    }
+    "be"
+    {
+        "en" "Belarusian"
+    }
+    "bn"
+    {
+        "en" "Bengali"
+    }
+    "bi"
+    {
+        "en" "Bislama"
+    }
+    "bs"
+    {
+        "en" "Bosnian"
+    }
+    "br"
+    {
+        "en" "Breton"
+    }
+    "bg"
+    {
+        "en" "Bulgarian"
+    }
+    "my"
+    {
+        "en" "Burmese"
+    }
+    "ca"
+    {
+        "en" "Catalan"
+    }
+    "km"
+    {
+        "en" "Central Khmer"
+    }
+    "ch"
+    {
+        "en" "Chamorro"
+    }
+    "ce"
+    {
+        "en" "Chechen"
+    }
+    "ny"
+    {
+        "en" "Chichewa"
+    }
+    "zh"
+    {
+        "en" "Chinese"
+    }
+    "cu"
+    {
+        "en" "Church Slavic"
+    }
+    "cv"
+    {
+        "en" "Chuvash"
+    }
+    "kw"
+    {
+        "en" "Cornish"
+    }
+    "co"
+    {
+        "en" "Corsican"
+    }
+    "cr"
+    {
+        "en" "Cree"
+    }
+    "hr"
+    {
+        "en" "Croatian"
+    }
+    "cs"
+    {
+        "en" "Czech"
+    }
+    "da"
+    {
+        "en" "Danish"
+    }
+    "dv"
+    {
+        "en" "Divehi"
+    }
+    "nl"
+    {
+        "en" "Dutch"
+    }
+    "dz"
+    {
+        "en" "Dzongkha"
+    }
+    "en"
+    {
+        "en" "English"
+    }
+    "eo"
+    {
+        "en" "Esperanto"
+    }
+    "et"
+    {
+        "en" "Estonian"
+    }
+    "ee"
+    {
+        "en" "Ewe"
+    }
+    "fo"
+    {
+        "en" "Faroese"
+    }
+    "fj"
+    {
+        "en" "Fijian"
+    }
+    "fi"
+    {
+        "en" "Finnish"
+    }
+    "fr"
+    {
+        "en" "French"
+    }
+    "ff"
+    {
+        "en" "Fulah"
+    }
+    "gd"
+    {
+        "en" "Gaelic"
+    }
+    "gl"
+    {
+        "en" "Galician"
+    }
+    "lg"
+    {
+        "en" "Ganda"
+    }
+    "ka"
+    {
+        "en" "Georgian"
+    }
+    "de"
+    {
+        "en" "German"
+    }
+    "el"
+    {
+        "en" "Greek"
+    }
+    "gn"
+    {
+        "en" "Guarani"
+    }
+    "gu"
+    {
+        "en" "Gujarati"
+    }
+    "ht"
+    {
+        "en" "Haitian"
+    }
+    "ha"
+    {
+        "en" "Hausa"
+    }
+    "he"
+    {
+        "en" "Hebrew"
+    }
+    "hz"
+    {
+        "en" "Herero"
+    }
+    "hi"
+    {
+        "en" "Hindi"
+    }
+    "ho"
+    {
+        "en" "Hiri Motu"
+    }
+    "hu"
+    {
+        "en" "Hungarian"
+    }
+    "is"
+    {
+        "en" "Icelandic"
+    }
+    "io"
+    {
+        "en" "Ido"
+    }
+    "ig"
+    {
+        "en" "Igbo"
+    }
+    "id"
+    {
+        "en" "Indonesian"
+    }
+    "ia"
+    {
+        "en" "Interlingua"
+    }
+    "ie"
+    {
+        "en" "Interlingue"
+    }
+    "iu"
+    {
+        "en" "Inuktitut"
+    }
+    "ik"
+    {
+        "en" "Inupiaq"
+    }
+    "ga"
+    {
+        "en" "Irish"
+    }
+    "it"
+    {
+        "en" "Italian"
+    }
+    "ja"
+    {
+        "en" "Japanese"
+    }
+    "jv"
+    {
+        "en" "Javanese"
+    }
+    "kl"
+    {
+        "en" "Kalaallisut"
+    }
+    "kn"
+    {
+        "en" "Kannada"
+    }
+    "kr"
+    {
+        "en" "Kanuri"
+    }
+    "ks"
+    {
+        "en" "Kashmiri"
+    }
+    "kk"
+    {
+        "en" "Kazakh"
+    }
+    "ki"
+    {
+        "en" "Kikuyu"
+    }
+    "rw"
+    {
+        "en" "Kinyarwanda"
+    }
+    "ky"
+    {
+        "en" "Kirghiz"
+    }
+    "kv"
+    {
+        "en" "Komi"
+    }
+    "kg"
+    {
+        "en" "Kongo"
+    }
+    "ko"
+    {
+        "en" "Korean"
+    }
+    "kj"
+    {
+        "en" "Kuanyama"
+    }
+    "ku"
+    {
+        "en" "Kurdish"
+    }
+    "lo"
+    {
+        "en" "Lao"
+    }
+    "la"
+    {
+        "en" "Latin"
+    }
+    "lv"
+    {
+        "en" "Latvian"
+    }
+    "li"
+    {
+        "en" "Limburgan"
+    }
+    "ln"
+    {
+        "en" "Lingala"
+    }
+    "lt"
+    {
+        "en" "Lithuanian"
+    }
+    "lu"
+    {
+        "en" "Luba-Katanga"
+    }
+    "lb"
+    {
+        "en" "Luxembourgish"
+    }
+    "mk"
+    {
+        "en" "Macedonian"
+    }
+    "mg"
+    {
+        "en" "Malagasy"
+    }
+    "ms"
+    {
+        "en" "Malay"
+    }
+    "ml"
+    {
+        "en" "Malayalam"
+    }
+    "mt"
+    {
+        "en" "Maltese"
+    }
+    "gv"
+    {
+        "en" "Manx"
+    }
+    "mi"
+    {
+        "en" "Maori"
+    }
+    "mr"
+    {
+        "en" "Marathi"
+    }
+    "mh"
+    {
+        "en" "Marshallese"
+    }
+    "mn"
+    {
+        "en" "Mongolian"
+    }
+    "na"
+    {
+        "en" "Nauru"
+    }
+    "nv"
+    {
+        "en" "Navajo"
+    }
+    "ng"
+    {
+        "en" "Ndonga"
+    }
+    "ne"
+    {
+        "en" "Nepali"
+    }
+    "nd"
+    {
+        "en" "North Ndebele"
+    }
+    "se"
+    {
+        "en" "Northern Sami"
+    }
+    "no"
+    {
+        "en" "Norwegian"
+    }
+    "nb"
+    {
+        "en" "Norwegian Bokmål"
+    }
+    "nn"
+    {
+        "en" "Norwegian Nynorsk"
+    }
+    "oc"
+    {
+        "en" "Occitan"
+    }
+    "oj"
+    {
+        "en" "Ojibwa"
+    }
+    "or"
+    {
+        "en" "Oriya"
+    }
+    "om"
+    {
+        "en" "Oromo"
+    }
+    "os"
+    {
+        "en" "Ossetian"
+    }
+    "pi"
+    {
+        "en" "Pali"
+    }
+    "ps"
+    {
+        "en" "Pashto"
+    }
+    "fa"
+    {
+        "en" "Persian"
+    }
+    "pl"
+    {
+        "en" "Polish"
+    }
+    //"pt"
+    //{
+    //    "en" "Portuguese"
+    //}
+    "pa"
+    {
+        "en" "Punjabi"
+    }
+    "qu"
+    {
+        "en" "Quechua"
+    }
+    "ro"
+    {
+        "en" "Romanian"
+    }
+    "rm"
+    {
+        "en" "Romansh"
+    }
+    "rn"
+    {
+        "en" "Rundi"
+    }
+    "ru"
+    {
+        "en" "Russian"
+    }
+    "sm"
+    {
+        "en" "Samoan"
+    }
+    "sg"
+    {
+        "en" "Sango"
+    }
+    "sa"
+    {
+        "en" "Sanskrit"
+    }
+    "sc"
+    {
+        "en" "Sardinian"
+    }
+    "sr"
+    {
+        "en" "Serbian"
+    }
+    "sn"
+    {
+        "en" "Shona"
+    }
+    "ii"
+    {
+        "en" "Sichuan Yi"
+    }
+    "sd"
+    {
+        "en" "Sindhi"
+    }
+    "si"
+    {
+        "en" "Sinhala"
+    }
+    "sk"
+    {
+        "en" "Slovak"
+    }
+    "sl"
+    {
+        "en" "Slovenian"
+    }
+    "so"
+    {
+        "en" "Somali"
+    }
+    "nr"
+    {
+        "en" "South Ndebele"
+    }
+    "st"
+    {
+        "en" "Southern Sotho"
+    }
+    "es"
+    {
+        "en" "Spanish"
+    }
+    "su"
+    {
+        "en" "Sundanese"
+    }
+    "sw"
+    {
+        "en" "Swahili"
+    }
+    "ss"
+    {
+        "en" "Swati"
+    }
+    "sv"
+    {
+        "en" "Swedish"
+    }
+    "tl"
+    {
+        "en" "Tagalog"
+    }
+    "ty"
+    {
+        "en" "Tahitian"
+    }
+    "tg"
+    {
+        "en" "Tajik"
+    }
+    "ta"
+    {
+        "en" "Tamil"
+    }
+    "tt"
+    {
+        "en" "Tatar"
+    }
+    "te"
+    {
+        "en" "Telugu"
+    }
+    "th"
+    {
+        "en" "Thai"
+    }
+    "bo"
+    {
+        "en" "Tibetan"
+    }
+    "ti"
+    {
+        "en" "Tigrinya"
+    }
+    "to"
+    {
+        "en" "Tonga"
+    }
+    "ts"
+    {
+        "en" "Tsonga"
+    }
+    "tn"
+    {
+        "en" "Tswana"
+    }
+    "tr"
+    {
+        "en" "Turkish"
+    }
+    "tk"
+    {
+        "en" "Turkmen"
+    }
+    "tw"
+    {
+        "en" "Twi"
+    }
+    "ug"
+    {
+        "en" "Uighur"
+    }
+    "uk"
+    {
+        "en" "Ukrainian"
+    }
+    "ur"
+    {
+        "en" "Urdu"
+    }
+    "uz"
+    {
+        "en" "Uzbek"
+    }
+    "ve"
+    {
+        "en" "Venda"
+    }
+    "vi"
+    {
+        "en" "Vietnamese"
+    }
+    "vo"
+    {
+        "en" "Volapük"
+    }
+    "wa"
+    {
+        "en" "Walloon"
+    }
+    "cy"
+    {
+        "en" "Welsh"
+    }
+    "fy"
+    {
+        "en" "Western Frisian"
+    }
+    "wo"
+    {
+        "en" "Wolof"
+    }
+    "xh"
+    {
+        "en" "Xhosa"
+    }
+    "yi"
+    {
+        "en" "Yiddish"
+    }
+    "yo"
+    {
+        "en" "Yoruba"
+    }
+    "za"
+    {
+        "en" "Zhuang"
+    }
+    "zu"
+    {
+        "en" "Zulu"
+    }
+}

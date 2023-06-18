@@ -1,0 +1,142 @@
+"Phrases"
+{
+    "Tag"
+    {
+        "pl"        "{blue}<{green}BossVote{blue}>{default}"
+    }
+    // RunVoteChecks
+    "NotAvailable"
+    {
+        "pl"        "Głosowanie na Bossa nie jest dostępne na tej mapie."
+    }
+    "Available"
+    {
+        "pl"        "Głosowanie na Bossa jest dostępne tylko podczas przygotowania."
+    }
+    "FirstRound"
+    {
+        "pl"        "Głosowanie na Bossa jest dostępne tylko podczas pierwszej rundy mapy."
+    }
+    "NotAvailableForSpec"
+    {
+        "pl"        "Głosowanie na Bossa nie jest dostępne dla widzów."
+    }
+    "CannotBeCalled"
+    {
+        "pl"        "Głosowanie na Bossa nie może być teraz wywołane..."
+    }
+    // VoteBossCmd
+    "Usage"
+    {
+        "pl"        "Użycie: !voteboss {olive}<{default}tank{olive}> <{default}witch{olive}>{default}."
+    }
+    "Usage2"
+    {
+        "pl"        "Użyj {default}\"{blue}0{default}\" dla {olive}Braku Odrodzenia{default}, \"{blue}-1{default}\" by {olive}Zignorować."
+    }
+    "Invalid"
+    {
+        "pl"        "Wartości procentowe są {olive}nieprawidłowe{default}."
+    }
+    "TankStatic"
+    {
+        "pl"        "Odrodzenie Tanka jest statyczne i nie można go zmienić na tej mapie."
+    }
+    "WitchStatic"
+    {
+        "pl"        "Odrodzenie Witch jest statyczne i nie można go zmienić na tej mapie."
+    }
+    "TankBanned"
+    {
+        "pl"        "Wartość procentowa Tanka {blue}zakazana{default}."
+    }
+    "WitchBanned"
+    {
+        "pl"        "Wartość procentowa Witch {blue}zakazana{default}."
+    }
+    "SetBosses"
+    {
+        "pl"        "Ustawić Tanka na: %s i Witch na: %s?"
+    }
+    "SetTank"
+    {
+        "pl"        "Ustawić Tanka na: %s i Witch na: Wyłączoną?"
+    }
+    "SetOnlyTank"
+    {
+        "pl"        "Ustawić Tanka na: %s?"
+    }
+    "SetWitch"
+    {
+        "pl"        "Ustawić Tanka na: Wyłączony i Witch na: %s?"
+    }
+    "SetOnlyWitch"
+    {
+        "pl"        "Ustawić Witch na: %s?"
+    }
+    "SetBossesDisabled"
+    {
+        "pl"        "Ustawić Bossów na: Wyłączone?"
+    }
+    "SetTankDisabled"
+    {
+        "pl"        "Ustawić Tanka na: Wyłączony?"
+    }
+    "SetWitchDisabled"
+    {
+        "pl"        "Ustawić Witch na: Wyłączoną?"
+    }
+    // BossVoteResultHandler
+    "OnlyReadyUp"
+    {
+        "pl"        "Odrodzenia mogą być ustawione tylko podczas przygotowania."
+    }
+    "SettingBoss"
+    {
+        "pl"        "Ustawianie Odrodzeń Bossów..."
+    }
+    "SettingTank"
+    {
+        "pl"        "Ustawianie Odrodzenia Tanka..."
+    }
+    "SettingWitch"
+    {
+        "pl"        "Ustawianie Odrodzenia Witch..."
+    }
+    "SettingBossDisabled"
+    {
+        "pl"        "Ustawianie Bossów Wyłączone..."
+    }
+    // ForceTankCommand
+    "CommandNotAvailable"
+    {
+        "pl"        "Polecenie niedostępne na tej mapie."
+    }
+    "TankSpawnStatic"
+    {
+        "pl"        "Odrodzenie Tanka jest statyczne i nie można go zmienić na tej mapie."
+    }
+    "PercentageInvalid"
+    {
+        "pl"        "Wartość procentowa {blue}nieprawidłowa{default}."
+    }
+    "Percentagebanned"
+    {
+        "pl"        "Wartość procentowa {blue}zakazana{default}."
+    }
+    "TankSpawnAdmin"
+    {
+		"#format"   "{1:i},{2:s}" // 1:p_iRequestedPercent 2:clientName
+        "pl"        "Odrodzenie Tanka ustawione na {olive}{1}%{default} przez Admina {blue}{2}{default}."
+    }
+    // ForceWitchCommand
+    "WitchSpawnStatic"
+    {
+        "pl"        "Odrodzenie Witch jest statyczne i nie można go zmienić na tej mapie."
+    }
+    "WitchSpawnAdmin"
+    {
+		"#format"   "{1:i},{2:s}" // 1:p_iRequestedPercent 2:clientName
+        "pl"        "Odrodzenie Witch ustawione na {olive}{1}%{default} przez Admina {blue}{2}{default}."
+    }
+}
