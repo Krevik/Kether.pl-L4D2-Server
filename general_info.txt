@@ -38,3 +38,14 @@ Kether 2.0:
 	-jockey can high pounce survs for max 15 dmg
 	-shortened time and distance needed to respawn into ghost state
 	-pitchfork is replaced with fireaxe
+
+Turbo:
+    • Boomer can vomit while moving;
+    • Boomer's vomit extinguishes his burning teammates;
+    • Charger steering with mouse movement;
+    • Chargers can be shoved;
+    • Incapped survivors can crawl;
+    • Jockey jump;
+    • Smoker right click releases the victim;
+    • Smoker can drag the victim;
+    • Weapon reload interrupt.
