@@ -337,6 +337,7 @@ void LoadGameData()
 			LogError("Failed to create SDKCall: \"TerrorNavMesh::GetInitialCheckpoint\" (%s)", g_sSystem);
 	}
 
+	/*
 	StartPrepSDKCall(SDKCall_Raw);
 	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "TerrorNavMesh::GetLastCheckpoint") == false )
 	{
@@ -347,6 +348,7 @@ void LoadGameData()
 		if( g_hSDK_TerrorNavMesh_GetLastCheckpoint == null )
 			LogError("Failed to create SDKCall: \"TerrorNavMesh::GetLastCheckpoint\" (%s)", g_sSystem);
 	}
+	*/
 
 	if( g_bLeft4Dead2 )
 	{
@@ -362,6 +364,7 @@ void LoadGameData()
 				LogError("Failed to create SDKCall: \"TerrorNavMesh::IsInInitialCheckpoint_NoLandmark\" (%s)", g_sSystem);
 		}
 
+		/*
 		StartPrepSDKCall(SDKCall_Raw);
 		if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "TerrorNavMesh::IsInExitCheckpoint_NoLandmark") == false )
 		{
@@ -373,6 +376,7 @@ void LoadGameData()
 			if( g_hSDK_TerrorNavMesh_IsInExitCheckpoint_NoLandmark == null )
 				LogError("Failed to create SDKCall: \"TerrorNavMesh::IsInExitCheckpoint_NoLandmark\" (%s)", g_sSystem);
 		}
+		*/
 	}
 
 	StartPrepSDKCall(SDKCall_Static);
@@ -1182,6 +1186,19 @@ void LoadGameData()
 			LogError("Failed to create SDKCall: \"CNavMesh::GetNavArea\" (%s)", g_sSystem);
 	}
 
+	StartPrepSDKCall(SDKCall_Raw);
+	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CNavArea::IsConnected") == false )
+	{
+		LogError("Failed to find signature: \"CNavArea::IsConnected\" (%s)", g_sSystem);
+	} else {
+		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+		PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+		g_hSDK_CNavArea_IsConnected = EndPrepSDKCall();
+		if( g_hSDK_CNavArea_IsConnected == null )
+			LogError("Failed to create SDKCall: \"CNavArea::IsConnected\" (%s)", g_sSystem);
+	}
+
 	StartPrepSDKCall(SDKCall_Player);
 	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::GetFlowDistance") == false )
 	{
@@ -1391,8 +1408,64 @@ void LoadGameData()
 			LogError("Failed to create SDKCall: \"CTerrorPlayer::CancelStagger\" (%s)", g_sSystem);
 	}
 
+	StartPrepSDKCall(SDKCall_Player);
+	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::FindUseEntity") == false )
+	{
+		LogError("Failed to find signature: \"CTerrorPlayer::FindUseEntity\" (%s)", g_sSystem);
+	} else {
+		PrepSDKCall_AddParameter(SDKType_Float,SDKPass_Plain);
+		PrepSDKCall_AddParameter(SDKType_Float,SDKPass_Plain);
+		PrepSDKCall_AddParameter(SDKType_Float,SDKPass_Plain);
+		PrepSDKCall_AddParameter(SDKType_PlainOldData,SDKPass_Plain);
+		PrepSDKCall_AddParameter(SDKType_Bool,SDKPass_Plain);
+		PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+		g_hSDK_CTerrorPlayer_FindUseEntity = EndPrepSDKCall();
+		if( g_hSDK_CTerrorPlayer_FindUseEntity == null )
+			LogError("Failed to create SDKCall: \"CTerrorPlayer::FindUseEntity\" (%s)", g_sSystem);
+	}
+
+	StartPrepSDKCall(SDKCall_Player);
+	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::OnPouncedOnSurvivor") == false )
+		SetFailState("Failed to find signature: CTerrorPlayer::OnPouncedOnSurvivor");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	g_hSDK_CTerrorPlayer_OnPouncedOnSurvivor = EndPrepSDKCall();
+	if( g_hSDK_CTerrorPlayer_OnPouncedOnSurvivor == null )
+		SetFailState("Failed to create SDKCall: CTerrorPlayer::OnPouncedOnSurvivor");
+
+	StartPrepSDKCall(SDKCall_Player);
+	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::GrabVictimWithTongue") == false )
+		SetFailState("Failed to find signature: CTerrorPlayer::GrabVictimWithTongue");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	g_hSDK_CTerrorPlayer_GrabVictimWithTongue = EndPrepSDKCall();
+	if( g_hSDK_CTerrorPlayer_GrabVictimWithTongue == null )
+		SetFailState("Failed to create SDKCall: CTerrorPlayer::GrabVictimWithTongue");
+
+	StartPrepSDKCall(SDKCall_Player);
+	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::ReleaseTongueVictim") == false )
+		SetFailState("Failed to find signature: CTerrorPlayer::ReleaseTongueVictim");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	g_hSDK_CTerrorPlayer_ReleaseTongueVictim = EndPrepSDKCall();
+	if( g_hSDK_CTerrorPlayer_ReleaseTongueVictim == null )
+		SetFailState("Failed to create SDKCall: CTerrorPlayer::ReleaseTongueVictim");
+
+	StartPrepSDKCall(SDKCall_Player);
+	if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::OnPounceEnded") == false )
+		SetFailState("Failed to find signature: CTerrorPlayer::OnPounceEnded");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	g_hSDK_CTerrorPlayer_OnPounceEnded = EndPrepSDKCall();
+	if( g_hSDK_CTerrorPlayer_OnPounceEnded == null )
+		SetFailState("Failed to create SDKCall: CTerrorPlayer::OnPounceEnded");
+
 	if( g_bLeft4Dead2 )
 	{
+		StartPrepSDKCall(SDKCall_Player);
+		if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::OnLeptOnSurvivor") == false )
+			SetFailState("Failed to find signature: CTerrorPlayer::OnLeptOnSurvivor");
+		PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+		g_hSDK_CTerrorPlayer_OnLeptOnSurvivor = EndPrepSDKCall();
+		if( g_hSDK_CTerrorPlayer_OnLeptOnSurvivor == null )
+			SetFailState("Failed to create SDKCall: CTerrorPlayer::OnLeptOnSurvivor");
+
 		StartPrepSDKCall(SDKCall_Static);
 		if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "ThrowImpactedSurvivor") == false )
 			SetFailState("Failed to find signature: ThrowImpactedSurvivor");
@@ -1429,6 +1502,14 @@ void LoadGameData()
 		g_hSDK_CTerrorPlayer_OnPummelEnded = EndPrepSDKCall();
 		if( g_hSDK_CTerrorPlayer_OnPummelEnded == null )
 			SetFailState("Failed to create SDKCall: CTerrorPlayer::OnPummelEnded");
+
+		StartPrepSDKCall(SDKCall_Player);
+		if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::OnCarryEnded") == false )
+			SetFailState("Failed to find signature: CTerrorPlayer::OnCarryEnded");
+		PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+		g_hSDK_CTerrorPlayer_OnCarryEnded = EndPrepSDKCall();
+		if( g_hSDK_CTerrorPlayer_OnCarryEnded == null )
+			SetFailState("Failed to create SDKCall: CTerrorPlayer::OnCarryEnded");
 
 		StartPrepSDKCall(SDKCall_Player);
 		if( PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTerrorPlayer::OnRideEnded") == false )
@@ -2037,8 +2118,8 @@ void LoadGameData()
 		g_iOff_m_iszScriptId = hGameData.GetOffset("m_iszScriptId");
 		ValidateOffset(g_iOff_m_iszScriptId, "m_iszScriptId");
 
-		g_iOff_SpawnTimer = hGameData.GetOffset("SpawnTimer");
-		ValidateOffset(g_iOff_SpawnTimer, "SpawnTimer");
+		g_iOff_m_flBecomeGhostAt = hGameData.GetOffset("CTerrorPlayer::m_flBecomeGhostAt");
+		ValidateOffset(g_iOff_m_flBecomeGhostAt, "CTerrorPlayer::m_flBecomeGhostAt");
 
 		g_iOff_OnBeginRoundSetupTime = hGameData.GetOffset("OnBeginRoundSetupTime");
 		ValidateOffset(g_iOff_OnBeginRoundSetupTime, "OnBeginRoundSetupTime");
@@ -2162,7 +2243,7 @@ void LoadGameData()
 
 		PrintToServer("AddonEclipse1 = %d", g_iOff_AddonEclipse1);
 		PrintToServer("AddonEclipse2 = %d", g_iOff_AddonEclipse2);
-		PrintToServer("SpawnTimer = %d", g_iOff_SpawnTimer);
+		PrintToServer("m_flBecomeGhostAt = %d", g_iOff_m_flBecomeGhostAt);
 		PrintToServer("iszScriptId = %d", g_iOff_m_iszScriptId);
 		PrintToServer("OnBeginRoundSetupTime = %d", g_iOff_OnBeginRoundSetupTime);
 		PrintToServer("m_iWitchCount = %d", g_iOff_m_iWitchCount);
