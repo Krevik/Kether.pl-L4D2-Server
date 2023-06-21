@@ -876,4 +876,136 @@
 		"start_loc_a"	"78.61 -4791.03 907.94"
 		"start_loc_b"	"539.61 -4568.96 1118.83"
 	}
+	"uz_crash"
+	{
+		"start_loc_a"	"1664 1720 264"
+		"start_loc_b"	"2216 1104 88"
+		"end_loc_a"	"11200 -320 -216"
+		"end_loc_b"	"11792 -896 -368"
+	}
+	"uz_town"
+	{
+		"start_loc_a"	"-2000 3168 -48"
+		"start_loc_b"	"-1392 2592 -272"
+		"end_loc_a"	"-832 -3904 352"
+		"end_loc_b"	"-576 -4544 48"
+	}
+	"uz_desert"
+	{
+		"start_loc_a"	"-11264 3728 160"
+		"start_loc_b"	"-11008 3056 -144"
+		"end_loc_a"	"-1888 -1440 -240"
+		"end_loc_b"	"-1376 -1696 -448"
+	}
+	"uz_bunker"
+	{
+		"start_loc_a"	"-6336 -832 640"
+		"start_loc_b"	"-5824 -1152 416"
+		"end_loc_a"	"-2848 4480 1376"
+		"end_loc_b"	"-2144 4032 1152"
+	}
+	"uz_escape"
+	{
+		"start_loc_a"	"-3616 640 224"
+		"start_loc_b"	"-2912 192 0"
+	}
+	"dkr_m1_motel"
+	{
+		"start_loc_a"	"10152 -5260 -183"
+		"start_loc_b"	"11392 -3648 -664"
+		"end_loc_a"	"-8440 680 -876"
+		"end_loc_b"	"-8008 864 -1008"
+	}
+	"dkr_m2_carnival"
+	{
+		"start_loc_a"	"8841 424 18"
+		"start_loc_b"	"9273 608 -124"
+		"end_loc_a"	"-1572 6484 272"
+		"end_loc_b"	"-1284 7664 -72"
+	}
+	"dkr_m3_tunneloflove"
+	{
+		"start_loc_a"	"1168 -5608 220"
+		"start_loc_b"	"1456 -4428 -124"
+		"end_loc_a"	"-3696 5784 80"
+		"end_loc_b"	"-3180 5964 -60"
+	}
+	"dkr_m4_ferris"
+	{
+		"start_loc_a"	"-2703 -11132 206"
+		"start_loc_b"	"-2187 -10952 66"
+		"end_loc_a"	"-3968 3916 -20"
+		"end_loc_b"	"-3084 4720 -344"
+	}
+	"dkr_m5_stadium"
+	{
+		"start_loc_a"	"-3968 3916 -20"
+		"start_loc_b"	"-3084 4720 -344"
+	}
+	"dprm1_milltown_a"
+	{
+		"start_loc_a"	"-7216 8656 239"
+		"start_loc_b"	"-6348 7408 75"
+		"end_loc_a"	"3744 -1440 360"
+		"end_loc_b"	"4224 -1844 104"
+	}
+	"dprm2_sugarmill_a"
+	{
+		"start_loc_a"	"3744 -1440 360"
+		"start_loc_b"	"4224 -1844 104"
+		"end_loc_a"	"-1919 -13584 258"
+		"end_loc_b"	"-1663 -13840 130"
+	}
+	"dprm3_sugarmill_b"
+	{
+		"start_loc_a"	"-1919 -13584 258"
+		"start_loc_b"	"-1663 -13840 130"
+		"end_loc_a"	"3744 -1440 360"
+		"end_loc_b"	"4224 -1844 104"
+	}
+	"dprm4_milltown_b"
+	{
+		"start_loc_a"	"3744 -1440 360"
+		"start_loc_b"	"4224 -1844 104"
+		"end_loc_a"	"-3968 3916 -20"
+		"end_loc_b"	"-3084 4720 -344"
+	}
+	"dprm5_milltown_escape"
+	{
+		"start_loc_a"	"-3682 8060 281"
+		"start_loc_b"	"-2850 7644 119"
+	}
+	"nmrm1_apartment"
+	{
+		"start_loc_a"	"1573.98 1401.99 418.24"
+		"start_loc_b"	"2307.31 786.07 843.20"
+		"end_loc_a"	"2813.10 3334.64 -270.68"
+		"end_loc_b"	"3044.48 2790.00 -108.78"
+	}
+	"nmrm2_subway"
+	{
+		"start_loc_a"	"2836.44 3376.91 -12.27"
+		"start_loc_b"	"3039.62 2787.82 147.85"
+		"end_loc_a"	"10774.93 4874.31 -6.8"
+		"end_loc_b"	"11126.95 4593.00 161.57"
+	}
+	"nmrm3_sewers"
+	{
+		"start_loc_a"	"10768.80 4886.78 -11.37"
+		"start_loc_b"	"11091.48 4574.21 166.96"
+		"end_loc_a"	"12624 12456 152"
+		"end_loc_b"	"12920 12688 16"
+	}
+	"nmrm4_hospital"
+	{
+		"start_loc_a"	"12624 12456 152"
+		"start_loc_b"	"12920 12688 16"
+		"end_loc_a"	"11273.65 15111.59 5726.53"
+		"end_loc_b"	"11709.37 14721.27 5517.87"
+	}
+	"nmrm5_rooftop"
+	{
+		"start_loc_a"	"5256.06 8576.34 5513.34"
+		"start_loc_b"	"5716.91 8232.01 5677.47"
+	}
 }
