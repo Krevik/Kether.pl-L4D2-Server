@@ -1,0 +1,5 @@
+version: "1"
+rules:
+  - base: Satanixon_Scavenge
+    upstream: Krevik:kether_2.0    # change `wei` to the owner of upstream repo
+    mergeMethod: merge
