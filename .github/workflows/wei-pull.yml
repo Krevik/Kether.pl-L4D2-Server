@@ -3,8 +3,3 @@ rules:
   - base: Satanixon_Scavenge
     upstream: Krevik:kether_2.0    # change `wei` to the owner of upstream repo
     mergeMethod: merge
-on:
-  workflow_dispatch:
-    branches:
-      - 'Krevik/kether_2.0'
-      - Satanixon_Scavenge
