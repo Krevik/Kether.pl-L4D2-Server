@@ -46,6 +46,25 @@
 			"name" "Kether Versus T2 (backport; use with caution)"
 		}
 	}
+	"Kether Scavenge Configs"
+	{
+		"kether_scavenge_t2"
+		{
+			"name" "Kether Scavenge T2"
+		}
+		"kether_scavenge_t2_turbo"
+		{
+			"name" "Kether Scavenge T2 Turbo"
+		}
+		"kether_scavenge_t1"
+		{
+			"name" "Kether Scavenge T1"
+		}
+		"kether_scavenge_t1_turbo"
+		{
+			"name" "Kether Scavenge T1 Turbo"
+		}
+	}
 	"ZoneMod Configs"
 	{
 		"zonemod"
@@ -166,7 +185,7 @@
 			"name" "1v1 ZoneHunters"
 		}
 	}
-		"ScavOgl Configs"
+	"ScavOgl Configs"
 	{
 		"scavogl"
 		{
