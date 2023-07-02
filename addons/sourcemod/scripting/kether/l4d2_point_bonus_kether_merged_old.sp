@@ -14,6 +14,7 @@ Handle hCvarValveSurvivalBonus = INVALID_HANDLE;
 float fSurvivorTotalBonus[2];
 float fSurvivorHealthItemsBonus[2];
 float fSurvivorHealthBonus[2];
+float fSurvivorSurvivalBonus[2];
 float fSurvivorTankKillPassBonus[2];
 float fSurvivorWitchCrownBonus[2];
 int iSurvivorsAlive[2];
@@ -115,6 +116,9 @@ public Action CMD_print_bonuses(int client, int args)
 			if(actualTotalBonus > 0 ){
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, actualTotalBonus,
 				GetActualHealthBonus(), GetActualHealthItemsBonus(), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
+
+				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", team+1, actualTotalBonus,
+				GetActualHealthBonus(), GetActualHealthItemsBonus(), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 			}else{
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}TB: {olive}0", team+1 );
 			}
@@ -123,6 +127,8 @@ public Action CMD_print_bonuses(int client, int args)
 			if(RoundToNearest(fSurvivorTotalBonus[0])>0){
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{green}HB: {olive}%d {default}| {green}HIB: {olive}%d {default}| {green}TB: {olive}%d {default}| {green}WB: {olive}%d{green}]", 1, RoundToNearest(fSurvivorTotalBonus[0]),
 				RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
+				// CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] [{green}Alive: {olive}%d{green}]", 1, RoundToNearest(fSurvivorTotalBonus[0]),
+				// RoundToNearest(fSurvivorHealthBonus[0]), RoundToNearest(fSurvivorHealthItemsBonus[0]), RoundToNearest(fSurvivorTankKillPassBonus[0]), RoundToNearest(fSurvivorWitchCrownBonus[0]));
 			}else{
 				CPrintToChat(client, "{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}0", 0 );
 			}
@@ -139,7 +145,7 @@ public Action CMD_print_bonuses(int client, int args)
 }
 
 public int GetActualTotalBonus(){
-	return GetActualHealthBonus() + GetActualHealthItemsBonus() + GetActualTankKillPassBonus() + GetActualWitchCrownBonus();
+	return GetActualHealthBonus() + GetActualHealthItemsBonus() + GetActualTankKillPassBonus() + GetActualWitchCrownBonus() + GetActualSurvialBonus();
 }
 
 public int GetActualHealthBonus(){
@@ -164,6 +170,11 @@ public int GetActualWitchCrownBonus(){
 	return RoundToNearest(fSurvivorWitchCrownBonus[team]);
 }
 
+public int GetActualSurvialBonus(){
+	int team = InSecondHalfOfRound();
+	return RoundToNearest(fSurvivorSurvivalBonus[team]);
+}
+
 public Action CMD_print_bonus_info(int client, int args)
 {
 	bool isTankInPlay = IsTankInPlay();
@@ -171,6 +182,7 @@ public Action CMD_print_bonus_info(int client, int args)
 		CPrintToChat(client, "[{green}Point Bonus{default}] Tank Is in Play. Cannot show the bonus, while tank is in play.");	
 	}else{
 		CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(GetMaximumBonusPerSurvivor()));	
+		CPrintToChat(client, "[{green}Point Bonus{default}] 1x Survivor in saferoom bonus: {green}%d", RoundToNearest(GetBonusForSurvival()));	
 		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 medkit for the map: {green}%d", RoundToNearest(GetBonusForMedkit()));	
 		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 pills/adrenaline for the map: {green}%d", RoundToNearest(GetBonusForPillsAdrenaline()));
 		CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 tank pass/kill for the map: {green}%d", RoundToNearest(GetBonusForTankKillPass()));	
@@ -282,6 +294,10 @@ Float:GetMaximumBonusPerSurvivor(){
 
 float GetBonusForMedkit(){
 	return GetMaximumBonusPerSurvivor()*1.4;
+}
+
+float GetBonusForSurvival(){
+	return 25.0*GetMapDistanceMultiplier();
 }
 
 float GetBonusForPillsAdrenaline(){
