@@ -1,9 +1,13 @@
 @echo off
+setlocal enabledelayedexpansion
+
+set "files="
 
 for %%i in (*.sp) do (
-    echo Compiling: %%i
-    compile.exe "%%i"
+    set "files=!files! %%i"
 )
 
+echo Compiling: %files%
+compile.exe %files%
+
 echo Done.
-pause
