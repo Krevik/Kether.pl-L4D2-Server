@@ -96,7 +96,7 @@ public Action CMD_print_bonuses(int client, int args)
 	int round = InSecondHalfOfRound();
     if(round == 0){
         if(totalBonus[0] > 0.0){
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]",
+			CPrintToChat(client,"{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]",
             1, 
             RoundToNearest(totalBonus[0]), 
             RoundToNearest(healthBonus[0]),
@@ -117,7 +117,7 @@ public Action CMD_print_bonuses(int client, int args)
         }
     }else if(round == 1){
         //round 0
-		CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]",
+		CPrintToChat(client,"{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]",
         1, 
         RoundToNearest(totalBonus[0]), 
         RoundToNearest(healthBonus[0]),
@@ -126,27 +126,15 @@ public Action CMD_print_bonuses(int client, int args)
         RoundToNearest(witchCrownBonus[0]),
 		RoundToNearest(survivalBonus[0]));
         //round 1
-        if(totalBonus[1] > 0.0){
-            //print cause we have it
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]",
-			2, 
-			RoundToNearest(totalBonus[1]), 
-			RoundToNearest(healthBonus[1]),
-			RoundToNearest(healthItemsBonus[1]),
-			RoundToNearest(tankPassKillBonus[1]),
-			RoundToNearest(witchCrownBonus[1]),
-			RoundToNearest(survivalBonus[1]));
-        }else{
-            //calculate current bonus
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]", 
-            2, 
-            RoundToNearest(GetCurrentTotalBonus()), 
-            RoundToNearest(GetCurrentHealthBonus()),
-            RoundToNearest(GetCurrentHealthItemsBonus()),
-            RoundToNearest(tankPassKillBonus[1]),
-            RoundToNearest(witchCrownBonus[1]),
-			RoundToNearest(GetCurrentSurvivalBonus()));
-        }
+        //calculate current bonus
+		CPrintToChat(client,"{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]", 
+        2, 
+        RoundToNearest(GetCurrentTotalBonus()), 
+        RoundToNearest(GetCurrentHealthBonus()),
+        RoundToNearest(GetCurrentHealthItemsBonus()),
+        RoundToNearest(tankPassKillBonus[1]),
+        RoundToNearest(witchCrownBonus[1]),
+		RoundToNearest(GetCurrentSurvivalBonus()));
     }
 	return Plugin_Handled;
 }
