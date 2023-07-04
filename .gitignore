@@ -24,6 +24,9 @@ $RECYCLE.BIN/
 # SourceMod spcomp's log
 compile.dat
 
+# SPComp testing plugin compilations
+**/compiled/
+
 # VS Code settings
 **/.vscode/settings.json
 **/.vs/slnx.sqlite

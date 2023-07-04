@@ -7,13 +7,6 @@
 public Plugin myinfo =
 {
 	name = "Super Stagger Solver",
-<<<<<<< HEAD
-	author = "CanadaRox, A1m (fix), Sir (rework)",
-	description = "Blocks all button presses during stumbles",
-	version = "1.2",
-};
-
-=======
 	author = "CanadaRox, A1m (fix), Sir (rework), Forgetest",
 	description = "Blocks all button presses and restarts animations during stumbles",
 	version = "2.2",
@@ -62,7 +55,6 @@ bool FixSpitter(int client)
 	return true;
 }
 
->>>>>>> 85bfb47fe (Update staggersolver (#681))
 public Action OnPlayerRunCmd(int client, int &buttons)
 {
 	if (IsClientInGame(client) 
