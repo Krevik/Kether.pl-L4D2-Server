@@ -10,6 +10,7 @@
 #include <l4d2_saferoom_detect>
 
 Handle hCvarValveSurvivalBonus = INVALID_HANDLE;
+Handle g_hCvarDefibPenalty = INVALID_HANDLE;
 
 float totalBonus[2];
 float healthItemsBonus[2];
@@ -39,6 +40,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	g_hCvarDefibPenalty = FindConVar("vs_defib_penalty");
 	hCvarValveSurvivalBonus = FindConVar("vs_survival_bonus");
 	teamSize = GetConVarInt(FindConVar("survivor_limit"));
 
@@ -54,6 +56,7 @@ public void OnPluginStart()
 public OnPluginEnd()
 {
 	ResetConVar(hCvarValveSurvivalBonus);
+	ResetConVar(g_hCvarDefibPenalty);
 }
 
 public void OnMapStart()
@@ -185,7 +188,12 @@ public void CalculateSetAndPrintFinalBonus(){
     GetAndSetHealthAndHealthItemsBonus(round);
     totalBonus[round] = healthItemsBonus[round] + healthBonus[round] + survivalBonus[round] + tankPassKillBonus[round] + witchCrownBonus[round];
     //set total bonus as cvar and print round end stats
-    SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest( FloatDiv(totalBonus[round], survivorsSurvived[round])) );
+	if(survivorsSurvived[round]>1.0){
+    	SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest( FloatDiv(totalBonus[round], survivorsSurvived[round])) );
+	}else{
+		GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
+		SetConVarInt(g_hCvarDefibPenalty, RoundToNearest( totalBonus[round] ) );
+	}
     CreateTimer(3.5, PrintRoundEndStats, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -256,6 +264,8 @@ public Action PrintRoundEndStats(Handle timer) {
 
 public void clearSavedBonusParameters(){
     SetConVarInt(hCvarValveSurvivalBonus, 0);
+    SetConVarInt(g_hCvarDefibPenalty, 0);
+
     mapDistanceFactor = 0.0;
     for(int round=0; round<= 1; round++){
         totalBonus[round] = 0.0;
