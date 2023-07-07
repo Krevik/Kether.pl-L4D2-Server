@@ -192,7 +192,7 @@ public void CalculateSetAndPrintFinalBonus(){
     	SetConVarInt(hCvarValveSurvivalBonus, RoundToNearest( FloatDiv(totalBonus[round], survivorsSurvived[round])) );
 	}else{
 		GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
-		SetConVarInt(g_hCvarDefibPenalty, RoundToNearest( totalBonus[round] ) );
+		SetConVarInt(g_hCvarDefibPenalty, -RoundToNearest( totalBonus[round] ) );
 	}
     CreateTimer(3.5, PrintRoundEndStats, _, TIMER_FLAG_NO_MAPCHANGE);
 }
