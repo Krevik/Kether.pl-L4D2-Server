@@ -34,7 +34,7 @@ public Plugin myinfo =
 	name = "L4D2 Scoring plugin",
 	author = "Krevik",
 	description = "Gives score bonuses for pills, adrenaline, HP, tank kill/pass, witch crown",
-	version = "1.9.9.9.9.9",
+	version = "1.9.9.9.9.10",
 	url = "kether.pl"
 };
 
@@ -109,7 +109,7 @@ public Action CMD_print_bonuses(int client, int args)
 			RoundToNearest(survivalBonus[0]));
         }else{
             //calculate current bonus
-			CPrintToChatAll("{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]", 
+			CPrintToChat(client,"{green}[{blue}R#%d {default}Bonus{green}] {green}Total: {olive}%d {green}[{blue}HB:{olive}%d {default}| {blue}HIB:{olive}%d {default}| {blue}TB:{olive}%d {default}| {blue}WB:{olive}%d {default}| {blue}SB:{olive}%d{green}]", 
             1, 
             RoundToNearest(GetCurrentTotalBonus()), 
             RoundToNearest(GetCurrentHealthBonus()),
