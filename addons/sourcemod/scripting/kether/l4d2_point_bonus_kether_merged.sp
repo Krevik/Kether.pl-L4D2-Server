@@ -79,6 +79,11 @@ public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBr
 		clearSavedBonusParameters();
 	}
     mapDistanceFactor = GetMapDistanceFactor();
+	//Rest player incaps counter
+	for (new i = 1; i <= MaxClients; i++)
+	{
+		playerIncaps[i] = 0;
+	}
 }
 
 //Events
@@ -280,13 +285,6 @@ public Action PrintRoundEndStats(Handle timer) {
         RoundToNearest(witchCrownBonus[1]),
 		RoundToNearest(survivalBonus[1]));
 	}
-
-	//Rest player incaps counter
-	for (new i = 1; i <= MaxClients; i++)
-	{
-		playerIncaps[i] = 0;
-	}
-
 	return Plugin_Handled;
 }
 
