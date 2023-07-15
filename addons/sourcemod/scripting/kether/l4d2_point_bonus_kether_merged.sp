@@ -21,6 +21,7 @@ float witchCrownBonus[2];
 int survivorsSurvived[2];
 int teamSize;
 float mapDistanceFactor;
+int playerIncaps[64];
 
 int WITCH_CROWN_BONUS = 24;
 int TANK_KILL_PASS_BONUS = 24;
@@ -51,6 +52,8 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_binfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 	RegConsoleCmd("sm_minfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 	RegConsoleCmd("sm_mapinfo", CMD_print_bonus_info, "Let's print those bonuses info.");
+
+	HookEvent("player_incapacitated", Event_OnPlayerIncapped);
 }
 
 public OnPluginEnd()
@@ -78,16 +81,27 @@ public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBr
     mapDistanceFactor = GetMapDistanceFactor();
 }
 
+//Events
+public void Event_OnPlayerIncapped(Handle event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(GetEventInt(event, "userid"));
+	if (IsSurvivor(client))
+	{
+		playerIncaps[client]+= 1;
+	} 
+}
+
 //commands
 //bonus info
 public Action CMD_print_bonus_info(int client, int args)
 {
-	CPrintToChat(client, "[{green}Point Bonus{default}] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(float(FULL_HP_SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor) );	
-	CPrintToChat(client, "[{green}Point Bonus{default}] 1x Survivor in saferoom bonus: {green}%d", RoundToNearest(float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor) );	
-	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 medkit for the map: {green}%d", RoundToNearest(float(MEDKIT_BONUS_BASE) * mapDistanceFactor) );	
-	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 pills/adrenaline for the map: {green}%d", RoundToNearest(float(PILLS_ADRENALINE_BONUS_BASE) * mapDistanceFactor) );
-	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 tank pass/kill for the map: {green}%d", RoundToNearest(float(TANK_KILL_PASS_BONUS)) );	
-	CPrintToChat(client, "[{green}Point Bonus{default}] Bonus per 1 witch crown for the map: {green}%d", RoundToNearest(float(WITCH_CROWN_BONUS)) );	
+	CPrintToChat(client, "[{green}Point Bonus{default}] [HP] Full HP Survivor bonus for the map: {green}%d", RoundToNearest(float(FULL_HP_SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor) );	
+	CPrintToChat(client, "[{green}Point Bonus{default}] [SB] 1x Survivor in saferoom bonus: {green}%d", RoundToNearest(float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor) );	
+	CPrintToChat(client, "[{green}Point Bonus{default}] [SB] The above bonus depends on number of incaps: {green}%d", RoundToNearest(float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor) );	
+	CPrintToChat(client, "[{green}Point Bonus{default}] [HIB] Bonus per 1 medkit for the map: {green}%d", RoundToNearest(float(MEDKIT_BONUS_BASE) * mapDistanceFactor) );	
+	CPrintToChat(client, "[{green}Point Bonus{default}] [HIB] Bonus per 1 pills/adrenaline for the map: {green}%d", RoundToNearest(float(PILLS_ADRENALINE_BONUS_BASE) * mapDistanceFactor) );
+	CPrintToChat(client, "[{green}Point Bonus{default}] [TB] Bonus per 1 tank pass/kill for the map: {green}%d", RoundToNearest(float(TANK_KILL_PASS_BONUS)) );	
+	CPrintToChat(client, "[{green}Point Bonus{default}] [WB] Bonus per 1 witch crown for the map: {green}%d", RoundToNearest(float(WITCH_CROWN_BONUS)) );	
 	CPrintToChat(client, "[{green}Point Bonus{default}] Map distance factor: {green}%f", mapDistanceFactor );	
 
 	return Plugin_Handled;
@@ -204,10 +218,18 @@ public void GetAndSetHealthAndHealthItemsBonus(int round){
     survivalBonus[round] = 0.0;
     for (new i = 1; i <= MaxClients && survivorCount < teamSize; i++)
 	{
+		float survivalBonusMultiplayer = 1.0;
+		if(playerIncaps[i] == 1){
+			survivalBonusMultiplayer = 0.75;
+		}else if(playerIncaps[i] == 2){
+			survivalBonusMultiplayer = 0.5;
+		}else if(playerIncaps[i] >= 3){
+			survivalBonusMultiplayer = 0.25;
+		}
 		if (IsSurvivor(i) && IsPlayerAlive(i) && L4D_IsInLastCheckpoint(i))
 		{
 			survivorCount++;
-            survivalBonus[round] += float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor;     
+            survivalBonus[round] += float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor * survivalBonusMultiplayer;     
             if(GetSurvivorPermanentHealth(i) <= 100){
                 healthBonus[round] += ((float(FULL_HP_SURVIVOR_SURVIVED_BONUS_BASE) * GetSurvivorPermanentHealth(i)) / 100.0) * mapDistanceFactor;
             }
@@ -259,6 +281,12 @@ public Action PrintRoundEndStats(Handle timer) {
 		RoundToNearest(survivalBonus[1]));
 	}
 
+	//Rest player incaps counter
+	for (new i = 1; i <= MaxClients; i++)
+	{
+		playerIncaps[i] = 0;
+	}
+
 	return Plugin_Handled;
 }
 
@@ -291,10 +319,19 @@ public float GetCurrentSurvivalBonus(){
 	float survivalBonus = 0.0;
     for (new i = 1; i <= MaxClients && survivorCount < teamSize; i++)
 	{
+		
 		if (IsSurvivor(i) && IsPlayerAlive(i))
 		{
+			float survivalBonusMultiplayer = 1.0;
+			if(playerIncaps[i] == 1){
+				survivalBonusMultiplayer = 0.75;
+			}else if(playerIncaps[i] == 2){
+				survivalBonusMultiplayer = 0.5;
+			}else if(playerIncaps[i] >= 3){
+				survivalBonusMultiplayer = 0.25;
+			}
 			survivorCount++;
-			survivalBonus += float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor;     
+			survivalBonus += float(SURVIVOR_SURVIVED_BONUS_BASE) * mapDistanceFactor * survivalBonusMultiplayer;     
 		}
 	}
 	return survivalBonus;
