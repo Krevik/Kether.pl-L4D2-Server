@@ -120,6 +120,10 @@
 		{
 			"name" "Promod Elite 1.1"
 		}
+		"deadman"
+		{
+			"name" "Deadman 5.0.3"
+		}
 	}
 	"Acemod Revamped Configs"
 	{
