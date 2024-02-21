@@ -1,0 +1,31 @@
+﻿"Phrases"
+{
+	"titleLowerCase"
+	{
+		"en"	"Takeover"
+	}
+	"titleUpperCase"
+	{
+		"en"	"TAKEOVER"
+	}
+	"failed"
+	{
+		"en"	"FAILED"
+	}
+	"yes"
+	{
+		"en"	"Yes"
+	}
+	"no"
+	{
+		"en"	"No"
+	}
+	"TAKEOVER_ANNOUNCE"
+	{
+		"#format"	"{1:s},{2:s}"
+		"en"	"Player {1} was put in control of survivor bot{2}."
+	}
+	"TAKEOVERCHOICE_QUESTION"
+	{
+		"en"	"Do you want to takeover a bot controlled living survivor?"
+}}

@@ -1,0 +1,31 @@
+"Phrases"
+{
+    "titleLowerCase"
+    {
+        "es"    "Takeover"
+    }
+    "titleUpperCase"
+    {
+        "es"    "TAKEOVER"
+    }
+    "failed"
+    {
+        "es"    "ha fallado"
+    }
+    "yes"
+    {
+        "es"    "Si"
+    }
+    "no"
+    {
+        "es"    "No"
+    }
+    "TAKEOVER_ANNOUNCE"
+    {
+        "#format"    "{1:s},{2:s}"
+        "es"    "{orange}{1} {olive}ha tomado el control del bot{2}."
+    }
+    "TAKEOVERCHOICE_QUESTION"
+    {
+        "es"    "¿Deseas tomar control de un bot con vida?"
+}}
