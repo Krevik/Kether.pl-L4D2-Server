@@ -43,7 +43,7 @@
 		}
 		"kether_t2_backport"
 		{
-			"name" "Kether Versus T2 (backport; use with caution)"
+			"name" "Kether Versus T2 (backport, use with caution)"
 		}
 	}
 	"Kether Scavenge Configs"
