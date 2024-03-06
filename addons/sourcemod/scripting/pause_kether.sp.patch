@@ -1,0 +1,15 @@
+--- /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/pause_kether.sp	2024-03-06 02:31:29.534041234 +0100
++++ /home/starterx4/Pulpit/gity/Kether.pl-L4D2-Server/addons/sourcemod/scripting/pause_latest.sp	2024-03-06 02:27:23.467027951 +0100
+@@ -130,12 +130,9 @@
+     RegConsoleCmd("sm_ready", Unpause_Cmd, "Marks your team as ready for an unpause");
+     RegConsoleCmd("sm_unready", Unready_Cmd, "Marks your team as ready for an unpause");
+     RegConsoleCmd("sm_toggleready", ToggleReady_Cmd, "Toggles your team's ready status");
+-	RegConsoleCmd("sm_r", Unpause_Cmd, "Marks your team as ready for an unpause");
+-	RegConsoleCmd("sm_nr", Unready_Cmd, "Marks your team as ready for an unpause");
+ 	
+     RegAdminCmd("sm_forcepause", ForcePause_Cmd, ADMFLAG_BAN, "Pauses the game and only allows admins to unpause");
+     RegAdminCmd("sm_forceunpause", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
+-	RegAdminCmd("sm_fs", ForceUnpause_Cmd, ADMFLAG_BAN, "Unpauses the game regardless of team ready status.  Must be used to unpause admin pauses");
+ 
+     RegConsoleCmd("sm_show", Show_Cmd, "Hides the pause panel so other menus can be seen");
+     RegConsoleCmd("sm_hide", Hide_Cmd, "Shows a hidden pause panel");
