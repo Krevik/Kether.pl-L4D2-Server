@@ -4,7 +4,7 @@
 
 */
 #define PLUGIN_NAME		   "Survivor Bot Takeover"
-#define PLUGIN_VERSION	   "0.8"
+#define PLUGIN_VERSION	   "0.8.1"
 #define PLUGIN_DESCRIPTION "Allows dead survivors to take over a living bot survivor."
 /*
 
@@ -150,7 +150,7 @@ public void OnPluginStart()
 	RegAdminCmd("sm_admintakeover", cmd_TakeoverAdmin, ADMFLAG_GENERIC, "Takeover a survivor bot.");
 
 	HookEvent("player_incapacitated", event_PlayerIncap);
-	HookEvent("player_death", event_PlayerDeath, EventHookMode_Pre);
+	HookEvent("player_death", event_PlayerDeath);
 	HookEvent("revive_success", event_PlayerRevive);
 	HookEvent("round_start", event_RoundStart);
 	HookEvent("finale_start", event_RoundStart);
