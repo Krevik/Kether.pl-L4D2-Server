@@ -23,14 +23,13 @@ public Plugin:myinfo =
 	name = "Tank Pass Unteleport",
 	author = "Krevik, larrybrains, StarterX4",
 	description = "Teleports a tank back into the map if they are randomly teleported outside or inside of the map after tank pass.",
-	version = "0.1",
+	version = "0.2",
 	url = "kether.pl"
 };
 
 public OnPluginStart()
 {
 	HookEvent("tank_spawn", Event_TankSpawn);
-	//Handle("g_fwdOnTankPass", Event_TankPass);
 	HookEvent("entity_killed", Event_EntityKilled);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Pre);
 	HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
@@ -70,6 +69,21 @@ public Action Event_TankSpawn(Event hEvent, const char[] name, bool dontBroadcas
 {
 	//CreateTimer(0.2); // waiting for the bot_player_replace being fired
 	new victim = GetClientOfUserId(hEvent.GetInt("userid"));
+
+	if (IsClientInGame(victim) && GetClientTeam(victim) == 2 && IsPlayerAlive(victim) && IsValidTank(victim))
+	{
+		tankPlayer = victim;
+		GetClientAbsOrigin(victim, tankPlayerPrevPos);
+
+		if(tankingCheck_Timer == null){
+			tankingCheck_Timer = CreateTimer(VICTIM_CHECK_INTERVAL, CheckVictimPosition_Timer, victim, TIMER_REPEAT);
+		}
+	}
+}
+
+public void TP_OnTankPass(){
+	KillTimer(tankingCheck_Timer);
+	new victim = GetTankClient();
 
 	if (IsClientInGame(victim) && GetClientTeam(victim) == 2 && IsPlayerAlive(victim) && IsValidTank(victim))
 	{
@@ -179,4 +193,24 @@ bool IsAliveTank(int tank)
 bool IsValidTank(int tank)
 {
 	return IsValid(tank) && IsAliveTank(tank);
+}
+
+int GetTankClient()
+{
+	if (tankPlayer == -1 || !IsValidTank(tankPlayer)) {
+		tankPlayer = FindTank();
+	}
+	
+	return tankPlayer;
+}
+
+int FindTank()
+{
+	for (int i = 1; i <= MaxClients; i++) {
+		if (IsAliveTank(i)) {
+			return i;
+		}
+	}
+	
+	return -1;
 }
