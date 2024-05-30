@@ -3,7 +3,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define VERSION "2.0.7"
+#define VERSION "2.0.8"
 
 new Handle:g_hEnabled;
 new Handle:g_hWeaponRandom;
@@ -99,6 +99,8 @@ public OnMapStart()
     PrecacheModel( "models/weapons/melee/w_tonfa.mdl", true );
     PrecacheModel( "models/w_models/weapons/w_sniper_scout.mdl");
     PrecacheModel( "models/v_models/v_snip_scout.mdl");
+    PrecacheModel("models/w_models/weapons/w_sniper_awp.mdl", true);
+    PrecacheModel("models/v_models/v_snip_awp.mdl", true);
     
     PrecacheGeneric( "scripts/melee/baseball_bat.txt", true );
     PrecacheGeneric( "scripts/melee/cricket_bat.txt", true );
@@ -114,6 +116,10 @@ public OnMapStart()
     new index = CreateEntityByName("weapon_sniper_scout");
     DispatchSpawn(index);
     RemoveEdict(index);
+
+    new index1 = CreateEntityByName("weapon_sniper_awp");
+    DispatchSpawn(index1);
+    RemoveEdict(index1);
 }
 
 public Action:Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
