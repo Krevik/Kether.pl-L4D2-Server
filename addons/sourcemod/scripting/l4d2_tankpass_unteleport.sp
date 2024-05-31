@@ -23,7 +23,7 @@ public Plugin:myinfo =
 	name = "Tank Pass Unteleport",
 	author = "Krevik, larrybrains, StarterX4",
 	description = "Teleports a tank back into the map if they are randomly teleported outside or inside of the map after tank pass.",
-	version = "0.2.1",
+	version = "0.3.0",
 	url = "kether.pl"
 };
 
@@ -54,11 +54,11 @@ public Action Event_RoundEnd(Event hEvent, const char[] s_Name, bool b_DontBroad
 public Action Event_EntityKilled(Event hEvent, const char[] s_Name, bool b_DontBroadcast)
 {
 	int entity = hEvent.GetInt("entindex_killed");
-	//CreateTimer(1.0, RecheckIfTankDied_Timer, entity);
-//}
+	CreateTimer(0.1, ReCheckIfTankDied_Timer, entity);
+}
 
-//public Action ReCheckIfTankDied_Timer(Handle timer, any entity)
-//{
+public Action ReCheckIfTankDied_Timer(Handle timer, any entity)
+{
 	if (IsClient(entity) && IsPlayerTank(entity))
 		RequestFrame(OnEntKilled, entity);
 }
@@ -72,9 +72,13 @@ public void OnEntKilled(int client)
 
 public Action Event_TankSpawn(Event hEvent, const char[] name, bool dontBroadcast)
 {
-	//CreateTimer(0.2); // waiting for the bot_player_replace being fired
-	new victim = GetClientOfUserId(hEvent.GetInt("userid"));
+	//new victim = GetClientOfUserId(hEvent.GetInt("userid"));
+	CreateTimer(0.2, PostTankSpawn_Timer); // waiting for the bot_player_replace being fired
+}
 
+public Action PostTankSpawn_Timer(Handle timer, any victim)
+{
+	new victim = GetTankClient();
 	if (IsClientInGame(victim) && GetClientTeam(victim) == 3 && IsPlayerAlive(victim) && IsValidTank(victim))
 	{
 		tankPlayer = victim;
@@ -178,6 +182,36 @@ bool isPrevPositionEmpty(){
 void TeleportToPreviousPosition(int victim){
 	TeleportEntity(victim, tankPlayerPrevPos, NULL_VECTOR, NULL_VECTOR);
 	CPrintToChatAll("{blue}[Tank Pass UnTeleport]{default} Tank Pass teleported the tank, teleporting him to previous position.");
+}
+
+void TeleportToNearestSurvivor(int victim)
+{
+	float distanceToNearestSurv = 1000.0;
+	int resultClientIndex = 1;
+	for (new i = 1; i <= MaxClients; i++)
+	{
+			if (IsSurvivor(i) && !IsIncaped(i) && !IsHandingFromLedge(i) && i!=victim)
+			{
+				if (IsPlayerAlive(i))
+				{
+					float actualSurvivorPosition[3];
+					GetClientAbsOrigin(i, actualSurvivorPosition);
+					float newDistance = GetVectorDistance(actualSurvivorPosition, tankPlayerPrevPos);
+					if(newDistance < distanceToNearestSurv){
+						distanceToNearestSurv = newDistance;
+						resultClientIndex=i;
+					}
+				}
+			}
+	}
+	
+	float destinationPos[3];
+	GetClientAbsOrigin(resultClientIndex, destinationPos);
+		
+	if (IsClientInGame(resultClientIndex) && IsPlayerAlive(resultClientIndex))
+	{
+		TeleportEntity(victim, destinationPos, NULL_VECTOR, NULL_VECTOR);
+	}
 }
 
 bool IsValid(int client)
