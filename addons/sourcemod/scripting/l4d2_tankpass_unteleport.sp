@@ -23,7 +23,7 @@ public Plugin:myinfo =
 	name = "Tank Pass Unteleport",
 	author = "Krevik, larrybrains, StarterX4",
 	description = "Teleports a tank back into the map if they are randomly teleported outside or inside of the map after tank pass.",
-	version = "0.2",
+	version = "0.2.1",
 	url = "kether.pl"
 };
 
@@ -54,6 +54,11 @@ public Action Event_RoundEnd(Event hEvent, const char[] s_Name, bool b_DontBroad
 public Action Event_EntityKilled(Event hEvent, const char[] s_Name, bool b_DontBroadcast)
 {
 	int entity = hEvent.GetInt("entindex_killed");
+	//CreateTimer(1.0, RecheckIfTankDied_Timer, entity);
+//}
+
+//public Action ReCheckIfTankDied_Timer(Handle timer, any entity)
+//{
 	if (IsClient(entity) && IsPlayerTank(entity))
 		RequestFrame(OnEntKilled, entity);
 }
@@ -70,7 +75,7 @@ public Action Event_TankSpawn(Event hEvent, const char[] name, bool dontBroadcas
 	//CreateTimer(0.2); // waiting for the bot_player_replace being fired
 	new victim = GetClientOfUserId(hEvent.GetInt("userid"));
 
-	if (IsClientInGame(victim) && GetClientTeam(victim) == 2 && IsPlayerAlive(victim) && IsValidTank(victim))
+	if (IsClientInGame(victim) && GetClientTeam(victim) == 3 && IsPlayerAlive(victim) && IsValidTank(victim))
 	{
 		tankPlayer = victim;
 		GetClientAbsOrigin(victim, tankPlayerPrevPos);
@@ -85,7 +90,7 @@ public void TP_OnTankPass(){
 	KillTimer(tankingCheck_Timer);
 	new victim = GetTankClient();
 
-	if (IsClientInGame(victim) && GetClientTeam(victim) == 2 && IsPlayerAlive(victim) && IsValidTank(victim))
+	if (IsClientInGame(victim) && GetClientTeam(victim) == 3 && IsPlayerAlive(victim) && IsValidTank(victim))
 	{
 		tankPlayer = victim;
 		GetClientAbsOrigin(victim, tankPlayerPrevPos);
@@ -129,7 +134,7 @@ public Action CheckVictimPosition_Timer(Handle timer, any victim)
 	static bool isOutsideWorld;
 	static float newVictimPos[3];
 	
-	if (IsClientInGame(victim) && GetClientTeam(victim) == 2 && IsPlayerAlive(victim))
+	if (IsClientInGame(victim) && GetClientTeam(victim) == 3 && IsPlayerAlive(victim))
 	{
 		GetClientAbsOrigin(victim, newVictimPos);
 		isOutsideWorld = TR_PointOutsideWorld(newVictimPos);
@@ -140,7 +145,7 @@ public Action CheckVictimPosition_Timer(Handle timer, any victim)
 		}
 	}
 	
-	if (IsClientInGame(victim) && GetClientTeam(victim) == 2 && IsPlayerAlive(victim))
+	if (IsClientInGame(victim) && GetClientTeam(victim) == 3 && IsPlayerAlive(victim))
 	{
 		GetClientAbsOrigin(victim, newVictimPos);
 		isOutsideWorld = TR_PointOutsideWorld(newVictimPos);
