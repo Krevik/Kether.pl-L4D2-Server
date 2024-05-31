@@ -17,13 +17,14 @@ enum L4D2Team
 Handle tankingCheck_Timer;
 float tankPlayerPrevPos[3];
 int tankPlayer;
+int teleportFailed = 0;
 
 public Plugin:myinfo =
 {
 	name = "Tank Pass Unteleport",
 	author = "Krevik, larrybrains, StarterX4",
 	description = "Teleports a tank back into the map if they are randomly teleported outside or inside of the map after tank pass.",
-	version = "0.3.0",
+	version = "0.3.1",
 	url = "kether.pl"
 };
 
@@ -43,12 +44,14 @@ public void OnMapStart()
 	tankPlayerPrevPos[1] = 0.0;
 	tankPlayerPrevPos[2] = 0.0;
 	tankPlayer=-1;
+	teleportFailed = 0;
 }
 
 public Action Event_RoundEnd(Event hEvent, const char[] s_Name, bool b_DontBroadcast)
 {
 	delete tankingCheck_Timer;
 	tankPlayer = -1;
+	teleportFailed = 0;
 }
 
 public Action Event_EntityKilled(Event hEvent, const char[] s_Name, bool b_DontBroadcast)
@@ -68,6 +71,7 @@ public void OnEntKilled(int client)
 	if (!IsAliveTank(client))
 	delete tankingCheck_Timer;
 	tankPlayer = -1;
+	teleportFailed = 0;
 }
 
 public Action Event_TankSpawn(Event hEvent, const char[] name, bool dontBroadcast)
@@ -115,6 +119,7 @@ public void Event_PlayerDeath(Event hEvent, const char[] name, bool dontBroadcas
 		if (client == tankPlayer) {
 			tankPlayer = -1;
 			delete tankingCheck_Timer;
+			teleportFailed = 0;
 		}
 	}
 }
@@ -129,6 +134,8 @@ public void Event_PlayerDisconnect(Event hEvent, const char[] name, bool dontBro
 		if (client == tankPlayer) {
 			tankPlayer = -1;
 			delete tankingCheck_Timer;
+			teleportFailed = 0;
+			
 		}
 	}
 }
@@ -138,6 +145,12 @@ public Action CheckVictimPosition_Timer(Handle timer, any victim)
 	static bool isOutsideWorld;
 	static float newVictimPos[3];
 	
+	if (teleportFailed == 3)
+	{
+		TeleportToNearestSurvivor(victim);
+		teleportFailed = 0;
+	}
+
 	if (IsClientInGame(victim) && GetClientTeam(victim) == 3 && IsPlayerAlive(victim))
 	{
 		GetClientAbsOrigin(victim, newVictimPos);
@@ -154,8 +167,10 @@ public Action CheckVictimPosition_Timer(Handle timer, any victim)
 		GetClientAbsOrigin(victim, newVictimPos);
 		isOutsideWorld = TR_PointOutsideWorld(newVictimPos);
 		
-		if(isOutsideWorld || (!isPrevPositionEmpty() && planarDistance(tankPlayerPrevPos, newVictimPos) > 500.0 )){
+		if(isOutsideWorld || (!isPrevPositionEmpty() && planarDistance(tankPlayerPrevPos, newVictimPos) > 500.0 ))
+		{
 			TeleportToPreviousPosition(victim);
+			teleportFailed++;
 		}
 	}
 	return Plugin_Continue;
@@ -211,6 +226,7 @@ void TeleportToNearestSurvivor(int victim)
 	if (IsClientInGame(resultClientIndex) && IsPlayerAlive(resultClientIndex))
 	{
 		TeleportEntity(victim, destinationPos, NULL_VECTOR, NULL_VECTOR);
+		CPrintToChatAll("{blue}[Tank Pass UnTeleport]{default} Failed to teleport tank back to previous position (3x). Teleporting him to the closest survivor.");
 	}
 }
 
