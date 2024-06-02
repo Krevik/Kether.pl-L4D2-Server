@@ -387,7 +387,6 @@ public Action applyTankDeathBonus(Handle timer)
 {
 	int round = InSecondHalfOfRound();
 	int survs = GetNotIncappedSurvivorsCount();
-	mapDistanceFactor = GetMapDistanceFactor();
 	if (survs > 0)
 	{
 		tankKillBonus[round] += TANK_KILL_BONUS * mapDistanceFactor;
