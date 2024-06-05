@@ -8,6 +8,7 @@
 #include <l4d2lib>
 #include <colors>
 #include <l4d2_saferoom_detect>
+#include <timers>
 
 Handle hCvarValveSurvivalBonus = INVALID_HANDLE;
 Handle g_hCvarDefibPenalty	   = INVALID_HANDLE;
@@ -67,7 +68,7 @@ public OnPluginEnd()
 public void OnMapStart()
 {
 	clearSavedBonusParameters();
-	mapDistanceFactor = GetMapDistanceFactor();
+	CreateTimer(0.1, UpdateMapDistanceFactor);
 }
 
 public void OnMapEnd()
@@ -82,7 +83,7 @@ public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBr
 	{
 		clearSavedBonusParameters();
 	}
-	mapDistanceFactor = GetMapDistanceFactor();
+	CreateTimer(0.1, UpdateMapDistanceFactor);
 	// Rest player incaps counter
 	for (new i = 1; i <= MaxClients; i++)
 	{
@@ -204,7 +205,6 @@ public void clearSavedBonusParameters()
 	SetConVarInt(hCvarValveSurvivalBonus, 0);
 	SetConVarInt(g_hCvarDefibPenalty, 0);
 
-	mapDistanceFactor = GetMapDistanceFactor();
 	for (int round = 0; round <= 1; round++)
 	{
 		totalBonus[round]		 = 0.0;
@@ -216,6 +216,8 @@ public void clearSavedBonusParameters()
 		witchCrownBonus[round]	 = 0.0;
 		survivorsSurvived[round] = 0;
 	}
+
+	CreateTimer(0.1, UpdateMapDistanceFactor);
 }
 
 void UpdateSurvivalBonus(int round)
@@ -291,6 +293,17 @@ int GetNotIncappedSurvivorsCount()
 	return survivorCount;
 }
 
+public Action UpdateMapDistanceFactor(Handle timer)
+{
+	if(L4D2_IsTankInPlay() || L4D_GetVersusMaxCompletionScore() == 0) {
+		CreateTimer(2.0, UpdateMapDistanceFactor);
+		return Plugin_Continue;
+	}
+	mapDistanceFactor = GetMapDistanceFactor();
+
+	return Plugin_Continue;
+}
+
 float GetMapDistanceFactor()
 {
 	return float(GetMapMaxScore()) / 400.0;
@@ -355,6 +368,16 @@ bool HasAdrenaline(int client)
 // apply bonus functions
 public void TP_OnTankPass()
 {
+	CreateTimer(0.1, applyAndPrintTankPassBonus);
+}
+
+public Action applyAndPrintTankPassBonus(Handle timer) {
+	if(mapDistanceFactor < 0.1) {
+		CreateTimer(2.0, applyAndPrintTankPassBonus);
+		CreateTimer(0.1, UpdateMapDistanceFactor);
+		return Plugin_Continue;
+	}
+
 	int round = InSecondHalfOfRound();
 	int survs = GetNotIncappedSurvivorsCount();
 	if (survs > 0)
@@ -362,6 +385,7 @@ public void TP_OnTankPass()
 		tankPassBonus[round] += TANK_PASS_BONUS * mapDistanceFactor;
 		CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_PASS_BONUS * mapDistanceFactor));
 	}
+	return Plugin_Continue;
 }
 
 public void OnTankDeath()
@@ -371,20 +395,49 @@ public void OnTankDeath()
 
 public void Kether_OnWitchDrawCrown()
 {
-	int round = InSecondHalfOfRound();
-	witchCrownBonus[round] += WITCH_CROWN_BONUS * mapDistanceFactor;
-	CPrintToChatAll("Witch has been draw-crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS * mapDistanceFactor));
+	CreateTimer(0.1, applyAndPrintWitchDrawCrownBonus);
 }
 
 public void Kether_OnWitchCrown()
 {
+	CreateTimer(0.1, applyAndPrintWitchCrownBonus);
+}
+
+public Action applyAndPrintWitchDrawCrownBonus(Handle timer) {
+	if(mapDistanceFactor < 0.1) {
+		CreateTimer(2.0, applyAndPrintWitchDrawCrownBonus);
+		CreateTimer(0.1, UpdateMapDistanceFactor);
+		return Plugin_Continue;
+	}
+
+	int round = InSecondHalfOfRound();
+	witchCrownBonus[round] += WITCH_CROWN_BONUS * mapDistanceFactor;
+	CPrintToChatAll("Witch has been draw-crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS * mapDistanceFactor));
+
+	return Plugin_Continue;
+}
+
+public Action applyAndPrintWitchCrownBonus(Handle timer) {
+	if(mapDistanceFactor < 0.1) {
+		CreateTimer(2.0, applyAndPrintWitchCrownBonus);
+		CreateTimer(0.1, UpdateMapDistanceFactor);
+		return Plugin_Continue;
+	}
+
 	int round = InSecondHalfOfRound();
 	witchCrownBonus[round] += WITCH_CROWN_BONUS * mapDistanceFactor;
 	CPrintToChatAll("Witch has been crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS * mapDistanceFactor));
+
+	return Plugin_Continue;
 }
 
 public Action applyTankDeathBonus(Handle timer)
 {
+	if(mapDistanceFactor < 0.1) {
+		CreateTimer(2.0, applyTankDeathBonus);
+		CreateTimer(0.1, UpdateMapDistanceFactor);
+		return Plugin_Continue;
+	}
 	int round = InSecondHalfOfRound();
 	int survs = GetNotIncappedSurvivorsCount();
 	if (survs > 0)
