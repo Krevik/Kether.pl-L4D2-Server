@@ -110,9 +110,9 @@ public Action CMD_print_bonus_info(int client, int args)
 	CPrintToChat(client, "[{green}Point Bonus{default}] [SB] The above bonus depends on number of incaps: {green}%d", RoundToNearest(SURVIVOR_SURVIVED_BONUS_BASE * mapDistanceFactor));
 	CPrintToChat(client, "[{green}Point Bonus{default}] [HIB] Bonus per 1 medkit for the map: {green}%d", RoundToNearest(MEDKIT_BONUS_BASE * mapDistanceFactor));
 	CPrintToChat(client, "[{green}Point Bonus{default}] [HIB] Bonus per 1 pills/adrenaline for the map: {green}%d", RoundToNearest(PILLS_ADRENALINE_BONUS_BASE * mapDistanceFactor));
-	CPrintToChat(client, "[{green}Point Bonus{default}] [TKB] Bonus per 1 tank kill for the map: {green}%d", RoundToNearest(TANK_KILL_BONUS * mapDistanceFactor));
-	CPrintToChat(client, "[{green}Point Bonus{default}] [TPB] Bonus per 1 tank pass for the map: {green}%d", RoundToNearest(TANK_PASS_BONUS * mapDistanceFactor));
-	CPrintToChat(client, "[{green}Point Bonus{default}] [WB] Bonus per 1 witch crown for the map: {green}%d", RoundToNearest(WITCH_CROWN_BONUS * mapDistanceFactor));
+	CPrintToChat(client, "[{green}Point Bonus{default}] [TKB] Bonus per 1 tank kill for the map: {green}%d", RoundToNearest(TANK_KILL_BONUS));
+	CPrintToChat(client, "[{green}Point Bonus{default}] [TPB] Bonus per 1 tank pass for the map: {green}%d", RoundToNearest(TANK_PASS_BONUS));
+	CPrintToChat(client, "[{green}Point Bonus{default}] [WB] Bonus per 1 witch crown for the map: {green}%d", RoundToNearest(WITCH_CROWN_BONUS));
 	CPrintToChat(client, "[{green}Point Bonus{default}] Map distance factor (alters every bonus): {green}%f", mapDistanceFactor);
 
 	return Plugin_Handled;
@@ -368,82 +368,37 @@ bool HasAdrenaline(int client)
 // apply bonus functions
 public void TP_OnTankPass()
 {
-	CreateTimer(0.1, applyAndPrintTankPassBonus);
-}
-
-public Action applyAndPrintTankPassBonus(Handle timer) {
-	if(mapDistanceFactor < 0.1) {
-		CreateTimer(2.0, applyAndPrintTankPassBonus);
-		CreateTimer(0.1, UpdateMapDistanceFactor);
-		return Plugin_Continue;
-	}
-
 	int round = InSecondHalfOfRound();
 	int survs = GetNotIncappedSurvivorsCount();
 	if (survs > 0)
 	{
-		tankPassBonus[round] += TANK_PASS_BONUS * mapDistanceFactor;
-		CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_PASS_BONUS * mapDistanceFactor));
+		tankPassBonus[round] += TANK_PASS_BONUS;
+		CPrintToChatAll("Tank has been passed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_PASS_BONUS));
 	}
-	return Plugin_Continue;
 }
 
 public void OnTankDeath()
 {
-	CreateTimer(2.0, applyTankDeathBonus);
+		int round = InSecondHalfOfRound();
+	int survs = GetNotIncappedSurvivorsCount();
+	if (survs > 0)
+	{
+		tankKillBonus[round] += TANK_KILL_BONUS;
+		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_KILL_BONUS));
+	}
 }
 
 public void Kether_OnWitchDrawCrown()
 {
-	CreateTimer(0.1, applyAndPrintWitchDrawCrownBonus);
+	int round = InSecondHalfOfRound();
+	witchCrownBonus[round] += WITCH_CROWN_BONUS;
+	CPrintToChatAll("Witch has been draw-crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS));
+
 }
 
 public void Kether_OnWitchCrown()
 {
-	CreateTimer(0.1, applyAndPrintWitchCrownBonus);
-}
-
-public Action applyAndPrintWitchDrawCrownBonus(Handle timer) {
-	if(mapDistanceFactor < 0.1) {
-		CreateTimer(2.0, applyAndPrintWitchDrawCrownBonus);
-		CreateTimer(0.1, UpdateMapDistanceFactor);
-		return Plugin_Continue;
-	}
-
 	int round = InSecondHalfOfRound();
-	witchCrownBonus[round] += WITCH_CROWN_BONUS * mapDistanceFactor;
-	CPrintToChatAll("Witch has been draw-crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS * mapDistanceFactor));
-
-	return Plugin_Continue;
-}
-
-public Action applyAndPrintWitchCrownBonus(Handle timer) {
-	if(mapDistanceFactor < 0.1) {
-		CreateTimer(2.0, applyAndPrintWitchCrownBonus);
-		CreateTimer(0.1, UpdateMapDistanceFactor);
-		return Plugin_Continue;
-	}
-
-	int round = InSecondHalfOfRound();
-	witchCrownBonus[round] += WITCH_CROWN_BONUS * mapDistanceFactor;
-	CPrintToChatAll("Witch has been crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS * mapDistanceFactor));
-
-	return Plugin_Continue;
-}
-
-public Action applyTankDeathBonus(Handle timer)
-{
-	if(mapDistanceFactor < 0.1) {
-		CreateTimer(2.0, applyTankDeathBonus);
-		CreateTimer(0.1, UpdateMapDistanceFactor);
-		return Plugin_Continue;
-	}
-	int round = InSecondHalfOfRound();
-	int survs = GetNotIncappedSurvivorsCount();
-	if (survs > 0)
-	{
-		tankKillBonus[round] += TANK_KILL_BONUS * mapDistanceFactor;
-		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_KILL_BONUS * mapDistanceFactor));
-	}
-	return Plugin_Continue;
+	witchCrownBonus[round] += WITCH_CROWN_BONUS;
+	CPrintToChatAll("Witch has been crowned resulting in: {olive}%d {default}points bonus", RoundToNearest(WITCH_CROWN_BONUS));
 }
