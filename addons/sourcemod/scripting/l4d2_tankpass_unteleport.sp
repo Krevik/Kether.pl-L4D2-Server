@@ -24,7 +24,7 @@ public Plugin:myinfo =
 	name = "Tank Pass Unteleport",
 	author = "Krevik, larrybrains, StarterX4",
 	description = "Teleports a tank back into the map if they are randomly teleported outside or inside of the map after tank pass.",
-	version = "0.3.1",
+	version = "0.3.2",
 	url = "kether.pl"
 };
 
@@ -62,7 +62,7 @@ public Action Event_EntityKilled(Event hEvent, const char[] s_Name, bool b_DontB
 
 public Action ReCheckIfTankDied_Timer(Handle timer, any entity)
 {
-	if (IsClient(entity) && IsPlayerTank(entity))
+	if (IsClient(entity) && IsPlayerTank(entity) && IsValidEntity(entity) && !IsWitch(entity))
 		RequestFrame(OnEntKilled, entity);
 }
 
