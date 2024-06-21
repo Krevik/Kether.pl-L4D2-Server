@@ -66,7 +66,7 @@ public OnPluginStart()
     RegAdminCmd("sm_melee", Command_SMMelee, ADMFLAG_KICK, "Lists all melee weapons spawnable in current campaign" );
 }
 
-public Action:Command_SMMelee(client, args)
+Action:Command_SMMelee(client, args)
 {
     for( new i = 0; i < g_iMeleeClassCount; i++ )
     {
@@ -122,7 +122,7 @@ public OnMapStart()
     RemoveEdict(index1);
 }
 
-public Action:Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
+Action:Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
 {
     if( !GetConVarBool( g_hEnabled ) ) return Plugin_Continue;
     
@@ -137,7 +137,7 @@ public Action:Event_RoundStart(Handle:event, const String:name[], bool:dontBroad
     return Plugin_Continue;
 }
 
-public Action:Timer_SpawnMelee( Handle:timer )
+Action:Timer_SpawnMelee( Handle:timer )
 {
     new client = GetInGameClient();
 

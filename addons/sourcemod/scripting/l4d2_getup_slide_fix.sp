@@ -48,7 +48,7 @@ public void OnPluginStart()
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
 }
 
-public void Event_RoundEnd(Event hEvent, const char[] eName, bool dontBroadcast)
+void Event_RoundEnd(Event hEvent, const char[] eName, bool dontBroadcast)
 {
 	ResetStaggerBlocked();
 }
@@ -59,7 +59,7 @@ public void OnMapEnd()
 }
 
 //Called when a Player replaces a Bot
-public void Event_BotPlayerReplace(Event hEvent, const char[] eName, bool dontBroadcast)
+void Event_BotPlayerReplace(Event hEvent, const char[] eName, bool dontBroadcast)
 {
 	int player = GetClientOfUserId(hEvent.GetInt("player"));
 	int charIndex = IdentifySurvivor(player);
@@ -73,7 +73,7 @@ public void Event_BotPlayerReplace(Event hEvent, const char[] eName, bool dontBr
 }
 
 //Called when a Bot replaces a Player
-public void Event_PlayerBotReplace(Event hEvent, const char[] eName, bool dontBroadcast)
+void Event_PlayerBotReplace(Event hEvent, const char[] eName, bool dontBroadcast)
 {
 	int bot = GetClientOfUserId(hEvent.GetInt("bot"));
 	int charIndex = IdentifySurvivor(bot);
@@ -86,7 +86,7 @@ public void Event_PlayerBotReplace(Event hEvent, const char[] eName, bool dontBr
 	}
 }
 
-public void Event_PounceChargeEnd(Event hEvent, const char[] eName, bool dontBroadcast)
+void Event_PounceChargeEnd(Event hEvent, const char[] eName, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(hEvent.GetInt("victim"));
 	int charIndex = IdentifySurvivor(client);
@@ -98,7 +98,7 @@ public void Event_PounceChargeEnd(Event hEvent, const char[] eName, bool dontBro
 	isSurvivorStaggerBlocked[charIndex] = true;
 }
 
-public Action HookOnThink(Handle hTimer, any client)
+Action HookOnThink(Handle hTimer, any client)
 {
 	if (client && IsSurvivor(client)) {
 		SDKHook(client, SDKHook_PostThink, OnThink);
@@ -107,7 +107,7 @@ public Action HookOnThink(Handle hTimer, any client)
 	return Plugin_Stop;
 }
 
-public void OnThink(int client)
+void OnThink(int client)
 {
 	int charIndex = IdentifySurvivor(client);
 	if (charIndex == SurvivorCharacter_Invalid) {
