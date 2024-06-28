@@ -640,16 +640,21 @@ void TankPass(int tank, int target, int admin = 0)
 		//TeleportEntity(target, vPos, vAng, NULL_VECTOR);
 
 		SetPassCount(tank);
-		L4D_ReplaceTank(tank, target);
+		passTankDelayed(tank,target);
 
-		if (IsMustIgnite(isOnFire))
-			IgniteEntity(target, IGNITE_TIME);
+		// if (IsMustIgnite(isOnFire))
+		// 	IgniteEntity(target, IGNITE_TIME);
 	}
 
 	Call_StartForward(g_fwdOnTankPass);
 	Call_PushCell(tank);
 	Call_PushCell(target);
 	Call_Finish();
+}
+
+public void passTankDelayed(int client, int target)
+{
+	L4D_ReplaceTank(client, target);
 }
 
 void TakeOverTank(int admin, int target)
