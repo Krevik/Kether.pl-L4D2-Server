@@ -640,7 +640,7 @@ void TankPass(int tank, int target, int admin = 0)
 		//TeleportEntity(target, vPos, vAng, NULL_VECTOR);
 
 		SetPassCount(tank);
-		passTankDelayed(tank,target);
+		RequestFrame(passTankDelayed, target);
 
 		// if (IsMustIgnite(isOnFire))
 		// 	IgniteEntity(target, IGNITE_TIME);
@@ -652,9 +652,18 @@ void TankPass(int tank, int target, int admin = 0)
 	Call_Finish();
 }
 
-public void passTankDelayed(int client, int target)
+public void passTankDelayed(int target)
 {
-	L4D_ReplaceTank(client, target);
+	int tank = GetTank();
+	float vAng[3], vOld[3], vNew[3];
+    GetClientEyeAngles(tank, vAng);
+    GetClientEyePosition(tank, vOld);
+    GetClientAbsOrigin(target, vNew);
+
+	L4D_ReplaceTank(tank, target);
+
+	TeleportEntity(tank, vOld, vAng, NULL_VECTOR);
+    TeleportEntity(target, vNew, NULL_VECTOR, NULL_VECTOR);
 }
 
 void TakeOverTank(int admin, int target)
