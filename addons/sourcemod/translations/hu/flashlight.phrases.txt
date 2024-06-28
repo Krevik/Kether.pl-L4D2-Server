@@ -1,0 +1,11 @@
+"Phrases"
+{
+	"Flashlight Intro"
+	{
+		"hu"		"Írd be a chatbe: {green}!light{default}. Színek: red, green, blue, purple, orange, yellow, white. Vagy 3 érték 0-255. PL: {green}!light red{default} vagy {green}!light 255 0 0{default}"
+	}
+	"Flashlight Usage"
+	{
+		"hu"		"Használat: {green}!light <szín neve|R G B>{default}. Színek: red, green, blue, purple, orange, yellow, white. Vagy 3 érték 0-255. PL: {green}!light red{default} vagy {green}!light 255 0 0{default}"
+	}
+}

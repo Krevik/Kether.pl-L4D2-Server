@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"Flashlight Intro"
+	{
+		"de"		"Chat Befehl zum An- und Ausschalten: {green}!light{default}. Farben: red, green, blue, purple, orange, yellow, white. Oder 3 Werte 0-255. z.B.: {green}!light red{default} oder {green}!light 255 0 0{default}"
+	}
+
+	"Flashlight Usage"
+	{
+		"de"		"Benutzung: {green}!light <Name der Farbe|R G B>{default}. Farben: red, green, blue, purple, orange, yellow, white. Oder 3 Werte 0-255. z.B.: {green}!light red{default} oder {green}!light 255 0 0{default}"
+	}
+}
