@@ -662,8 +662,8 @@ public void passTankDelayed(int target)
 
 	L4D_ReplaceTank(tank, target);
 
-	TeleportEntity(tank, vOld, vAng, NULL_VECTOR);
-    TeleportEntity(target, vNew, NULL_VECTOR, NULL_VECTOR);
+	TeleportEntity(target, vOld, vAng, NULL_VECTOR);
+    TeleportEntity(tank, vNew, NULL_VECTOR, NULL_VECTOR);
 }
 
 void TakeOverTank(int admin, int target)
