@@ -658,7 +658,7 @@ public void passTankDelayed(int target)
 	float vAng[3], vOld[3], vNew[3];
     GetClientEyeAngles(tank, vAng);
     GetClientEyePosition(tank, vOld);
-    GetClientAbsOrigin(target, vNew);
+    GetClientAbsOrigin(tank, vNew);
 
 	L4D_ReplaceTank(tank, target);
 
