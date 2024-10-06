@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# replace "steam" with the user you created, leave it alone if you've actually called your user "steam"
+SRCDS_USER="steam"
+
 # Do not change this path
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 # The path to the game, only change this if you have a different installation path than in the guide.
-DIR=/home/steam/l4d2
+DIR=/home/$SRCDS_USER/l4d2
 DAEMON="$DIR/srcds_run"
 
 # Change all Parameters to your needs.
@@ -56,9 +59,9 @@ case "$1" in
 		;;
 
 	stop)
-		if screen -ls |grep $NAME; then
+		if screen -ls |grep -w "$NAME"; then
 			echo -n "Stopping $DESC: $NAME"
-			kill `screen -ls |grep $NAME |awk -F . '{print $1}'|awk '{print $1}'`
+			kill `screen -ls |grep -w "$NAME" |awk -F . '{print $1}'|awk '{print $1}'`
 			echo " ... done."
 		else
 			echo "Couldn't find a running $DESC"
@@ -66,9 +69,9 @@ case "$1" in
 		;;
 
 	restart)
-		if screen -ls |grep $NAME; then
+		if screen -ls |grep -w "$NAME"; then
 			echo -n "Stopping $DESC: $NAME"
-			kill `screen -ls |grep $NAME |awk -F . '{print $1}'|awk '{print $1}'`
+			kill `screen -ls |grep -w "$NAME" |awk -F . '{print $1}'|awk '{print $1}'`
 			echo " ... done."
 		else
 			echo "Couldn't find a running $DESC"

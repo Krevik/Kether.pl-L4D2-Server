@@ -7,7 +7,7 @@ SRCDS_USER="steam"
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 # The path to the game, only change this if you have a different installation path than in the guide.
-DIR=/home/steam/Steam/steamapps/common/Left 4 Dead 2 Dedicated Server
+DIR=/home/$SRCDS_USER/Steam/steamapps/common/Left 4 Dead 2 Dedicated Server
 DAEMON="$DIR/srcds_run"
 
 # Change all Parameters to your needs.
@@ -59,9 +59,9 @@ case "$1" in
 		;;
 
 	stop)
-		if su $SRCDS_USER -l -c "screen -ls" |grep $NAME; then
+		if su $SRCDS_USER -l -c "screen -ls" |grep -w "$NAME"; then
 			echo -n "Stopping $DESC: $NAME"
-			kill `su $SRCDS_USER -l -c "screen -ls" |grep $NAME |awk -F . '{print $1}'|awk '{print $1}'`
+			kill `su $SRCDS_USER -l -c "screen -ls" |grep -w "$NAME" |awk -F . '{print $1}'|awk '{print $1}'`
 			echo " ... done."
 		else
 			echo "Couldn't find a running $DESC"
@@ -69,9 +69,9 @@ case "$1" in
 		;;
 
 	restart)
-		if su $SRCDS_USER -l -c "screen -ls" |grep $NAME; then
+		if su $SRCDS_USER -l -c "screen -ls" |grep -w "$NAME"; then
 			echo -n "Stopping $DESC: $NAME"
-			kill `su $SRCDS_USER -l -c "screen -ls" |grep $NAME |awk -F . '{print $1}'|awk '{print $1}'`
+			kill `su $SRCDS_USER -l -c "screen -ls" |grep -w "$NAME" |awk -F . '{print $1}'|awk '{print $1}'`
 			echo " ... done."
 		else
 			echo "Couldn't find a running $DESC"
