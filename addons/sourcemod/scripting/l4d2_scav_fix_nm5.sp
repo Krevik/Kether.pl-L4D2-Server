@@ -77,5 +77,5 @@ stock void Ignite(int entity)
 stock void FindEntityByClassname2(int startEnt, const char[] classname)
 {
 	while (startEnt > -1 && !IsValidEntity(startEnt)) startEnt--;
-	return FindEntityByClassname(startEnt, classname);
+	FindEntityByClassname(startEnt, classname);
 }
