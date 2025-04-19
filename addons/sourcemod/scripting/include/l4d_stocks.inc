@@ -1213,16 +1213,18 @@ stock bool L4D_IsPlayerUsingMountedWeapon(int client)
 stock int L4D_GetPlayerTempHealth(int client)
 {
     static Handle painPillsDecayCvar = INVALID_HANDLE;
-    if (painPillsDecayCvar == null)
+    if (painPillsDecayCvar == INVALID_HANDLE)
     {
         painPillsDecayCvar = FindConVar("pain_pills_decay_rate");
-        if (painPillsDecayCvar == null)
+        if (painPillsDecayCvar == INVALID_HANDLE)
         {
+            // Log error instead of just returning -1 silently
+            LogError("Could not find ConVar 'pain_pills_decay_rate'. L4D_GetPlayerTempHealth will not function correctly.");
             return -1;
         }
     }
 
-    int tempHealth = RoundToCeil(GetEntPropFloat(client, Prop_Send, "m_healthBuffer") - ((GetGameTime() - GetEntPropFloat(client, Prop_Send, "m_healthBufferTime")) * painPillsDecayCvar.FloatValue)) - 1;
+    int tempHealth = RoundToCeil(GetEntPropFloat(client, Prop_Send, "m_healthBuffer") - ((GetGameTime() - GetEntPropFloat(client, Prop_Send, "m_healthBufferTime")) * GetConVarFloat(painPillsDecayCvar))) - 1;
     return tempHealth < 0 ? 0 : tempHealth;
 }
 
@@ -1383,9 +1385,9 @@ stock int L4D1_GetShotgunNeedPump(int weapon)
  * @parma needPump      Whether shotgun needs to be pumped.
  * @noreturn
  */
-stock int L4D1_SetShotgunNeedPump(int weapon, bool needPump)
+stock void L4D1_SetShotgunNeedPump(int weapon, bool needPump)
 {
-    return SetEntProp(weapon, Prop_Send, "m_needPump", view_as<int>(needPump));
+    SetEntProp(weapon, Prop_Send, "m_needPump", view_as<int>(needPump));
 }
 
 /**
