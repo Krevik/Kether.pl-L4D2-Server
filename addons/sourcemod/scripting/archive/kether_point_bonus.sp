@@ -388,4 +388,6 @@ stock GetSurvivorPermanentHealth(client)
     return GetEntProp(client, Prop_Send, "m_iHealth");
 }
 
-stock IsIncapacitated(client) return GetEntProp(client, Prop_Send, "m_isIncapacitated");
+stock IsIncapacitated(client) {
+	return GetEntProp(client, Prop_Send, "m_isIncapacitated");
+}

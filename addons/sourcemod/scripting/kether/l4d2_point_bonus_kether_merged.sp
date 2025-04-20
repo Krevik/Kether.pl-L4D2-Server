@@ -409,7 +409,7 @@ stock GetMapMaxScore()
 	return L4D_GetVersusMaxCompletionScore();
 }
 
-stock IsIncapacitated(client) return GetEntProp(client, Prop_Send, "m_isIncapacitated");
+stock IsIncapacitated(client) {return GetEntProp(client, Prop_Send, "m_isIncapacitated");}
 
 stock GetSurvivorPermanentHealth(client)
 {
