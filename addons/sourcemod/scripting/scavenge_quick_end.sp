@@ -4,7 +4,7 @@
 #include <smlib>
 
 
-// We must wait longer because of cases where the game doesn't 
+// We must wait longer because of cases where the game doesn't
 // do the compare at the same time as us.
 #define SAFETY_BUFFER_TIME 1.0
 
@@ -17,7 +17,7 @@ new bool:g_bInSecondHalf;
 
 #define boolalpha(%0) (%0 ? "true" : "false")
 
-public Plugin:myinfo = 
+public Plugin:myinfo =
 {
 	name = "Scavenge Quick End",
 	author = "ProdigySim",
@@ -28,31 +28,31 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	HookEvent("gascan_pour_completed", EventHook:OnCanPoured, EventHookMode_PostNoCopy);
-	HookEvent("scavenge_round_start", EventHook:RoundStart);
-	HookEvent("round_end", EventHook:RoundEnd, EventHookMode_PostNoCopy);
-	
+	HookEvent("gascan_pour_completed", OnCanPoured, EventHookMode_PostNoCopy);
+	HookEvent("scavenge_round_start", RoundStart);
+	HookEvent("round_end", RoundEnd, EventHookMode_PostNoCopy);
+
 	RegConsoleCmd("sm_time", TimeCmd);
 }
 
 public Action:TimeCmd(client,args)
 {
 	if(!g_bInScavengeRound) return Plugin_Handled;
-	
+
 	if(g_bInSecondHalf)
 	{
 		new Float:lastRoundTime;
 		new lastRoundMinutes;
 		GetRoundTime(lastRoundMinutes,lastRoundTime,3);
-		
+
 		Client_PrintToChat(client, true, "[TIME] Last Round: {OG}%d {N}in {OG}%d:%05.2f", GameRules_GetScavengeTeamScore(3), lastRoundMinutes, lastRoundTime);
 	}
-	
+
 	new Float:thisRoundTime;
 	new thisRoundMinutes;
 	GetRoundTime(thisRoundMinutes,thisRoundTime,2);
 	Client_PrintToChat(client, true, "[TIME] This Round: {OG}%d {N}in {OG}%d:%05.2f", GameRules_GetScavengeTeamScore(2), thisRoundMinutes, thisRoundTime);
-	
+
 	return Plugin_Handled;
 }
 
@@ -65,16 +65,18 @@ public OnGameFrame()
 	}
 }
 
-public RoundEnd()
+public Action:RoundEnd(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if(g_bInScavengeRound) PrintRoundEndTimeData(g_bInSecondHalf);
-	
-	g_flDefaultLossTime=0.0;	
+
+	g_flDefaultLossTime=0.0;
 	g_bInScavengeRound=false;
 	g_bInSecondHalf=false;
+
+	return Plugin_Continue;
 }
 
-public RoundStart(Handle:event)
+public Action:RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	g_bInSecondHalf = !GetEventBool(event, "firsthalf");
 	g_bInScavengeRound=true;
@@ -87,9 +89,10 @@ public RoundStart(Handle:event)
 			g_flDefaultLossTime = GameRules_GetPropFloat("m_flRoundStartTime") + GameRules_GetRoundDuration(3) + SAFETY_BUFFER_TIME;
 		}
 	}
+	return Plugin_Continue;
 }
 
-public OnCanPoured()
+public Action:OnCanPoured(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	if(g_bInScavengeRound && g_bInSecondHalf)
 	{
@@ -104,6 +107,7 @@ public OnCanPoured()
 			}
 		}
 	}
+	return Plugin_Continue;
 }
 
 PrintRoundEndTimeData(bool:secondHalf)
@@ -141,7 +145,7 @@ stock Float:GameRules_GetRoundDuration(team)
 	}
 	team = L4D2_TeamNumberToTeamIndex(team);
 	if(team == -1) return -1.0;
-	
+
 	return GameRules_GetPropFloat("m_flRoundDuration", team);
 }
 
@@ -149,7 +153,7 @@ stock GameRules_GetScavengeTeamScore(team, round=-1)
 {
 	team = L4D2_TeamNumberToTeamIndex(team);
 	if(team == -1) return -1;
-	
+
 	if(round <= 0 || round > 5)
 	{
 		round = GameRules_GetProp("m_nRoundNumber");
@@ -171,7 +175,7 @@ stock L4D2_TeamNumberToTeamIndex(team)
 	// 3	   0		 1
 	// 3	   1		 0
 	// index = (team & 1) ^ flipped
-	// index = team-2 XOR flipped, or team%2 XOR flipped, or this...	
+	// index = team-2 XOR flipped, or team%2 XOR flipped, or this...
 	new bool:flipped = bool:GameRules_GetProp("m_bAreTeamsFlipped", 1);
 	if(flipped) ++team;
 	return team % 2;
