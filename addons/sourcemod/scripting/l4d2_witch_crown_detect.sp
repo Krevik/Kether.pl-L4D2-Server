@@ -13,8 +13,8 @@
 // --print damage done to witch by survs
 // TODO --detect draw crown
 
-int TEAM_SURVIVOR = 2;
-int TEAM_INFECTED = 3;
+#define TEAM_SURVIVORS 2
+#define TEAM_INFECTED 3
 
 Handle witchDamageTrie = INVALID_HANDLE;
 Handle witchHarasserTrie = INVALID_HANDLE;
