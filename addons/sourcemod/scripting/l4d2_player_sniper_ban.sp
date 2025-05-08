@@ -2,6 +2,7 @@
 //Changelog:
 /*
 0.2.0: Save banned players' SteamIDs to disk.
+0.3.0: Commands to temporarily ban/unban players.
 
 */
 
