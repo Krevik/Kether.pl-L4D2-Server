@@ -12,7 +12,7 @@
 #include <sdkhooks>
 #include <sdktools>
 
-#define PLUGIN_VERSION "0.2.0"
+#define PLUGIN_VERSION "0.3.0"
 
 // L4D2 Sniper Rifle Classnames
 #define L4D2_HUNTING_RIFLE_CLASSNAME	"weapon_sniper_scout"      // L4D2 Hunting Rifle (classname is weapon_sniper_scout)
@@ -45,6 +45,9 @@ public void OnPluginStart() {
 
 	RegAdminCmd("sm_bansnipers", Command_BanSnipers, ADMFLAG_BAN, "sm_bansnipers <#userid|name> - Bans a player from using sniper rifles.");
 	RegAdminCmd("sm_unbansnipers", Command_UnbanSnipers, ADMFLAG_BAN, "sm_unbansnipers <#userid|name|steamid> - Unbans a player or SteamID from using sniper rifles.");
+	RegAdminCmd("sm_tempbansnipers", Command_TempBanSnipers, ADMFLAG_KICK, "sm_tempbansnipers <#userid|name> - Temporarily bans a player from using sniper rifles for the current session.");
+	RegAdminCmd("sm_tempunbansnipers", Command_TempUnbanSnipers, ADMFLAG_KICK, "sm_tempunbansnipers <#userid|name> - Temporarily unbans a player from using sniper rifles for the current session.");
+
 
 	BuildPath(Path_SM, g_sBannedSnipersFilePath, sizeof(g_sBannedSnipersFilePath), BANNED_SNIPERS_FILE);
 
@@ -225,6 +228,102 @@ public Action Command_UnbanSnipers(int admin, int args) {
 		}
 	} else {
 		PrintToChat(admin, "[SM] SteamID %s was not found in the sniper ban list.", steamIdToUnban);
+	}
+	return Plugin_Handled;
+}
+
+public Action Command_TempBanSnipers(int admin, int args) {
+	if (args < 1) {
+		ReplyToCommand(admin, "[SM] Usage: sm_tempbansnipers <#userid|name>");
+		return Plugin_Handled;
+	}
+
+	char sTarget[64];
+	GetCmdArg(1, sTarget, sizeof(sTarget));
+
+	char sTargetName[MAX_TARGET_LENGTH];
+	int[] iTargets = new int[MAXPLAYERS];
+	int iNumTargets;
+	bool bML = false;
+
+	if ((iNumTargets = ProcessTargetString(
+			sTarget,
+			admin,
+			iTargets,
+			MAXPLAYERS,
+			COMMAND_FILTER_CONNECTED,
+			sTargetName,
+			sizeof(sTargetName),
+			bML)) <= 0) {
+		ReplyToTargetError(admin, iNumTargets);
+		return Plugin_Handled;
+	}
+
+	if (iNumTargets > 1) {
+		 ReplyToCommand(admin, "[SM] Cannot temporarily ban snipers for multiple players at once. Matched: %s", sTargetName);
+		 return Plugin_Handled;
+	}
+
+	int targetClient = iTargets[0];
+
+	if (!IsClientValidAndInGame(targetClient)) {
+		ReplyToCommand(admin, "[SM] Target player (%s) not found or not fully in game.", sTargetName);
+		return Plugin_Handled;
+	}
+
+	g_bIsSniperBanned[targetClient] = true;
+	LogAction(admin, targetClient, "\"%L\" temporarily banned sniper usage for \"%L\" (session only)", admin, targetClient);
+	PrintToChat(admin, "[SM] %N is now TEMPORARILY BANNED from using sniper rifles (session only).", targetClient);
+	if (g_cvEnableMessages.BoolValue) {
+		PrintToChat(targetClient, "[SM] An admin has TEMPORARILY BANNED you from using sniper rifles for this session.");
+	}
+	return Plugin_Handled;
+}
+
+public Action Command_TempUnbanSnipers(int admin, int args) {
+	if (args < 1) {
+		ReplyToCommand(admin, "[SM] Usage: sm_tempunbansnipers <#userid|name>");
+		return Plugin_Handled;
+	}
+
+	char sTarget[64];
+	GetCmdArg(1, sTarget, sizeof(sTarget));
+
+char sTargetName[MAX_TARGET_LENGTH];
+	int[] iTargets = new int[MAXPLAYERS];
+	int iNumTargets;
+	bool bML = false;
+
+	if ((iNumTargets = ProcessTargetString(
+			sTarget,
+			admin,
+			iTargets,
+			MAXPLAYERS,
+			COMMAND_FILTER_CONNECTED,
+			sTargetName,
+			sizeof(sTargetName),
+			bML)) <= 0) {
+		ReplyToTargetError(admin, iNumTargets);
+		return Plugin_Handled;
+	}
+
+	if (iNumTargets > 1) {
+		 ReplyToCommand(admin, "[SM] Cannot temporarily ban snipers for multiple players at once. Matched: %s", sTargetName);
+		 return Plugin_Handled;
+	}
+
+	int targetClient = iTargets[0];
+
+	if (targetClient <= 0) {
+		ReplyToTargetError(admin, targetClient); // ProcessTargetString returns error codes directly for NO_MULTI
+		return Plugin_Handled;
+	}
+
+	g_bIsSniperBanned[targetClient] = false;
+	LogAction(admin, targetClient, "\"%L\" temporarily UNBANNED sniper usage for \"%L\" (session only)", admin, targetClient);
+	PrintToChat(admin, "[SM] %N is NO LONGER temporarily banned from using sniper rifles (session only).", targetClient);
+	if (IsClientInGame(targetClient) && g_cvEnableMessages.BoolValue) {
+		PrintToChat(targetClient, "[SM] An admin has TEMPORARILY UNBANNED you from using sniper rifles for this session.");
 	}
 	return Plugin_Handled;
 }
