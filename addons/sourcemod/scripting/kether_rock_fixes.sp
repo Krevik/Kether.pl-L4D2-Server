@@ -11,7 +11,6 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <l4d_stocks>
-#include <l4d2lib>
 #include <l4d2_direct>
 
 #define COLLISION_GROUP_NORMAL 0
@@ -76,9 +75,6 @@ public Action Hook_FixRockCollision(int rock)
     SetEntProp(rock, Prop_Data, "m_CollisionGroup", COLLISION_GROUP_NORMAL);
     AcceptEntityInput(rock, "Wake");
 
-    // spawn the glow overlay
-    CreateRockGlow(rock);
-
     return Plugin_Continue;
 }
 
@@ -89,12 +85,6 @@ bool IsTankRock(int ent)
     GetEntPropString(ent, Prop_Data, "m_ModelName", model, sizeof(model));
     return (StrContains(model, "rock", false) != -1
          && StrContains(model, "tank", false)  != -1);
-}
-
-// attach a prop_dynamic_override that glows
-void CreateRockGlow(int target)
-{
-	L4D2_SetEntityGlow(target, L4D2Glow_Constant, 0, 22, {255, 255, 255}, true);
 }
 
 // only survivors see the glow overlay
