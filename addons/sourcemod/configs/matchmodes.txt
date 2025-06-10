@@ -22,10 +22,6 @@
 		{
 			"name" "Kether Campaign"
 		}
-		"kether_test"
-		{
-			"name" "Kether Test"
-		}
 		"kether_versus_t1_foolsday"
 		{
 			"name" "Kether VerSus T1"
@@ -40,10 +36,6 @@
 		"kether_t2_pure"
 		{
 			"name" "Kether T2 Pure"
-		}
-		"kether_t2_backport"
-		{
-			"name" "Kether Versus T2 (backport, use with caution)"
 		}
 	}
 	"Kether Scavenge Configs"
