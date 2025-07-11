@@ -33,6 +33,10 @@
 		{
 			"name" "Kether T2" 
 		}
+		"kether_versus_t2_realism"
+		{
+			"name" "Kether Versus T2 Realism"
+		}
 		"kether_versus_turbo_t2"
 		{
 			"name" "Kether Versus T2 Turbo"
