@@ -37,7 +37,7 @@ SVNUM=1
 IP=54.36.179.182
 PORT=27015
 NAME=L4D2_Server$SVNUM
-PARAMS="-game left4dead2 -ip $IP -port $PORT +sv_clockcorrection_msecs 25 -timeout 10 -tickrate 128 +map c8m1_apartment -maxplayers 32 +servercfgfile server$SVNUM.cfg"
+PARAMS="-game left4dead2 -ip $IP -port $PORT +sv_clockcorrection_msecs 25 -timeout 1 -tickrate 128 +map c8m1_apartment -maxplayers 32 +servercfgfile server$SVNUM.cfg"
 DESC="L4D2 Dedicated Server #$SVNUM on port $PORT"
 
 
