@@ -118,9 +118,13 @@ void PlayerSpawn_Event(Event event, const char[] name, bool dontBroadcast)
 		return;
 	}
 
+	// Get the Jockey's spawn position
+	float vOrigin[3];
+	GetClientAbsOrigin(client, vOrigin);
+
 	// Play the first sound instantly on spawn
 	int rndPick = GetRandomInt(0, (sizeof(g_sJockeySound) - 1));
-	EmitSoundToAll(g_sJockeySound[rndPick], client, SNDCHAN_VOICE, SNDLEVEL_HELICOPTER);
+	EmitSoundToAll(g_sJockeySound[rndPick], client, SNDCHAN_VOICE, SNDLEVEL_HELICOPTER, SND_NOFLAGS, 1.0, 100, -1, vOrigin);
 
 	// Setup the sound interval
 	RequestFrame(JockeyRideEnd_NextFrame, GetClientUserId(client));
