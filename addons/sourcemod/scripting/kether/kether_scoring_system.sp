@@ -217,6 +217,7 @@ public void clearSavedBonusParameters()
 		tankKillBonus[round]	 = 0.0;
 		witchCrownBonus[round]	 = 0.0;
 		survivorsSurvived[round] = 0;
+		mapDistanceFactor		 = 0.0;
 	}
 
 	CreateTimer(0.1, UpdateMapDistanceFactor);
@@ -301,7 +302,11 @@ public Action UpdateMapDistanceFactor(Handle timer)
 		CreateTimer(2.0, UpdateMapDistanceFactor);
 		return Plugin_Continue;
 	}
-	mapDistanceFactor = GetMapDistanceFactor();
+	
+	float newFactor = GetMapDistanceFactor();
+	if (newFactor > 0.0) {  // Only update if we get a valid value
+		mapDistanceFactor = newFactor;
+	}
 
 	return Plugin_Continue;
 }
