@@ -20,7 +20,8 @@ float  survivalBonus[2];
 float  tankKillBonus[2];
 float  tankPassBonus[2];
 float  witchCrownBonus[2];
-int	   survivorsSurvived[2];
+int	   survivorsSurvived[2]; // Excluding incaps
+int	   aliveSurvs[2]; // Including incaps
 int	   teamSize;
 float  mapDistanceFactor;
 int	   playerIncaps[64];
@@ -38,7 +39,7 @@ public Plugin myinfo =
 	name		= "L4D2 Scoring plugin",
 	author		= "Krevik",
 	description = "Gives score bonuses for pills, adrenaline, HP, tank kill/pass, witch crown",
-	version		= "1.9.9.9.9.10",
+	version		= "1.10",
 	url			= "kether.pl"
 };
 
@@ -85,7 +86,7 @@ public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBr
 	}
 	CreateTimer(0.1, UpdateMapDistanceFactor);
 	// Rest player incaps counter
-	for (new i = 1; i <= MaxClients; i++)
+	for (int i = 1; i <= MaxClients; i++)
 	{
 		playerIncaps[i] = 0;
 	}
@@ -207,6 +208,7 @@ public void clearSavedBonusParameters()
 
 	for (int round = 0; round <= 1; round++)
 	{
+		aliveSurvs[round]		 = 0;
 		totalBonus[round]		 = 0.0;
 		healthItemsBonus[round]	 = 0.0;
 		healthBonus[round]		 = 0.0;
@@ -224,7 +226,7 @@ void UpdateSurvivalBonus(int round)
 {
 	survivalBonus[round] = 0.0;
 	int survivorCount	 = 0;
-	for (new i = 1; i <= MaxClients&& survivorCount < teamSize; i++)
+	for (int i = 1; i <= MaxClients && survivorCount < teamSize; i++)
 	{
 		if (IsSurvivor(i) && IsPlayerAlive(i) && (!L4D_IsPlayerIncapacitated(i) || L4D_IsInLastCheckpoint(i)))
 		{
@@ -259,7 +261,7 @@ void UpdateCurrentHealthAndHealthItemsBonus(int round)
 	int survivorCount		= 0;
 	healthBonus[round]		= 0.0;
 	healthItemsBonus[round] = 0.0;
-	for (new i = 1; i <= MaxClients&& survivorCount < teamSize; i++)
+	for (int i = 1; i <= MaxClients && survivorCount < teamSize; i++)
 	{
 		if (IsSurvivor(i) && IsPlayerAlive(i) && (!L4D_IsPlayerIncapacitated(i) || L4D_IsInLastCheckpoint(i)))
 		{
@@ -283,7 +285,7 @@ void UpdateCurrentHealthAndHealthItemsBonus(int round)
 int GetNotIncappedSurvivorsCount()
 {
 	int survivorCount = 0;
-	for (new i = 1; i <= MaxClients&& survivorCount < teamSize; i++)
+	for (int i = 1; i <= MaxClients && survivorCount < teamSize; i++)
 	{
 		if (IsSurvivor(i) && IsPlayerAlive(i) && (!L4D_IsPlayerIncapacitated(i) || L4D_IsInLastCheckpoint(i)))
 		{
@@ -331,7 +333,7 @@ bool IsSurvivor(int client)
 
 bool HasMedkit(int client)
 {
-	new item = GetPlayerWeaponSlot(client, 3);
+	int item = GetPlayerWeaponSlot(client, 3);
 	if (IsValidEdict(item))
 	{
 		char buffer[64];
@@ -343,7 +345,7 @@ bool HasMedkit(int client)
 
 bool HasPills(int client)
 {
-	new item = GetPlayerWeaponSlot(client, 4);
+	int item = GetPlayerWeaponSlot(client, 4);
 	if (IsValidEdict(item))
 	{
 		char buffer[64];
@@ -355,7 +357,7 @@ bool HasPills(int client)
 
 bool HasAdrenaline(int client)
 {
-	new item = GetPlayerWeaponSlot(client, 4);
+	int item = GetPlayerWeaponSlot(client, 4);
 	if (IsValidEdict(item))
 	{
 		char buffer[64];
@@ -379,12 +381,21 @@ public void TP_OnTankPass()
 
 public void OnTankDeath()
 {
-		int round = InSecondHalfOfRound();
+	int round = InSecondHalfOfRound();
 	int survs = GetNotIncappedSurvivorsCount();
 	if (survs > 0)
 	{
-		tankKillBonus[round] += TANK_KILL_BONUS;
-		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_KILL_BONUS));
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (IsSurvivor(i) && IsPlayerAlive(i))
+			{
+				aliveSurvs[round]++;
+			}
+		}
+		//float difficultyMultipier = (float(survs[round]) / float(teamSize)); // ¼
+		float difficultyMultipier = ((float(aliveSurvs[round]) + float(teamSize)) / (2.0 * float(teamSize)));
+		tankKillBonus[round] += TANK_KILL_BONUS / difficultyMultipier;
+		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(tankKillBonus[round]));
 	}
 }
 
