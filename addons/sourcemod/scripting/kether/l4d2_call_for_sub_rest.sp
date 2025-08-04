@@ -12,7 +12,7 @@ public Plugin myinfo =
 	name = "[ANY] Call For Sub",
 	author = "Krevik, StarterX4",
 	description = "Lets players to call for a sub.",
-	version = "2.0",
+	version = "2.0.1",
 	url = "https://kether.pl"
 };
 
@@ -47,9 +47,9 @@ public void postCallForSubRequest(int clientID)
 				GetClientAuthId(clientID, AuthId_SteamID64, steamID, sizeof(steamID)-1);
 
 				JSONObject cfs = new JSONObject();
-				cfs.SetString("steamID", steamID);
+				cfs.SetInt64("steamID", steamID);
 
-				HTTPRequest request = new HTTPRequest("http://144.24.170.110:3002/api/callForSub");
+				HTTPRequest request = new HTTPRequest("http://21370000.xyz/api/callForSub");
 				request.Post(cfs, OnCalledForSub, clientID);
 
 				// JSON objects and arrays must be deleted when you are done with them
