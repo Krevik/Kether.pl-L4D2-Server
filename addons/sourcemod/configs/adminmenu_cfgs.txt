@@ -4,7 +4,14 @@
  */
 Configs
 {
-	"cfg/server.cfg"			"Standard Server Setup"
-	"cfg/sourcemod/sm_warmode_on.cfg"	"War Mode On"
-	"cfg/sourcemod/sm_warmode_off.cfg"	"War Mode Off"
+	"cfg/cfgogl_adminmenu/kether_versus_t1.cfg"			"Kether Versus T1"
+	"cfg/cfgogl_adminmenu/kether_t2.cfg"				"Kether Versus T2"
+	"cfg/cfgogl_adminmenu/kether_versus_t1_realism.cfg"		"Kether Versus T1 Realism"
+	"cfg/cfgogl_adminmenu/kether_versus_t2_realism.cfg"		"Kether Versus T2 Realism"
+	"cfg/cfgogl_adminmenu/kether_versus_turbo_t1.cfg"		"Kether Versus Turbo T1"
+	"cfg/cfgogl_adminmenu/kether_versus_turbo_t2.cfg"		"Kether Versus Turbo T2"
+	"cfg/cfgogl_adminmenu/zonemod.cfg"						"ZoneMod"
+	"" 							"---------------------------------------------"
+	""							"↓↓ DON'T USE UNTIL SOMETHING SERIOUSLY BROKE ↓↓"
+	"cfg/server.cfg"			"Standard Server Setup (server.cfg starting cycle)"
 }
