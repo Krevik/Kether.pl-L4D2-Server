@@ -45,6 +45,5 @@ Initial_Settings_Setter.smx
 motd_lerp.sp
 motd_lerp.smx
 logs/
-addons/sourcemod/configs/databases.cfg
 cfg/rcon_password.cfg
 OUTDIR/
