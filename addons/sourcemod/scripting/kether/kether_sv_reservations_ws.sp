@@ -23,7 +23,6 @@ public Plugin myinfo =
 WebSocket g_ws = null;
 
 bool g_isReserved = false;
-int g_reservedTimestamp = 0;
 char g_reservedUntil[64];
 
 // Plugin Lifecycle
@@ -118,21 +117,18 @@ void HandleSetReservation(const char[] message)
     }
     
     // Store raw timestamp and format for display
-    g_reservedTimestamp = timestamp;
     FormatTimestamp(timestamp, g_reservedUntil, sizeof(g_reservedUntil));
     g_isReserved = true;
 
-    PrintToServer("[WS] Reservation set until %s", g_reservedUntil);
+    PrintToServer("[WS] Reservation set off %s", g_reservedUntil);
     ShowReservationMessages();
 }
 
 void HandleClearReservation()
 {
+    if (g_isReserved == true) PrintToServer("[WS] Reservation cleared");
     g_isReserved = false;
-    g_reservedTimestamp = 0;
     g_reservedUntil[0] = '\0';
-
-    PrintToServer("[WS] Reservation cleared");
 }
 
 void ShowReservationMessages()
