@@ -1,7 +1,7 @@
 #include <websocket>
 #include <colors>
 
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 #define PLUGIN_URL "https://kether.pl"
 
 // Constants
@@ -43,6 +43,30 @@ public void OnPluginStart()
     g_ws.Connect();
 
     CreateTimer(REMINDER_INTERVAL, Timer_Reminder, _, TIMER_REPEAT);
+}
+
+public void OnClientPutInServer(int client)
+{
+    // Check if this is the first human player joining an empty server
+    if (!IsFakeClient(client) && IsClientInGame(client))
+    {
+        // Count other human players (excluding this one)
+        int humanCount = 0;
+        for (int i = 1; i <= MaxClients; i++)
+        {
+            if (i != client && IsClientInGame(i) && !IsFakeClient(i))
+            {
+                humanCount++;
+            }
+        }
+        
+        // If server was empty (0 other humans) and reservation is active, show reminder
+        if (humanCount == 0 && g_isReserved)
+        {
+            // Delay slightly to ensure client is fully connected
+            CreateTimer(1.0, Timer_ShowReminderOnJoin, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+        }
+    }
 }
 
 public void OnPluginEnd()
@@ -96,6 +120,19 @@ public Action Timer_Reminder(Handle timer)
     return Plugin_Continue;
 }
 
+public Action Timer_ShowReminderOnJoin(Handle timer, int userId)
+{
+    int client = GetClientOfUserId(userId);
+    
+    // Only show if reservation is still active and client is still connected
+    if (g_isReserved && client > 0 && IsClientInGame(client) && !IsFakeClient(client))
+    {
+        ShowReservationMessages();
+    }
+    
+    return Plugin_Stop;
+}
+
 // Helper Functions
 void HandleSetReservation(const char[] message)
 {
@@ -142,9 +179,9 @@ void ShowReservationMessages()
     char timeRemaining[64];
     FormatTimestamp(g_reservedTimestamp, timeRemaining, sizeof(timeRemaining));
     
-    CPrintToChatAll("{green}Server has been reserved for the Kether community starting in {red}%s{green}!", timeRemaining);
-    CPrintToChatAll("{green}You are advised to finish your match and leave the server within {red}%s{green}.", timeRemaining);
-    CPrintToChatAll("{green}A few minutes (3-5) before the reservation starts, a sudden restart may happen.");
+    CPrintToChatAll("{green}Server has been reserved for Kether community game in {red}%s{green}.", timeRemaining);
+    CPrintToChatAll("{green}Please finish your match and leave the server within {red}%s{green}.", timeRemaining);
+    CPrintToChatAll("{green}Restart may occur 3-5 minutes before reservation.");
 }
 
 void FormatTimestamp(int timestamp, char[] buffer, int maxlen)
