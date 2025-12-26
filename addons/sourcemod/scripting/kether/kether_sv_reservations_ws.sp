@@ -1,6 +1,8 @@
 #include <websocket>
+#include <colors>
 
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
+#define PLUGIN_URL "https://kether.pl"
 
 // Constants
 #define REMINDER_INTERVAL 300.0
@@ -16,20 +18,21 @@ public Plugin myinfo =
     author = "StarterX4",
     description = "Manages server reservations via WebSocket connection",
     version = PLUGIN_VERSION,
-    url = "https://kether.pl"
+    url = PLUGIN_URL
 };
 
 // Globals
 WebSocket g_ws = null;
 
 bool g_isReserved = false;
-char g_reservedUntil[64];
+int g_reservedTimestamp = 0;
 
 // Plugin Lifecycle
 public void OnPluginStart()
 {
     g_ws = new WebSocket("wss://21370000.xyz/api/ws/plan", WebSocket_STRING);
 
+    g_ws.SetHeader("Origin", PLUGIN_URL);
     g_ws.SetOpenCallback(OnWSOpen);
     g_ws.SetMessageCallback(OnWSMessage);
     g_ws.SetCloseCallback(OnWSClose);
@@ -116,11 +119,13 @@ void HandleSetReservation(const char[] message)
         return;
     }
     
-    // Store raw timestamp and format for display
-    FormatTimestamp(timestamp, g_reservedUntil, sizeof(g_reservedUntil));
+    // Store raw timestamp
+    g_reservedTimestamp = timestamp;
     g_isReserved = true;
 
-    PrintToServer("[WS] Reservation set off %s", g_reservedUntil);
+    char timeStr[64];
+    FormatTimestamp(timestamp, timeStr, sizeof(timeStr));
+    PrintToServer("[WS] Reservation set off %s", timeStr);
     ShowReservationMessages();
 }
 
@@ -128,14 +133,18 @@ void HandleClearReservation()
 {
     if (g_isReserved == true) PrintToServer("[WS] Reservation cleared");
     g_isReserved = false;
-    g_reservedUntil[0] = '\0';
+    g_reservedTimestamp = 0;
 }
 
 void ShowReservationMessages()
 {
-    PrintToChatAll("Server has been reserved off {red}%s{default} to the Kether community!", g_reservedUntil);
-    PrintToChatAll("You are advised to finish your match and leave the server until {red}%s{default}.", g_reservedUntil);
-    PrintToChatAll("Few (3~5) minutes before the reservation starts, sudden restart may happen.");
+    // Recalculate time remaining on each reminder
+    char timeRemaining[64];
+    FormatTimestamp(g_reservedTimestamp, timeRemaining, sizeof(timeRemaining));
+    
+    CPrintToChatAll("{green}Server has been reserved for the Kether community starting in {red}%s{green}!", timeRemaining);
+    CPrintToChatAll("{green}You are advised to finish your match and leave the server within {red}%s{green}.", timeRemaining);
+    CPrintToChatAll("{green}A few minutes (3-5) before the reservation starts, a sudden restart may happen.");
 }
 
 void FormatTimestamp(int timestamp, char[] buffer, int maxlen)
