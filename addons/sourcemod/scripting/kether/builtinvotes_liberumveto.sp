@@ -5,11 +5,12 @@
 #include <sdktools>
 #include <builtinvotes>
 
-#define PLUGIN_VERSION "1.0.0"
+#define PLUGIN_VERSION "1.0.1"
 
 const int TEAM_SPECTATE = 1;
 const int TEAM_SURVIVOR = 2;
 const int TEAM_INFECTED = 3;
+const int L4D2_VOTE_TEAM_ALL = 255; // L4D2 uses 255 for "all teams" votes
 
 bool g_bBuiltinVotesAvailable;
 bool g_bBuiltinCancelAvailable;
@@ -70,14 +71,24 @@ Action Command_LiberumVeto(int client, int args)
 
 	bool voteCancelled = false;
 	int fakeNoVotesIssued = 0;
+	bool isGameVote = false;
 
-	if (g_bBuiltinCancelAvailable)
+	// Check if it's a native game vote (ReturnToLobby, ChangeMission, etc.)
+	if (g_bGameVoteStatusAvailable && Game_IsVoteInProgress())
 	{
+		isGameVote = true;
+		// Game votes cannot be cancelled via CancelBuiltinVote(), must use Vote No
+		fakeNoVotesIssued = ForceBuiltinVoteNo();
+	}
+	else if (g_bBuiltinCancelAvailable && g_bBuiltinVotesAvailable && IsBuiltinVoteInProgress())
+	{
+		// Only use CancelBuiltinVote() for actual BuiltinVotes (plugin-created votes)
 		CancelBuiltinVote();
 		voteCancelled = true;
 	}
 	else
 	{
+		// Fallback: try to force Vote No
 		fakeNoVotesIssued = ForceBuiltinVoteNo();
 	}
 
@@ -89,7 +100,14 @@ Action Command_LiberumVeto(int client, int args)
 	}
 	else if (fakeNoVotesIssued > 0)
 	{
-		ReplyToInvoker(client, "[LiberumVeto] Issued Vote No for %d eligible players.", fakeNoVotesIssued);
+		if (isGameVote)
+		{
+			ReplyToInvoker(client, "[LiberumVeto] Issued Vote No for %d eligible players (game vote).", fakeNoVotesIssued);
+		}
+		else
+		{
+			ReplyToInvoker(client, "[LiberumVeto] Issued Vote No for %d eligible players.", fakeNoVotesIssued);
+		}
 	}
 	else
 	{
@@ -127,10 +145,15 @@ int ForceBuiltinVoteNo()
 
 	int forced = 0;
 	int team = BUILTINVOTES_ALL_TEAMS;
+	bool isGameVote = false;
 
-	if (g_bGameVoteStatusAvailable && g_bGameVoteTeamAvailable && Game_IsVoteInProgress())
+	if (g_bGameVoteStatusAvailable && Game_IsVoteInProgress())
 	{
-		team = Game_GetVoteTeam();
+		isGameVote = true;
+		if (g_bGameVoteTeamAvailable)
+		{
+			team = Game_GetVoteTeam();
+		}
 	}
 
 	for (int i = 1; i <= MaxClients; i++)
@@ -140,14 +163,20 @@ int ForceBuiltinVoteNo()
 			continue;
 		}
 
-		if (g_bBuiltinVotePoolAvailable && !IsClientInBuiltinVotePool(i))
+		// Only check vote pool for BuiltinVotes, not game votes
+		if (!isGameVote && g_bBuiltinVotePoolAvailable && !IsClientInBuiltinVotePool(i))
 		{
 			continue;
 		}
 
-		if (team >= TEAM_SPECTATE && team <= TEAM_INFECTED && GetClientTeam(i) != team)
+		// Check team restrictions (handle both -1 and 255 as "all teams")
+		int clientTeam = GetClientTeam(i);
+		if (team != BUILTINVOTES_ALL_TEAMS && team != L4D2_VOTE_TEAM_ALL)
 		{
-			continue;
+			if (team >= TEAM_SPECTATE && team <= TEAM_INFECTED && clientTeam != team)
+			{
+				continue;
+			}
 		}
 
 		FakeClientCommand(i, "Vote No");
