@@ -74,8 +74,8 @@
 		{
 			"Event"
 			{
-				"min"		"53"
-				"max"		"75"
+				"min"		"49"
+				"max"		"85"
 			}
 		}
 	}
@@ -2966,6 +2966,20 @@
 		"start_extra_dist"	"150.000000"
 		"end_dist"			"150.000000"
 	}
+	//=======================================================================
+	//=============== Heaven Can Wait II
+	"hcw2_rivermotel"
+	{
+		"tank_ban_flow"
+		{
+			"kanaly"
+			{
+				"min"		"0"
+				"max"		"35"
+			}
+		}
+	}
+	
 	
 //-------- ↓↓↓ you can add custom info here ↓↓↓
 
