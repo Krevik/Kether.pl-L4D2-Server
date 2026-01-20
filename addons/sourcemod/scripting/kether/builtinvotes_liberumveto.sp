@@ -23,7 +23,7 @@
 #include <sdktools>
 #include <builtinvotes>
 
-#define PLUGIN_VERSION "1.0.1"
+#define PLUGIN_VERSION "1.0.2"
 
 const int TEAM_SPECTATE = 1;
 const int TEAM_SURVIVOR = 2;
@@ -48,6 +48,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	RegAdminCmd("sm_liberumveto", Command_LiberumVeto, ADMFLAG_GENERIC, "Forces the current vote to fail.");
+	RegAdminCmd("sm_lv", Command_LiberumVeto, ADMFLAG_GENERIC, "Alias for sm_liberumveto.");
 
 	HookConVarChange(CreateConVar("sm_liberumveto_version", PLUGIN_VERSION, "NativeVotes Liberum Veto version", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD), ConVar_VersionChanged);
 
