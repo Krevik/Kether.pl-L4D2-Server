@@ -19,16 +19,24 @@
 #include <websocket>
 #include <colors>
 
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 #define PLUGIN_URL "https://kether.pl"
 
 // Constants
-#define REMINDER_INTERVAL 300.0
 #define SECONDS_PER_DAY 86400
 #define SECONDS_PER_HOUR 3600
 #define SECONDS_PER_MINUTE 60
 #define SET_COMMAND_PREFIX "SET "
 #define SET_COMMAND_PREFIX_LEN 4
+
+// Dynamic reminder interval thresholds
+#define SECONDS_3_HOURS 10800
+#define SECONDS_50_MINUTES 3000
+#define SECONDS_20_MINUTES 1200
+#define INTERVAL_1_HOUR 3600.0
+#define INTERVAL_30_MIN 1800.0
+#define INTERVAL_15_MIN 900.0
+#define INTERVAL_5_MIN 300.0
 
 public Plugin myinfo =
 {
@@ -44,6 +52,7 @@ WebSocket g_ws = null;
 
 bool g_isReserved = false;
 int g_reservedTimestamp = 0;
+Handle g_reminderTimer = null;
 
 // Plugin Lifecycle
 public void OnPluginStart()
@@ -59,8 +68,6 @@ public void OnPluginStart()
     g_ws.AutoReconnect = true;
 
     g_ws.Connect();
-
-    CreateTimer(REMINDER_INTERVAL, Timer_Reminder, _, TIMER_REPEAT);
 }
 
 public void OnClientPutInServer(int client)
@@ -89,6 +96,12 @@ public void OnClientPutInServer(int client)
 
 public void OnPluginEnd()
 {
+    if (g_reminderTimer != null)
+    {
+        KillTimer(g_reminderTimer);
+        g_reminderTimer = null;
+    }
+    
     if (g_ws != null)
     {
         delete g_ws;
@@ -130,10 +143,28 @@ public void OnWSError(WebSocket ws, const char[] errMsg)
 // Timer Callbacks
 public Action Timer_Reminder(Handle timer)
 {
-    if (g_isReserved)
+    if (!g_isReserved)
     {
-        ShowReservationMessages();
+        g_reminderTimer = null;
+        return Plugin_Stop;
     }
+    
+    // Check if reservation has expired
+    int time = GetTime();
+    int diff = g_reservedTimestamp - time;
+    
+    if (diff <= 0)
+    {
+        // Reservation expired, stop timer
+        g_isReserved = false;
+        g_reminderTimer = null;
+        return Plugin_Stop;
+    }
+    
+    ShowReservationMessages();
+    
+    // Restart timer with updated interval based on remaining time
+    RestartReminderTimer();
 
     return Plugin_Continue;
 }
@@ -182,6 +213,9 @@ void HandleSetReservation(const char[] message)
     FormatTimestamp(timestamp, timeStr, sizeof(timeStr));
     PrintToServer("[WS] Reservation set off %s", timeStr);
     ShowReservationMessages();
+    
+    // Start timer with appropriate interval based on remaining time
+    RestartReminderTimer();
 }
 
 void HandleClearReservation()
@@ -189,6 +223,12 @@ void HandleClearReservation()
     if (g_isReserved == true) PrintToServer("[WS] Reservation cleared");
     g_isReserved = false;
     g_reservedTimestamp = 0;
+    
+    if (g_reminderTimer != null)
+    {
+        KillTimer(g_reminderTimer);
+        g_reminderTimer = null;
+    }
 }
 
 void ShowReservationMessages()
@@ -223,4 +263,57 @@ void FormatTimestamp(int timestamp, char[] buffer, int maxlen)
         Format(buffer, maxlen, "%d hour(s) %d minute(s)", hours, minutes);
     else
         Format(buffer, maxlen, "%d minute(s)", minutes);
+}
+
+float GetReminderInterval(int remainingSeconds)
+{
+    if (remainingSeconds > SECONDS_3_HOURS)
+    {
+        return INTERVAL_1_HOUR;
+    }
+    else if (remainingSeconds > SECONDS_50_MINUTES)
+    {
+        return INTERVAL_30_MIN;
+    }
+    else if (remainingSeconds > SECONDS_20_MINUTES)
+    {
+        return INTERVAL_15_MIN;
+    }
+    else
+    {
+        return INTERVAL_5_MIN;
+    }
+}
+
+void RestartReminderTimer()
+{
+    // Kill existing timer if it exists
+    if (g_reminderTimer != null)
+    {
+        KillTimer(g_reminderTimer);
+        g_reminderTimer = null;
+    }
+    
+    // Check if reservation is still valid
+    if (!g_isReserved)
+    {
+        return;
+    }
+    
+    // Calculate remaining time
+    int time = GetTime();
+    int diff = g_reservedTimestamp - time;
+    
+    // If reservation expired, don't start timer
+    if (diff <= 0)
+    {
+        g_isReserved = false;
+        return;
+    }
+    
+    // Get appropriate interval based on remaining time
+    float interval = GetReminderInterval(diff);
+    
+    // Create new repeating timer with calculated interval
+    g_reminderTimer = CreateTimer(interval, Timer_Reminder, _, TIMER_REPEAT);
 }
