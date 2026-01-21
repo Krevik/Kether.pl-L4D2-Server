@@ -1,675 +1,1658 @@
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <sdktools>
-#include <colors>
 
-#pragma newdecls required
+#define CONFIG_LADDERS           "data/l4d2_ladder_editor.cfg"
+#define CHAT_TAG                 "\x04[Ladder]\x01 "
+#define MAX_LADDERS              128
+#define MAX_REMOVES              128
+#define DEFAULT_POS_STEP         1.0
+#define DEFAULT_ANG_STEP         15.0
+#define DEFAULT_SIZE_STEP        4.0
+#define ORIGIN_TOLERANCE         1.0
+#define ANGLE_TOLERANCE          1.0
 
-#define MAX_STR_LEN             100
-#define DEFAULT_STEP_SIZE       1.0
-#define TEAM_INFECTED           3
-#define HUD_DRAW_INTERVAL       0.5
+enum struct LadderData
+{
+    char model[128];
+    float origin[3];
+    float angles[3];
+    float normal[3];
+}
 
-static int selectedLadder[MAXPLAYERS + 1];
-static int bEditMode[MAXPLAYERS + 1];
-static float stepSize[MAXPLAYERS + 1];
-StringMap hLadders;
-bool in_attack[MAXPLAYERS + 1];
-bool in_attack2[MAXPLAYERS + 1];
-bool in_score[MAXPLAYERS + 1];
-bool in_speed[MAXPLAYERS + 1];
-bool bHudActive[MAXPLAYERS + 1];
-bool bHudHintShown[MAXPLAYERS + 1];
-
-public Plugin myinfo = {
-    name = "L4D2 Ladder Editor",
-    author = "devilesk",
-    version = "0.5.0",
-    description = "Clone and move special infected ladders.",
-    url = "https://github.com/devilesk/rl4d2l-plugins"
+public Plugin myinfo =
+{
+    name = "L4D2 Ladder Editor (Menu)",
+    author = "Kether",
+    description = "Menu-based ladder editor with live save.",
+    version = "1.0.0",
+    url = ""
 };
 
-public void OnPluginStart() {
-    RegAdminCmd("sm_ladder_edit", Command_Edit, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_step", Command_Step, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_select", Command_Select, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_clone", Command_Clone, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_move", Command_Move, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_nudge", Command_Nudge, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_rotate", Command_Rotate, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_kill", Command_Kill, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_info", Command_Info, ADMFLAG_ROOT);
-    RegAdminCmd("sm_ladder_togglehud", Command_ToggleHud, ADMFLAG_ROOT);
-    HookEvent("player_team", PlayerTeam_Event);
-    hLadders = new StringMap();
-    for (int i = 1; i <= MaxClients; i++) {
-        selectedLadder[i] = -1;
-        bEditMode[i] = false;
-        in_attack[i] = false;
-        in_attack2[i] = false;
-        in_score[i] = false;
-        in_speed[i] = false;
-        bHudActive[i] = false;
-        stepSize[i] = DEFAULT_STEP_SIZE;
-    }
-    CreateTimer(HUD_DRAW_INTERVAL, HudDrawTimer, _, TIMER_REPEAT);
-}
+int g_iSelectedLadder[MAXPLAYERS + 1];
+float g_fPosStep[MAXPLAYERS + 1];
+float g_fAngStep[MAXPLAYERS + 1];
+float g_fSizeStep[MAXPLAYERS + 1];
+bool g_bMenuOpen[MAXPLAYERS + 1];
+int g_iLastMenuAction[MAXPLAYERS + 1]; // 0=main, 1=nudge, 2=rotate, 3=size, 4=normal
 
-public void OnMapStart() {
-    for (int i = 1; i <= MaxClients; i++) {
-        selectedLadder[i] = -1;
-        bEditMode[i] = false;
-        in_attack[i] = false;
-        in_attack2[i] = false;
-        in_score[i] = false;
-        in_speed[i] = false;
-        bHudActive[i] = false;
-        stepSize[i] = DEFAULT_STEP_SIZE;
-    }
-    hLadders.Clear();
-}
+LadderData g_AddData[MAX_LADDERS];
+int g_iAddEntRef[MAX_LADDERS];
+int g_iAddCount;
 
-public void OnClientAuthorized(int client, const char[] auth)
+LadderData g_RemoveData[MAX_REMOVES];
+int g_iRemoveCount;
+
+bool g_bMapStarted;
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
-    bHudHintShown[client] = false;
+    EngineVersion test = GetEngineVersion();
+    if (test != Engine_Left4Dead2)
+    {
+        strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
+        return APLRes_SilentFailure;
+    }
+    return APLRes_Success;
+}
+
+public void OnPluginStart()
+{
+    RegAdminCmd("sm_ladder_menu", Command_Menu, ADMFLAG_ROOT, "Open ladder editor menu.");
+
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        g_iSelectedLadder[i] = INVALID_ENT_REFERENCE;
+        g_fPosStep[i] = DEFAULT_POS_STEP;
+        g_fAngStep[i] = DEFAULT_ANG_STEP;
+        g_fSizeStep[i] = DEFAULT_SIZE_STEP;
+        g_bMenuOpen[i] = false;
+        g_iLastMenuAction[i] = 0;
+    }
+}
+
+static int g_iLastButtons[MAXPLAYERS + 1];
+
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon)
+{
+    if (client <= 0 || client > MaxClients || !IsClientInGame(client) || IsFakeClient(client))
+        return Plugin_Continue;
+
+    if (!g_bMenuOpen[client] || GetSelectedEntity(client) == -1)
+    {
+        g_iLastButtons[client] = buttons;
+        return Plugin_Continue;
+    }
+    int currentButtons = buttons;
+    bool bShift = (buttons & IN_SPEED) != 0;
+
+    if (!bShift)
+    {
+        g_iLastButtons[client] = currentButtons;
+        return Plugin_Continue;
+    }
+
+    int lastButtons = g_iLastButtons[client];
+    bool bPressed = false;
+    float move[3];
+    float rotDelta[3];
+    float sizeDelta[3];
+    float normalDelta[3];
+
+    int menuAction = g_iLastMenuAction[client];
+    
+    if (menuAction == 1 || menuAction == 0)
+    {
+        if ((currentButtons & IN_FORWARD) && !(lastButtons & IN_FORWARD))
+        {
+            move[1] = g_fPosStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_BACK) && !(lastButtons & IN_BACK))
+        {
+            move[1] = -g_fPosStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVELEFT) && !(lastButtons & IN_MOVELEFT))
+        {
+            move[0] = -g_fPosStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVERIGHT) && !(lastButtons & IN_MOVERIGHT))
+        {
+            move[0] = g_fPosStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_USE) && !(lastButtons & IN_USE))
+        {
+            move[2] = g_fPosStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_RELOAD) && !(lastButtons & IN_RELOAD))
+        {
+            move[2] = -g_fPosStep[client];
+            bPressed = true;
+        }
+        if (bPressed && (move[0] != 0.0 || move[1] != 0.0 || move[2] != 0.0))
+        {
+            NudgeSelected(client, move[0], move[1], move[2]);
+        }
+    }
+    else if (menuAction == 2)
+    {
+        if ((currentButtons & IN_FORWARD) && !(lastButtons & IN_FORWARD))
+        {
+            rotDelta[1] = g_fAngStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_BACK) && !(lastButtons & IN_BACK))
+        {
+            rotDelta[1] = -g_fAngStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVELEFT) && !(lastButtons & IN_MOVELEFT))
+        {
+            rotDelta[2] = -g_fAngStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVERIGHT) && !(lastButtons & IN_MOVERIGHT))
+        {
+            rotDelta[2] = g_fAngStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_USE) && !(lastButtons & IN_USE))
+        {
+            rotDelta[0] = g_fAngStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_RELOAD) && !(lastButtons & IN_RELOAD))
+        {
+            rotDelta[0] = -g_fAngStep[client];
+            bPressed = true;
+        }
+        if (bPressed && (rotDelta[0] != 0.0 || rotDelta[1] != 0.0 || rotDelta[2] != 0.0))
+        {
+            RotateSelected(client, rotDelta);
+        }
+    }
+    else if (menuAction == 3)
+    {
+        if ((currentButtons & IN_FORWARD) && !(lastButtons & IN_FORWARD))
+        {
+            sizeDelta[1] = g_fSizeStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_BACK) && !(lastButtons & IN_BACK))
+        {
+            sizeDelta[1] = -g_fSizeStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVELEFT) && !(lastButtons & IN_MOVELEFT))
+        {
+            sizeDelta[0] = -g_fSizeStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVERIGHT) && !(lastButtons & IN_MOVERIGHT))
+        {
+            sizeDelta[0] = g_fSizeStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_USE) && !(lastButtons & IN_USE))
+        {
+            sizeDelta[2] = g_fSizeStep[client];
+            bPressed = true;
+        }
+        if ((currentButtons & IN_RELOAD) && !(lastButtons & IN_RELOAD))
+        {
+            sizeDelta[2] = -g_fSizeStep[client];
+            bPressed = true;
+        }
+        if (bPressed && (sizeDelta[0] != 0.0 || sizeDelta[1] != 0.0 || sizeDelta[2] != 0.0))
+        {
+            ResizeSelected(client, sizeDelta);
+        }
+    }
+    else if (menuAction == 4)
+    {
+        float step = 0.1;
+        if ((currentButtons & IN_FORWARD) && !(lastButtons & IN_FORWARD))
+        {
+            normalDelta[1] = step;
+            bPressed = true;
+        }
+        if ((currentButtons & IN_BACK) && !(lastButtons & IN_BACK))
+        {
+            normalDelta[1] = -step;
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVELEFT) && !(lastButtons & IN_MOVELEFT))
+        {
+            normalDelta[0] = -step;
+            bPressed = true;
+        }
+        if ((currentButtons & IN_MOVERIGHT) && !(lastButtons & IN_MOVERIGHT))
+        {
+            normalDelta[0] = step;
+            bPressed = true;
+        }
+        if ((currentButtons & IN_USE) && !(lastButtons & IN_USE))
+        {
+            normalDelta[2] = step;
+            bPressed = true;
+        }
+        if ((currentButtons & IN_RELOAD) && !(lastButtons & IN_RELOAD))
+        {
+            normalDelta[2] = -step;
+            bPressed = true;
+        }
+        if (bPressed && (normalDelta[0] != 0.0 || normalDelta[1] != 0.0 || normalDelta[2] != 0.0))
+        {
+            AdjustNormalSelected(client, normalDelta);
+        }
+    }
+
+    g_iLastButtons[client] = currentButtons;
+    return Plugin_Continue;
+}
+
+public void OnMapStart()
+{
+    g_bMapStarted = true;
+    ResetState();
+    CreateTimer(0.2, Timer_LoadConfig, _, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public void OnMapEnd()
+{
+    g_bMapStarted = false;
+    ResetState();
 }
 
 public void OnClientDisconnect_Post(int client)
 {
-    bEditMode[client] = false;
-    in_attack[client] = false;
-    in_attack2[client] = false;
-    in_score[client] = false;
-    in_speed[client] = false;
-    bHudActive[client] = false;
-    stepSize[client] = DEFAULT_STEP_SIZE;
+    g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
+    g_fPosStep[client] = DEFAULT_POS_STEP;
+    g_fAngStep[client] = DEFAULT_ANG_STEP;
+    g_fSizeStep[client] = DEFAULT_SIZE_STEP;
+    g_bMenuOpen[client] = false;
+    g_iLastMenuAction[client] = 0;
 }
 
-stock void SetClientFrozen(int client, int freeze)
+Action Timer_LoadConfig(Handle timer)
 {
-    SetEntityMoveType(client, freeze ? MOVETYPE_NONE : MOVETYPE_WALK);
+    if (!g_bMapStarted)
+        return Plugin_Stop;
+
+    LoadConfig();
+    return Plugin_Stop;
 }
 
-public Action Command_ToggleHud(int client, int args) 
+void ResetState()
 {
-    bHudActive[client] = !bHudActive[client];
-    CPrintToChat(client, "<{olive}HUD{default}> Ladder Editor HUD is now %s.", (bHudActive[client] ? "{blue}on{default}" : "{red}off{default}"));
+    g_iAddCount = 0;
+    g_iRemoveCount = 0;
+
+    for (int i = 0; i < MAX_LADDERS; i++)
+        g_iAddEntRef[i] = 0;
 }
 
-public Action HudDrawTimer(Handle hTimer) 
+// ====================================================================================================
+//                                     COMMANDS / MENUS
+// ====================================================================================================
+public Action Command_Menu(int client, int args)
 {
-    
-
-    for (int i = 1; i <= MaxClients; i++) 
+    if (!client)
     {
-        if (!bHudActive[i] || IsFakeClient(i))
+        ReplyToCommand(client, "[Ladder] Command can only be used in game.");
+        return Plugin_Handled;
+    }
+
+    ShowMainMenu(client);
+    return Plugin_Handled;
+}
+
+void ShowMainMenu(int client)
+{
+    Menu menu = new Menu(MainMenuHandler);
+    menu.SetTitle("Ladder Editor");
+    menu.AddItem("select", "Select ladder (aim)");
+    menu.AddItem("clone", "Clone ladder (aim) at crosshair");
+    menu.AddItem("move", "Move selected to crosshair");
+    menu.AddItem("nudge", "Nudge selected");
+    menu.AddItem("rotate", "Rotate selected");
+    menu.AddItem("size", "Resize selected");
+    menu.AddItem("normal", "Adjust normal");
+    menu.AddItem("delete", "Delete selected");
+    menu.AddItem("list", "List saved ladders");
+    menu.AddItem("tele", "Teleport to ladder");
+    menu.AddItem("reload", "Reload from config");
+    menu.ExitButton = true;
+    menu.ExitBackButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+    g_bMenuOpen[client] = true;
+    g_iLastMenuAction[client] = 0;
+}
+
+int MainMenuHandler(Menu menu, MenuAction action, int client, int index)
+{
+    if (action == MenuAction_End)
+    {
+        delete menu;
+        g_bMenuOpen[client] = false;
+        return 0;
+    }
+    
+    if (action != MenuAction_Select)
+        return 0;
+
+    char info[16];
+    menu.GetItem(index, info, sizeof(info));
+
+    if (StrEqual(info, "select"))
+    {
+        SelectLadder(client);
+        ShowMainMenu(client);
+    }
+    else if (StrEqual(info, "clone"))
+    {
+        CloneFromAim(client);
+        ShowMainMenu(client);
+    }
+    else if (StrEqual(info, "move"))
+    {
+        MoveSelectedToCrosshair(client);
+        ShowMainMenu(client);
+    }
+    else if (StrEqual(info, "nudge"))
+    {
+        ShowNudgeMenu(client);
+    }
+    else if (StrEqual(info, "rotate"))
+    {
+        ShowRotateMenu(client);
+    }
+    else if (StrEqual(info, "size"))
+    {
+        ShowSizeMenu(client);
+    }
+    else if (StrEqual(info, "normal"))
+    {
+        ShowNormalMenu(client);
+    }
+    else if (StrEqual(info, "delete"))
+    {
+        DeleteSelected(client);
+        ShowMainMenu(client);
+    }
+    else if (StrEqual(info, "list"))
+    {
+        PrintLadderList(client);
+        ShowMainMenu(client);
+    }
+    else if (StrEqual(info, "tele"))
+    {
+        ShowTeleportMenu(client);
+    }
+    else if (StrEqual(info, "reload"))
+    {
+        ReloadFromConfig(client);
+        ShowMainMenu(client);
+    }
+
+    return 0;
+}
+
+void ShowNudgeMenu(int client)
+{
+    Menu menu = new Menu(NudgeMenuHandler);
+    char title[64];
+    Format(title, sizeof(title), "Nudge (step %.2f)", g_fPosStep[client]);
+    menu.SetTitle(title);
+    menu.AddItem("x+", "X +");
+    menu.AddItem("y+", "Y +");
+    menu.AddItem("z+", "Z +");
+    menu.AddItem("x-", "X -");
+    menu.AddItem("y-", "Y -");
+    menu.AddItem("z-", "Z -");
+    menu.AddItem("step+", "Step +0.5");
+    menu.AddItem("step-", "Step -0.5");
+    menu.AddItem("back", "Back to main");
+    menu.ExitButton = true;
+    menu.ExitBackButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+    g_iLastMenuAction[client] = 1;
+}
+
+int NudgeMenuHandler(Menu menu, MenuAction action, int client, int index)
+{
+    if (action == MenuAction_End)
+    {
+        delete menu;
+        if (g_iLastMenuAction[client] == 1)
+            g_bMenuOpen[client] = false;
+        return 0;
+    }
+    
+    if (action != MenuAction_Select)
+        return 0;
+
+    char info[16];
+    menu.GetItem(index, info, sizeof(info));
+
+    if (StrEqual(info, "back"))
+    {
+        ShowMainMenu(client);
+        return 0;
+    }
+
+    if (StrEqual(info, "step+"))
+    {
+        g_fPosStep[client] += 0.5;
+    }
+    else if (StrEqual(info, "step-"))
+    {
+        g_fPosStep[client] = FloatMaxCustom(0.1, g_fPosStep[client] - 0.5);
+    }
+    else
+    {
+        float move[3];
+        if (StrEqual(info, "x+")) move[0] = g_fPosStep[client];
+        if (StrEqual(info, "y+")) move[1] = g_fPosStep[client];
+        if (StrEqual(info, "z+")) move[2] = g_fPosStep[client];
+        if (StrEqual(info, "x-")) move[0] = -g_fPosStep[client];
+        if (StrEqual(info, "y-")) move[1] = -g_fPosStep[client];
+        if (StrEqual(info, "z-")) move[2] = -g_fPosStep[client];
+
+        NudgeSelected(client, move[0], move[1], move[2]);
+    }
+
+    ShowNudgeMenu(client);
+    return 0;
+}
+
+void ShowRotateMenu(int client)
+{
+    Menu menu = new Menu(RotateMenuHandler);
+    char title[64];
+    Format(title, sizeof(title), "Rotate (step %.1f)", g_fAngStep[client]);
+    menu.SetTitle(title);
+    menu.AddItem("p+", "Pitch +");
+    menu.AddItem("y+", "Yaw +");
+    menu.AddItem("r+", "Roll +");
+    menu.AddItem("p-", "Pitch -");
+    menu.AddItem("y-", "Yaw -");
+    menu.AddItem("r-", "Roll -");
+    menu.AddItem("step+", "Step +5.0");
+    menu.AddItem("step-", "Step -5.0");
+    menu.AddItem("back", "Back to main");
+    menu.ExitButton = true;
+    menu.ExitBackButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+    g_iLastMenuAction[client] = 2;
+}
+
+int RotateMenuHandler(Menu menu, MenuAction action, int client, int index)
+{
+    if (action == MenuAction_End)
+    {
+        delete menu;
+        if (g_iLastMenuAction[client] == 2)
+            g_bMenuOpen[client] = false;
+        return 0;
+    }
+    
+    if (action != MenuAction_Select)
+        return 0;
+
+    char info[16];
+    menu.GetItem(index, info, sizeof(info));
+
+    if (StrEqual(info, "back"))
+    {
+        ShowMainMenu(client);
+        return 0;
+    }
+
+    if (StrEqual(info, "step+"))
+    {
+        g_fAngStep[client] += 5.0;
+    }
+    else if (StrEqual(info, "step-"))
+    {
+        g_fAngStep[client] = FloatMaxCustom(1.0, g_fAngStep[client] - 5.0);
+    }
+    else
+    {
+        float delta[3];
+        if (StrEqual(info, "p+")) delta[0] = g_fAngStep[client];
+        if (StrEqual(info, "y+")) delta[1] = g_fAngStep[client];
+        if (StrEqual(info, "r+")) delta[2] = g_fAngStep[client];
+        if (StrEqual(info, "p-")) delta[0] = -g_fAngStep[client];
+        if (StrEqual(info, "y-")) delta[1] = -g_fAngStep[client];
+        if (StrEqual(info, "r-")) delta[2] = -g_fAngStep[client];
+
+        RotateSelected(client, delta);
+    }
+
+    ShowRotateMenu(client);
+    return 0;
+}
+
+void ShowTeleportMenu(int client)
+{
+    Menu menu = new Menu(TeleportMenuHandler);
+    menu.SetTitle("Teleport to ladder");
+
+    char info[16];
+    char label[128];
+    float center[3];
+    for (int i = 0; i < g_iAddCount; i++)
+    {
+        if (!IsValidEntRef(g_iAddEntRef[i]))
             continue;
-        Handle hud = CreatePanel();
-        FillHudInfo(i, hud);
-        SendPanelToClient(hud, i, DummyHudHandler, 3);
-        delete hud;
-        if (!bHudHintShown[i])
+
+        int entity = EntRefToEntIndex(g_iAddEntRef[i]);
+        GetLadderCenter(entity, center);
+        Format(info, sizeof(info), "%d", i);
+        Format(label, sizeof(label), "#%d (%.1f %.1f %.1f)", i + 1, center[0], center[1], center[2]);
+        menu.AddItem(info, label);
+    }
+
+    menu.AddItem("back", "Back to main");
+    menu.ExitButton = true;
+    menu.ExitBackButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+}
+
+int TeleportMenuHandler(Menu menu, MenuAction action, int client, int index)
+{
+    if (action == MenuAction_End)
+    {
+        delete menu;
+        return 0;
+    }
+    
+    if (action != MenuAction_Select)
+        return 0;
+
+    char info[16];
+    menu.GetItem(index, info, sizeof(info));
+    
+    if (StrEqual(info, "back"))
+    {
+        ShowMainMenu(client);
+        return 0;
+    }
+    
+    int slot = StringToInt(info);
+    if (slot < 0 || slot >= g_iAddCount)
+    {
+        ShowTeleportMenu(client);
+        return 0;
+    }
+
+    if (!IsValidEntRef(g_iAddEntRef[slot]))
+    {
+        ShowTeleportMenu(client);
+        return 0;
+    }
+
+    int entity = EntRefToEntIndex(g_iAddEntRef[slot]);
+    float center[3];
+    GetLadderCenter(entity, center);
+    center[2] += 20.0;
+    TeleportEntity(client, center, NULL_VECTOR, NULL_VECTOR);
+    PrintToChat(client, "%sTeleported to ladder #%d.", CHAT_TAG, slot + 1);
+    ShowTeleportMenu(client);
+    return 0;
+}
+
+// ====================================================================================================
+//                                     MENU ACTIONS
+// ====================================================================================================
+void SelectLadder(int client)
+{
+    int entity = GetClientAimTarget(client, false);
+    if (!IsValidEntity(entity) || !IsLadder(entity))
+    {
+        g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
+        PrintToChat(client, "%sNot looking at a ladder.", CHAT_TAG);
+        return;
+    }
+
+    g_iSelectedLadder[client] = EntIndexToEntRef(entity);
+    PrintLadderInfo(client, entity, "Selected");
+}
+
+void CloneFromAim(int client)
+{
+    int source = GetClientAimTarget(client, false);
+    if (!IsValidEntity(source) || !IsLadder(source))
+    {
+        PrintToChat(client, "%sAim at a ladder to clone.", CHAT_TAG);
+        return;
+    }
+
+    float targetCenter[3];
+    if (!GetAimPosition(client, targetCenter))
+    {
+        PrintToChat(client, "%sCannot find target position.", CHAT_TAG);
+        return;
+    }
+
+    LadderData data;
+    float sourceCenter[3];
+    GetLadderData(source, data, sourceCenter);
+
+    float offset[3];
+    offset[0] = sourceCenter[0] - data.origin[0];
+    offset[1] = sourceCenter[1] - data.origin[1];
+    offset[2] = sourceCenter[2] - data.origin[2];
+
+    data.origin[0] = targetCenter[0] - offset[0];
+    data.origin[1] = targetCenter[1] - offset[1];
+    data.origin[2] = targetCenter[2] - offset[2];
+
+    int entity = CreateLadderEntity(data);
+    if (entity == -1)
+    {
+        PrintToChat(client, "%sFailed to create ladder.", CHAT_TAG);
+        return;
+    }
+
+    int index = AddLadderConfig(data);
+    if (index == -1)
+    {
+        RemoveEntity(entity);
+        PrintToChat(client, "%sCannot save ladder (limit reached).", CHAT_TAG);
+        return;
+    }
+
+    g_iAddEntRef[index] = EntIndexToEntRef(entity);
+    g_iSelectedLadder[client] = EntIndexToEntRef(entity);
+    PrintToChat(client, "%sLadder cloned and saved (#%d).", CHAT_TAG, index + 1);
+}
+
+void MoveSelectedToCrosshair(int client)
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    if (!EnsureManagedLadder(client, entity))
+        return;
+
+    entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    float targetCenter[3];
+    if (!GetAimPosition(client, targetCenter))
+    {
+        PrintToChat(client, "%sCannot find target position.", CHAT_TAG);
+        return;
+    }
+
+    float center[3];
+    float origin[3];
+    GetLadderCenter(entity, center);
+    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+
+    float offset[3];
+    offset[0] = center[0] - origin[0];
+    offset[1] = center[1] - origin[1];
+    offset[2] = center[2] - origin[2];
+
+    origin[0] = targetCenter[0] - offset[0];
+    origin[1] = targetCenter[1] - offset[1];
+    origin[2] = targetCenter[2] - offset[2];
+    TeleportEntity(entity, origin, NULL_VECTOR, NULL_VECTOR);
+
+    UpdateManagedLadder(entity);
+    PrintToChat(client, "%sMoved ladder to target.", CHAT_TAG);
+}
+
+void NudgeSelected(int client, float x, float y, float z)
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    if (!EnsureManagedLadder(client, entity))
+        return;
+
+    entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    float origin[3];
+    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+    origin[0] += x;
+    origin[1] += y;
+    origin[2] += z;
+    TeleportEntity(entity, origin, NULL_VECTOR, NULL_VECTOR);
+
+    UpdateManagedLadder(entity);
+}
+
+void RotateSelected(int client, const float delta[3])
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    if (!EnsureManagedLadder(client, entity))
+        return;
+
+    entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    float origin[3];
+    float angles[3];
+    float normal[3];
+    float center[3];
+    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+    GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+    GetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
+    GetLadderCenter(entity, center);
+
+    angles[0] += delta[0];
+    angles[1] += delta[1];
+    angles[2] += delta[2];
+
+    float newOrigin[3];
+    ComputeOriginForCenter(entity, center, angles, newOrigin);
+    TeleportEntity(entity, newOrigin, angles, NULL_VECTOR);
+
+    float rotatedNormal[3];
+    Math_RotateVector(normal, delta, rotatedNormal);
+    SetEntPropVector(entity, Prop_Send, "m_climbableNormal", rotatedNormal);
+
+    UpdateManagedLadder(entity);
+}
+
+void ShowSizeMenu(int client)
+{
+    Menu menu = new Menu(SizeMenuHandler);
+    char title[64];
+    Format(title, sizeof(title), "Resize (step %.1f)", g_fSizeStep[client]);
+    menu.SetTitle(title);
+    menu.AddItem("x+", "Width +");
+    menu.AddItem("y+", "Depth +");
+    menu.AddItem("z+", "Height +");
+    menu.AddItem("x-", "Width -");
+    menu.AddItem("y-", "Depth -");
+    menu.AddItem("z-", "Height -");
+    menu.AddItem("step+", "Step +2.0");
+    menu.AddItem("step-", "Step -2.0");
+    menu.AddItem("back", "Back to main");
+    menu.ExitButton = true;
+    menu.ExitBackButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+    g_iLastMenuAction[client] = 3;
+}
+
+int SizeMenuHandler(Menu menu, MenuAction action, int client, int index)
+{
+    if (action == MenuAction_End)
+    {
+        delete menu;
+        if (g_iLastMenuAction[client] == 3)
+            g_bMenuOpen[client] = false;
+        return 0;
+    }
+    
+    if (action != MenuAction_Select)
+        return 0;
+
+    char info[16];
+    menu.GetItem(index, info, sizeof(info));
+
+    if (StrEqual(info, "back"))
+    {
+        ShowMainMenu(client);
+        return 0;
+    }
+
+    if (StrEqual(info, "step+"))
+    {
+        g_fSizeStep[client] += 2.0;
+    }
+    else if (StrEqual(info, "step-"))
+    {
+        g_fSizeStep[client] = FloatMaxCustom(1.0, g_fSizeStep[client] - 2.0);
+    }
+    else
+    {
+        float delta[3];
+        if (StrEqual(info, "x+")) delta[0] = g_fSizeStep[client];
+        if (StrEqual(info, "y+")) delta[1] = g_fSizeStep[client];
+        if (StrEqual(info, "z+")) delta[2] = g_fSizeStep[client];
+        if (StrEqual(info, "x-")) delta[0] = -g_fSizeStep[client];
+        if (StrEqual(info, "y-")) delta[1] = -g_fSizeStep[client];
+        if (StrEqual(info, "z-")) delta[2] = -g_fSizeStep[client];
+
+        ResizeSelected(client, delta);
+    }
+
+    ShowSizeMenu(client);
+    return 0;
+}
+
+void ShowNormalMenu(int client)
+{
+    Menu menu = new Menu(NormalMenuHandler);
+    menu.SetTitle("Adjust Normal");
+    menu.AddItem("x+", "Normal X +");
+    menu.AddItem("y+", "Normal Y +");
+    menu.AddItem("z+", "Normal Z +");
+    menu.AddItem("x-", "Normal X -");
+    menu.AddItem("y-", "Normal Y -");
+    menu.AddItem("z-", "Normal Z -");
+    menu.AddItem("reset", "Reset to default");
+    menu.AddItem("back", "Back to main");
+    menu.ExitButton = true;
+    menu.ExitBackButton = false;
+    menu.Display(client, MENU_TIME_FOREVER);
+    g_iLastMenuAction[client] = 4;
+}
+
+int NormalMenuHandler(Menu menu, MenuAction action, int client, int index)
+{
+    if (action == MenuAction_End)
+    {
+        delete menu;
+        if (g_iLastMenuAction[client] == 4)
+            g_bMenuOpen[client] = false;
+        return 0;
+    }
+    
+    if (action != MenuAction_Select)
+        return 0;
+
+    char info[16];
+    menu.GetItem(index, info, sizeof(info));
+
+    if (StrEqual(info, "back"))
+    {
+        ShowMainMenu(client);
+        return 0;
+    }
+
+    if (StrEqual(info, "reset"))
+    {
+        ResetNormalSelected(client);
+    }
+    else
+    {
+        float delta[3];
+        float step = 0.1;
+        if (StrEqual(info, "x+")) delta[0] = step;
+        if (StrEqual(info, "y+")) delta[1] = step;
+        if (StrEqual(info, "z+")) delta[2] = step;
+        if (StrEqual(info, "x-")) delta[0] = -step;
+        if (StrEqual(info, "y-")) delta[1] = -step;
+        if (StrEqual(info, "z-")) delta[2] = -step;
+
+        AdjustNormalSelected(client, delta);
+    }
+
+    ShowNormalMenu(client);
+    return 0;
+}
+
+void ResizeSelected(int client, const float delta[3])
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    if (!EnsureManagedLadder(client, entity))
+        return;
+
+    entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    float mins[3];
+    float maxs[3];
+    float center[3];
+    float angles[3];
+    GetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
+    GetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+    GetLadderCenter(entity, center);
+    GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+
+    mins[0] += delta[0] * 0.5;
+    mins[1] += delta[1] * 0.5;
+    mins[2] += delta[2] * 0.5;
+    maxs[0] += delta[0] * 0.5;
+    maxs[1] += delta[1] * 0.5;
+    maxs[2] += delta[2] * 0.5;
+
+    if (mins[0] >= maxs[0] || mins[1] >= maxs[1] || mins[2] >= maxs[2])
+    {
+        PrintToChat(client, "%sCannot resize: size would be invalid.", CHAT_TAG);
+        return;
+    }
+
+    SetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
+    SetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+
+    float newOrigin[3];
+    ComputeOriginForCenter(entity, center, angles, newOrigin);
+    TeleportEntity(entity, newOrigin, NULL_VECTOR, NULL_VECTOR);
+
+    UpdateManagedLadder(entity);
+}
+
+void AdjustNormalSelected(int client, const float delta[3])
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    if (!EnsureManagedLadder(client, entity))
+        return;
+
+    entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    float normal[3];
+    GetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
+
+    normal[0] += delta[0];
+    normal[1] += delta[1];
+    normal[2] += delta[2];
+
+    float len = SquareRoot(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+    if (len > 0.0)
+    {
+        normal[0] /= len;
+        normal[1] /= len;
+        normal[2] /= len;
+    }
+
+    SetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
+    UpdateManagedLadder(entity);
+}
+
+void ResetNormalSelected(int client)
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    if (!EnsureManagedLadder(client, entity))
+        return;
+
+    entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    float angles[3];
+    GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+
+    float normal[3];
+    normal[0] = 0.0;
+    normal[1] = 0.0;
+    normal[2] = 1.0;
+
+    Math_RotateVector(normal, angles, normal);
+
+    float len = SquareRoot(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+    if (len > 0.0)
+    {
+        normal[0] /= len;
+        normal[1] /= len;
+        normal[2] /= len;
+    }
+
+    SetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
+    UpdateManagedLadder(entity);
+    PrintToChat(client, "%sNormal reset to default.", CHAT_TAG);
+}
+
+void DeleteSelected(int client)
+{
+    int entity = GetSelectedEntity(client);
+    if (entity == -1)
+        return;
+
+    int slot = GetManagedSlotByEntity(entity);
+    if (slot != -1)
+    {
+        RemoveManagedLadder(slot);
+        PrintToChat(client, "%sLadder deleted.", CHAT_TAG);
+        return;
+    }
+
+    LadderData data;
+    float center[3];
+    GetLadderData(entity, data, center);
+    if (AddRemoveConfig(data))
+    {
+        RemoveEntity(entity);
+        PrintToChat(client, "%sOriginal ladder removed and saved.", CHAT_TAG);
+        g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
+    }
+    else
+    {
+        PrintToChat(client, "%sFailed to save removal (limit reached).", CHAT_TAG);
+    }
+}
+
+void ReloadFromConfig(int client)
+{
+    ResetState();
+    LoadConfig();
+    PrintToChat(client, "%sReloaded ladders from config.", CHAT_TAG);
+}
+
+void PrintLadderList(int client)
+{
+    int count = 0;
+    float center[3];
+
+    for (int i = 0; i < g_iAddCount; i++)
+    {
+        if (!IsValidEntRef(g_iAddEntRef[i]))
+            continue;
+
+        int entity = EntRefToEntIndex(g_iAddEntRef[i]);
+        GetLadderCenter(entity, center);
+        PrintToChat(client, "%s#%d: %.1f %.1f %.1f", CHAT_TAG, i + 1, center[0], center[1], center[2]);
+        count++;
+    }
+
+    PrintToChat(client, "%sTotal ladders: %d.", CHAT_TAG, count);
+}
+
+// ====================================================================================================
+//                                     CONFIG HANDLING
+// ====================================================================================================
+void LoadConfig()
+{
+    char path[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, path, sizeof(path), CONFIG_LADDERS);
+    if (!FileExists(path))
+        return;
+
+    KeyValues kv = new KeyValues("ladders");
+    if (!kv.ImportFromFile(path))
+    {
+        delete kv;
+        return;
+    }
+
+    char map[64];
+    GetCurrentMap(map, sizeof(map));
+    if (!kv.JumpToKey(map))
+    {
+        delete kv;
+        return;
+    }
+
+    g_iRemoveCount = LoadRemoveSection(kv, "remove");
+    ApplyRemovals();
+
+    g_iAddCount = LoadAddSection(kv, "add");
+    for (int i = 0; i < g_iAddCount; i++)
+    {
+        int entity = CreateLadderEntity(g_AddData[i]);
+        if (entity != -1)
+            g_iAddEntRef[i] = EntIndexToEntRef(entity);
+    }
+
+    delete kv;
+}
+
+int LoadAddSection(KeyValues kv, const char[] section)
+{
+    if (!kv.JumpToKey(section))
+        return 0;
+
+    int count = kv.GetNum("num", 0);
+    if (count > MAX_LADDERS)
+        count = MAX_LADDERS;
+
+    char indexStr[8];
+    for (int i = 1; i <= count; i++)
+    {
+        IntToString(i, indexStr, sizeof(indexStr));
+        if (!kv.JumpToKey(indexStr))
+            continue;
+
+        kv.GetString("model", g_AddData[i - 1].model, sizeof(g_AddData[i - 1].model));
+        kv.GetVector("origin", g_AddData[i - 1].origin);
+        kv.GetVector("angles", g_AddData[i - 1].angles);
+        kv.GetVector("normal", g_AddData[i - 1].normal);
+        kv.GoBack();
+    }
+
+    kv.GoBack();
+    return count;
+}
+
+int LoadRemoveSection(KeyValues kv, const char[] section)
+{
+    if (!kv.JumpToKey(section))
+        return 0;
+
+    int count = kv.GetNum("num", 0);
+    if (count > MAX_REMOVES)
+        count = MAX_REMOVES;
+
+    char indexStr[8];
+    for (int i = 1; i <= count; i++)
+    {
+        IntToString(i, indexStr, sizeof(indexStr));
+        if (!kv.JumpToKey(indexStr))
+            continue;
+
+        kv.GetString("model", g_RemoveData[i - 1].model, sizeof(g_RemoveData[i - 1].model));
+        kv.GetVector("origin", g_RemoveData[i - 1].origin);
+        kv.GetVector("angles", g_RemoveData[i - 1].angles);
+        kv.GetVector("normal", g_RemoveData[i - 1].normal);
+        kv.GoBack();
+    }
+
+    kv.GoBack();
+    return count;
+}
+
+int AddLadderConfig(const LadderData data)
+{
+    if (g_iAddCount >= MAX_LADDERS)
+        return -1;
+
+    char path[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, path, sizeof(path), CONFIG_LADDERS);
+    EnsureConfigFile(path);
+
+    KeyValues kv = new KeyValues("ladders");
+    kv.ImportFromFile(path);
+
+    char map[64];
+    GetCurrentMap(map, sizeof(map));
+    kv.JumpToKey(map, true);
+    kv.JumpToKey("add", true);
+
+    int count = kv.GetNum("num", 0);
+    count++;
+    kv.SetNum("num", count);
+
+    char indexStr[8];
+    IntToString(count, indexStr, sizeof(indexStr));
+    kv.JumpToKey(indexStr, true);
+    WriteLadderData(kv, data);
+
+    kv.Rewind();
+    kv.ExportToFile(path);
+    delete kv;
+
+    g_AddData[g_iAddCount] = data;
+    g_iAddEntRef[g_iAddCount] = 0;
+    g_iAddCount++;
+
+    return count - 1;
+}
+
+bool UpdateLadderConfig(int slot, const LadderData data)
+{
+    if (slot < 0 || slot >= g_iAddCount)
+        return false;
+
+    char path[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, path, sizeof(path), CONFIG_LADDERS);
+    EnsureConfigFile(path);
+
+    KeyValues kv = new KeyValues("ladders");
+    kv.ImportFromFile(path);
+
+    char map[64];
+    GetCurrentMap(map, sizeof(map));
+    if (!kv.JumpToKey(map))
+    {
+        delete kv;
+        return false;
+    }
+
+    if (!kv.JumpToKey("add"))
+    {
+        delete kv;
+        return false;
+    }
+
+    char indexStr[8];
+    IntToString(slot + 1, indexStr, sizeof(indexStr));
+    if (!kv.JumpToKey(indexStr))
+    {
+        delete kv;
+        return false;
+    }
+
+    WriteLadderData(kv, data);
+    kv.Rewind();
+    kv.ExportToFile(path);
+    delete kv;
+
+    g_AddData[slot] = data;
+    return true;
+}
+
+bool RemoveLadderConfig(int slot)
+{
+    if (slot < 0 || slot >= g_iAddCount)
+        return false;
+
+    char path[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, path, sizeof(path), CONFIG_LADDERS);
+    if (!FileExists(path))
+        return false;
+
+    KeyValues kv = new KeyValues("ladders");
+    if (!kv.ImportFromFile(path))
+    {
+        delete kv;
+        return false;
+    }
+
+    char map[64];
+    GetCurrentMap(map, sizeof(map));
+    if (!kv.JumpToKey(map) || !kv.JumpToKey("add"))
+    {
+        delete kv;
+        return false;
+    }
+
+    int count = kv.GetNum("num", 0);
+    if (count <= 0)
+    {
+        delete kv;
+        return false;
+    }
+
+    char indexStr[8];
+    bool moved = false;
+    for (int i = slot + 1; i <= count; i++)
+    {
+        IntToString(i, indexStr, sizeof(indexStr));
+        if (!kv.JumpToKey(indexStr))
         {
-            bHudHintShown[i] = true;
-            CPrintToChat(i, "<{olive}HUD{default}> Type {green}!togglehud{default} into chat to toggle the {blue}Ladder Editor HUD{default}.");
+            kv.Rewind();
+            kv.JumpToKey(map);
+            kv.JumpToKey("add");
+            continue;
+        }
+
+        if (!moved)
+        {
+            moved = true;
+            kv.DeleteThis();
+        }
+        else
+        {
+            IntToString(i - 1, indexStr, sizeof(indexStr));
+            kv.SetSectionName(indexStr);
+        }
+
+        kv.Rewind();
+        kv.JumpToKey(map);
+        kv.JumpToKey("add");
+    }
+
+    if (moved)
+    {
+        count--;
+        kv.SetNum("num", count);
+        kv.Rewind();
+        kv.ExportToFile(path);
+    }
+
+    delete kv;
+    return moved;
+}
+
+bool AddRemoveConfig(const LadderData data)
+{
+    if (g_iRemoveCount >= MAX_REMOVES)
+        return false;
+
+    char path[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, path, sizeof(path), CONFIG_LADDERS);
+    EnsureConfigFile(path);
+
+    KeyValues kv = new KeyValues("ladders");
+    kv.ImportFromFile(path);
+
+    char map[64];
+    GetCurrentMap(map, sizeof(map));
+    kv.JumpToKey(map, true);
+    kv.JumpToKey("remove", true);
+
+    int count = kv.GetNum("num", 0);
+    count++;
+    kv.SetNum("num", count);
+
+    char indexStr[8];
+    IntToString(count, indexStr, sizeof(indexStr));
+    kv.JumpToKey(indexStr, true);
+    WriteLadderData(kv, data);
+
+    kv.Rewind();
+    kv.ExportToFile(path);
+    delete kv;
+
+    g_RemoveData[g_iRemoveCount] = data;
+    g_iRemoveCount++;
+    return true;
+}
+
+void WriteLadderData(KeyValues kv, const LadderData data)
+{
+    kv.SetString("model", data.model);
+    kv.SetVector("origin", data.origin);
+    kv.SetVector("angles", data.angles);
+    kv.SetVector("normal", data.normal);
+}
+
+void EnsureConfigFile(const char[] path)
+{
+    if (FileExists(path))
+        return;
+
+    File cfg = OpenFile(path, "w");
+    if (cfg != null)
+    {
+        cfg.WriteLine("");
+        delete cfg;
+    }
+}
+
+void ApplyRemovals()
+{
+    if (g_iRemoveCount == 0)
+        return;
+
+    int entity = -1;
+    char classname[64];
+    while ((entity = FindEntityByClassname(entity, "func_simpleladder")) != -1)
+    {
+        if (!IsValidEntity(entity))
+            continue;
+
+        GetEntityClassname(entity, classname, sizeof(classname));
+        if (!StrEqual(classname, "func_simpleladder"))
+            continue;
+
+        LadderData data;
+        float center[3];
+        GetLadderData(entity, data, center);
+
+        for (int i = 0; i < g_iRemoveCount; i++)
+        {
+            if (IsRemovalMatch(data, g_RemoveData[i]))
+            {
+                AcceptEntityInput(entity, "Kill");
+                break;
+            }
         }
     }
 }
 
-public int DummyHudHandler(Handle hMenu, MenuAction action, int param1, int param2) {}
-
-public void FillHudInfo(int client, Handle hHud)
+bool IsRemovalMatch(const LadderData a, const LadderData b)
 {
-    DrawPanelText(hHud, "Ladder Editor HUD");
-    DrawPanelText(hHud, " ");
-    char buffer[512];
-    Format(buffer, sizeof(buffer), "Edit mode: %s", (bEditMode[client] ? "on" : "off"));
-    DrawPanelText(hHud, buffer);
-    DrawPanelText(hHud, " ");
-    int entity = selectedLadder[client];
-    if (!IsValidEntity(entity)) {
-        Format(buffer, sizeof(buffer), "No ladder selected.");
-        DrawPanelText(hHud, buffer);
-        return;
-    }
+    if (!StrEqual(a.model, b.model, false))
+        return false;
 
-    char modelname[128];
-    float origin[3];
-    float position[3];
-    float normal[3];
-    float angles[3];
-    GetLadderEntityInfo(entity, modelname, sizeof(modelname), origin, position, normal, angles);
+    if (FloatAbs(a.origin[0] - b.origin[0]) > ORIGIN_TOLERANCE) return false;
+    if (FloatAbs(a.origin[1] - b.origin[1]) > ORIGIN_TOLERANCE) return false;
+    if (FloatAbs(a.origin[2] - b.origin[2]) > ORIGIN_TOLERANCE) return false;
+    if (FloatAbs(a.angles[0] - b.angles[0]) > ANGLE_TOLERANCE) return false;
+    if (FloatAbs(a.angles[1] - b.angles[1]) > ANGLE_TOLERANCE) return false;
+    if (FloatAbs(a.angles[2] - b.angles[2]) > ANGLE_TOLERANCE) return false;
 
-    Format(buffer, sizeof(buffer), "Entity: %i", entity);
-    DrawPanelText(hHud, buffer);
-    Format(buffer, sizeof(buffer), "Model Name: %s", modelname);
-    DrawPanelText(hHud, buffer);
-    Format(buffer, sizeof(buffer), "Position: %.2f, %.2f, %.2f", position[0], position[1], position[2]);
-    DrawPanelText(hHud, buffer);
-    Format(buffer, sizeof(buffer), "Origin: %.2f, %.2f, %.2f", origin[0], origin[1], origin[2]);
-    DrawPanelText(hHud, buffer);
-    Format(buffer, sizeof(buffer), "Normal: %.2f, %.2f, %.2f", normal[0], normal[1], normal[2]);
-    DrawPanelText(hHud, buffer);
-    Format(buffer, sizeof(buffer), "Angles: %.2f, %.2f, %.2f", angles[0], angles[1], angles[2]);
-    DrawPanelText(hHud, buffer);
+    return true;
 }
 
-public bool GetEndPosition(int client, float end[3])
+// ====================================================================================================
+//                                     LADDER HELPERS
+// ====================================================================================================
+bool IsLadder(int entity)
+{
+    char classname[64];
+    GetEntityClassname(entity, classname, sizeof(classname));
+    return StrEqual(classname, "func_simpleladder", false);
+}
+
+int GetSelectedEntity(int client)
+{
+    int entity = EntRefToEntIndex(g_iSelectedLadder[client]);
+    if (entity == INVALID_ENT_REFERENCE || entity <= 0 || !IsValidEntity(entity))
+    {
+        PrintToChat(client, "%sNo ladder selected.", CHAT_TAG);
+        g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
+        return -1;
+    }
+    return entity;
+}
+
+int GetManagedSlotByEntity(int entity)
+{
+    for (int i = 0; i < g_iAddCount; i++)
+    {
+        if (IsValidEntRef(g_iAddEntRef[i]) && EntRefToEntIndex(g_iAddEntRef[i]) == entity)
+            return i;
+    }
+    return -1;
+}
+
+bool EnsureManagedLadder(int client, int entity)
+{
+    if (GetManagedSlotByEntity(entity) != -1)
+        return true;
+
+    LadderData data;
+    float center[3];
+    GetLadderData(entity, data, center);
+
+    int addIndex = AddLadderConfig(data);
+    if (addIndex == -1)
+    {
+        PrintToChat(client, "%sCannot save ladder (limit reached).", CHAT_TAG);
+        return false;
+    }
+
+    if (!AddRemoveConfig(data))
+    {
+        RemoveLadderConfig(addIndex);
+        if (g_iAddCount > 0)
+        {
+            g_iAddCount--;
+            g_iAddEntRef[g_iAddCount] = 0;
+        }
+        PrintToChat(client, "%sCannot save removal (limit reached).", CHAT_TAG);
+        return false;
+    }
+
+    int newEntity = CreateLadderEntity(data);
+    if (newEntity == -1)
+    {
+        PrintToChat(client, "%sFailed to create ladder.", CHAT_TAG);
+        return false;
+    }
+
+    RemoveEntity(entity);
+    g_iAddEntRef[addIndex] = EntIndexToEntRef(newEntity);
+    g_iSelectedLadder[client] = EntIndexToEntRef(newEntity);
+    PrintToChat(client, "%sOriginal ladder converted to custom.", CHAT_TAG);
+    return true;
+}
+
+void UpdateManagedLadder(int entity)
+{
+    int slot = GetManagedSlotByEntity(entity);
+    if (slot == -1)
+        return;
+
+    LadderData data;
+    float center[3];
+    GetLadderData(entity, data, center);
+    UpdateLadderConfig(slot, data);
+}
+
+void RemoveManagedLadder(int slot)
+{
+    if (slot < 0 || slot >= g_iAddCount)
+        return;
+
+    int entity = EntRefToEntIndex(g_iAddEntRef[slot]);
+    if (IsValidEntity(entity))
+        RemoveEntity(entity);
+
+    if (!RemoveLadderConfig(slot))
+        return;
+
+    for (int i = slot; i < g_iAddCount - 1; i++)
+    {
+        g_AddData[i] = g_AddData[i + 1];
+        g_iAddEntRef[i] = g_iAddEntRef[i + 1];
+    }
+
+    g_iAddEntRef[g_iAddCount - 1] = 0;
+    g_iAddCount--;
+}
+
+int CreateLadderEntity(const LadderData data)
+{
+    int entity = CreateEntityByName("func_simpleladder");
+    if (entity == -1)
+        return -1;
+
+    DispatchKeyValue(entity, "model", data.model);
+    DispatchKeyValue(entity, "team", "2");
+
+    char buf[32];
+    Format(buf, sizeof(buf), "%.6f", data.normal[2]);
+    DispatchKeyValue(entity, "normal.z", buf);
+    Format(buf, sizeof(buf), "%.6f", data.normal[1]);
+    DispatchKeyValue(entity, "normal.y", buf);
+    Format(buf, sizeof(buf), "%.6f", data.normal[0]);
+    DispatchKeyValue(entity, "normal.x", buf);
+
+    DispatchSpawn(entity);
+    TeleportEntity(entity, data.origin, data.angles, NULL_VECTOR);
+    SetEntPropVector(entity, Prop_Send, "m_climbableNormal", data.normal);
+    return entity;
+}
+
+void GetLadderData(int entity, LadderData data, float center[3])
+{
+    GetEntPropString(entity, Prop_Data, "m_ModelName", data.model, sizeof(data.model));
+    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", data.origin);
+    GetEntPropVector(entity, Prop_Send, "m_angRotation", data.angles);
+    GetEntPropVector(entity, Prop_Send, "m_climbableNormal", data.normal);
+    GetLadderCenter(entity, center);
+}
+
+void GetLadderCenter(int entity, float center[3])
+{
+    float origin[3];
+    float mins[3];
+    float maxs[3];
+    float angles[3];
+    float rotMins[3];
+    float rotMaxs[3];
+
+    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
+    GetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
+    GetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+    GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
+
+    Math_RotateVector(mins, angles, rotMins);
+    Math_RotateVector(maxs, angles, rotMaxs);
+
+    center[0] = origin[0] + (rotMins[0] + rotMaxs[0]) * 0.5;
+    center[1] = origin[1] + (rotMins[1] + rotMaxs[1]) * 0.5;
+    center[2] = origin[2] + (rotMins[2] + rotMaxs[2]) * 0.5;
+}
+
+void ComputeOriginForCenter(int entity, const float center[3], const float angles[3], float origin[3])
+{
+    float mins[3];
+    float maxs[3];
+    float rotMins[3];
+    float rotMaxs[3];
+
+    GetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
+    GetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+
+    Math_RotateVector(mins, angles, rotMins);
+    Math_RotateVector(maxs, angles, rotMaxs);
+
+    origin[0] = center[0] - (rotMins[0] + rotMaxs[0]) * 0.5;
+    origin[1] = center[1] - (rotMins[1] + rotMaxs[1]) * 0.5;
+    origin[2] = center[2] - (rotMins[2] + rotMaxs[2]) * 0.5;
+}
+
+void PrintLadderInfo(int client, int entity, const char[] prefix)
+{
+    LadderData data;
+    float center[3];
+    GetLadderData(entity, data, center);
+    PrintToChat(client, "%s%s ladder: model=%s center=(%.1f %.1f %.1f) origin=(%.1f %.1f %.1f)",
+        CHAT_TAG, prefix, data.model, center[0], center[1], center[2], data.origin[0], data.origin[1], data.origin[2]);
+}
+
+bool GetAimPosition(int client, float pos[3])
 {
     float start[3];
     float angle[3];
     GetClientEyePosition(client, start);
     GetClientEyeAngles(client, angle);
-    TR_TraceRayFilter(start, angle, MASK_SOLID, RayType_Infinite, TraceEntityFilterPlayer, client);
-    if (TR_DidHit(INVALID_HANDLE))
+
+    Handle trace = TR_TraceRayFilterEx(start, angle, MASK_SOLID, RayType_Infinite, TraceFilterPlayers);
+    if (TR_DidHit(trace))
     {
-        TR_GetEndPosition(end, INVALID_HANDLE);
+        TR_GetEndPosition(pos, trace);
+        delete trace;
         return true;
     }
+
+    delete trace;
     return false;
 }
 
-public bool TraceEntityFilterPlayer(int entity, int contentsMask, any data)
+bool TraceFilterPlayers(int entity, int contentsMask)
 {
-    return entity > MaxClients;
+    return entity > MaxClients || !entity;
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon) {
-    if (client <= 0 || client > MaxClients) return Plugin_Continue;
-    if (!IsClientInGame(client)) return Plugin_Continue;
-    if (IsFakeClient(client)) return Plugin_Continue;
-    
-    int prevButtons = buttons;
-
-    // Player was holding m1, and now isn't. (Released)
-    if (buttons & IN_ATTACK != IN_ATTACK && in_attack[client]) {
-        in_attack[client] = false;
-        if (bEditMode[client])
-            Command_Select(client, 0);
-    }
-    // Player was not holding m1, and now is. (Pressed)
-    if (buttons & IN_ATTACK == IN_ATTACK && !in_attack[client]) {
-        in_attack[client] = true;
-    }
-
-    // Player was holding m2, and now isn't. (Released)
-    if (buttons & IN_ATTACK2 != IN_ATTACK2 && in_attack2[client]) {
-        in_attack2[client] = false;
-        if (bEditMode[client]) {
-            float end[3];
-            if (GetEndPosition(client, end))
-                Move(client, end[0], end[1], end[2], true);
-            else
-                PrintToChat(client, "Invalid end position.");
-        }
-    }
-    // Player was not holding m2, and now is. (Pressed)
-    if (buttons & IN_ATTACK2 == IN_ATTACK2 && !in_attack2[client]) {
-        in_attack2[client] = true;
-    }
-
-    // Player was holding tab, and now isn't. (Released)
-    if (buttons & IN_SCORE != IN_SCORE && in_score[client]) {
-        in_score[client] = false;
-        Command_Edit(client, 0);
-    }
-    // Player was not holding tab, and now is. (Pressed)
-    if (buttons & IN_SCORE == IN_SCORE && !in_score[client]) {
-        in_score[client] = true;
-    }
-
-    // Player was holding shift, and now isn't. (Released)
-    if (buttons & IN_SPEED != IN_SPEED && in_speed[client]) {
-        in_speed[client] = false;
-        if (bEditMode[client])
-            RotateStep(client);
-    }
-    // Player was not holding shift, and now is. (Pressed)
-    if (buttons & IN_SPEED == IN_SPEED && !in_speed[client]) {
-        in_speed[client] = true;
-    }
-    
-    if (!bEditMode[client]) return Plugin_Continue;
-
-    if (buttons & IN_MOVELEFT == IN_MOVELEFT) {
-        Nudge(client, -stepSize[client], 0.0, 0.0, false);
-    }
-    if (buttons & IN_MOVERIGHT == IN_MOVERIGHT) {
-        Nudge(client, stepSize[client], 0.0, 0.0, false);
-    }
-    if (buttons & IN_FORWARD == IN_FORWARD) {
-        Nudge(client, 0.0, stepSize[client], 0.0, false);
-    }
-    if (buttons & IN_BACK == IN_BACK) {
-        Nudge(client, 0.0, -stepSize[client], 0.0, false);
-    }
-    if (buttons & IN_USE == IN_USE) {
-        Nudge(client, 0.0, 0.0, stepSize[client], false);
-    }
-    if (buttons & IN_RELOAD == IN_RELOAD) {
-        Nudge(client, 0.0, 0.0, -stepSize[client], false);
-    }
-
-    buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_SCORE | IN_USE | IN_RELOAD);
-
-    if (prevButtons != buttons) {
-        return Plugin_Changed;
-    }
-    return Plugin_Continue;
-}
-
-public Action PlayerTeam_Event(Handle event, const char[] name, bool dontBroadcast)
+bool IsValidEntRef(int entRef)
 {
-    int client = GetClientOfUserId(GetEventInt(event, "userid"));
-    int team = GetEventInt(event, "team");
-    if (team != TEAM_INFECTED && bEditMode[client]) {
-        bEditMode[client] = false;
-        PrintToChat(client, "Exiting edit mode.");
-    }
+    return entRef && EntRefToEntIndex(entRef) != INVALID_ENT_REFERENCE;
 }
 
-public Action Command_Step(int client, int args)
+float FloatMaxCustom(float a, float b)
 {
-    if (args != 1) {
-        PrintToChat(client, "[SM] Usage: sm_step <size>");
-        return Plugin_Handled;
-    }
-    char x[8];
-    GetCmdArg(1, x, sizeof(x));
-    int size = StringToInt(x);
-    if (size > 0) {
-        stepSize[client] = size * 1.0;
-        PrintToChat(client, "Step size set to %i.", size);
-    }
-    else {
-        PrintToChat(client, "Step size must be greater than 0.");
-    }
-    return Plugin_Handled;
+    return (a > b) ? a : b;
 }
 
-public Action Command_Edit(int client, int args)
-{
-    if (GetClientTeam(client) != TEAM_INFECTED) {
-        PrintToChat(client, "Must be on infected team to enter edit mode.");
-        return Plugin_Handled;
-    }
-    if (bEditMode[client]) {
-        bEditMode[client] = false;
-        SetClientFrozen(client, false);
-        PrintToChat(client, "Exiting edit mode.");
-    }
-    else {
-        bEditMode[client] = true;
-        SetClientFrozen(client, true);
-        PrintToChat(client, "Entering edit mode.");
-    }
-    return Plugin_Handled;
-}
-
-public Action Command_Kill(int client, int args)
-{
-    char modelname[128];
-    char classname[MAX_STR_LEN];
-    int entity = selectedLadder[client];
-    if (IsValidEntity(entity)) {
-        GetEntityClassname(entity, classname, MAX_STR_LEN);
-        float normal[3];
-        float origin[3];
-        float position[3];
-        float mins[3];
-        float maxs[3];
-        GetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
-        GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
-        GetEntPropVector(entity,Prop_Send,"m_vecMins",mins);
-        GetEntPropVector(entity,Prop_Send,"m_vecMaxs",maxs);
-        position[0] = origin[0] + (mins[0] + maxs[0]) * 0.5;
-        position[1] = origin[1] + (mins[1] + maxs[1]) * 0.5;
-        position[2] = origin[1] + (mins[2] + maxs[2]) * 0.5;
-        AcceptEntityInput(entity, "Kill");
-        selectedLadder[client] = -1;
-        char key[8];
-        IntToString(entity, key, 8);
-        RemoveFromTrie(hLadders, key);
-        PrintToChat(client, "Killed ladder entity %i, %s at (%.2f,%.2f,%.2f). origin: (%.2f,%.2f,%.2f). normal: (%.2f,%.2f,%.2f)", entity, modelname, position[0], position[1], position[2], origin[0], origin[1], origin[2], normal[0], normal[1], normal[2]);
-    }
-    else {
-        PrintToChat(client, "No ladder selected.");
-    }
-    return Plugin_Handled;
-}
-
-public void GetLadderEntityInfo(int entity, char[] modelname, int modelnamelen, float origin[3], float position[3], float normal[3], float angles[3]) {
-    float mins[3];
-    float maxs[3];
-    GetEntPropString(entity, Prop_Data, "m_ModelName", modelname, modelnamelen);
-    GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
-    GetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
-    GetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
-    GetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
-    GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
-    Math_RotateVector(mins, angles, mins);
-    Math_RotateVector(maxs, angles, maxs);
-    position[0] = origin[0] + (mins[0] + maxs[0]) * 0.5;
-    position[1] = origin[1] + (mins[1] + maxs[1]) * 0.5;
-    position[2] = origin[2] + (mins[2] + maxs[2]) * 0.5;
-}
-
-public Action Command_Info(int client, int args)
-{
-    char classname[MAX_STR_LEN];
-    int entity = GetClientAimTarget(client, false);
-    if (IsValidEntity(entity)) {
-        GetEntityClassname(entity, classname, MAX_STR_LEN);
-        if (StrEqual(classname, "func_simpleladder", false)) {
-            char modelname[128];
-            float origin[3];
-            float position[3];
-            float normal[3];
-            float angles[3];
-            GetLadderEntityInfo(entity, modelname, sizeof(modelname), origin, position, normal, angles);
-
-            PrintToChat(client, "Ladder entity %i, %s at (%.2f,%.2f,%.2f). origin: (%.2f,%.2f,%.2f). normal: (%.2f,%.2f,%.2f). angles: (%.2f,%.2f,%.2f)", entity, modelname, position[0], position[1], position[2], origin[0], origin[1], origin[2], normal[0], normal[1], normal[2], angles[0], angles[1], angles[2]);
-
-            PrintToConsole(client, "add:");
-            PrintToConsole(client, "{");
-            PrintToConsole(client, "    \"model\" \"%s\"", modelname);
-            PrintToConsole(client, "    \"normal.z\" \"%.2f\"", normal[2]);
-            PrintToConsole(client, "    \"normal.y\" \"%.2f\"", normal[1]);
-            PrintToConsole(client, "    \"normal.x\" \"%.2f\"", normal[0]);
-            PrintToConsole(client, "    \"team\" \"2\"");
-            PrintToConsole(client, "    \"classname\" \"func_simpleladder\"");
-            PrintToConsole(client, "    \"origin\" \"%.2f %.2f %.2f\"", origin[0], origin[1], origin[2]);
-            PrintToConsole(client, "    \"angles\" \"%.2f %.2f %.2f\"", angles[0], angles[1], angles[2]);
-            PrintToConsole(client, "}");
-        }
-        else {
-            PrintToChat(client, "Not looking at a ladder. Entity %i, classname: %s", entity, classname);
-        }
-    }
-    else {
-        PrintToChat(client, "Looking at invalid entity %i", entity);
-    }
-    return Plugin_Handled;
-}
-
-public void RotateStep(int client)
-{
-    int entity = selectedLadder[client];
-    if (IsValidEntity(entity)) {
-        char modelname[128];
-        float origin[3];
-        float position[3];
-        float normal[3];
-        float angles[3];
-        GetLadderEntityInfo(entity, modelname, sizeof(modelname), origin, position, normal, angles);
-        Rotate(client, 0.0, angles[1] + 90, 0.0, true);
-    }
-    else {
-        PrintToChat(client, "No ladder selected.");
-    }
-}
-
-public void Nudge(int client, float x, float y, float z, bool bPrint)
-{
-    int entity = selectedLadder[client];
-    if (IsValidEntity(entity)) {
-        float position[3];
-        GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
-        float origin[3];
-        origin[0] = position[0] + x;
-        origin[1] = position[1] + y;
-        origin[2] = position[2] + z;
-        TeleportEntity(entity, origin, NULL_VECTOR, NULL_VECTOR);
-        GetEntPropVector(entity, Prop_Send, "m_vecOrigin", position);
-        if (bPrint)
-            PrintToChat(client, "Nudged ladder entity %i. Origin (%.2f,%.2f,%.2f)", entity, origin[0], origin[1], origin[2]);
-    }
-    else {
-        if (bPrint)
-            PrintToChat(client, "No ladder selected.");
-    }
-}
-
-public void Rotate(int client, float x, float y, float z, bool bPrint)
-{
-    int entity = selectedLadder[client];
-    if (IsValidEntity(entity)) {
-        int sourceEnt;
-        char key[8];
-        IntToString(entity, key, 8);
-        if (!hLadders.GetValue(key, sourceEnt)) {
-            if (bPrint)
-                PrintToChat(client, "Original ladder not found.");
-            return;
-        }
-        
-        char modelname[128];
-        float sourceOrigin[3];
-        float sourcePos[3];
-        float sourceNormal[3];
-        float sourceAngles[3];
-        GetLadderEntityInfo(sourceEnt, modelname, sizeof(modelname), sourceOrigin, sourcePos, sourceNormal, sourceAngles);
-        if (bPrint)
-            PrintToChat(client, "Original ladder entity %i at (%.2f,%.2f,%.2f)", sourceEnt, sourcePos[0], sourcePos[1], sourcePos[2]);
-        
-        float origin[3];
-        float position[3];
-        float normal[3];
-        float angles[3];
-        GetLadderEntityInfo(entity, modelname, sizeof(modelname), origin, position, normal, angles);
-        
-        angles[0] = x;
-        angles[1] = y;
-        angles[2] = z;
-        
-        float rotatedPos[3];
-        Math_RotateVector(sourcePos, angles, rotatedPos);
-        
-        origin[0] = -rotatedPos[0] + position[0];
-        origin[1] = -rotatedPos[1] + position[1];
-        origin[2] = -rotatedPos[2] + position[2];
-    
-        TeleportEntity(entity, origin, angles, NULL_VECTOR);
-        
-        Math_RotateVector(sourceNormal, angles, normal);
-        SetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
-        
-        if (bPrint)
-            PrintToChat(client, "Rotated ladder entity %i. Origin (%.2f,%.2f,%.2f). Angles (%.2f,%.2f,%.2f). Normal (%.2f,%.2f,%.2f)", entity, origin[0], origin[1], origin[2], angles[0], angles[1], angles[2], normal[0], normal[1], normal[2]);
-    }
-    else {
-        if (bPrint)
-            PrintToChat(client, "No ladder selected.");
-    }
-}
-
-public void Move(int client, float x, float y, float z, bool bPrint)
-{
-    int entity = selectedLadder[client];
-    if (IsValidEntity(entity)) {
-        int sourceEnt;
-        char key[8];
-        IntToString(entity, key, 8);
-        if (!hLadders.GetValue(key, sourceEnt)) {
-            if (bPrint)
-                PrintToChat(client, "Original ladder not found.");
-            return;
-        }
-        
-        char modelname[128];
-        float origin[3];
-        float sourcePos[3];
-        float normal[3];
-        float angles[3];
-        GetLadderEntityInfo(sourceEnt, modelname, sizeof(modelname), origin, sourcePos, normal, angles);
-
-        if (bPrint)
-            PrintToChat(client, "Original ladder entity %i at (%.2f,%.2f,%.2f)", sourceEnt, sourcePos[0], sourcePos[1], sourcePos[2]);
-        
-        origin[0] = x - sourcePos[0];
-        origin[1] = y - sourcePos[1];
-        origin[2] = z - sourcePos[2];
-    
-        TeleportEntity(entity, origin, NULL_VECTOR, NULL_VECTOR);
-        if (bPrint)
-            PrintToChat(client, "Moved ladder entity %i. Origin (%.2f,%.2f,%.2f)", entity, origin[0], origin[1], origin[2]);
-    }
-    else {
-        if (bPrint)
-            PrintToChat(client, "No ladder selected.");
-    }
-}
-
-public Action Command_Rotate(int client, int args)
-{
-    if (args != 3) {
-        PrintToChat(client, "[SM] Usage: sm_rotate <x> <y> <z>");
-        return Plugin_Handled;
-    }
-    char x[8];
-    char y[8];
-    char z[8];
-    GetCmdArg(1, x, sizeof(x));
-    GetCmdArg(2, y, sizeof(y));
-    GetCmdArg(3, z, sizeof(z));
-    Rotate(client, StringToFloat(x), StringToFloat(y), StringToFloat(z), true);
-    return Plugin_Handled;
-}
-
-public Action Command_Nudge(int client, int args)
-{
-    if (args != 3) {
-        PrintToChat(client, "[SM] Usage: sm_nudge <x> <y> <z>");
-        return Plugin_Handled;
-    }
-    char x[8], y[8], z[8];
-    GetCmdArg(1, x, sizeof(x));
-    GetCmdArg(2, y, sizeof(y));
-    GetCmdArg(3, z, sizeof(z));
-    Nudge(client, StringToFloat(x), StringToFloat(y), StringToFloat(z), true);
-    return Plugin_Handled;
-}
-
-public Action Command_Move(int client, int args)
-{
-    if (args != 3) {
-        PrintToChat(client, "[SM] Usage: sm_move <x> <y> <z>");
-        return Plugin_Handled;
-    }
-    char x[8], y[8], z[8];
-    GetCmdArg(1, x, sizeof(x));
-    GetCmdArg(2, y, sizeof(y));
-    GetCmdArg(3, z, sizeof(z));
-    Move(client, StringToFloat(x), StringToFloat(y), StringToFloat(z), true);
-    return Plugin_Handled;
-}
-
-public Action Command_Clone(int client, int args)
-{
-    char classname[MAX_STR_LEN];
-    int sourceEnt = selectedLadder[client];
-    if (IsValidEntity(sourceEnt)) {
-        GetEntityClassname(sourceEnt, classname, MAX_STR_LEN);
-        if (!StrEqual(classname, "func_simpleladder", false)) {
-            selectedLadder[client] = -1;
-            PrintToChat(client, "No ladder selected.");
-            return Plugin_Handled;
-        }
-        char modelname[128];
-        float origin[3];
-        float position[3];
-        float normal[3];
-        float angles[3];
-        GetLadderEntityInfo(sourceEnt, modelname, sizeof(modelname), origin, position, normal, angles);
-        PrecacheModel(modelname, true);
-        int entity = CreateEntityByName("func_simpleladder");
-        if (entity == -1)
-        {
-            PrintToChat(client, "Failed to create ladder.");
-            return Plugin_Handled;
-        }
-        char buf[32];
-        DispatchKeyValue(entity, "model", modelname);
-        Format(buf, sizeof(buf), "%.6f", normal[2]);
-        DispatchKeyValue(entity, "normal.z", buf);
-        Format(buf, sizeof(buf), "%.6f", normal[1]);
-        DispatchKeyValue(entity, "normal.y", buf);
-        Format(buf, sizeof(buf), "%.6f", normal[0]);
-        DispatchKeyValue(entity, "normal.x", buf);
-        DispatchKeyValue(entity, "team", "2");
-        DispatchKeyValue(entity, "origin", "50 0 0");
-
-        DispatchSpawn(entity);
-        selectedLadder[client] = entity;
-        char key[8];
-        IntToString(entity, key, 8);
-        SetTrieValue(hLadders, key, sourceEnt, true);
-        PrintToChat(client, "Cloned ladder entity %i. New entity %i", sourceEnt, entity);
-    }
-    else {
-        PrintToChat(client, "No ladder selected.");
-    }
-    return Plugin_Handled;
-}
-
-public Action Command_Select(int client, int args)
-{
-    char classname[MAX_STR_LEN];
-    int entity = GetClientAimTarget(client, false);
-    if (IsValidEntity(entity)) {
-        GetEntityClassname(entity, classname, MAX_STR_LEN);
-        if (StrEqual(classname, "func_simpleladder", false)) {
-            selectedLadder[client] = entity;
-            
-            char modelname[128];
-            float origin[3];
-            float position[3];
-            float normal[3];
-            float angles[3];
-            GetLadderEntityInfo(entity, modelname, sizeof(modelname), origin, position, normal, angles);
-            PrintToChat(client, "Selected ladder entity %i, %s at (%.2f,%.2f,%.2f). origin: (%.2f,%.2f,%.2f). normal: (%.2f,%.2f,%.2f)", entity, modelname, position[0], position[1], position[2], origin[0], origin[1], origin[2], normal[0], normal[1], normal[2]);
-        }
-        else {
-            selectedLadder[client] = -1;
-            PrintToChat(client, "Not looking at a ladder. Entity %i, classname: %s", entity, classname);
-        }
-    }
-    else {
-        selectedLadder[client] = -1;
-        PrintToChat(client, "Looking at invalid entity %i", entity);
-    }
-    return Plugin_Handled;
-}
-
-// from smlib https://github.com/bcserv/smlib
-
-/**
- * Rotates a vector around its zero-point.
- * Note: As example you can rotate mins and maxs of an entity and then add its origin to mins and maxs to get its bounding box in relation to the world and its rotation.
- * When used with players use the following angle input:
- *   angles[0] = 0.0;
- *   angles[1] = 0.0;
- *   angles[2] = playerEyeAngles[1];
- *
- * @param vec 			Vector to rotate.
- * @param angles 		How to rotate the vector.
- * @param result		Output vector.
- * @noreturn
- */
+// ====================================================================================================
+//                                     MATH
+// ====================================================================================================
 stock void Math_RotateVector(const float vec[3], const float angles[3], float result[3])
 {
-    // First the angle/radiant calculations
     float rad[3];
-    // I don't really know why, but the alpha, beta, gamma order of the angles are messed up...
-    // 2 = xAxis
-    // 0 = yAxis
-    // 1 = zAxis
     rad[0] = DegToRad(angles[2]);
     rad[1] = DegToRad(angles[0]);
     rad[2] = DegToRad(angles[1]);
 
-    // Pre-calc function calls
     float cosAlpha = Cosine(rad[0]);
     float sinAlpha = Sine(rad[0]);
     float cosBeta = Cosine(rad[1]);
@@ -677,29 +1660,27 @@ stock void Math_RotateVector(const float vec[3], const float angles[3], float re
     float cosGamma = Cosine(rad[2]);
     float sinGamma = Sine(rad[2]);
 
-    // 3D rotation matrix for more information: http://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
     float x = vec[0];
     float y = vec[1];
     float z = vec[2];
     float newX;
     float newY;
     float newZ;
-    newY = cosAlpha*y - sinAlpha*z;
-    newZ = cosAlpha*z + sinAlpha*y;
+    newY = cosAlpha * y - sinAlpha * z;
+    newZ = cosAlpha * z + sinAlpha * y;
     y = newY;
     z = newZ;
 
-    newX = cosBeta*x + sinBeta*z;
-    newZ = cosBeta*z - sinBeta*x;
+    newX = cosBeta * x + sinBeta * z;
+    newZ = cosBeta * z - sinBeta * x;
     x = newX;
     z = newZ;
 
-    newX = cosGamma*x - sinGamma*y;
-    newY = cosGamma*y + sinGamma*x;
+    newX = cosGamma * x - sinGamma * y;
+    newY = cosGamma * y + sinGamma * x;
     x = newX;
     y = newY;
 
-    // Store everything...
     result[0] = x;
     result[1] = y;
     result[2] = z;
