@@ -36,7 +36,7 @@ float g_fPosStep[MAXPLAYERS + 1];
 float g_fAngStep[MAXPLAYERS + 1];
 float g_fSizeStep[MAXPLAYERS + 1];
 bool g_bMenuOpen[MAXPLAYERS + 1];
-int g_iLastMenuAction[MAXPLAYERS + 1]; // 0=main, 1=nudge, 2=rotate, 3=size, 4=normal
+int g_iLastMenuAction[MAXPLAYERS + 1]; // 0=main, 1=nudge, 2=rotate, 3=size
 
 LadderData g_AddData[MAX_LADDERS];
 int g_iAddEntRef[MAX_LADDERS];
@@ -80,7 +80,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
     if (client <= 0 || client > MaxClients || !IsClientInGame(client) || IsFakeClient(client))
         return Plugin_Continue;
 
-    if (!g_bMenuOpen[client] || GetSelectedEntity(client) == -1)
+    if (!g_bMenuOpen[client] || GetSelectedEntity(client, false) == -1)
     {
         g_iLastButtons[client] = buttons;
         return Plugin_Continue;
@@ -98,8 +98,6 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
     bool bPressed = false;
     float move[3];
     float rotDelta[3];
-    float sizeDelta[3];
-    float normalDelta[3];
 
     int menuAction = g_iLastMenuAction[client];
     
@@ -179,77 +177,20 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
     }
     else if (menuAction == 3)
     {
-        if ((currentButtons & IN_FORWARD) && !(lastButtons & IN_FORWARD))
-        {
-            sizeDelta[1] = g_fSizeStep[client];
-            bPressed = true;
-        }
-        if ((currentButtons & IN_BACK) && !(lastButtons & IN_BACK))
-        {
-            sizeDelta[1] = -g_fSizeStep[client];
-            bPressed = true;
-        }
-        if ((currentButtons & IN_MOVELEFT) && !(lastButtons & IN_MOVELEFT))
-        {
-            sizeDelta[0] = -g_fSizeStep[client];
-            bPressed = true;
-        }
-        if ((currentButtons & IN_MOVERIGHT) && !(lastButtons & IN_MOVERIGHT))
-        {
-            sizeDelta[0] = g_fSizeStep[client];
-            bPressed = true;
-        }
+        float heightDelta = 0.0;
         if ((currentButtons & IN_USE) && !(lastButtons & IN_USE))
         {
-            sizeDelta[2] = g_fSizeStep[client];
+            heightDelta = g_fSizeStep[client];
             bPressed = true;
         }
         if ((currentButtons & IN_RELOAD) && !(lastButtons & IN_RELOAD))
         {
-            sizeDelta[2] = -g_fSizeStep[client];
+            heightDelta = -g_fSizeStep[client];
             bPressed = true;
         }
-        if (bPressed && (sizeDelta[0] != 0.0 || sizeDelta[1] != 0.0 || sizeDelta[2] != 0.0))
+        if (bPressed && heightDelta != 0.0)
         {
-            ResizeSelected(client, sizeDelta);
-        }
-    }
-    else if (menuAction == 4)
-    {
-        float step = 0.1;
-        if ((currentButtons & IN_FORWARD) && !(lastButtons & IN_FORWARD))
-        {
-            normalDelta[1] = step;
-            bPressed = true;
-        }
-        if ((currentButtons & IN_BACK) && !(lastButtons & IN_BACK))
-        {
-            normalDelta[1] = -step;
-            bPressed = true;
-        }
-        if ((currentButtons & IN_MOVELEFT) && !(lastButtons & IN_MOVELEFT))
-        {
-            normalDelta[0] = -step;
-            bPressed = true;
-        }
-        if ((currentButtons & IN_MOVERIGHT) && !(lastButtons & IN_MOVERIGHT))
-        {
-            normalDelta[0] = step;
-            bPressed = true;
-        }
-        if ((currentButtons & IN_USE) && !(lastButtons & IN_USE))
-        {
-            normalDelta[2] = step;
-            bPressed = true;
-        }
-        if ((currentButtons & IN_RELOAD) && !(lastButtons & IN_RELOAD))
-        {
-            normalDelta[2] = -step;
-            bPressed = true;
-        }
-        if (bPressed && (normalDelta[0] != 0.0 || normalDelta[1] != 0.0 || normalDelta[2] != 0.0))
-        {
-            AdjustNormalSelected(client, normalDelta);
+            ResizeSelected(client, heightDelta);
         }
     }
 
@@ -322,8 +263,7 @@ void ShowMainMenu(int client)
     menu.AddItem("move", "Move selected to crosshair");
     menu.AddItem("nudge", "Nudge selected");
     menu.AddItem("rotate", "Rotate selected");
-    menu.AddItem("size", "Resize selected");
-    menu.AddItem("normal", "Adjust normal");
+    menu.AddItem("size", "Resize height");
     menu.AddItem("delete", "Delete selected");
     menu.AddItem("list", "List saved ladders");
     menu.AddItem("tele", "Teleport to ladder");
@@ -376,10 +316,6 @@ int MainMenuHandler(Menu menu, MenuAction action, int client, int index)
     else if (StrEqual(info, "size"))
     {
         ShowSizeMenu(client);
-    }
-    else if (StrEqual(info, "normal"))
-    {
-        ShowNormalMenu(client);
     }
     else if (StrEqual(info, "delete"))
     {
@@ -778,14 +714,10 @@ void ShowSizeMenu(int client)
 {
     Menu menu = new Menu(SizeMenuHandler);
     char title[64];
-    Format(title, sizeof(title), "Resize (step %.1f)", g_fSizeStep[client]);
+    Format(title, sizeof(title), "Resize Height (step %.1f)", g_fSizeStep[client]);
     menu.SetTitle(title);
-    menu.AddItem("x+", "Width +");
-    menu.AddItem("y+", "Depth +");
-    menu.AddItem("z+", "Height +");
-    menu.AddItem("x-", "Width -");
-    menu.AddItem("y-", "Depth -");
-    menu.AddItem("z-", "Height -");
+    menu.AddItem("h+", "Height +");
+    menu.AddItem("h-", "Height -");
     menu.AddItem("step+", "Step +2.0");
     menu.AddItem("step-", "Step -2.0");
     menu.AddItem("back", "Back to main");
@@ -827,84 +759,21 @@ int SizeMenuHandler(Menu menu, MenuAction action, int client, int index)
     }
     else
     {
-        float delta[3];
-        if (StrEqual(info, "x+")) delta[0] = g_fSizeStep[client];
-        if (StrEqual(info, "y+")) delta[1] = g_fSizeStep[client];
-        if (StrEqual(info, "z+")) delta[2] = g_fSizeStep[client];
-        if (StrEqual(info, "x-")) delta[0] = -g_fSizeStep[client];
-        if (StrEqual(info, "y-")) delta[1] = -g_fSizeStep[client];
-        if (StrEqual(info, "z-")) delta[2] = -g_fSizeStep[client];
+        float heightDelta = 0.0;
+        if (StrEqual(info, "h+")) heightDelta = g_fSizeStep[client];
+        if (StrEqual(info, "h-")) heightDelta = -g_fSizeStep[client];
 
-        ResizeSelected(client, delta);
+        if (heightDelta != 0.0)
+        {
+            ResizeSelected(client, heightDelta);
+        }
     }
 
     ShowSizeMenu(client);
     return 0;
 }
 
-void ShowNormalMenu(int client)
-{
-    Menu menu = new Menu(NormalMenuHandler);
-    menu.SetTitle("Adjust Normal");
-    menu.AddItem("x+", "Normal X +");
-    menu.AddItem("y+", "Normal Y +");
-    menu.AddItem("z+", "Normal Z +");
-    menu.AddItem("x-", "Normal X -");
-    menu.AddItem("y-", "Normal Y -");
-    menu.AddItem("z-", "Normal Z -");
-    menu.AddItem("reset", "Reset to default");
-    menu.AddItem("back", "Back to main");
-    menu.ExitButton = true;
-    menu.ExitBackButton = false;
-    menu.Display(client, MENU_TIME_FOREVER);
-    g_iLastMenuAction[client] = 4;
-}
-
-int NormalMenuHandler(Menu menu, MenuAction action, int client, int index)
-{
-    if (action == MenuAction_End)
-    {
-        delete menu;
-        if (g_iLastMenuAction[client] == 4)
-            g_bMenuOpen[client] = false;
-        return 0;
-    }
-    
-    if (action != MenuAction_Select)
-        return 0;
-
-    char info[16];
-    menu.GetItem(index, info, sizeof(info));
-
-    if (StrEqual(info, "back"))
-    {
-        ShowMainMenu(client);
-        return 0;
-    }
-
-    if (StrEqual(info, "reset"))
-    {
-        ResetNormalSelected(client);
-    }
-    else
-    {
-        float delta[3];
-        float step = 0.1;
-        if (StrEqual(info, "x+")) delta[0] = step;
-        if (StrEqual(info, "y+")) delta[1] = step;
-        if (StrEqual(info, "z+")) delta[2] = step;
-        if (StrEqual(info, "x-")) delta[0] = -step;
-        if (StrEqual(info, "y-")) delta[1] = -step;
-        if (StrEqual(info, "z-")) delta[2] = -step;
-
-        AdjustNormalSelected(client, delta);
-    }
-
-    ShowNormalMenu(client);
-    return 0;
-}
-
-void ResizeSelected(int client, const float delta[3])
+void ResizeSelected(int client, float heightDelta)
 {
     int entity = GetSelectedEntity(client);
     if (entity == -1)
@@ -926,96 +795,38 @@ void ResizeSelected(int client, const float delta[3])
     GetLadderCenter(entity, center);
     GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
 
-    mins[0] += delta[0] * 0.5;
-    mins[1] += delta[1] * 0.5;
-    mins[2] += delta[2] * 0.5;
-    maxs[0] += delta[0] * 0.5;
-    maxs[1] += delta[1] * 0.5;
-    maxs[2] += delta[2] * 0.5;
+    // Zmieniamy tylko wysokość (Z axis)
+    mins[2] += heightDelta * 0.5;
+    maxs[2] += heightDelta * 0.5;
 
-    if (mins[0] >= maxs[0] || mins[1] >= maxs[1] || mins[2] >= maxs[2])
+    if (mins[2] >= maxs[2])
     {
-        PrintToChat(client, "%sCannot resize: size would be invalid.", CHAT_TAG);
+        PrintToChat(client, "%sCannot resize: height would be invalid.", CHAT_TAG);
         return;
     }
 
+    // Ustawiamy mins/maxs w obu miejscach (Send i Data)
     SetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
     SetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+    SetEntPropVector(entity, Prop_Data, "m_vecMins", mins);
+    SetEntPropVector(entity, Prop_Data, "m_vecMaxs", maxs);
 
+    // Obliczamy nowy origin na podstawie zachowanego center i nowych mins/maxs
     float newOrigin[3];
     ComputeOriginForCenter(entity, center, angles, newOrigin);
+    
+    // Teleportujemy entity z nowym originem
     TeleportEntity(entity, newOrigin, NULL_VECTOR, NULL_VECTOR);
+    
+    // Aktualizujemy collision box
+    SetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
+    SetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+    SetEntPropVector(entity, Prop_Data, "m_vecMins", mins);
+    SetEntPropVector(entity, Prop_Data, "m_vecMaxs", maxs);
 
     UpdateManagedLadder(entity);
 }
 
-void AdjustNormalSelected(int client, const float delta[3])
-{
-    int entity = GetSelectedEntity(client);
-    if (entity == -1)
-        return;
-
-    if (!EnsureManagedLadder(client, entity))
-        return;
-
-    entity = GetSelectedEntity(client);
-    if (entity == -1)
-        return;
-
-    float normal[3];
-    GetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
-
-    normal[0] += delta[0];
-    normal[1] += delta[1];
-    normal[2] += delta[2];
-
-    float len = SquareRoot(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
-    if (len > 0.0)
-    {
-        normal[0] /= len;
-        normal[1] /= len;
-        normal[2] /= len;
-    }
-
-    SetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
-    UpdateManagedLadder(entity);
-}
-
-void ResetNormalSelected(int client)
-{
-    int entity = GetSelectedEntity(client);
-    if (entity == -1)
-        return;
-
-    if (!EnsureManagedLadder(client, entity))
-        return;
-
-    entity = GetSelectedEntity(client);
-    if (entity == -1)
-        return;
-
-    float angles[3];
-    GetEntPropVector(entity, Prop_Send, "m_angRotation", angles);
-
-    float normal[3];
-    normal[0] = 0.0;
-    normal[1] = 0.0;
-    normal[2] = 1.0;
-
-    Math_RotateVector(normal, angles, normal);
-
-    float len = SquareRoot(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
-    if (len > 0.0)
-    {
-        normal[0] /= len;
-        normal[1] /= len;
-        normal[2] /= len;
-    }
-
-    SetEntPropVector(entity, Prop_Send, "m_climbableNormal", normal);
-    UpdateManagedLadder(entity);
-    PrintToChat(client, "%sNormal reset to default.", CHAT_TAG);
-}
 
 void DeleteSelected(int client)
 {
@@ -1027,6 +838,7 @@ void DeleteSelected(int client)
     if (slot != -1)
     {
         RemoveManagedLadder(slot);
+        g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
         PrintToChat(client, "%sLadder deleted.", CHAT_TAG);
         return;
     }
@@ -1037,8 +849,8 @@ void DeleteSelected(int client)
     if (AddRemoveConfig(data))
     {
         RemoveEntity(entity);
-        PrintToChat(client, "%sOriginal ladder removed and saved.", CHAT_TAG);
         g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
+        PrintToChat(client, "%sOriginal ladder removed and saved.", CHAT_TAG);
     }
     else
     {
@@ -1430,12 +1242,15 @@ bool IsLadder(int entity)
     return StrEqual(classname, "func_simpleladder", false);
 }
 
-int GetSelectedEntity(int client)
+int GetSelectedEntity(int client, bool showMessage = true)
 {
     int entity = EntRefToEntIndex(g_iSelectedLadder[client]);
     if (entity == INVALID_ENT_REFERENCE || entity <= 0 || !IsValidEntity(entity))
     {
-        PrintToChat(client, "%sNo ladder selected.", CHAT_TAG);
+        if (showMessage && g_bMenuOpen[client])
+        {
+            PrintToChat(client, "%sNo ladder selected.", CHAT_TAG);
+        }
         g_iSelectedLadder[client] = INVALID_ENT_REFERENCE;
         return -1;
     }
@@ -1512,11 +1327,22 @@ void RemoveManagedLadder(int slot)
         return;
 
     int entity = EntRefToEntIndex(g_iAddEntRef[slot]);
+    int entityRef = g_iAddEntRef[slot];
+    
     if (IsValidEntity(entity))
         RemoveEntity(entity);
 
     if (!RemoveLadderConfig(slot))
         return;
+
+    // Clear selected ladder for all clients if this entity was selected
+    for (int i = 1; i <= MaxClients; i++)
+    {
+        if (g_iSelectedLadder[i] == entityRef)
+        {
+            g_iSelectedLadder[i] = INVALID_ENT_REFERENCE;
+        }
+    }
 
     for (int i = slot; i < g_iAddCount - 1; i++)
     {
