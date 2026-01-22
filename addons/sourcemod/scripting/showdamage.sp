@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <sdkhooks>
 #include <clientprefs>
 #include <colors>
 
@@ -62,6 +63,8 @@ public OnPluginStart()
 	}
 	else
 	{
+		// For games without damage info in player_hurt, use SDKHook instead of OnGameFrame
+		// This is much more efficient - only fires when damage occurs, not every tick
 		HookEvent("player_hurt", Event_PlayerHurt_FrameMod, EventHookMode_Pre);
 		FrameMod = true;
 	}
@@ -145,6 +148,42 @@ public OnClientConnected(client)
 	block_timer[client] = false;
 }
 
+public OnClientPutInServer(client)
+{
+	if (FrameMod && show_damage)
+	{
+		SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	}
+}
+
+public OnClientDisconnect(client)
+{
+	if (FrameMod)
+	{
+		SDKUnhook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	}
+}
+
+// OPTIMIZED: Use SDKHook instead of OnGameFrame
+// This only fires when damage occurs, not every tick (60-100 times per second)
+public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
+{
+	if (!FrameMod || !show_damage || victim < 1 || victim > MaxClients)
+	{
+		return Plugin_Continue;
+	}
+	
+	if (!IsClientInGame(victim))
+	{
+		return Plugin_Continue;
+	}
+	
+	// Store current health before damage is applied
+	player_old_health[victim] = GetClientHealth(victim);
+	
+	return Plugin_Continue;
+}
+
 public Action:Event_PlayerSpawn(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -154,19 +193,9 @@ public Action:Event_PlayerSpawn(Handle:event, const String:name[], bool:dontBroa
 }
 
 //This is for games that have no damage information in player_hurt event
-public OnGameFrame()
-{
-	if (FrameMod && show_damage)
-	{
-		for (new client = 1; client <= MaxClients; client++)
-		{
-			if (IsClientInGame(client))
-			{
-				player_old_health[client] = GetClientHealth(client);
-			}
-		}
-	}
-}
+//OPTIMIZED: Removed OnGameFrame - using SDKHook OnTakeDamage instead for better performance
+//OnGameFrame was called every tick (60-100 times per second) and iterated through all clients
+//SDKHook OnTakeDamage is only called when damage actually occurs, much more efficient
 
 public Action:ShowDamage(Handle:timer, any:client)
 {
@@ -207,7 +236,15 @@ public Action:Event_PlayerHurt_FrameMod(Handle:event, const String:name[], bool:
 {	
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
 	new client_attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	
+	// Calculate damage from stored old health (set in OnTakeDamage hook)
 	new damage = player_old_health[client] - GetClientHealth(client);
+	
+	// Update stored health for next time
+	if (IsClientInGame(client))
+	{
+		player_old_health[client] = GetClientHealth(client);
+	}
 	
 	CalcDamage(client, client_attacker, damage);
 	
