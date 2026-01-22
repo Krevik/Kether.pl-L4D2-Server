@@ -25,12 +25,16 @@ ConVar hStabilizationDelay;
 ConVar hAngularVelocityDamping;
 ConVar hForceDirection;
 ConVar hDebug;
+ConVar hLightweightSpeedMultiplier;
+ConVar hLightweightVerticalMultiplier;
 
 bool g_bStabilizationEnabled;
 float g_fStabilizationDelay;
 float g_fAngularVelocityDamping;
 bool g_bForceDirection;
 bool g_bDebug;
+float g_fLightweightSpeedMultiplier;
+float g_fLightweightVerticalMultiplier;
 
 public Plugin myinfo = 
 {
@@ -63,11 +67,21 @@ public void OnPluginStart()
 		"Enable debug output (1: enabled, 0: disabled)",
 		FCVAR_NONE, true, 0.0, true, 1.0);
 	
+	hLightweightSpeedMultiplier = CreateConVar("hc_lightweight_speed_mult", "0.7",
+		"Speed multiplier for lightweight hittables (forklifts, logs, pallets, etc.) - lower = slower",
+		FCVAR_NONE, true, 0.1, true, 2.0);
+	
+	hLightweightVerticalMultiplier = CreateConVar("hc_lightweight_vertical_mult", "0.3",
+		"Vertical velocity multiplier for lightweight hittables - lower = less upward flight",
+		FCVAR_NONE, true, 0.0, true, 2.0);
+	
 	hStabilizationEnabled.AddChangeHook(OnConVarChanged);
 	hStabilizationDelay.AddChangeHook(OnConVarChanged);
 	hAngularVelocityDamping.AddChangeHook(OnConVarChanged);
 	hForceDirection.AddChangeHook(OnConVarChanged);
 	hDebug.AddChangeHook(OnConVarChanged);
+	hLightweightSpeedMultiplier.AddChangeHook(OnConVarChanged);
+	hLightweightVerticalMultiplier.AddChangeHook(OnConVarChanged);
 	
 	GetCvars();
 	
@@ -127,6 +141,8 @@ void GetCvars()
 	g_fAngularVelocityDamping = hAngularVelocityDamping.FloatValue;
 	g_bForceDirection = hForceDirection.BoolValue;
 	g_bDebug = hDebug.BoolValue;
+	g_fLightweightSpeedMultiplier = hLightweightSpeedMultiplier.FloatValue;
+	g_fLightweightVerticalMultiplier = hLightweightVerticalMultiplier.FloatValue;
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -233,6 +249,20 @@ Action StabilizeHittable(Handle timer, int data)
 		return Plugin_Stop;
 	}
 	
+	// Check if this is a lightweight hittable
+	bool isLightweight = IsLightweightHittable(hittable);
+	float speedMultiplier = isLightweight ? g_fLightweightSpeedMultiplier : 1.0;
+	float verticalMultiplier = isLightweight ? g_fLightweightVerticalMultiplier : 1.0;
+	
+	if (g_bDebug && isLightweight)
+	{
+		PrintToServer("[HittableStabilization] Detected lightweight hittable %d, applying multipliers: speed=%.2f, vertical=%.2f", 
+			hittable, speedMultiplier, verticalMultiplier);
+	}
+	
+	// Apply speed multiplier for lightweight objects
+	speed *= speedMultiplier;
+	
 	float newVelocity[3];
 	
 	if (g_bForceDirection)
@@ -246,12 +276,13 @@ Action StabilizeHittable(Handle timer, int data)
 		{
 			// Use a consistent upward velocity based on horizontal speed
 			// This creates a more predictable arc
-			float horizontalSpeed = SquareRoot(currentVelocity[0] * currentVelocity[0] + currentVelocity[1] * currentVelocity[1]);
-			newVelocity[2] = horizontalSpeed * 0.15 + 50.0; // Small upward component
+			float horizontalSpeed = SquareRoot(newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1]);
+			float baseUpward = horizontalSpeed * 0.15 + 50.0; // Small upward component
+			newVelocity[2] = baseUpward * verticalMultiplier; // Apply vertical multiplier for lightweight
 		}
 		else
 		{
-			newVelocity[2] = currentVelocity[2];
+			newVelocity[2] = currentVelocity[2] * verticalMultiplier;
 		}
 		
 		if (g_bDebug)
@@ -267,7 +298,8 @@ Action StabilizeHittable(Handle timer, int data)
 		NormalizeVector(currentVelocity, newVelocity);
 		newVelocity[0] *= speed;
 		newVelocity[1] *= speed;
-		newVelocity[2] = currentVelocity[2]; // Keep Z component as-is
+		// Apply vertical multiplier for lightweight objects
+		newVelocity[2] = currentVelocity[2] * verticalMultiplier;
 		
 		if (g_bDebug)
 		{
@@ -323,6 +355,52 @@ bool IsTankHittable(int entity)
 			return true;
 	}
 	else if (StrEqual(className, "prop_car_alarm"))
+		return true;
+	
+	return false;
+}
+
+bool IsLightweightHittable(int entity)
+{
+	if (!IsValidEntity(entity))
+		return false;
+	
+	char sModelName[PLATFORM_MAX_PATH];
+	GetEntPropString(entity, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
+	ReplaceString(sModelName, sizeof(sModelName), "\\", "/", false);
+	
+	// Forklifts (wózki widłowe)
+	if (StrEqual(sModelName, "models/props/cs_assault/forklift.mdl", false))
+		return true;
+	if (StrContains(sModelName, "forklift_brokenlift", false) != -1)
+		return true;
+	
+	// Handtrucks/Pallets (palety/wózki)
+	if (StrEqual(sModelName, "models/props/cs_assault/handtruck.mdl", false))
+		return true;
+	
+	// Baggage carts (bagażówki)
+	if (StrEqual(sModelName, "models/props_vehicles/airport_baggage_cart2.mdl", false))
+		return true;
+	if (StrEqual(sModelName, "models/sblitz/field_equipment_cart.mdl", false))
+		return true;
+	
+	// Haybales (siano)
+	if (StrEqual(sModelName, "models/props_unique/haybails_single.mdl", false))
+		return true;
+	
+	// Logs (kłody)
+	if (StrEqual(sModelName, "models/props_foliage/swamp_fallentree01_bare.mdl", false))
+		return true;
+	if (StrEqual(sModelName, "models/props_foliage/tree_trunk_fallen.mdl", false))
+		return true;
+	
+	// Generator trailer (przyczepa)
+	if (StrEqual(sModelName, "models/props_vehicles/generatortrailer01.mdl", false))
+		return true;
+	
+	// I-beams (belki)
+	if (StrContains(sModelName, "ibeam_breakable01", false) != -1)
 		return true;
 	
 	return false;
