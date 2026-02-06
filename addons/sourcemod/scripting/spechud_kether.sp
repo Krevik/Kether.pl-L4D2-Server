@@ -22,7 +22,7 @@
 //Kether patches
 #include "kether/spechud.inc"
 
-#define PLUGIN_VERSION	"3.8.4"
+#define PLUGIN_VERSION	"3.8.5"
 
 public Plugin myinfo = 
 {
@@ -345,7 +345,11 @@ public void OnRoundIsLive()
 	
 	GetCurrentGameMode();
 	
-	//for (int i = 1; i <= MaxClients; ++i) storedClass[i] = ZC_None;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_SPECTATOR && !IsClientSourceTV(i))
+			FakeClientCommand(i, "sm_spectate");
+	}
 	
 	if (g_Gamemode == GAMEMODE_VERSUS)
 	{
