@@ -11,6 +11,7 @@
 #define Z_TANK			8
 #define TEAM_INFECTED	3
 #define TEAM_SPECTATOR	1
+#define TEAM_SURVIVOR	2
 
 #define MAX_EDICTS		2048 //(1 << 11)
 
@@ -22,7 +23,10 @@ ConVar
 	g_hCvarColor = null,
 	g_hCvarTankOnly = null,
 	g_hCvarTankSpec = null,
-	g_hCvarTankPropsBeGone = null;
+	g_hCvarTankPropsBeGone = null,
+	g_hCvarSurvivorsGlow = null,
+	g_hCvarSurvivorsColor = null,
+	g_hCvarSurvivorsRange = null;
 
 ArrayList
 	g_hTankProps = null,
@@ -30,14 +34,18 @@ ArrayList
 
 int
 	g_iEntityList[MAX_EDICTS] = {-1, ...},
+	g_iEntityListSurvivors[MAX_EDICTS] = {-1, ...},
 	g_iTankClient = -1,
 	g_iCvarRange = 0,
 	g_iCvarRangeMin = 0,
-	g_iCvarColor = 0;
+	g_iCvarColor = 0,
+	g_iCvarSurvivorsColor = 0,
+	g_iCvarSurvivorsRange = 0;
 
 bool
 	g_bCvarTankOnly = false,
 	g_bCvarTankSpec = false,
+	g_bCvarSurvivorsGlow = false,
 	g_bTankSpawned = false,
 	g_bHittableControlExists = false;
 
@@ -58,6 +66,9 @@ public void OnPluginStart()
 	g_hCvarTankOnly = CreateConVar("l4d2_tank_prop_glow_only", "0", "Only Tank can see the glow", FCVAR_NOTIFY);
 	g_hCvarTankSpec = CreateConVar("l4d2_tank_prop_glow_spectators", "1", "Spectators can see the glow too", FCVAR_NOTIFY);
 	g_hCvarTankPropsBeGone = CreateConVar("l4d2_tank_prop_dissapear_time", "10.0", "Time it takes for hittables that were punched by Tank to dissapear after the Tank dies.", FCVAR_NOTIFY);
+	g_hCvarSurvivorsGlow = CreateConVar("l4d2_tank_prop_glow_survivors", "1", "Show weak glow for survivors when tank is alive (does not penetrate walls)", FCVAR_NOTIFY);
+	g_hCvarSurvivorsColor = CreateConVar("l4d2_tank_prop_glow_survivors_color", "80 80 80", "Survivor Glow Color (weaker), three values between 0-255 separated by spaces. RGB Color255 - Red Green Blue.", FCVAR_NOTIFY);
+	g_hCvarSurvivorsRange = CreateConVar("l4d2_tank_prop_glow_survivors_range", "3000", "How near to props do survivors need to be to enable their glow.", FCVAR_NOTIFY);
 
 	GetCvars();
 
@@ -68,6 +79,9 @@ public void OnPluginStart()
 	g_hCvarRangeMin.AddChangeHook(ConVarChanged_RangeMin);
 	g_hCvarTankOnly.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarTankSpec.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarSurvivorsGlow.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarSurvivorsColor.AddChangeHook(ConVarChanged_SurvivorsGlow);
+	g_hCvarSurvivorsRange.AddChangeHook(ConVarChanged_SurvivorsRange);
 
 	PluginEnable();
 }
@@ -100,12 +114,18 @@ void GetCvars()
 {
 	g_bCvarTankOnly = g_hCvarTankOnly.BoolValue;
 	g_bCvarTankSpec = g_hCvarTankSpec.BoolValue;
+	g_bCvarSurvivorsGlow = g_hCvarSurvivorsGlow.BoolValue;
 	g_iCvarRange = g_hCvarRange.IntValue;
 	g_iCvarRangeMin = g_hCvarRangeMin.IntValue;
+	g_iCvarSurvivorsRange = g_hCvarSurvivorsRange.IntValue;
 
 	char sColor[16];
 	g_hCvarColor.GetString(sColor, sizeof(sColor));
 	g_iCvarColor = GetColor(sColor);
+
+	char sSurvivorsColor[16];
+	g_hCvarSurvivorsColor.GetString(sSurvivorsColor, sizeof(sSurvivorsColor));
+	g_iCvarSurvivorsColor = GetColor(sSurvivorsColor);
 }
 
 void TankPropsGlowAllow(Handle hConVar, const char[] sOldValue, const char[] sNewValue)
@@ -184,6 +204,51 @@ void ConVarChanged_RangeMin(ConVar hConVar, const char[] sOldValue, const char[]
 	}
 }
 
+void ConVarChanged_SurvivorsGlow(Handle hConVar, const char[] sOldValue, const char[] sNewValue)
+{
+	GetCvars();
+
+	if (!g_bTankSpawned) {
+		return;
+	}
+
+	int iRef = INVALID_ENT_REFERENCE, iValue = 0, iSize = g_hTankPropsHit.Length;
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankPropsHit.Get(i);
+
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			iRef = g_iEntityListSurvivors[iValue];
+
+			if (IsValidEntRef(iRef)) {
+				SetEntProp(iRef, Prop_Send, "m_iGlowType", 2);
+				SetEntProp(iRef, Prop_Send, "m_glowColorOverride", g_iCvarSurvivorsColor);
+			}
+		}
+	}
+}
+
+void ConVarChanged_SurvivorsRange(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
+{
+	GetCvars();
+
+	if (!g_bTankSpawned) {
+		return;
+	}
+
+	int iRef = INVALID_ENT_REFERENCE, iValue = -1, iSize = g_hTankPropsHit.Length;
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankPropsHit.Get(i);
+
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			iRef = g_iEntityListSurvivors[iValue];
+
+			if (IsValidEntRef(iRef)) {
+				SetEntProp(iRef, Prop_Send, "m_nGlowRange", g_iCvarSurvivorsRange);
+			}
+		}
+	}
+}
+
 void PluginEnable()
 {
 	g_hTankPropFade.SetBool(false);
@@ -202,6 +267,12 @@ void PluginEnable()
 	g_iCvarRange = g_hCvarRange.IntValue;
 	g_iCvarRangeMin = g_hCvarRangeMin.IntValue;
 	g_bCvarTankOnly = g_hCvarTankOnly.BoolValue;
+	g_bCvarSurvivorsGlow = g_hCvarSurvivorsGlow.BoolValue;
+	g_iCvarSurvivorsRange = g_hCvarSurvivorsRange.IntValue;
+
+	char sSurvivorsColor[16];
+	g_hCvarSurvivorsColor.GetString(sSurvivorsColor, sizeof(sSurvivorsColor));
+	g_iCvarSurvivorsColor = GetColor(sSurvivorsColor);
 }
 
 void PluginDisable()
@@ -224,6 +295,12 @@ void PluginDisable()
 
 		if (iValue > 0 && IsValidEdict(iValue)) {
 			iRef = g_iEntityList[iValue];
+
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+			}
+
+			iRef = g_iEntityListSurvivors[iValue];
 
 			if (IsValidEntRef(iRef)) {
 				RemoveEntity(iRef);
@@ -374,6 +451,62 @@ void CreateTankPropGlow(int iTarget)
 
 	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmit);
 	g_iEntityList[iTarget] = EntIndexToEntRef(iEntity);
+
+	// Create separate glow entity for survivors if enabled
+	if (g_bCvarSurvivorsGlow) {
+		CreateSurvivorPropGlow(iTarget);
+	}
+}
+
+void CreateSurvivorPropGlow(int iTarget)
+{
+	// Check if glow already exists for this prop
+	if (g_iEntityListSurvivors[iTarget] != -1 && IsValidEntRef(g_iEntityListSurvivors[iTarget])) {
+		return;
+	}
+
+	// Spawn dynamic prop entity for survivors
+	int iEntity = CreateEntityByName("prop_dynamic_override");
+	if (iEntity == -1) {
+		return;
+	}
+
+	// Get position of hittable
+	float vOrigin[3];
+	float vAngles[3];
+	GetEntPropVector(iTarget, Prop_Send, "m_vecOrigin", vOrigin);
+	GetEntPropVector(iTarget, Prop_Data, "m_angRotation", vAngles);
+
+	// Get Client Model
+	char sModelName[PLATFORM_MAX_PATH];
+	GetEntPropString(iTarget, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
+
+	// Set new fake model
+	SetEntityModel(iEntity, sModelName);
+	DispatchSpawn(iEntity);
+
+	// Set outline glow color (weaker, same type as infected but with weaker color and range)
+	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
+	SetEntProp(iEntity, Prop_Send, "m_nSolidType", 0);
+	SetEntProp(iEntity, Prop_Send, "m_nGlowRange", g_iCvarSurvivorsRange);
+	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarRangeMin);
+	SetEntProp(iEntity, Prop_Send, "m_iGlowType", 2); // Same type as infected
+	SetEntProp(iEntity, Prop_Send, "m_glowColorOverride", g_iCvarSurvivorsColor);
+	AcceptEntityInput(iEntity, "StartGlowing");
+
+	// Set model invisible
+	SetEntityRenderMode(iEntity, RENDER_NONE);
+	SetEntityRenderColor(iEntity, 0, 0, 0, 0);
+
+	// Set model to hittable position
+	TeleportEntity(iEntity, vOrigin, vAngles, NULL_VECTOR);
+
+	// Set model attach to client, and always synchronize
+	SetVariantString("!activator");
+	AcceptEntityInput(iEntity, "SetParent", iTarget);
+
+	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmitSurvivors);
+	g_iEntityListSurvivors[iTarget] = EntIndexToEntRef(iEntity);
 }
 
 Action OnTransmit(int iEntity, int iClient)
@@ -389,6 +522,24 @@ Action OnTransmit(int iEntity, int iClient)
 			}
 
 			return Plugin_Handled;
+		}
+		case TEAM_SPECTATOR: {
+			return (g_bCvarTankSpec) ? Plugin_Continue : Plugin_Handled;
+		}
+	}
+
+	return Plugin_Handled;
+}
+
+Action OnTransmitSurvivors(int iEntity, int iClient)
+{
+	if (!g_bCvarSurvivorsGlow) {
+		return Plugin_Handled;
+	}
+
+	switch (GetClientTeam(iClient)) {
+		case TEAM_SURVIVOR: {
+			return Plugin_Continue;
 		}
 		case TEAM_SPECTATOR: {
 			return (g_bCvarTankSpec) ? Plugin_Continue : Plugin_Handled;
@@ -442,6 +593,11 @@ void HookTankProps()
 		if (IsTankProp(i)) {
 			SDKHook(i, SDKHook_OnTakeDamagePost, PropDamaged);
 			g_hTankProps.Push(i);
+			
+			// Create glow for survivors for all hittable props when tank spawns
+			if (g_bCvarSurvivorsGlow) {
+				CreateSurvivorPropGlow(i);
+			}
 		}
 	}
 }
@@ -462,7 +618,15 @@ void UnhookTankProps()
 		iValue = g_hTankPropsHit.Get(i);
 
 		if (iValue > 0 && IsValidEdict(iValue)) {
-			RemoveEntity(iValue);
+			int iRef = g_iEntityList[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+			}
+
+			iRef = g_iEntityListSurvivors[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+			}
 			//PrintToChatAll("remove %d", iValue);
 		}
 	}
