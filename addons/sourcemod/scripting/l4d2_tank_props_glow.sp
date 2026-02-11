@@ -288,19 +288,27 @@ void PluginDisable()
 		return;
 	}
 
-	int iRef = INVALID_ENT_REFERENCE, iValue = -1, iSize = g_hTankPropsHit.Length;
+	// Remove survivor glow for all props
+	int iValue = 0, iSize = g_hTankProps.Length;
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankProps.Get(i);
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			int iRef = g_iEntityListSurvivors[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+				g_iEntityListSurvivors[iValue] = -1;
+			}
+		}
+	}
 
+	// Remove infected glow for hit props
+	iValue = 0;
+	iSize = g_hTankPropsHit.Length;
 	for (int i = 0; i < iSize; i++) {
 		iValue = g_hTankPropsHit.Get(i);
 
 		if (iValue > 0 && IsValidEdict(iValue)) {
-			iRef = g_iEntityList[iValue];
-
-			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
-			}
-
-			iRef = g_iEntityListSurvivors[iValue];
+			int iRef = g_iEntityList[iValue];
 
 			if (IsValidEntRef(iRef)) {
 				RemoveEntity(iRef);
@@ -609,6 +617,15 @@ void UnhookTankProps()
 	for (int i = 0; i < iSize; i++) {
 		iValue = g_hTankProps.Get(i);
 		SDKUnhook(iValue, SDKHook_OnTakeDamagePost, PropDamaged);
+		
+		// Remove survivor glow for all props
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			int iRef = g_iEntityListSurvivors[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+				g_iEntityListSurvivors[iValue] = -1;
+			}
+		}
 	}
 
 	iValue = 0;
@@ -619,11 +636,6 @@ void UnhookTankProps()
 
 		if (iValue > 0 && IsValidEdict(iValue)) {
 			int iRef = g_iEntityList[iValue];
-			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
-			}
-
-			iRef = g_iEntityListSurvivors[iValue];
 			if (IsValidEntRef(iRef)) {
 				RemoveEntity(iRef);
 			}
