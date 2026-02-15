@@ -1,8 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto eol=lf
 
-*.vpk   -text
-*.smx   -text merge=theirs
+*.vpk   binary
+*.smx   binary
 
 # Custom for Visual Studio
 *.cs     diff=csharp
