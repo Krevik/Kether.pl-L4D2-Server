@@ -26,21 +26,33 @@ ConVar
 	g_hCvarTankPropsBeGone = null,
 	g_hCvarSurvivorsGlow = null,
 	g_hCvarSurvivorsColor = null,
-	g_hCvarSurvivorsRange = null;
+	g_hCvarSurvivorsRange = null,
+	g_hCvarSurvivorsRangeMin = null,
+	g_hCvarTankFarRange = null,
+	g_hCvarTankFarRangeMin = null,
+	g_hCvarTankFarColor = null;
 
 ArrayList
 	g_hTankProps = null,
 	g_hTankPropsHit = null;
 
+Handle
+	g_hTimerSyncFarGlows = null;
+
 int
 	g_iEntityList[MAX_EDICTS] = {-1, ...},
 	g_iEntityListSurvivors[MAX_EDICTS] = {-1, ...},
+	g_iEntityListFar[MAX_EDICTS] = {-1, ...},
 	g_iTankClient = -1,
 	g_iCvarRange = 0,
 	g_iCvarRangeMin = 0,
 	g_iCvarColor = 0,
 	g_iCvarSurvivorsColor = 0,
-	g_iCvarSurvivorsRange = 0;
+	g_iCvarSurvivorsRange = 0,
+	g_iCvarSurvivorsRangeMin = 0,
+	g_iCvarTankFarRange = 0,
+	g_iCvarTankFarRangeMin = 0,
+	g_iCvarTankFarColor = 0;
 
 bool
 	g_bCvarTankOnly = false,
@@ -53,7 +65,7 @@ public Plugin myinfo =
 {
 	name = "L4D2 Tank Hittable Glow",
 	author = "Harry Potter, Sir, A1m`, Derpduck",
-	version = "2.5.1",
+	version = "2.6.0",
 	description = "Stop tank props from fading whilst the tank is alive + add Hittable Glow."
 };
 
@@ -68,7 +80,11 @@ public void OnPluginStart()
 	g_hCvarTankPropsBeGone = CreateConVar("l4d2_tank_prop_dissapear_time", "10.0", "Time it takes for hittables that were punched by Tank to dissapear after the Tank dies.", FCVAR_NOTIFY);
 	g_hCvarSurvivorsGlow = CreateConVar("l4d2_tank_prop_glow_survivors", "1", "Show weak glow for survivors when tank is alive (does not penetrate walls)", FCVAR_NOTIFY);
 	g_hCvarSurvivorsColor = CreateConVar("l4d2_tank_prop_glow_survivors_color", "80 80 80", "Survivor Glow Color (weaker), three values between 0-255 separated by spaces. RGB Color255 - Red Green Blue.", FCVAR_NOTIFY);
-	g_hCvarSurvivorsRange = CreateConVar("l4d2_tank_prop_glow_survivors_range", "3000", "How near to props do survivors need to be to enable their glow.", FCVAR_NOTIFY);
+	g_hCvarSurvivorsRange = CreateConVar("l4d2_tank_prop_glow_survivors_range", "700", "Max distance for survivors to see hittable glow (weak, nearby only).", FCVAR_NOTIFY);
+	g_hCvarSurvivorsRangeMin = CreateConVar("l4d2_tank_prop_glow_survivors_range_min", "0", "Min distance for survivors to see hittable glow (0 = no minimum).", FCVAR_NOTIFY);
+	g_hCvarTankFarRange = CreateConVar("l4d2_tank_prop_glow_tank_far_range", "12000", "Max distance for tank to see weak glow on distant hittables.", FCVAR_NOTIFY);
+	g_hCvarTankFarRangeMin = CreateConVar("l4d2_tank_prop_glow_tank_far_range_min", "0", "Min distance for tank far glow (0 = weak glow visible from any distance up to far_range).", FCVAR_NOTIFY);
+	g_hCvarTankFarColor = CreateConVar("l4d2_tank_prop_glow_tank_far_color", "100 100 100", "Weak glow color for distant hittables (tank only). RGB 0-255.", FCVAR_NOTIFY);
 
 	GetCvars();
 
@@ -82,6 +98,10 @@ public void OnPluginStart()
 	g_hCvarSurvivorsGlow.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarSurvivorsColor.AddChangeHook(ConVarChanged_SurvivorsGlow);
 	g_hCvarSurvivorsRange.AddChangeHook(ConVarChanged_SurvivorsRange);
+	g_hCvarSurvivorsRangeMin.AddChangeHook(ConVarChanged_SurvivorsRangeMin);
+	g_hCvarTankFarRange.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarTankFarRangeMin.AddChangeHook(ConVarChanged_Cvars);
+	g_hCvarTankFarColor.AddChangeHook(ConVarChanged_Cvars);
 
 	PluginEnable();
 }
@@ -118,6 +138,9 @@ void GetCvars()
 	g_iCvarRange = g_hCvarRange.IntValue;
 	g_iCvarRangeMin = g_hCvarRangeMin.IntValue;
 	g_iCvarSurvivorsRange = g_hCvarSurvivorsRange.IntValue;
+	g_iCvarSurvivorsRangeMin = g_hCvarSurvivorsRangeMin.IntValue;
+	g_iCvarTankFarRange = g_hCvarTankFarRange.IntValue;
+	g_iCvarTankFarRangeMin = g_hCvarTankFarRangeMin.IntValue;
 
 	char sColor[16];
 	g_hCvarColor.GetString(sColor, sizeof(sColor));
@@ -126,6 +149,10 @@ void GetCvars()
 	char sSurvivorsColor[16];
 	g_hCvarSurvivorsColor.GetString(sSurvivorsColor, sizeof(sSurvivorsColor));
 	g_iCvarSurvivorsColor = GetColor(sSurvivorsColor);
+
+	char sTankFarColor[16];
+	g_hCvarTankFarColor.GetString(sTankFarColor, sizeof(sTankFarColor));
+	g_iCvarTankFarColor = GetColor(sTankFarColor);
 }
 
 void TankPropsGlowAllow(Handle hConVar, const char[] sOldValue, const char[] sNewValue)
@@ -249,6 +276,28 @@ void ConVarChanged_SurvivorsRange(ConVar hConVar, const char[] sOldValue, const 
 	}
 }
 
+void ConVarChanged_SurvivorsRangeMin(ConVar hConVar, const char[] sOldValue, const char[] sNewValue)
+{
+	GetCvars();
+
+	if (!g_bTankSpawned) {
+		return;
+	}
+
+	int iRef = INVALID_ENT_REFERENCE, iValue = -1, iSize = g_hTankPropsHit.Length;
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankPropsHit.Get(i);
+
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			iRef = g_iEntityListSurvivors[iValue];
+
+			if (IsValidEntRef(iRef)) {
+				SetEntProp(iRef, Prop_Send, "m_nGlowRangeMin", g_iCvarSurvivorsRangeMin);
+			}
+		}
+	}
+}
+
 void PluginEnable()
 {
 	g_hTankPropFade.SetBool(false);
@@ -259,7 +308,7 @@ void PluginEnable()
 	HookEvent("round_start", TankPropRoundReset, EventHookMode_PostNoCopy);
 	HookEvent("round_end", TankPropRoundReset, EventHookMode_PostNoCopy);
 	HookEvent("tank_spawn", TankPropTankSpawn, EventHookMode_PostNoCopy);
-	HookEvent("player_death", TankPropTankKilled, EventHookMode_PostNoCopy);
+	HookEvent("player_death", TankPropTankKilled, EventHookMode_Post);
 
 	char sColor[16];
 	g_hCvarColor.GetString(sColor, sizeof(sColor));
@@ -269,10 +318,17 @@ void PluginEnable()
 	g_bCvarTankOnly = g_hCvarTankOnly.BoolValue;
 	g_bCvarSurvivorsGlow = g_hCvarSurvivorsGlow.BoolValue;
 	g_iCvarSurvivorsRange = g_hCvarSurvivorsRange.IntValue;
+	g_iCvarSurvivorsRangeMin = g_hCvarSurvivorsRangeMin.IntValue;
+	g_iCvarTankFarRange = g_hCvarTankFarRange.IntValue;
+	g_iCvarTankFarRangeMin = g_hCvarTankFarRangeMin.IntValue;
 
 	char sSurvivorsColor[16];
 	g_hCvarSurvivorsColor.GetString(sSurvivorsColor, sizeof(sSurvivorsColor));
 	g_iCvarSurvivorsColor = GetColor(sSurvivorsColor);
+
+	char sTankFarColor[16];
+	g_hCvarTankFarColor.GetString(sTankFarColor, sizeof(sTankFarColor));
+	g_iCvarTankFarColor = GetColor(sTankFarColor);
 }
 
 void PluginDisable()
@@ -288,7 +344,7 @@ void PluginDisable()
 		return;
 	}
 
-	// Remove survivor glow for all props
+	// Remove survivor glow and tank far glow for all props
 	int iValue = 0, iSize = g_hTankProps.Length;
 	for (int i = 0; i < iSize; i++) {
 		iValue = g_hTankProps.Get(i);
@@ -297,6 +353,11 @@ void PluginDisable()
 			if (IsValidEntRef(iRef)) {
 				RemoveEntity(iRef);
 				g_iEntityListSurvivors[iValue] = -1;
+			}
+			iRef = g_iEntityListFar[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+				g_iEntityListFar[iValue] = -1;
 			}
 		}
 	}
@@ -357,6 +418,8 @@ void TankPropTankSpawn(Event hEvent, const char[] sEventName, bool bDontBroadcas
 	DHookAddEntityListener(ListenType_Created, PossibleTankPropCreated);
 
 	g_bTankSpawned = true;
+	if (g_hTimerSyncFarGlows != null) delete g_hTimerSyncFarGlows;
+	g_hTimerSyncFarGlows = CreateTimer(0.1, Timer_SyncFarGlows, _, TIMER_REPEAT);
 }
 
 /* // error 203: symbol is never used: "PD_ev_EntityKilled"
@@ -380,19 +443,30 @@ void TankPropTankKilled(Event hEvent, const char[] sEventName, bool bDontBroadca
 		return;
 	}
 
+	int iVictim = GetClientOfUserId(hEvent.GetInt("userid"));
+	if (iVictim > 0 && IsTank(iVictim)) {
+		// Tank just died – remove survivor glows immediately so survs stop seeing them
+		RemoveAllSurvivorGlows();
+		g_iTankClient = -1;
+		g_bTankSpawned = false;
+		if (g_hTimerSyncFarGlows != null) { delete g_hTimerSyncFarGlows; g_hTimerSyncFarGlows = null; }
+		DHookRemoveEntityListener(ListenType_Created, PossibleTankPropCreated);
+		CreateTimer(g_hCvarTankPropsBeGone.FloatValue, TankPropsBeGone, _, TIMER_FLAG_NO_MAPCHANGE);
+		return;
+	}
+
 	CreateTimer(0.5, TankDeadCheck, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 Action TankDeadCheck(Handle hTimer)
 {
 	if (GetTankClient() == -1) {
+		RemoveAllSurvivorGlows();
+		if (g_hTimerSyncFarGlows != null) { delete g_hTimerSyncFarGlows; g_hTimerSyncFarGlows = null; }
 		CreateTimer(g_hCvarTankPropsBeGone.FloatValue, TankPropsBeGone);
-
 		DHookRemoveEntityListener(ListenType_Created, PossibleTankPropCreated);
-
 		g_bTankSpawned = false;
 	}
-
 	return Plugin_Stop;
 }
 
@@ -497,7 +571,7 @@ void CreateSurvivorPropGlow(int iTarget)
 	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
 	SetEntProp(iEntity, Prop_Send, "m_nSolidType", 0);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRange", g_iCvarSurvivorsRange);
-	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarRangeMin);
+	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarSurvivorsRangeMin);
 	SetEntProp(iEntity, Prop_Send, "m_iGlowType", 2); // Same type as infected
 	SetEntProp(iEntity, Prop_Send, "m_glowColorOverride", g_iCvarSurvivorsColor);
 	AcceptEntityInput(iEntity, "StartGlowing");
@@ -515,6 +589,69 @@ void CreateSurvivorPropGlow(int iTarget)
 
 	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmitSurvivors);
 	g_iEntityListSurvivors[iTarget] = EntIndexToEntRef(iEntity);
+}
+
+void CreateTankPropGlowFar(int iTarget)
+{
+	if (g_iEntityListFar[iTarget] != -1 && IsValidEntRef(g_iEntityListFar[iTarget])) {
+		return;
+	}
+
+	int iEntity = CreateEntityByName("prop_dynamic_override");
+	if (iEntity == -1) {
+		return;
+	}
+
+	float vOrigin[3];
+	float vAngles[3];
+	GetEntPropVector(iTarget, Prop_Send, "m_vecOrigin", vOrigin);
+	GetEntPropVector(iTarget, Prop_Data, "m_angRotation", vAngles);
+
+	char sModelName[PLATFORM_MAX_PATH];
+	GetEntPropString(iTarget, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
+
+	SetEntityModel(iEntity, sModelName);
+	DispatchSpawn(iEntity);
+
+	// Weak glow for tank at distance – type 3 (Constant) so it can show from far / through walls
+	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
+	SetEntProp(iEntity, Prop_Send, "m_nSolidType", 0);
+	SetEntProp(iEntity, Prop_Send, "m_nGlowRange", g_iCvarTankFarRange);
+	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarTankFarRangeMin);
+	SetEntProp(iEntity, Prop_Send, "m_iGlowType", 3);
+	SetEntProp(iEntity, Prop_Send, "m_glowColorOverride", g_iCvarTankFarColor);
+	AcceptEntityInput(iEntity, "StartGlowing");
+
+	SetEntityRenderMode(iEntity, RENDER_NONE);
+	SetEntityRenderColor(iEntity, 0, 0, 0, 0);
+
+	TeleportEntity(iEntity, vOrigin, vAngles, NULL_VECTOR);
+
+	SetVariantString("!activator");
+	AcceptEntityInput(iEntity, "SetParent", iTarget);
+
+	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmitFar);
+	g_iEntityListFar[iTarget] = EntIndexToEntRef(iEntity);
+}
+
+Action Timer_SyncFarGlows(Handle hTimer)
+{
+	if (!g_bTankSpawned || g_hTankProps == null) {
+		g_hTimerSyncFarGlows = null;
+		return Plugin_Stop;
+	}
+	int iValue, iRef, iSize = g_hTankProps.Length;
+	float vOrigin[3], vAngles[3];
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankProps.Get(i);
+		if (iValue <= 0 || !IsValidEntity(iValue)) continue;
+		iRef = g_iEntityListFar[iValue];
+		if (!IsValidEntRef(iRef)) continue;
+		GetEntPropVector(iValue, Prop_Send, "m_vecOrigin", vOrigin);
+		GetEntPropVector(iValue, Prop_Data, "m_angRotation", vAngles);
+		TeleportEntity(EntRefToEntIndex(iRef), vOrigin, vAngles, NULL_VECTOR);
+	}
+	return Plugin_Continue;
 }
 
 Action OnTransmit(int iEntity, int iClient)
@@ -539,9 +676,29 @@ Action OnTransmit(int iEntity, int iClient)
 	return Plugin_Handled;
 }
 
+Action OnTransmitFar(int iEntity, int iClient)
+{
+	// Same visibility as main tank glow - infected (tank) and optionally spectators
+	switch (GetClientTeam(iClient)) {
+		case TEAM_INFECTED: {
+			if (!g_bCvarTankOnly) {
+				return Plugin_Continue;
+			}
+			if (IsTank(iClient)) {
+				return Plugin_Continue;
+			}
+			return Plugin_Handled;
+		}
+		case TEAM_SPECTATOR: {
+			return (g_bCvarTankSpec) ? Plugin_Continue : Plugin_Handled;
+		}
+	}
+	return Plugin_Handled;
+}
+
 Action OnTransmitSurvivors(int iEntity, int iClient)
 {
-	if (!g_bCvarSurvivorsGlow) {
+	if (!g_bCvarSurvivorsGlow || !g_bTankSpawned || GetTankClient() == -1) {
 		return Plugin_Handled;
 	}
 
@@ -606,12 +763,34 @@ void HookTankProps()
 			if (g_bCvarSurvivorsGlow) {
 				CreateSurvivorPropGlow(i);
 			}
+			// Create weak far glow for tank so he can see distant hittables
+			CreateTankPropGlowFar(i);
+		}
+	}
+}
+
+void RemoveAllSurvivorGlows()
+{
+	int iValue = 0, iSize = g_hTankProps.Length;
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankProps.Get(i);
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			int iRef = g_iEntityListSurvivors[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+				g_iEntityListSurvivors[iValue] = -1;
+			}
 		}
 	}
 }
 
 void UnhookTankProps()
 {
+	if (g_hTimerSyncFarGlows != null) {
+		delete g_hTimerSyncFarGlows;
+		g_hTimerSyncFarGlows = null;
+	}
+
 	int iValue = 0, iSize = g_hTankProps.Length;
 
 	for (int i = 0; i < iSize; i++) {
@@ -624,6 +803,12 @@ void UnhookTankProps()
 			if (IsValidEntRef(iRef)) {
 				RemoveEntity(iRef);
 				g_iEntityListSurvivors[iValue] = -1;
+			}
+			// Remove tank far glow
+			iRef = g_iEntityListFar[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(iRef);
+				g_iEntityListFar[iValue] = -1;
 			}
 		}
 	}
@@ -677,6 +862,7 @@ void Hook_PropSpawned(int iEntity)
 			g_hTankProps.Push(iEntity);
 			g_hTankPropsHit.Push(iEntity);
 			CreateTankPropGlow(iEntity);
+			CreateTankPropGlowFar(iEntity);
 		} else if (StrContains(sModelName, "forklift_brokenfork.mdl") != -1) {
 			RemoveEntity(iEntity);
 		}
