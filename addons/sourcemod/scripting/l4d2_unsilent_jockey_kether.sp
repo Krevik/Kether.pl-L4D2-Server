@@ -98,6 +98,15 @@ public void L4D_OnEnterGhostState(int client)
 	ChangeJockeyTimerStatus(client, false);
 }
 
+public void L4D_OnMaterializeFromGhost(int client)
+{
+	// Ensure the timer starts when the Jockey leaves ghost state.
+	if (IsLiveMaterializedJockey(client)) {
+		EmitRandomJockeySound(client);
+		ChangeJockeyTimerStatus(client, true);
+	}
+}
+
 void PlayerSpawn_Event(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -118,13 +127,10 @@ void PlayerSpawn_Event(Event event, const char[] name, bool dontBroadcast)
 		return;
 	}
 
-	// Get the Jockey's spawn position
-	float vOrigin[3];
-	GetClientAbsOrigin(client, vOrigin);
-
-	// Play the first sound instantly on spawn
-	int rndPick = GetRandomInt(0, (sizeof(g_sJockeySound) - 1));
-	EmitSoundToAll(g_sJockeySound[rndPick], client, SNDCHAN_VOICE, SNDLEVEL_HELICOPTER, SND_NOFLAGS, 1.0, 100, -1, vOrigin);
+	// If this spawn is already materialized, emit right away for immediate feedback.
+	if (!GetEntProp(client, Prop_Send, "m_isGhost")) {
+		EmitRandomJockeySound(client);
+	}
 
 	// Setup the sound interval
 	RequestFrame(JockeyRideEnd_NextFrame, GetClientUserId(client));
@@ -186,8 +192,12 @@ void JockeyRideEnd_NextFrame(any userid)
 
 Action delayedJockeySound(Handle timer, any client)
 {
-	int rndPick = GetRandomInt(0, (sizeof(g_sJockeySound) - 1));
-	EmitSoundToAll(g_sJockeySound[rndPick], client, SNDCHAN_VOICE, SNDLEVEL_HELICOPTER);
+	if (!IsLiveMaterializedJockey(client)) {
+		g_hJockeySoundTimer[client] = null;
+		return Plugin_Stop;
+	}
+
+	EmitRandomJockeySound(client);
 
 	return Plugin_Continue;
 }
@@ -202,4 +212,24 @@ void ChangeJockeyTimerStatus(int client, bool bEnable)
 	if (bEnable) {
 		g_hJockeySoundTimer[client] = CreateTimer(g_hJockeyVoiceInterval.FloatValue, delayedJockeySound, client, TIMER_REPEAT);
 	}
+}
+
+bool IsLiveMaterializedJockey(int client)
+{
+	return client > 0
+		&& client <= MaxClients
+		&& IsClientInGame(client)
+		&& IsPlayerAlive(client)
+		&& GetClientTeam(client) == TEAM_INFECTED
+		&& GetEntProp(client, Prop_Send, "m_zombieClass") == ZC_JOCKEY
+		&& !GetEntProp(client, Prop_Send, "m_isGhost");
+}
+
+void EmitRandomJockeySound(int client)
+{
+	float vOrigin[3];
+	GetClientAbsOrigin(client, vOrigin);
+
+	int rndPick = GetRandomInt(0, (sizeof(g_sJockeySound) - 1));
+	EmitSoundToAll(g_sJockeySound[rndPick], client, SNDCHAN_VOICE, SNDLEVEL_HELICOPTER, SND_NOFLAGS, 1.0, 100, -1, vOrigin);
 }
