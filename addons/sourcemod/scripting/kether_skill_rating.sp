@@ -151,6 +151,11 @@ public void OnMapStart()
 	GetCurrentMap(g_sMapName, sizeof(g_sMapName));
 }
 
+public void OnMapEnd()
+{
+	FinalizeRoundIfNeeded();
+}
+
 public void OnClientPostAdminCheck(int client)
 {
 	if (!IsValidHuman(client))
@@ -649,7 +654,11 @@ public Action Command_SkillSim(int client, int args)
 	}
 
 	char steamid[32];
-	GetClientAuthId(target, AuthId_Steam2, steamid, sizeof(steamid));
+	if (!GetPlayerSteamId(target, steamid, sizeof(steamid)))
+	{
+		ReplyToCommand(client, "[Skill] Cannot resolve SteamID for target.");
+		return Plugin_Handled;
+	}
 
 	char query[1024];
 	Format(query, sizeof(query),
@@ -1180,7 +1189,10 @@ void LoadPlayerProfile(int client)
 	}
 
 	char steamid[32];
-	GetClientAuthId(client, AuthId_Steam2, steamid, sizeof(steamid));
+	if (!GetPlayerSteamId(client, steamid, sizeof(steamid)))
+	{
+		return;
+	}
 
 	char name[MAX_NAME_LENGTH];
 	GetClientName(client, name, sizeof(name));
@@ -1226,7 +1238,10 @@ public void SQL_LoadPlayerProfile(Database db, DBResultSet results, const char[]
 void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarded)
 {
 	char steamid[32];
-	GetClientAuthId(client, AuthId_Steam2, steamid, sizeof(steamid));
+	if (!GetPlayerSteamId(client, steamid, sizeof(steamid)))
+	{
+		return;
+	}
 
 	char name[MAX_NAME_LENGTH];
 	GetClientName(client, name, sizeof(name));
@@ -1315,6 +1330,27 @@ bool IsValidClient(int client)
 bool IsValidHuman(int client)
 {
 	return IsValidClient(client) && !IsFakeClient(client);
+}
+
+bool GetPlayerSteamId(int client, char[] buffer, int size)
+{
+	buffer[0] = '\0';
+	if (!IsValidHuman(client))
+	{
+		return false;
+	}
+
+	if (GetClientAuthId(client, AuthId_SteamID64, buffer, size) && buffer[0] != '\0')
+	{
+		return true;
+	}
+
+	if (GetClientAuthId(client, AuthId_Steam2, buffer, size) && buffer[0] != '\0')
+	{
+		return true;
+	}
+
+	return false;
 }
 
 bool IsTankInPlayActive()
