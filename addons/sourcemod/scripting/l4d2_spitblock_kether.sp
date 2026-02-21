@@ -36,6 +36,7 @@ int
 ConVar
 	g_cvShowAreas = null,
 	g_cvShowToSpecs = null,
+	g_cvShowToSurvivors = null,
 	g_cvBoxZMin = null,
 	g_cvBoxZMax = null,
 	g_cvDrawInterval = null;
@@ -45,7 +46,7 @@ public Plugin myinfo =
 	name = "L4D2 Spit Blocker (Kether)",
 	author = "ProdigySim, Estoopi, Jacob, Visor, A1m`, Kether",
 	description = "Blocks spit damage on various maps; shows blocked areas to infected players",
-	version = "2.3.1",
+	version = "2.30.2",
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework"
 };
 
@@ -65,6 +66,7 @@ public void OnPluginStart()
 
 	g_cvShowAreas = CreateConVar("l4d2_spitblock_kether_show", "1", "Show spit-block areas to infected players (1 = yes, 0 = no).", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_cvShowToSpecs = CreateConVar("l4d2_spitblock_kether_specs", "1", "Also show spit-block areas to spectators (1 = yes, 0 = no).", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_cvShowToSurvivors = CreateConVar("l4d2_spitblock_kether_survivors", "0", "Also show spit-block areas to survivor players (1 = yes, 0 = no).", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_cvBoxZMin = CreateConVar("l4d2_spitblock_kether_z_min", "-500.0", "Bottom Z of the drawn spit-block box (fixed, so the box does not slide).", FCVAR_NONE, true, -2000.0, true, 2000.0);
 	g_cvBoxZMax = CreateConVar("l4d2_spitblock_kether_z_max", "2500.0", "Top Z of the drawn spit-block box (fixed, so the box does not slide).", FCVAR_NONE, true, -1000.0, true, 4000.0);
 	g_cvDrawInterval = CreateConVar("l4d2_spitblock_kether_interval", "1.0", "Interval in seconds between redrawing the spit-block area to infected.", FCVAR_NONE, true, 0.2, true, 5.0);
@@ -177,6 +179,7 @@ Action Timer_DrawSpitBlockAreas(Handle timer)
 	int recipients[MAXPLAYERS + 1];
 	int n = 0;
 	bool includeSpecs = (g_cvShowToSpecs != null && g_cvShowToSpecs.BoolValue);
+	bool includeSurvivors = (g_cvShowToSurvivors != null && g_cvShowToSurvivors.BoolValue);
 
 	for (int i = 1; i <= MaxClients; i++) {
 		if (!IsClientInGame(i) || IsFakeClient(i)) {
@@ -186,6 +189,8 @@ Action Timer_DrawSpitBlockAreas(Handle timer)
 		if (team == 3) {  // L4DTeam_Infected
 			recipients[n++] = i;
 		} else if (includeSpecs && team == 1) {  // Spectators
+			recipients[n++] = i;
+		} else if (includeSurvivors && team == 2) {  // Survivors
 			recipients[n++] = i;
 		}
 	}
