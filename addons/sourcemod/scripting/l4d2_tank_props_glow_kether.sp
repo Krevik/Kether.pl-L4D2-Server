@@ -351,12 +351,12 @@ void PluginDisable()
 		if (iValue > 0 && IsValidEdict(iValue)) {
 			int iRef = g_iEntityListSurvivors[iValue];
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 				g_iEntityListSurvivors[iValue] = -1;
 			}
 			iRef = g_iEntityListFar[iValue];
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 				g_iEntityListFar[iValue] = -1;
 			}
 		}
@@ -372,7 +372,7 @@ void PluginDisable()
 			int iRef = g_iEntityList[iValue];
 
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 			}
 		}
 	}
@@ -444,9 +444,11 @@ void TankPropTankKilled(Event hEvent, const char[] sEventName, bool bDontBroadca
 	}
 
 	int iVictim = GetClientOfUserId(hEvent.GetInt("userid"));
-	if (iVictim > 0 && IsTank(iVictim)) {
+	// player_death fires when the victim is already dead, so IsTank() is unreliable here.
+	if (iVictim > 0 && IsTankClass(iVictim)) {
 		// Tank just died – remove survivor glows immediately so survs stop seeing them
 		RemoveAllSurvivorGlows();
+		RemoveAllFarGlows();
 		g_iTankClient = -1;
 		g_bTankSpawned = false;
 		if (g_hTimerSyncFarGlows != null) { delete g_hTimerSyncFarGlows; g_hTimerSyncFarGlows = null; }
@@ -462,6 +464,7 @@ Action TankDeadCheck(Handle hTimer)
 {
 	if (GetTankClient() == -1) {
 		RemoveAllSurvivorGlows();
+		RemoveAllFarGlows();
 		if (g_hTimerSyncFarGlows != null) { delete g_hTimerSyncFarGlows; g_hTimerSyncFarGlows = null; }
 		CreateTimer(g_hCvarTankPropsBeGone.FloatValue, TankPropsBeGone);
 		DHookRemoveEntityListener(ListenType_Created, PossibleTankPropCreated);
@@ -656,12 +659,12 @@ Action Timer_SyncFarGlows(Handle hTimer)
 
 Action OnTransmit(int iEntity, int iClient)
 {
+	if (!HasAliveTank()) {
+		return Plugin_Handled;
+	}
+
 	switch (GetClientTeam(iClient)) {
 		case TEAM_INFECTED: {
-			if (!g_bCvarTankOnly) {
-				return Plugin_Continue;
-			}
-
 			if (IsTank(iClient)) {
 				return Plugin_Continue;
 			}
@@ -678,12 +681,13 @@ Action OnTransmit(int iEntity, int iClient)
 
 Action OnTransmitFar(int iEntity, int iClient)
 {
-	// Same visibility as main tank glow - infected (tank) and optionally spectators
+	if (!HasAliveTank()) {
+		return Plugin_Handled;
+	}
+
+	// Same visibility as main tank glow - tank only on infected, spectators optional
 	switch (GetClientTeam(iClient)) {
 		case TEAM_INFECTED: {
-			if (!g_bCvarTankOnly) {
-				return Plugin_Continue;
-			}
 			if (IsTank(iClient)) {
 				return Plugin_Continue;
 			}
@@ -698,7 +702,7 @@ Action OnTransmitFar(int iEntity, int iClient)
 
 Action OnTransmitSurvivors(int iEntity, int iClient)
 {
-	if (!g_bCvarSurvivorsGlow || !g_bTankSpawned || GetTankClient() == -1) {
+	if (!g_bCvarSurvivorsGlow || !HasAliveTank()) {
 		return Plugin_Handled;
 	}
 
@@ -777,8 +781,23 @@ void RemoveAllSurvivorGlows()
 		if (iValue > 0 && IsValidEdict(iValue)) {
 			int iRef = g_iEntityListSurvivors[iValue];
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 				g_iEntityListSurvivors[iValue] = -1;
+			}
+		}
+	}
+}
+
+void RemoveAllFarGlows()
+{
+	int iValue = 0, iSize = g_hTankProps.Length;
+	for (int i = 0; i < iSize; i++) {
+		iValue = g_hTankProps.Get(i);
+		if (iValue > 0 && IsValidEdict(iValue)) {
+			int iRef = g_iEntityListFar[iValue];
+			if (IsValidEntRef(iRef)) {
+				RemoveEntity(EntRefToEntIndex(iRef));
+				g_iEntityListFar[iValue] = -1;
 			}
 		}
 	}
@@ -801,13 +820,13 @@ void UnhookTankProps()
 		if (iValue > 0 && IsValidEdict(iValue)) {
 			int iRef = g_iEntityListSurvivors[iValue];
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 				g_iEntityListSurvivors[iValue] = -1;
 			}
 			// Remove tank far glow
 			iRef = g_iEntityListFar[iValue];
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 				g_iEntityListFar[iValue] = -1;
 			}
 		}
@@ -822,8 +841,10 @@ void UnhookTankProps()
 		if (iValue > 0 && IsValidEdict(iValue)) {
 			int iRef = g_iEntityList[iValue];
 			if (IsValidEntRef(iRef)) {
-				RemoveEntity(iRef);
+				RemoveEntity(EntRefToEntIndex(iRef));
 			}
+			// Keep original plugin behavior: remove the hittable itself after tank death.
+			RemoveEntity(iValue);
 			//PrintToChatAll("remove %d", iValue);
 		}
 	}
@@ -927,5 +948,15 @@ bool IsAliveTank(int iClient)
 bool IsTank(int iClient)
 {
 	return (GetEntProp(iClient, Prop_Send, "m_zombieClass") == Z_TANK && IsPlayerAlive(iClient));
+}
+
+bool IsTankClass(int iClient)
+{
+	return (iClient > 0 && iClient <= MaxClients && IsClientInGame(iClient) && GetClientTeam(iClient) == TEAM_INFECTED && GetEntProp(iClient, Prop_Send, "m_zombieClass") == Z_TANK);
+}
+
+bool HasAliveTank()
+{
+	return (GetTankClient() != -1);
 }
 
