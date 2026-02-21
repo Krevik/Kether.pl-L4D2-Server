@@ -14,7 +14,7 @@
 
 // Spit block area visualization (shown to infected)
 #define SPITBLOCK_BEAM_LIFE     1.2
-#define SPITBLOCK_BEAM_WIDTH    8.0
+#define SPITBLOCK_BEAM_WIDTH    5.0
 
 bool
 	g_bIsBlockEnable = false;
@@ -23,7 +23,8 @@ float
 	g_fBlockSquare[4] = {0.0, ...};
 
 StringMap
-	g_hSpitBlockSquares = null;
+	g_hSpitBlockSquares = null,
+	g_hSpitBlockZ = null;  // optional per-map z_min, z_max for drawing (float[2])
 
 bool
 	g_bLateLoad = false;
@@ -41,6 +42,7 @@ ConVar
 	g_cvSpitterOnly = null,
 	g_cvBoxZMin = null,
 	g_cvBoxZMax = null,
+	g_cvDrawInset = null,
 	g_cvDrawInterval = null;
 
 public Plugin myinfo =
@@ -48,7 +50,7 @@ public Plugin myinfo =
 	name = "L4D2 Spit Blocker (Kether)",
 	author = "ProdigySim, Estoopi, Jacob, Visor, A1m`, Kether",
 	description = "Blocks spit damage on various maps; shows blocked areas to infected players",
-	version = "2.30.3",
+	version = "2.30.4",
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework"
 };
 
@@ -62,6 +64,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
 	g_hSpitBlockSquares = new StringMap();
+	g_hSpitBlockZ = new StringMap();
 
 	RegServerCmd("spit_block_square", AddSpitBlockSquare);
 	RegServerCmd("spit_remove_block_square", RemoveSpitBlockSquare);
@@ -72,6 +75,7 @@ public void OnPluginStart()
 	g_cvSpitterOnly = CreateConVar("l4d2_spitblock_kether_spitter_only", "0", "Show spit-block areas only to Spitter class (1 = spitter only, 0 = all infected).", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_cvBoxZMin = CreateConVar("l4d2_spitblock_kether_z_min", "-500.0", "Bottom Z of the drawn spit-block box (fixed, so the box does not slide).", FCVAR_NONE, true, -2000.0, true, 2000.0);
 	g_cvBoxZMax = CreateConVar("l4d2_spitblock_kether_z_max", "2500.0", "Top Z of the drawn spit-block box (fixed, so the box does not slide).", FCVAR_NONE, true, -1000.0, true, 4000.0);
+	g_cvDrawInset = CreateConVar("l4d2_spitblock_kether_inset", "12.0", "Inset in world units so beams are drawn slightly inside the block area (0 = on strict borders).", FCVAR_NONE, true, 0.0, true, 200.0);
 	g_cvDrawInterval = CreateConVar("l4d2_spitblock_kether_interval", "1.0", "Interval in seconds between redrawing the spit-block area to infected.", FCVAR_NONE, true, 0.2, true, 5.0);
 
 	if (g_bLateLoad) {
@@ -88,10 +92,9 @@ Action AddSpitBlockSquare(int iArgs)
 	float fSquare[4];
 	char sMapName[MAX_MAP_NAME_SIZE], sBuffer[32], sGetCmd[128];
 
-	if (iArgs != 5) {
+	if (iArgs != 5 && iArgs != 7) {
 		GetCmdArgString(sGetCmd, sizeof(sGetCmd));
-		ErrorAnnounce("[%s] You entered the wrong number of arguments '%f'. Need 5 arguments.", PLUGIN_TAG, sGetCmd);
-		ErrorAnnounce("[%s] Usage: spit_block_square <mapname> <x1> <y1> <x2> <y2>.", PLUGIN_TAG);
+		ErrorAnnounce("[%s] Wrong number of arguments. Usage: spit_block_square <mapname> <x1> <y1> <x2> <y2> [z_min z_max].", PLUGIN_TAG);
 		return Plugin_Handled;
 	}
 
@@ -103,6 +106,17 @@ Action AddSpitBlockSquare(int iArgs)
 	}
 
 	g_hSpitBlockSquares.SetArray(sMapName, fSquare, sizeof(fSquare), true);
+
+	if (iArgs == 7) {
+		float fZ[2];
+		GetCmdArg(6, sBuffer, sizeof(sBuffer));
+		fZ[0] = StringToFloat(sBuffer);
+		GetCmdArg(7, sBuffer, sizeof(sBuffer));
+		fZ[1] = StringToFloat(sBuffer);
+		g_hSpitBlockZ.SetArray(sMapName, fZ, sizeof(fZ), true);
+	} else {
+		g_hSpitBlockZ.Remove(sMapName);  // use global convars for this map
+	}
 
 	OnMapStart();
 
@@ -124,6 +138,7 @@ Action RemoveSpitBlockSquare(int iArgs)
 	GetCmdArg(1, sMapName, sizeof(sMapName));
 	if (g_hSpitBlockSquares.GetArray(sMapName, fSquare, sizeof(fSquare))) {
 		g_hSpitBlockSquares.Remove(sMapName);
+		g_hSpitBlockZ.Remove(sMapName);
 		PrintToServer("[%s] Spit block square removed on this map '%s'.", PLUGIN_TAG, sMapName);
 	} else {
 		PrintToServer("[%s] Could not find the specified map '%s'.", PLUGIN_TAG, sMapName);
@@ -208,9 +223,18 @@ Action Timer_DrawSpitBlockAreas(Handle timer)
 		return Plugin_Continue;
 	}
 
-	// Fixed Z range so the box is static and covers the whole elevator (no sliding)
-	float zMin = g_cvBoxZMin.FloatValue;
-	float zMax = g_cvBoxZMax.FloatValue;
+	// Z range: per-map if set, else global convars
+	char sMapName[MAX_MAP_NAME_SIZE];
+	GetCurrentMap(sMapName, sizeof(sMapName));
+	float zMin, zMax;
+	float fZ[2];
+	if (g_hSpitBlockZ.GetArray(sMapName, fZ, sizeof(fZ))) {
+		zMin = fZ[0];
+		zMax = fZ[1];
+	} else {
+		zMin = g_cvBoxZMin.FloatValue;
+		zMax = g_cvBoxZMax.FloatValue;
+	}
 	if (zMin > zMax) {
 		float t = zMin;
 		zMin = zMax;
@@ -223,6 +247,21 @@ Action Timer_DrawSpitBlockAreas(Handle timer)
 	float maxX = (x1 > x2) ? x1 : x2;
 	float minY = (y1 < y2) ? y1 : y2;
 	float maxY = (y1 > y2) ? y1 : y2;
+
+	// Inset so beams are drawn slightly inside the area (more toward center)
+	float inset = (g_cvDrawInset != null) ? g_cvDrawInset.FloatValue : 0.0;
+	if (inset > 0.0) {
+		float sizeX = maxX - minX, sizeY = maxY - minY;
+		float maxInset = (sizeX < sizeY) ? sizeX : sizeY;
+		maxInset *= 0.45;  // cap at 45% of smaller side so box stays visible
+		if (inset > maxInset) inset = maxInset;
+		minX += inset;
+		maxX -= inset;
+		minY += inset;
+		maxY -= inset;
+		if (minX >= maxX) { minX = (minX + maxX) * 0.5 - 1.0; maxX = minX + 2.0; }
+		if (minY >= maxY) { minY = (minY + maxY) * 0.5 - 1.0; maxY = minY + 2.0; }
+	}
 
 	float corners[8][3];
 	// Bottom (z = zMin): 0 minX,minY  1 maxX,minY  2 maxX,maxY  3 minX,maxY
