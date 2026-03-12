@@ -67,7 +67,7 @@ public Plugin myinfo =
 {
 	name = "L4D2 Tank Hittable Glow (Kether)",
 	author = "Harry Potter, Sir, A1m`, Derpduck",
-	version = "2.6.0",
+	version = "2.50.0",
 	description = "Stop tank props from fading whilst the tank is alive + add Hittable Glow."
 };
 
@@ -560,15 +560,15 @@ void PropDamaged(int iVictim, int iAttacker, int iInflictor, float fDamage, int 
 	}
 }
 
-void CreateTankPropGlow(int iTarget)
+int CreateAttachedGlowEntity(int iTarget)
 {
 	// Spawn dynamic prop entity
 	int iEntity = CreateEntityByName("prop_dynamic_override");
 	if (iEntity == -1) {
-		return;
+		return -1;
 	}
 
-	// Get position of hittable
+	// Get position of hittable.
 	float vOrigin[3];
 	float vAngles[3];
 	GetEntPropVector(iTarget, Prop_Send, "m_vecOrigin", vOrigin);
@@ -578,29 +578,50 @@ void CreateTankPropGlow(int iTarget)
 	char sModelName[PLATFORM_MAX_PATH];
 	GetEntPropString(iTarget, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
 
-	// Set new fake model
+	// Set new fake model.
 	SetEntityModel(iEntity, sModelName);
 	DispatchSpawn(iEntity);
 
-	// Set outline glow color
+	// No collision / solid behavior.
 	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
 	SetEntProp(iEntity, Prop_Send, "m_nSolidType", 0);
+
+	// The shell itself stays invisible, only the glow is visible.
+	SetEntityRenderMode(iEntity, RENDER_NONE);
+	SetEntityRenderColor(iEntity, 0, 0, 0, 0);
+
+	// Match the hittable position and angles.
+	TeleportEntity(iEntity, vOrigin, vAngles, NULL_VECTOR);
+
+	// Parent to the hittable so it follows movement.
+	SetVariantString("!activator");
+	AcceptEntityInput(iEntity, "SetParent", iTarget);
+
+	return iEntity;
+}
+
+void RemoveGlowRef(int &iRef)
+{
+	if (IsValidEntRef(iRef)) {
+		RemoveEntity(EntRefToEntIndex(iRef));
+	}
+	iRef = -1;
+}
+
+void CreateTankPropGlow(int iTarget)
+{
+	int iEntity = CreateAttachedGlowEntity(iTarget);
+	if (iEntity == -1) {
+		return;
+	}
+
+	// Infected/Tank-visible glow settings.
+	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRange", g_iCvarRange);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarRangeMin);
 	SetEntProp(iEntity, Prop_Send, "m_iGlowType", 2);
 	SetEntProp(iEntity, Prop_Send, "m_glowColorOverride", g_iCvarColor);
 	AcceptEntityInput(iEntity, "StartGlowing");
-
-	// Set model invisible
-	SetEntityRenderMode(iEntity, RENDER_NONE);
-	SetEntityRenderColor(iEntity, 0, 0, 0, 0);
-
-	// Set model to hittable position
-	TeleportEntity(iEntity, vOrigin, vAngles, NULL_VECTOR);
-
-	// Set model attach to client, and always synchronize
-	SetVariantString("!activator");
-	AcceptEntityInput(iEntity, "SetParent", iTarget);
 
 	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmit);
 	g_iEntityList[iTarget] = EntIndexToEntRef(iEntity);
@@ -618,45 +639,18 @@ void CreateSurvivorPropGlow(int iTarget)
 		return;
 	}
 
-	// Spawn dynamic prop entity for survivors
-	int iEntity = CreateEntityByName("prop_dynamic_override");
+	int iEntity = CreateAttachedGlowEntity(iTarget);
 	if (iEntity == -1) {
 		return;
 	}
 
-	// Get position of hittable
-	float vOrigin[3];
-	float vAngles[3];
-	GetEntPropVector(iTarget, Prop_Send, "m_vecOrigin", vOrigin);
-	GetEntPropVector(iTarget, Prop_Data, "m_angRotation", vAngles);
-
-	// Get Client Model
-	char sModelName[PLATFORM_MAX_PATH];
-	GetEntPropString(iTarget, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
-
-	// Set new fake model
-	SetEntityModel(iEntity, sModelName);
-	DispatchSpawn(iEntity);
-
-	// Set outline glow color (weaker, same type as infected but with weaker color and range)
+	// Survivor-only weaker nearby glow.
 	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
-	SetEntProp(iEntity, Prop_Send, "m_nSolidType", 0);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRange", g_iCvarSurvivorsRange);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarSurvivorsRangeMin);
 	SetEntProp(iEntity, Prop_Send, "m_iGlowType", 2); // Same type as infected
 	SetEntProp(iEntity, Prop_Send, "m_glowColorOverride", g_iCvarSurvivorsColor);
 	AcceptEntityInput(iEntity, "StartGlowing");
-
-	// Set model invisible
-	SetEntityRenderMode(iEntity, RENDER_NONE);
-	SetEntityRenderColor(iEntity, 0, 0, 0, 0);
-
-	// Set model to hittable position
-	TeleportEntity(iEntity, vOrigin, vAngles, NULL_VECTOR);
-
-	// Set model attach to client, and always synchronize
-	SetVariantString("!activator");
-	AcceptEntityInput(iEntity, "SetParent", iTarget);
 
 	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmitSurvivors);
 	g_iEntityListSurvivors[iTarget] = EntIndexToEntRef(iEntity);
@@ -668,38 +662,18 @@ void CreateTankPropGlowFar(int iTarget)
 		return;
 	}
 
-	int iEntity = CreateEntityByName("prop_dynamic_override");
+	int iEntity = CreateAttachedGlowEntity(iTarget);
 	if (iEntity == -1) {
 		return;
 	}
 
-	float vOrigin[3];
-	float vAngles[3];
-	GetEntPropVector(iTarget, Prop_Send, "m_vecOrigin", vOrigin);
-	GetEntPropVector(iTarget, Prop_Data, "m_angRotation", vAngles);
-
-	char sModelName[PLATFORM_MAX_PATH];
-	GetEntPropString(iTarget, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
-
-	SetEntityModel(iEntity, sModelName);
-	DispatchSpawn(iEntity);
-
 	// Weak glow for tank at distance – type 3 (Constant) so it can show from far / through walls
 	SetEntProp(iEntity, Prop_Send, "m_CollisionGroup", 0);
-	SetEntProp(iEntity, Prop_Send, "m_nSolidType", 0);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRange", g_iCvarTankFarRange);
 	SetEntProp(iEntity, Prop_Send, "m_nGlowRangeMin", g_iCvarTankFarRangeMin);
 	SetEntProp(iEntity, Prop_Send, "m_iGlowType", 3);
 	SetEntProp(iEntity, Prop_Send, "m_glowColorOverride", g_iCvarTankFarColor);
 	AcceptEntityInput(iEntity, "StartGlowing");
-
-	SetEntityRenderMode(iEntity, RENDER_NONE);
-	SetEntityRenderColor(iEntity, 0, 0, 0, 0);
-
-	TeleportEntity(iEntity, vOrigin, vAngles, NULL_VECTOR);
-
-	SetVariantString("!activator");
-	AcceptEntityInput(iEntity, "SetParent", iTarget);
 
 	SDKHook(iEntity, SDKHook_SetTransmit, OnTransmitFar);
 	g_iEntityListFar[iTarget] = EntIndexToEntRef(iEntity);
@@ -847,11 +821,7 @@ void RemoveAllSurvivorGlows()
 	for (int i = 0; i < iSize; i++) {
 		iValue = g_hTankProps.Get(i);
 		if (iValue > 0 && IsValidEdict(iValue)) {
-			int iRef = g_iEntityListSurvivors[iValue];
-			if (IsValidEntRef(iRef)) {
-				RemoveEntity(EntRefToEntIndex(iRef));
-				g_iEntityListSurvivors[iValue] = -1;
-			}
+			RemoveGlowRef(g_iEntityListSurvivors[iValue]);
 		}
 	}
 }
@@ -862,11 +832,7 @@ void RemoveAllFarGlows()
 	for (int i = 0; i < iSize; i++) {
 		iValue = g_hTankProps.Get(i);
 		if (iValue > 0 && IsValidEdict(iValue)) {
-			int iRef = g_iEntityListFar[iValue];
-			if (IsValidEntRef(iRef)) {
-				RemoveEntity(EntRefToEntIndex(iRef));
-				g_iEntityListFar[iValue] = -1;
-			}
+			RemoveGlowRef(g_iEntityListFar[iValue]);
 		}
 	}
 }
@@ -886,17 +852,8 @@ void UnhookTankProps(bool removeHitProps = true)
 		
 		// Remove survivor glow for all props
 		if (iValue > 0 && IsValidEdict(iValue)) {
-			int iRef = g_iEntityListSurvivors[iValue];
-			if (IsValidEntRef(iRef)) {
-				RemoveEntity(EntRefToEntIndex(iRef));
-				g_iEntityListSurvivors[iValue] = -1;
-			}
-			// Remove tank far glow
-			iRef = g_iEntityListFar[iValue];
-			if (IsValidEntRef(iRef)) {
-				RemoveEntity(EntRefToEntIndex(iRef));
-				g_iEntityListFar[iValue] = -1;
-			}
+			RemoveGlowRef(g_iEntityListSurvivors[iValue]);
+			RemoveGlowRef(g_iEntityListFar[iValue]);
 		}
 	}
 
@@ -908,10 +865,7 @@ void UnhookTankProps(bool removeHitProps = true)
 			iValue = g_hTankPropsHit.Get(i);
 
 			if (iValue > 0 && IsValidEdict(iValue)) {
-				int iRef = g_iEntityList[iValue];
-				if (IsValidEntRef(iRef)) {
-					RemoveEntity(EntRefToEntIndex(iRef));
-				}
+				RemoveGlowRef(g_iEntityList[iValue]);
 				// Keep original plugin behavior: remove the hittable itself after tank death.
 				RemoveEntity(iValue);
 				//PrintToChatAll("remove %d", iValue);
