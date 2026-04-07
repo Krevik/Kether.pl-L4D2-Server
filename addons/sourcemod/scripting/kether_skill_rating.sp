@@ -78,6 +78,7 @@ bool g_bHealStartedToOther[MAXPLAYERS + 1];
 bool g_bMixVoteInProgress = false;
 Handle g_hMixVote = INVALID_HANDLE;
 float g_fLastMixVoteTime = 0.0;
+bool g_bRebuildInProgress = false;
 
 public Plugin myinfo =
 {
@@ -136,6 +137,9 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_skilltop", Command_SkillTop, "Show top skill players");
 	RegConsoleCmd("sm_skillsim", Command_SkillSim, "Show players with a similar profile");
 	RegConsoleCmd("sm_skillmix", Command_SkillMixVote, "Call vote to mix teams by skill");
+	RegAdminCmd("sm_skillrebuild", Command_SkillRebuild, ADMFLAG_ROOT, "Rebuild players totals from round_stats");
+
+	StartPlayersBackfillMigration();
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -163,6 +167,7 @@ public void OnClientPostAdminCheck(int client)
 		return;
 	}
 
+	TryMergeSteamIdVariantsForClient(client);
 	ResetRoundStats(client);
 	g_fTotalPoints[client] = 0.0;
 	g_iRoundsPlayed[client] = 0;
@@ -734,6 +739,19 @@ public Action Command_SkillMixVote(int client, int args)
 	return Plugin_Handled;
 }
 
+public Action Command_SkillRebuild(int client, int args)
+{
+	if (g_bRebuildInProgress)
+	{
+		ReplyToCommand(client, "[Skill] Rebuild already in progress.");
+		return Plugin_Handled;
+	}
+
+	StartPlayersBackfillMigration();
+	ReplyToCommand(client, "[Skill] Rebuild started.");
+	return Plugin_Handled;
+}
+
 public void Handle_MixVoteAction(Handle vote, BuiltinVoteAction action, int param1, int param2)
 {
 	switch (action)
@@ -1200,13 +1218,18 @@ void LoadPlayerProfile(int client)
 	char escName[MAX_NAME_LENGTH * 2 + 1];
 	g_Db.Escape(name, escName, sizeof(escName));
 
-	char qEnsure[512];
-	Format(qEnsure, sizeof(qEnsure),
+	char qInsert[512];
+	Format(qInsert, sizeof(qInsert),
 		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
-		... "VALUES ('%s', '%s', 0.0, 0, strftime('%%s', 'now')); "
-		... "UPDATE players SET name='%s', last_seen=strftime('%%s', 'now') WHERE steamid='%s';",
-		steamid, escName, escName, steamid);
-	g_Db.Query(SQL_ErrorOnly, qEnsure);
+		... "VALUES ('%s', '%s', 0.0, 0, strftime('%%s', 'now'));",
+		steamid, escName);
+	g_Db.Query(SQL_ErrorOnly, qInsert);
+
+	char qTouch[512];
+	Format(qTouch, sizeof(qTouch),
+		"UPDATE players SET name='%s', last_seen=strftime('%%s', 'now') WHERE steamid='%s';",
+		escName, steamid);
+	g_Db.Query(SQL_ErrorOnly, qTouch);
 
 	char qLoad[256];
 	Format(qLoad, sizeof(qLoad), "SELECT total_points, rounds_played FROM players WHERE steamid='%s';", steamid);
@@ -1248,13 +1271,18 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	char escName[MAX_NAME_LENGTH * 2 + 1];
 	g_Db.Escape(name, escName, sizeof(escName));
 
-	char qPlayer[1024];
-	Format(qPlayer, sizeof(qPlayer),
+	char qInsertPlayer[512];
+	Format(qInsertPlayer, sizeof(qInsertPlayer),
 		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
-		... "VALUES ('%s', '%s', 0.0, 0, strftime('%%s', 'now')); "
-		... "UPDATE players SET name='%s', total_points=total_points+%.4f, rounds_played=rounds_played+1, last_seen=strftime('%%s', 'now') WHERE steamid='%s';",
-		steamid, escName, escName, awarded, steamid);
-	g_Db.Query(SQL_ErrorOnly, qPlayer);
+		... "VALUES ('%s', '%s', 0.0, 0, strftime('%%s', 'now'));",
+		steamid, escName);
+	g_Db.Query(SQL_ErrorOnly, qInsertPlayer);
+
+	char qUpdatePlayer[768];
+	Format(qUpdatePlayer, sizeof(qUpdatePlayer),
+		"UPDATE players SET name='%s', total_points=total_points+%.4f, rounds_played=rounds_played+1, last_seen=strftime('%%s', 'now') WHERE steamid='%s';",
+		escName, awarded, steamid);
+	g_Db.Query(SQL_ErrorOnly, qUpdatePlayer);
 
 	char escMap[128];
 	g_Db.Escape(g_sMapName, escMap, sizeof(escMap));
@@ -1340,6 +1368,7 @@ bool GetPlayerSteamId(int client, char[] buffer, int size)
 		return false;
 	}
 
+	// Use SteamID64 as canonical key to avoid split identities.
 	if (GetClientAuthId(client, AuthId_SteamID64, buffer, size) && buffer[0] != '\0')
 	{
 		return true;
@@ -1351,6 +1380,51 @@ bool GetPlayerSteamId(int client, char[] buffer, int size)
 	}
 
 	return false;
+}
+
+void TryMergeSteamIdVariantsForClient(int client)
+{
+	if (!IsValidHuman(client) || g_Db == null)
+	{
+		return;
+	}
+
+	char steam2[32];
+	char steam64[32];
+	bool hasSteam2 = GetClientAuthId(client, AuthId_Steam2, steam2, sizeof(steam2)) && steam2[0] != '\0';
+	bool hasSteam64 = GetClientAuthId(client, AuthId_SteamID64, steam64, sizeof(steam64)) && steam64[0] != '\0';
+
+	if (!hasSteam2 || !hasSteam64 || StrEqual(steam2, steam64, false))
+	{
+		return;
+	}
+
+	char query[2048];
+
+	Format(query, sizeof(query),
+		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
+		... "VALUES ('%s', '', 0.0, 0, strftime('%%s', 'now'));",
+		steam64);
+	g_Db.Query(SQL_ErrorOnly, query);
+
+	Format(query, sizeof(query),
+		"UPDATE players SET "
+		... "total_points = total_points + COALESCE((SELECT total_points FROM players WHERE steamid='%s'), 0.0), "
+		... "rounds_played = rounds_played + COALESCE((SELECT rounds_played FROM players WHERE steamid='%s'), 0), "
+		... "last_seen = MAX(last_seen, COALESCE((SELECT last_seen FROM players WHERE steamid='%s'), last_seen)) "
+		... "WHERE steamid='%s';",
+		steam2, steam2, steam2, steam64);
+	g_Db.Query(SQL_ErrorOnly, query);
+
+	Format(query, sizeof(query),
+		"UPDATE round_stats SET steamid='%s' WHERE steamid='%s';",
+		steam64, steam2);
+	g_Db.Query(SQL_ErrorOnly, query);
+
+	Format(query, sizeof(query),
+		"DELETE FROM players WHERE steamid='%s';",
+		steam2);
+	g_Db.Query(SQL_ErrorOnly, query);
 }
 
 bool IsTankInPlayActive()
@@ -1461,4 +1535,61 @@ public void SQL_ErrorOnly(Database db, DBResultSet results, const char[] error, 
 	{
 		LogError("[SkillRating] SQL error: %s", error);
 	}
+}
+
+void StartPlayersBackfillMigration()
+{
+	if (g_Db == null || g_bRebuildInProgress)
+	{
+		return;
+	}
+
+	g_bRebuildInProgress = true;
+
+	char qInsertMissing[1024];
+	Format(qInsertMissing, sizeof(qInsertMissing),
+		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
+		... "SELECT rs.steamid, MAX(rs.name), 0.0, 0, COALESCE(MAX(rs.ts), strftime('%%s', 'now')) "
+		... "FROM round_stats rs GROUP BY rs.steamid;");
+	g_Db.Query(SQL_RebuildStepInsertDone, qInsertMissing);
+}
+
+public void SQL_RebuildStepInsertDone(Database db, DBResultSet results, const char[] error, any data)
+{
+	if (results == null)
+	{
+		g_bRebuildInProgress = false;
+		LogError("[SkillRating] Rebuild step insert failed: %s", error);
+		return;
+	}
+
+	char qUpdateTotals[1024];
+	Format(qUpdateTotals, sizeof(qUpdateTotals),
+		"UPDATE players SET "
+		... "total_points = COALESCE((SELECT SUM(rs.awarded_points) FROM round_stats rs WHERE rs.steamid = players.steamid), 0.0), "
+		... "rounds_played = COALESCE((SELECT COUNT(*) FROM round_stats rs WHERE rs.steamid = players.steamid), 0), "
+		... "last_seen = COALESCE((SELECT MAX(rs.ts) FROM round_stats rs WHERE rs.steamid = players.steamid), last_seen);");
+	g_Db.Query(SQL_RebuildStepUpdateDone, qUpdateTotals);
+}
+
+public void SQL_RebuildStepUpdateDone(Database db, DBResultSet results, const char[] error, any data)
+{
+	g_bRebuildInProgress = false;
+
+	if (results == null)
+	{
+		LogError("[SkillRating] Rebuild step update failed: %s", error);
+		return;
+	}
+
+	// Keep online cache in sync after DB rebuild.
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsValidHuman(i))
+		{
+			LoadPlayerProfile(i);
+		}
+	}
+
+	PrintToServer("[SkillRating] Players totals rebuild completed.");
 }
