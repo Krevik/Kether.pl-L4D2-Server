@@ -96,6 +96,7 @@ ConVar g_CvarWeightChargerLevel;
 ConVar g_CvarWeightTongueCut;
 ConVar g_CvarWeightSpecialShove;
 ConVar g_CvarWeightRockEatenPenalty;
+ConVar g_CvarWeightReviveInterrupt;
 ConVar g_CvarWeightRevive;
 ConVar g_CvarWeightMedkitGive;
 ConVar g_CvarWeightRescue;
@@ -173,6 +174,10 @@ int g_iChargerLevels[MAXPLAYERS + 1];
 int g_iTongueCuts[MAXPLAYERS + 1];
 int g_iSpecialShoveSaves[MAXPLAYERS + 1];
 int g_iRockEatenPenalty[MAXPLAYERS + 1];
+int g_iReviveInterrupts[MAXPLAYERS + 1];
+
+int g_iReviveTargetForReviver[MAXPLAYERS + 1];
+float g_fReviveStartTime[MAXPLAYERS + 1];
 // g_iBigHitAssists retained earlier; no duplicate declaration here.
 int g_iRevives[MAXPLAYERS + 1];
 int g_iMedkitGives[MAXPLAYERS + 1];
@@ -282,6 +287,7 @@ public void OnPluginStart()
 	g_CvarWeightTongueCut = CreateConVar("sm_skill_w_tongue_cut", "6.0", "Weight for cutting smoker tongue", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSpecialShove = CreateConVar("sm_skill_w_special_shove", "4.0", "Weight for shoving special infected (from skill_detect forward)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRockEatenPenalty = CreateConVar("sm_skill_w_rock_eaten_penalty", "-10.0", "Penalty when survivor eats a tank rock", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightReviveInterrupt = CreateConVar("sm_skill_w_revive_interrupt", "5.0", "Weight for interrupting a revive (infected)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRevive = CreateConVar("sm_skill_w_revive", "10.0", "Revive weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightMedkitGive = CreateConVar("sm_skill_w_medkit_give", "10.0", "Heal other with medkit weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRescue = CreateConVar("sm_skill_w_rescue", "8.0", "Rescue from special pin weight", FCVAR_NONE, true, 0.0, false);
@@ -320,6 +326,8 @@ public void OnPluginStart()
 	HookEvent("revive_success", Event_ReviveSuccess, EventHookMode_Post);
 	HookEvent("heal_begin", Event_HealBegin, EventHookMode_Post);
 	HookEvent("heal_success", Event_HealSuccess, EventHookMode_Post);
+	HookEvent("revive_begin", Event_ReviveBegin, EventHookMode_Post);
+	HookEvent("revive_end", Event_ReviveEnd, EventHookMode_Post);
 	HookEvent("ability_use", Event_AbilityUse, EventHookMode_Post);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
 	HookEvent("player_shoved", Event_PlayerShoved, EventHookMode_Post);
@@ -802,6 +810,7 @@ float ComputeRawRoundScore(int client, int team)
 		score += float(g_iTankKills[client]) * g_CvarWeightTankKill.FloatValue;
 		score += float(g_iTankPasses[client]) * g_CvarWeightTankPassPenalty.FloatValue;
 		score += float(g_iTankWipeBonus[client]) * g_CvarWeightTankWipe.FloatValue;
+	score += float(g_iReviveInterrupts[client]) * g_CvarWeightReviveInterrupt.FloatValue;
 		return score;
 	}
 
@@ -956,6 +965,28 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 			if (g_iLastStaggerer[victim] > 0 && g_iLastStaggerer[victim] != attacker && (now - g_fLastStaggerTime[victim]) <= 3.0)
 			{
 				g_iStaggerSetup[g_iLastStaggerer[victim]]++;
+			}
+
+			// Revive interrupt: if victim is reviver or revivee in active window
+			for (int rev = 1; rev <= MaxClients; rev++)
+			{
+				if (g_iReviveTargetForReviver[rev] == 0 || !IsValidHuman(rev) || GetClientTeam(rev) != TEAM_SURVIVOR)
+				{
+					continue;
+				}
+				if ((GetEngineTime() - g_fReviveStartTime[rev]) > 5.0)
+				{
+					g_iReviveTargetForReviver[rev] = 0;
+					g_fReviveStartTime[rev] = 0.0;
+					continue;
+				}
+				if (victim == rev || victim == g_iReviveTargetForReviver[rev])
+				{
+					g_iReviveInterrupts[attacker]++;
+					g_iReviveTargetForReviver[rev] = 0;
+					g_fReviveStartTime[rev] = 0.0;
+					break;
+				}
 			}
 		}
 		return;
@@ -1115,6 +1146,8 @@ public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadca
 		g_bIncapped[revived] = false;
 		RegisterSaveCoop(reviver, revived);
 	}
+	g_iReviveTargetForReviver[reviver] = 0;
+	g_fReviveStartTime[reviver] = 0.0;
 }
 
 public void Event_HealBegin(Event event, const char[] name, bool dontBroadcast)
@@ -1157,6 +1190,32 @@ public void Event_HealSuccess(Event event, const char[] name, bool dontBroadcast
 		}
 	}
 	g_bHealStartedToOther[healer] = false;
+}
+
+public void Event_ReviveBegin(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
+	{
+		return;
+	}
+	int reviver = GetClientOfUserId(event.GetInt("userid"));
+	int revived = GetClientOfUserId(event.GetInt("subject"));
+	if (!IsValidHuman(reviver) || GetClientTeam(reviver) != TEAM_SURVIVOR || !IsValidClient(revived))
+	{
+		return;
+	}
+	g_iReviveTargetForReviver[reviver] = revived;
+	g_fReviveStartTime[reviver] = GetEngineTime();
+}
+
+public void Event_ReviveEnd(Event event, const char[] name, bool dontBroadcast)
+{
+	int reviver = GetClientOfUserId(event.GetInt("userid"));
+	if (reviver > 0)
+	{
+		g_iReviveTargetForReviver[reviver] = 0;
+		g_fReviveStartTime[reviver] = 0.0;
+	}
 }
 
 public Action Event_AbilityUse(Event event, const char[] name, bool dontBroadcast)
@@ -1597,53 +1656,27 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	Format(line, sizeof(line), "Survival time (this round): %.0fs", g_fSurvivalTime[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Headshots on SI: %d", g_iHeadshotSI[target]);
+	Format(line, sizeof(line), "FF dealt / taken: %d / %d | HS SI: %d", g_iFriendlyFireDealt[target], g_iFriendlyFireTaken[target], g_iHeadshotSI[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "FF dealt / taken: %d / %d", g_iFriendlyFireDealt[target], g_iFriendlyFireTaken[target]);
+	menu.AddItem("x", "--- Survivors (summary) ---", ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Damage: %d (Tank %d | Witch %d | Common %d)", g_iDamageAsSurvivor[target], g_iTankDamageAsSurvivor[target], g_iWitchDamageAsSurvivor[target], g_iCommonKillsAsSurvivor[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Survivors ---", ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Damage (all): %d", g_iDamageAsSurvivor[target]);
+	Format(line, sizeof(line), "Clears/support: clears %d | self %d | revives %d | medkits %d | rescues %d | jockey blocks %d", g_iSpecialClears[target], g_iSmokerSelfClears[target], g_iRevives[target], g_iMedkitGives[target], g_iRescuesFromSpecial[target], g_iJockeyBlocks[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Tank dmg: %d | Witch dmg: %d | Common kills: %d", g_iTankDamageAsSurvivor[target], g_iWitchDamageAsSurvivor[target], g_iCommonKillsAsSurvivor[target]);
+	Format(line, sizeof(line), "Skill shots: skeets %d | melee %d | rocks %d | deadstops %d", g_iSkeets[target], g_iSkeetsMelee[target], g_iRockSkeets[target], g_iDeadstops[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Special clears: %d | Self clears: %d", g_iSpecialClears[target], g_iSmokerSelfClears[target]);
+	Format(line, sizeof(line), "Team play: tank actions %d | chain clears %d | safe saves %d | zero FF %d | alarms %d", g_iTankPlayActions[target], g_iChainClearBoom[target], g_iSafeSaves[target], g_iZeroFFBonus[target], g_iAlarmTriggers[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Skeets: %d | Melee skeets: %d | Rock skeets: %d | Deadstops: %d", g_iSkeets[target], g_iSkeetsMelee[target], g_iRockSkeets[target], g_iDeadstops[target]);
+	Format(line, sizeof(line), "Crowns/shoves: witch crowns %d | shoves SI %d | charger levels %d | tongue cuts %d | shove saves %d | rock eaten %d", g_iWitchCrowns[target], g_iShoveSI[target], g_iChargerLevels[target], g_iTongueCuts[target], g_iSpecialShoveSaves[target], g_iRockEatenPenalty[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Boomer pops clean: %d | Splash pops: %d", g_iBoomerPopsNoVomit[target], g_iBoomerPopsSplash[target]);
+	menu.AddItem("x", "--- Infected (summary) ---", ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Damage/booms: dmg %d | vomit hits/casts %d/%d", g_iDamageAsInfected[target], g_iBoomerVomitHits[target], g_iBoomerVomitCasts[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Revives: %d | Medkit gives: %d | Special rescues: %d", g_iRevives[target], g_iMedkitGives[target], g_iRescuesFromSpecial[target]);
+	Format(line, sizeof(line), "Pins/assists: pin %d | pin DPS %.0f | big-hit %d (score %.1f) | spit pins/incap %d/%d | setup %d | boom kill %d", g_iPinAssists[target], g_fPinDpsAssists[target], g_iBigHitAssists[target], g_fBigHitAssistScore[target], g_iSpitPinnedTicks[target], g_iSpitIncapTicks[target], g_iSpitSetupAssists[target], g_iBoomKillAssists[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Jockey blocks: %d | Tank play actions: %d", g_iJockeyBlocks[target], g_iTankPlayActions[target]);
+	Format(line, sizeof(line), "Focus/chain: shared %d | boom focus %d | stagger setups %d | chain control %d | tank support %d | charger multi %d | spit multi %d | revive interrupts %d", g_iSharedFocus[target], g_iBoomFocusAssist[target], g_iStaggerSetup[target], g_iChainControlAssist[target], g_iTankSupportAssist[target], g_iChargerMulti[target], g_iSpitMultiHits[target], g_iReviveInterrupts[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Shoves on SI: %d | Witch crowns: %d", g_iShoveSI[target], g_iWitchCrowns[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Chain clear boom: %d | Safe saves: %d | Zero FF bonus: %d", g_iChainClearBoom[target], g_iSafeSaves[target], g_iZeroFFBonus[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Alarms triggered: %d", g_iAlarmTriggers[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Infected ---", ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Infected damage: %d", g_iDamageAsInfected[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Boomer vomit hits/casts: %d / %d", g_iBoomerVomitHits[target], g_iBoomerVomitCasts[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Pin assists: %d | Pin DPS: %.0f", g_iPinAssists[target], g_fPinDpsAssists[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Big-hit assists: %d | Score: %.1f", g_iBigHitAssists[target], g_fBigHitAssistScore[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Spit ticks pinned/incap: %d / %d", g_iSpitPinnedTicks[target], g_iSpitIncapTicks[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Tank boom assists: %d | Witch assists: %d", g_iTankBoomAssists[target], g_iWitchAssists[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Spit setup assists: %d | Boom kill assists: %d", g_iSpitSetupAssists[target], g_iBoomKillAssists[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Charger multi-hits: %d | Spit multi-hits: %d", g_iChargerMulti[target], g_iSpitMultiHits[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Shared focus: %d | Boom focus: %d", g_iSharedFocus[target], g_iBoomFocusAssist[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Stagger setups: %d | Chain control: %d | Tank support: %d", g_iStaggerSetup[target], g_iChainControlAssist[target], g_iTankSupportAssist[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Tank hold: %.0fs | Tank kills: %d | Passes: %d | Wipe bonus: %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target], g_iTankWipeBonus[target]);
+	Format(line, sizeof(line), "Tank play: hold %.0fs | kills %d | passes %d | wipe bonus %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target], g_iTankWipeBonus[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	menu.AddItem("x", "Tip: use !skilltop and !skillsim for more.", ITEMDRAW_DISABLED);
 
@@ -2689,8 +2722,8 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	char qRound[2048];
 	Format(qRound, sizeof(qRound),
 		"INSERT INTO round_stats (steamid, name, round_index, map_name, team, raw_points, awarded_points, "
-		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, chain_clear_boom, safe_saves, zero_ff_bonus, shared_focus, boom_focus, stagger_setup, chain_control, tank_support, alarm_triggers, tank_hold_time, tank_passes, tank_kills, tank_wipe_bonus, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, ts) "
-		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
+		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, chain_clear_boom, safe_saves, zero_ff_bonus, shared_focus, boom_focus, stagger_setup, chain_control, tank_support, alarm_triggers, tank_hold_time, tank_passes, tank_kills, tank_wipe_bonus, charger_levels, tongue_cuts, special_shove_saves, rock_eaten_penalty, revive_interrupts, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, ts) "
+		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
 		steamid, escName, g_iRoundNumber, escMap, team, rawScore, awarded,
 		g_iDamageAsInfected[client],
 		g_iDamageAsSurvivor[client],
@@ -2732,19 +2765,24 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 		g_iTankPasses[client],
 		g_iTankKills[client],
 		g_iTankWipeBonus[client],
-		g_iRevives[client],
-		g_iMedkitGives[client],
-		g_iRescuesFromSpecial[client],
-		g_iJockeyBlocks[client],
-		g_iTankPlayActions[client],
-		g_iFriendlyFireDealt[client],
-		g_iFriendlyFireTaken[client],
-		g_iHeadshotSI[client],
-		g_iBoomerVomitCasts[client],
-		g_iBoomerVomitHits[client],
-		g_fFlowBest[client],
-		g_fSurvivalTime[client],
-		g_bAliveAtEnd[client] ? 1 : 0);
+		g_iChargerLevels[client],
+		g_iTongueCuts[client],
+		g_iSpecialShoveSaves[client],
+		g_iRockEatenPenalty[client],
+		g_iReviveInterrupts[client],
+	g_iRevives[client],
+	g_iMedkitGives[client],
+	g_iRescuesFromSpecial[client],
+	g_iJockeyBlocks[client],
+	g_iTankPlayActions[client],
+	g_iFriendlyFireDealt[client],
+	g_iFriendlyFireTaken[client],
+	g_iHeadshotSI[client],
+	g_iBoomerVomitCasts[client],
+	g_iBoomerVomitHits[client],
+	g_fFlowBest[client],
+	g_fSurvivalTime[client],
+	g_bAliveAtEnd[client] ? 1 : 0);
 	g_Db.Query(SQL_ErrorOnly, qRound);
 
 	g_fTotalPoints[client] += awarded;
@@ -3098,6 +3136,9 @@ void ResetRoundStats(int client)
 	g_iTongueCuts[client] = 0;
 	g_iSpecialShoveSaves[client] = 0;
 	g_iRockEatenPenalty[client] = 0;
+	g_iReviveInterrupts[client] = 0;
+	g_iReviveTargetForReviver[client] = 0;
+	g_fReviveStartTime[client] = 0.0;
 	g_iLastBoomerKiller[client] = 0;
 	g_fLastBoomerDeathTime[client] = 0.0;
 	g_iLastBoomerVomitHits[client] = 0;
@@ -3424,6 +3465,7 @@ void CreateTables()
 	EnsureColumn("round_stats", "tongue_cuts", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "special_shove_saves", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "rock_eaten_penalty", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "revive_interrupts", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "ff_dealt", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "ff_taken", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "headshot_si", "INTEGER NOT NULL DEFAULT 0");
