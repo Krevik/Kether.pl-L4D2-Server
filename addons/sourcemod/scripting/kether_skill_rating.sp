@@ -79,6 +79,23 @@ ConVar g_CvarWeightWitchCrown;
 ConVar g_CvarWeightChargerMulti;
 ConVar g_CvarWeightSpitMulti;
 ConVar g_CvarWeightRockSkeet;
+ConVar g_CvarWeightChainClearBoom;
+ConVar g_CvarWeightSafeSave;
+ConVar g_CvarWeightZeroFFBonus;
+ConVar g_CvarWeightSharedFocus;
+ConVar g_CvarWeightBoomFocus;
+ConVar g_CvarWeightStaggerSetup;
+ConVar g_CvarWeightChainControl;
+ConVar g_CvarWeightTankSupport;
+ConVar g_CvarWeightAlarmPenalty;
+ConVar g_CvarWeightTankHoldSec;
+ConVar g_CvarWeightTankKill;
+ConVar g_CvarWeightTankPassPenalty;
+ConVar g_CvarWeightTankWipe;
+ConVar g_CvarWeightChargerLevel;
+ConVar g_CvarWeightTongueCut;
+ConVar g_CvarWeightSpecialShove;
+ConVar g_CvarWeightRockEatenPenalty;
 ConVar g_CvarWeightRevive;
 ConVar g_CvarWeightMedkitGive;
 ConVar g_CvarWeightRescue;
@@ -139,6 +156,23 @@ float g_fSpitHitWindowStart[MAXPLAYERS + 1];
 int g_iSpitHitWindowCount[MAXPLAYERS + 1];
 int g_iSpitHitWindowLastVictim[MAXPLAYERS + 1];
 int g_iRockSkeets[MAXPLAYERS + 1];
+int g_iChainClearBoom[MAXPLAYERS + 1];
+int g_iSafeSaves[MAXPLAYERS + 1];
+int g_iZeroFFBonus[MAXPLAYERS + 1];
+int g_iSharedFocus[MAXPLAYERS + 1];
+int g_iBoomFocusAssist[MAXPLAYERS + 1];
+int g_iStaggerSetup[MAXPLAYERS + 1];
+int g_iChainControlAssist[MAXPLAYERS + 1];
+int g_iTankSupportAssist[MAXPLAYERS + 1];
+int g_iAlarmTriggers[MAXPLAYERS + 1];
+float g_fTankHoldTime[MAXPLAYERS + 1];
+int g_iTankPasses[MAXPLAYERS + 1];
+int g_iTankKills[MAXPLAYERS + 1];
+int g_iTankWipeBonus[MAXPLAYERS + 1];
+int g_iChargerLevels[MAXPLAYERS + 1];
+int g_iTongueCuts[MAXPLAYERS + 1];
+int g_iSpecialShoveSaves[MAXPLAYERS + 1];
+int g_iRockEatenPenalty[MAXPLAYERS + 1];
 // g_iBigHitAssists retained earlier; no duplicate declaration here.
 int g_iRevives[MAXPLAYERS + 1];
 int g_iMedkitGives[MAXPLAYERS + 1];
@@ -157,6 +191,8 @@ bool g_bAliveAtEnd[MAXPLAYERS + 1];
 float g_fFlowBest[MAXPLAYERS + 1];
 Handle g_hFlowTimer = null;
 bool g_bIncapped[MAXPLAYERS + 1];
+int g_iCurrentTank = 0;
+float g_fTankHoldStart = 0.0;
 
 int g_iLastBoomerKiller[MAXPLAYERS + 1];
 float g_fLastBoomerDeathTime[MAXPLAYERS + 1];
@@ -170,6 +206,10 @@ int g_iLastBoomerForVictim[MAXPLAYERS + 1];
 float g_fLastBoomTime[MAXPLAYERS + 1];
 int g_iLastSpitterForVictim[MAXPLAYERS + 1];
 float g_fLastSpitTime[MAXPLAYERS + 1];
+int g_iLastAttackerForVictim[MAXPLAYERS + 1];
+float g_fLastAttackTime[MAXPLAYERS + 1];
+int g_iLastStaggerer[MAXPLAYERS + 1];
+float g_fLastStaggerTime[MAXPLAYERS + 1];
 
 bool g_bHealStartedToOther[MAXPLAYERS + 1];
 
@@ -225,6 +265,23 @@ public void OnPluginStart()
 	g_CvarWeightChargerMulti = CreateConVar("sm_skill_w_charger_multi", "6.0", "Weight for charger multi-hit (2nd+ victim in one charge)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSpitMulti = CreateConVar("sm_skill_w_spit_multi", "4.0", "Weight for spitter hitting multiple survivors in same spit tick window", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRockSkeet = CreateConVar("sm_skill_w_rock_skeet", "16.0", "Weight per tank rock skeet by survivors", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightChainClearBoom = CreateConVar("sm_skill_w_chain_clear_boom", "6.0", "Weight for clearing/picking up a boomed teammate quickly", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSafeSave = CreateConVar("sm_skill_w_safe_save", "6.0", "Weight for fast save on pinned/incapped teammate", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightZeroFFBonus = CreateConVar("sm_skill_w_zero_ff_bonus", "8.0", "Bonus for a round with zero FF and sufficient actions", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSharedFocus = CreateConVar("sm_skill_w_shared_focus", "3.0", "Weight per shared focus hit (multiple SI on same target window)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBoomFocus = CreateConVar("sm_skill_w_boom_focus", "3.0", "Weight for boomer when teammates follow-up on boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightStaggerSetup = CreateConVar("sm_skill_w_stagger_setup", "3.0", "Weight for setups (stagger/slow) that enable other SI within window", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightChainControl = CreateConVar("sm_skill_w_chain_control", "4.0", "Weight for Smoker->Hunter/Jockey chain control assist", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankSupport = CreateConVar("sm_skill_w_tank_support", "4.0", "Weight for assisting tank hits via boom/pin setup", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightAlarmPenalty = CreateConVar("sm_skill_w_alarm_penalty", "-8.0", "Penalty per car alarm triggered", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightTankHoldSec = CreateConVar("sm_skill_w_tank_hold_sec", "0.05", "Weight per second holding tank", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankKill = CreateConVar("sm_skill_w_tank_kill", "12.0", "Weight per survivor kill by tank", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankPassPenalty = CreateConVar("sm_skill_w_tank_pass_penalty", "-6.0", "Penalty per voluntary tank pass", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightTankWipe = CreateConVar("sm_skill_w_tank_wipe", "20.0", "Bonus when tank is alive and survivors are wiped", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightChargerLevel = CreateConVar("sm_skill_w_charger_level", "10.0", "Weight for leveling/interrupting charger", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTongueCut = CreateConVar("sm_skill_w_tongue_cut", "6.0", "Weight for cutting smoker tongue", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpecialShove = CreateConVar("sm_skill_w_special_shove", "4.0", "Weight for shoving special infected (from skill_detect forward)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightRockEatenPenalty = CreateConVar("sm_skill_w_rock_eaten_penalty", "-10.0", "Penalty when survivor eats a tank rock", FCVAR_NONE, false, 0.0, false);
 	g_CvarWeightRevive = CreateConVar("sm_skill_w_revive", "10.0", "Revive weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightMedkitGive = CreateConVar("sm_skill_w_medkit_give", "10.0", "Heal other with medkit weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRescue = CreateConVar("sm_skill_w_rescue", "8.0", "Rescue from special pin weight", FCVAR_NONE, true, 0.0, false);
@@ -265,8 +322,11 @@ public void OnPluginStart()
 	HookEvent("heal_success", Event_HealSuccess, EventHookMode_Post);
 	HookEvent("ability_use", Event_AbilityUse, EventHookMode_Post);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
-HookEvent("player_shoved", Event_PlayerShoved, EventHookMode_Post);
-HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
+	HookEvent("player_shoved", Event_PlayerShoved, EventHookMode_Post);
+	HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
+	HookEvent("tank_spawn", Event_TankSpawn, EventHookMode_PostNoCopy);
+	HookEvent("charger_carry_end", Event_PinEnd_Generic, EventHookMode_Post);
+	HookEvent("triggered_car_alarm", Event_CarAlarmTriggered, EventHookMode_Post);
 
 	RegConsoleCmd("sm_skill", Command_Skill, "Show your skill rating");
 	RegConsoleCmd("sm_myskill", Command_Skill, "Show your skill rating");
@@ -316,6 +376,16 @@ public void OnMapEnd()
 	FinalizeRoundIfNeeded();
 }
 
+public void Event_TankSpawn(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_CvarEnabled.BoolValue)
+	{
+		return;
+	}
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	StartTankHold(client);
+}
+
 public void OnClientPostAdminCheck(int client)
 {
 	if (!IsValidHuman(client))
@@ -332,6 +402,10 @@ public void OnClientPostAdminCheck(int client)
 
 public void OnClientDisconnect(int client)
 {
+	if (g_iCurrentTank == client)
+	{
+		EndTankHoldSegment(client);
+	}
 	ResetRoundStats(client);
 	g_fTotalPoints[client] = 0.0;
 	g_iRoundsPlayed[client] = 0;
@@ -351,6 +425,8 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	g_bRoundFinalized = false;
 	g_bPaused = false;
 	g_iRoundNumber++;
+	g_iCurrentTank = 0;
+	g_fTankHoldStart = 0.0;
 	GetCurrentMap(g_sMapName, sizeof(g_sMapName));
 
 	for (int i = 1; i <= MaxClients; i++)
@@ -508,12 +584,33 @@ void FinalizeRoundIfNeeded()
 		g_hFlowTimer = null;
 	}
 
-	float teamPool = g_CvarRoundPool.FloatValue;
+	int survAlive = 0;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (IsValidHuman(i) && GetClientTeam(i) == TEAM_SURVIVOR && IsPlayerAlive(i))
+		{
+			survAlive++;
+		}
+	}
+	if (survAlive == 0 && g_iCurrentTank > 0 && IsValidHuman(g_iCurrentTank) && GetClientTeam(g_iCurrentTank) == TEAM_INFECTED)
+	{
+		g_iTankWipeBonus[g_iCurrentTank]++;
+		EndTankHoldSegment(g_iCurrentTank);
+	}
+	else if (g_iCurrentTank > 0)
+	{
+		EndTankHoldSegment(g_iCurrentTank);
+	}
+
+	float teamPoolBase = g_CvarRoundPool.FloatValue;
 	float teamRawSum[4];
+	float teamAdjSum[4];
 	int teamCount[4];
 
 	teamRawSum[TEAM_SURVIVOR] = 0.0;
 	teamRawSum[TEAM_INFECTED] = 0.0;
+	teamAdjSum[TEAM_SURVIVOR] = 0.0;
+	teamAdjSum[TEAM_INFECTED] = 0.0;
 	teamCount[TEAM_SURVIVOR] = 0;
 	teamCount[TEAM_INFECTED] = 0;
 
@@ -544,6 +641,105 @@ void FinalizeRoundIfNeeded()
 		teamCount[team]++;
 	}
 
+	// Compute team medians for percentile damping
+	float teamMedian[4];
+	teamMedian[TEAM_SURVIVOR] = 0.0;
+	teamMedian[TEAM_INFECTED] = 0.0;
+	for (int t = TEAM_SURVIVOR; t <= TEAM_INFECTED; t++)
+	{
+		int cnt = 0;
+		float values[MAXPLAYERS + 1];
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			if (!IsValidHuman(i) || GetClientTeam(i) != t)
+			{
+				continue;
+			}
+			values[cnt++] = rawScore[i];
+		}
+		if (cnt > 0)
+		{
+			// simple insertion sort
+			for (int a = 1; a < cnt; a++)
+			{
+				float key = values[a];
+				int b = a - 1;
+				while (b >= 0 && values[b] > key)
+				{
+					values[b + 1] = values[b];
+					b--;
+				}
+				values[b + 1] = key;
+			}
+			if (cnt % 2 == 1)
+			{
+				teamMedian[t] = values[cnt / 2];
+			}
+			else
+			{
+				teamMedian[t] = (values[(cnt / 2) - 1] + values[cnt / 2]) * 0.5;
+			}
+		}
+	}
+
+	// Roster quality multiplier
+	float teamPoolScaled[4];
+	for (int t = TEAM_SURVIVOR; t <= TEAM_INFECTED; t++)
+	{
+		float avgRounds = 0.0;
+		if (teamCount[t] > 0)
+		{
+			for (int i = 1; i <= MaxClients; i++)
+			{
+				if (IsValidHuman(i) && GetClientTeam(i) == t)
+				{
+					avgRounds += float(g_iRoundsPlayed[i]);
+				}
+			}
+			avgRounds /= float(teamCount[t]);
+		}
+		float rosterMult = FloatClamp(avgRounds / 50.0, 0.5, 1.0);
+		teamPoolScaled[t] = teamPoolBase * rosterMult;
+	}
+
+	// Adjust raw scores with percentile/damping and compute adjusted sums
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i))
+		{
+			continue;
+		}
+		int team = GetClientTeam(i);
+		if (team != TEAM_SURVIVOR && team != TEAM_INFECTED)
+		{
+			continue;
+		}
+
+		float median = teamMedian[team];
+		float adjusted = rawScore[i];
+		if (median > 0.0 && adjusted > (1.5 * median))
+		{
+			adjusted = median + (adjusted - median) * 0.5;
+		}
+		if (teamRawSum[team] > 0.0 && (rawScore[i] / teamRawSum[team]) > 0.4 && teamRawSum[team] < (median * float(teamCount[team]) * 0.5))
+		{
+			adjusted *= 0.7;
+		}
+
+		// zero FF bonus check (survivor only)
+		if (team == TEAM_SURVIVOR && g_iFriendlyFireDealt[i] == 0)
+		{
+			int actionCount = g_iSpecialClears[i] + g_iSmokerSelfClears[i] + g_iSkeets[i] + g_iSkeetsMelee[i] + g_iDeadstops[i] + g_iBoomerPopsNoVomit[i] + g_iRevives[i] + g_iMedkitGives[i] + g_iRescuesFromSpecial[i] + g_iJockeyBlocks[i] + g_iTankPlayActions[i] + g_iChainClearBoom[i] + g_iSafeSaves[i];
+			if (actionCount >= 5)
+			{
+				g_iZeroFFBonus[i] = 1;
+			}
+		}
+
+		rawScore[i] = adjusted;
+		teamAdjSum[team] += adjusted;
+	}
+
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		if (!IsValidHuman(i))
@@ -560,13 +756,13 @@ void FinalizeRoundIfNeeded()
 		float awarded = 0.0;
 		if (teamCount[team] > 0)
 		{
-			if (teamRawSum[team] > 0.0001)
+			if (teamAdjSum[team] > 0.0001)
 			{
-				awarded = teamPool * (rawScore[i] / teamRawSum[team]);
+				awarded = teamPoolScaled[team] * (rawScore[i] / teamAdjSum[team]);
 			}
 			else
 			{
-				awarded = teamPool / float(teamCount[team]);
+				awarded = teamPoolScaled[team] / float(teamCount[team]);
 			}
 		}
 
@@ -597,6 +793,15 @@ float ComputeRawRoundScore(int client, int team)
 		score += float(g_iBoomKillAssists[client]) * g_CvarWeightBoomKillAssist.FloatValue;
 		score += float(g_iChargerMulti[client]) * g_CvarWeightChargerMulti.FloatValue;
 		score += float(g_iSpitMultiHits[client]) * g_CvarWeightSpitMulti.FloatValue;
+		score += float(g_iSharedFocus[client]) * g_CvarWeightSharedFocus.FloatValue;
+		score += float(g_iBoomFocusAssist[client]) * g_CvarWeightBoomFocus.FloatValue;
+		score += float(g_iStaggerSetup[client]) * g_CvarWeightStaggerSetup.FloatValue;
+		score += float(g_iChainControlAssist[client]) * g_CvarWeightChainControl.FloatValue;
+		score += float(g_iTankSupportAssist[client]) * g_CvarWeightTankSupport.FloatValue;
+		score += g_fTankHoldTime[client] * g_CvarWeightTankHoldSec.FloatValue;
+		score += float(g_iTankKills[client]) * g_CvarWeightTankKill.FloatValue;
+		score += float(g_iTankPasses[client]) * g_CvarWeightTankPassPenalty.FloatValue;
+		score += float(g_iTankWipeBonus[client]) * g_CvarWeightTankWipe.FloatValue;
 		return score;
 	}
 
@@ -631,6 +836,14 @@ float ComputeRawRoundScore(int client, int team)
 	score += float(g_iShoveSI[client]) * g_CvarWeightShoveSI.FloatValue;
 	score += float(g_iWitchCrowns[client]) * g_CvarWeightWitchCrown.FloatValue;
 	score += float(g_iRockSkeets[client]) * g_CvarWeightRockSkeet.FloatValue;
+	score += float(g_iChainClearBoom[client]) * g_CvarWeightChainClearBoom.FloatValue;
+	score += float(g_iSafeSaves[client]) * g_CvarWeightSafeSave.FloatValue;
+	score += float(g_iZeroFFBonus[client]) * g_CvarWeightZeroFFBonus.FloatValue;
+	score += float(g_iAlarmTriggers[client]) * g_CvarWeightAlarmPenalty.FloatValue;
+	score += float(g_iChargerLevels[client]) * g_CvarWeightChargerLevel.FloatValue;
+	score += float(g_iTongueCuts[client]) * g_CvarWeightTongueCut.FloatValue;
+	score += float(g_iSpecialShoveSaves[client]) * g_CvarWeightSpecialShove.FloatValue;
+	score += float(g_iRockEatenPenalty[client]) * g_CvarWeightRockEatenPenalty.FloatValue;
 
 	return score;
 }
@@ -675,6 +888,17 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 			AddPinDpsAssist(attacker, victim, damage);
 
 			int zClassAtt = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+			float now = GetEngineTime();
+
+			// Shared focus fire (multiple SI on same target)
+			int prevAttacker = g_iLastAttackerForVictim[victim];
+			if (prevAttacker > 0 && prevAttacker != attacker && IsValidHuman(prevAttacker) && GetClientTeam(prevAttacker) == TEAM_INFECTED && (now - g_fLastAttackTime[victim]) <= 3.0)
+			{
+				g_iSharedFocus[attacker]++;
+				g_iSharedFocus[prevAttacker]++;
+			}
+			g_iLastAttackerForVictim[victim] = attacker;
+			g_fLastAttackTime[victim] = now;
 
 			int spitter = 0;
 			// Spitter utility on pinned/incapped
@@ -690,6 +914,8 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 				{
 					g_iSpitIncapTicks[attacker]++;
 				}
+				g_iLastStaggerer[victim] = attacker;
+				g_fLastStaggerTime[victim] = now;
 			}
 			else if (g_iLastSpitterForVictim[victim] > 0 && (GetEngineTime() - g_fLastSpitTime[victim]) <= SPIT_SETUP_WINDOW)
 			{
@@ -707,6 +933,29 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 				AddBigHitAssistForVictim(victim, damage);
 				AddBoomAssistIfRecent(victim);
 				AddSpitSetupAssist(victim);
+				if (zClassAtt == ZC_CHARGER)
+				{
+					g_iLastStaggerer[victim] = attacker;
+					g_fLastStaggerTime[victim] = now;
+				}
+				if (zClassAtt == ZC_TANK)
+				{
+					AddTankSupportAssist(victim);
+					g_iLastStaggerer[victim] = attacker;
+					g_fLastStaggerTime[victim] = now;
+				}
+			}
+
+			// Boom follow-up focus (credit boomer)
+			if (g_iLastBoomerForVictim[victim] > 0 && g_iLastBoomerForVictim[victim] != attacker && (now - g_fLastBoomTime[victim]) <= 10.0)
+			{
+				g_iBoomFocusAssist[g_iLastBoomerForVictim[victim]]++;
+			}
+
+			// Stagger setup (spit/rock/charge/tank) -> other SI hit
+			if (g_iLastStaggerer[victim] > 0 && g_iLastStaggerer[victim] != attacker && (now - g_fLastStaggerTime[victim]) <= 3.0)
+			{
+				g_iStaggerSetup[g_iLastStaggerer[victim]]++;
 			}
 		}
 		return;
@@ -834,6 +1083,19 @@ public void Event_PlayerBoomed(Event event, const char[] name, bool dontBroadcas
 	g_fLastBoomTime[victim] = GetEngineTime();
 }
 
+public void Event_CarAlarmTriggered(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
+	{
+		return;
+	}
+	int survivor = GetClientOfUserId(event.GetInt("userid"));
+	if (IsValidHuman(survivor) && GetClientTeam(survivor) == TEAM_SURVIVOR)
+	{
+		g_iAlarmTriggers[survivor]++;
+	}
+}
+
 public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
@@ -851,6 +1113,7 @@ public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadca
 			g_iTankPlayActions[reviver]++;
 		}
 		g_bIncapped[revived] = false;
+		RegisterSaveCoop(reviver, revived);
 	}
 }
 
@@ -959,6 +1222,15 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 
+	if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
+	{
+		int zcAtt = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+		if (zcAtt == ZC_TANK && IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
+		{
+			g_iTankKills[attacker]++;
+		}
+	}
+
 	if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
 	{
 		g_bAliveAtEnd[victim] = false;
@@ -1002,6 +1274,15 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 		// Heuristic witch assist (non-client attacker)
 		AddWitchAssistHeuristic(victim);
 	}
+
+	if (IsValidHuman(victim) && GetClientTeam(victim) == TEAM_INFECTED)
+	{
+		int zcV = GetEntProp(victim, Prop_Send, "m_zombieClass");
+		if (zcV == ZC_TANK)
+		{
+			EndTankHoldSegment(victim);
+		}
+	}
 }
 
 public void Event_PinStart_Smoker(Event event, const char[] name, bool dontBroadcast)
@@ -1015,6 +1296,7 @@ public void Event_PinStart_Jockey(Event event, const char[] name, bool dontBroad
 {
 	int attacker = GetClientOfUserId(event.GetInt("userid"));
 	int victim = GetClientOfUserId(event.GetInt("victim"));
+	AddChainControlIfSmoker(victim);
 	MarkPinStart(attacker, victim, ZC_JOCKEY);
 }
 
@@ -1037,6 +1319,7 @@ public void Event_PinStart_Hunter(Event event, const char[] name, bool dontBroad
 {
 	int attacker = GetClientOfUserId(event.GetInt("userid"));
 	int victim = GetClientOfUserId(event.GetInt("victim"));
+	AddChainControlIfSmoker(victim);
 	MarkPinStart(attacker, victim, ZC_HUNTER);
 }
 
@@ -1104,6 +1387,7 @@ public void OnSpecialClear(int clearer, int pinner, int pinvictim, int zombieCla
 		{
 			g_iTankPlayActions[clearer]++;
 		}
+		RegisterSaveCoop(clearer, pinvictim);
 	}
 	MarkPinEnd(pinvictim);
 }
@@ -1233,6 +1517,8 @@ public void OnSpecialShoved(int survivor, int infected, int zombieClass)
 		return;
 	}
 
+	g_iSpecialShoveSaves[survivor]++;
+
 	// Heuristic: jockey shove-interrupts are treated as "jockey blocks".
 	if (zombieClass == ZC_JOCKEY)
 	{
@@ -1332,6 +1618,10 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	Format(line, sizeof(line), "Shoves on SI: %d | Witch crowns: %d", g_iShoveSI[target], g_iWitchCrowns[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Chain clear boom: %d | Safe saves: %d | Zero FF bonus: %d", g_iChainClearBoom[target], g_iSafeSaves[target], g_iZeroFFBonus[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Alarms triggered: %d", g_iAlarmTriggers[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	menu.AddItem("x", "--- Infected ---", ITEMDRAW_DISABLED);
 	Format(line, sizeof(line), "Infected damage: %d", g_iDamageAsInfected[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
@@ -1348,6 +1638,12 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 	Format(line, sizeof(line), "Spit setup assists: %d | Boom kill assists: %d", g_iSpitSetupAssists[target], g_iBoomKillAssists[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	Format(line, sizeof(line), "Charger multi-hits: %d | Spit multi-hits: %d", g_iChargerMulti[target], g_iSpitMultiHits[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Shared focus: %d | Boom focus: %d", g_iSharedFocus[target], g_iBoomFocusAssist[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Stagger setups: %d | Chain control: %d | Tank support: %d", g_iStaggerSetup[target], g_iChainControlAssist[target], g_iTankSupportAssist[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Tank hold: %.0fs | Tank kills: %d | Passes: %d | Wipe bonus: %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target], g_iTankWipeBonus[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	menu.AddItem("x", "Tip: use !skilltop and !skillsim for more.", ITEMDRAW_DISABLED);
 
@@ -2393,8 +2689,8 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	char qRound[2048];
 	Format(qRound, sizeof(qRound),
 		"INSERT INTO round_stats (steamid, name, round_index, map_name, team, raw_points, awarded_points, "
-		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, ts) "
-		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
+		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, chain_clear_boom, safe_saves, zero_ff_bonus, shared_focus, boom_focus, stagger_setup, chain_control, tank_support, alarm_triggers, tank_hold_time, tank_passes, tank_kills, tank_wipe_bonus, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, ts) "
+		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
 		steamid, escName, g_iRoundNumber, escMap, team, rawScore, awarded,
 		g_iDamageAsInfected[client],
 		g_iDamageAsSurvivor[client],
@@ -2423,6 +2719,19 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 		g_iShoveSI[client],
 		g_iWitchCrowns[client],
 		g_iRockSkeets[client],
+		g_iChainClearBoom[client],
+		g_iSafeSaves[client],
+		g_iZeroFFBonus[client],
+		g_iSharedFocus[client],
+		g_iBoomFocusAssist[client],
+		g_iStaggerSetup[client],
+		g_iChainControlAssist[client],
+		g_iTankSupportAssist[client],
+		g_iAlarmTriggers[client],
+		g_fTankHoldTime[client],
+		g_iTankPasses[client],
+		g_iTankKills[client],
+		g_iTankWipeBonus[client],
 		g_iRevives[client],
 		g_iMedkitGives[client],
 		g_iRescuesFromSpecial[client],
@@ -2512,6 +2821,127 @@ void AddSpitMultiHit(int spitter, int victim)
 
 	g_iSpitHitWindowLastVictim[spitter] = victim;
 	g_iSpitHitWindowCount[spitter]++;
+}
+
+void AddTankSupportAssist(int victim)
+{
+	if (!IsValidClient(victim))
+	{
+		return;
+	}
+	float now = GetEngineTime();
+
+	// Boomer setup
+	if (g_iLastBoomerForVictim[victim] > 0 && (now - g_fLastBoomTime[victim]) <= 5.0)
+	{
+		int boomer = g_iLastBoomerForVictim[victim];
+		if (IsValidHuman(boomer) && GetClientTeam(boomer) == TEAM_INFECTED)
+		{
+			g_iTankSupportAssist[boomer]++;
+		}
+	}
+
+	// Pin setup
+	int zc;
+	int pinner = GetRecentPinner(victim, PIN_ASSIST_WINDOW, zc);
+	if (pinner > 0 && (now - g_fLastPinEnd[victim]) <= 5.0)
+	{
+		g_iTankSupportAssist[pinner]++;
+	}
+}
+
+void AddChainControlIfSmoker(int victim)
+{
+	int zc;
+	int smoker = GetRecentPinner(victim, 5.0, zc);
+	if (smoker > 0 && zc == ZC_SMOKER)
+	{
+		g_iChainControlAssist[smoker]++;
+	}
+}
+
+public void TP_OnTankPass(int old_tank, int new_tank)
+{
+	if (IsValidHuman(old_tank))
+	{
+		EndTankHoldSegment(old_tank);
+		g_iTankPasses[old_tank]++;
+	}
+	StartTankHold(new_tank);
+}
+
+public void OnChargerLevel(int survivor, int charger)
+{
+	if (!g_bRoundActive || !IsValidHuman(survivor) || GetClientTeam(survivor) != TEAM_SURVIVOR)
+	{
+		return;
+	}
+	g_iChargerLevels[survivor]++;
+}
+
+public void OnTongueCut(int survivor, int smoker)
+{
+	if (!g_bRoundActive || !IsValidHuman(survivor) || GetClientTeam(survivor) != TEAM_SURVIVOR)
+	{
+		return;
+	}
+	g_iTongueCuts[survivor]++;
+}
+
+public void OnTankRockEaten(int tank, int survivor)
+{
+	if (!g_bRoundActive || !IsValidHuman(survivor) || GetClientTeam(survivor) != TEAM_SURVIVOR)
+	{
+		return;
+	}
+	g_iRockEatenPenalty[survivor]++;
+}
+
+void StartTankHold(int client)
+{
+	if (!IsValidHuman(client) || GetClientTeam(client) != TEAM_INFECTED)
+	{
+		return;
+	}
+	g_iCurrentTank = client;
+	g_fTankHoldStart = GetEngineTime();
+}
+
+void EndTankHoldSegment(int client)
+{
+	if (g_iCurrentTank != client)
+	{
+		return;
+	}
+	float now = GetEngineTime();
+	if (g_fTankHoldStart > 0.0)
+	{
+		g_fTankHoldTime[client] += (now - g_fTankHoldStart);
+	}
+	g_iCurrentTank = 0;
+	g_fTankHoldStart = 0.0;
+}
+
+void RegisterSaveCoop(int saver, int victim)
+{
+	if (!IsValidHuman(saver) || !IsValidClient(victim))
+	{
+		return;
+	}
+	float now = GetEngineTime();
+
+	// Chain clear after boom
+	if (g_iLastBoomerForVictim[victim] > 0 && (now - g_fLastBoomTime[victim]) <= 3.0)
+	{
+		g_iChainClearBoom[saver]++;
+	}
+
+	// Safe-save timing: fast after pin start or low HP
+	int health = GetClientHealth(victim);
+	if ((now - g_fLastPinStart[victim]) <= 2.0 || health > 0 && health <= 10)
+	{
+		g_iSafeSaves[saver]++;
+	}
 }
 
 void AddChargerMultiHit(int charger)
@@ -2651,6 +3081,23 @@ void ResetRoundStats(int client)
 	g_iShoveSI[client] = 0;
 	g_iWitchCrowns[client] = 0;
 	g_iRockSkeets[client] = 0;
+	g_iChainClearBoom[client] = 0;
+	g_iSafeSaves[client] = 0;
+	g_iZeroFFBonus[client] = 0;
+	g_iSharedFocus[client] = 0;
+	g_iBoomFocusAssist[client] = 0;
+	g_iStaggerSetup[client] = 0;
+	g_iChainControlAssist[client] = 0;
+	g_iTankSupportAssist[client] = 0;
+	g_iAlarmTriggers[client] = 0;
+	g_fTankHoldTime[client] = 0.0;
+	g_iTankPasses[client] = 0;
+	g_iTankKills[client] = 0;
+	g_iTankWipeBonus[client] = 0;
+	g_iChargerLevels[client] = 0;
+	g_iTongueCuts[client] = 0;
+	g_iSpecialShoveSaves[client] = 0;
+	g_iRockEatenPenalty[client] = 0;
 	g_iLastBoomerKiller[client] = 0;
 	g_fLastBoomerDeathTime[client] = 0.0;
 	g_iLastBoomerVomitHits[client] = 0;
@@ -2661,6 +3108,12 @@ void ResetRoundStats(int client)
 	g_fLastPinEnd[client] = 0.0;
 	g_iLastBoomerForVictim[client] = 0;
 	g_fLastBoomTime[client] = 0.0;
+	g_iLastSpitterForVictim[client] = 0;
+	g_fLastSpitTime[client] = 0.0;
+	g_iLastAttackerForVictim[client] = 0;
+	g_fLastAttackTime[client] = 0.0;
+	g_iLastStaggerer[client] = 0;
+	g_fLastStaggerTime[client] = 0.0;
 	g_fSurvivalTime[client] = 0.0;
 	g_fFlowBest[client] = 0.0;
 	g_bAliveAtEnd[client] = true;
@@ -2901,6 +3354,23 @@ void CreateTables()
 		... "shove_si INTEGER NOT NULL DEFAULT 0, "
 		... "witch_crowns INTEGER NOT NULL DEFAULT 0, "
 		... "rock_skeets INTEGER NOT NULL DEFAULT 0, "
+		... "chain_clear_boom INTEGER NOT NULL DEFAULT 0, "
+		... "safe_saves INTEGER NOT NULL DEFAULT 0, "
+		... "zero_ff_bonus INTEGER NOT NULL DEFAULT 0, "
+		... "shared_focus INTEGER NOT NULL DEFAULT 0, "
+		... "boom_focus INTEGER NOT NULL DEFAULT 0, "
+		... "stagger_setup INTEGER NOT NULL DEFAULT 0, "
+		... "chain_control INTEGER NOT NULL DEFAULT 0, "
+		... "tank_support INTEGER NOT NULL DEFAULT 0, "
+		... "alarm_triggers INTEGER NOT NULL DEFAULT 0, "
+		... "tank_hold_time REAL NOT NULL DEFAULT 0.0, "
+		... "tank_passes INTEGER NOT NULL DEFAULT 0, "
+		... "tank_kills INTEGER NOT NULL DEFAULT 0, "
+		... "tank_wipe_bonus INTEGER NOT NULL DEFAULT 0, "
+		... "charger_levels INTEGER NOT NULL DEFAULT 0, "
+		... "tongue_cuts INTEGER NOT NULL DEFAULT 0, "
+		... "special_shove_saves INTEGER NOT NULL DEFAULT 0, "
+		... "rock_eaten_penalty INTEGER NOT NULL DEFAULT 0, "
 		... "revives INTEGER NOT NULL DEFAULT 0, "
 		... "medkit_gives INTEGER NOT NULL DEFAULT 0, "
 		... "special_rescues INTEGER NOT NULL DEFAULT 0, "
@@ -2937,6 +3407,23 @@ void CreateTables()
 	EnsureColumn("round_stats", "shove_si", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "witch_crowns", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "rock_skeets", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "chain_clear_boom", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "safe_saves", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "zero_ff_bonus", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "shared_focus", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "boom_focus", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "stagger_setup", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "chain_control", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "tank_support", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "alarm_triggers", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "tank_hold_time", "REAL NOT NULL DEFAULT 0.0");
+	EnsureColumn("round_stats", "tank_passes", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "tank_kills", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "tank_wipe_bonus", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "charger_levels", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "tongue_cuts", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "special_shove_saves", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "rock_eaten_penalty", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "ff_dealt", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "ff_taken", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "headshot_si", "INTEGER NOT NULL DEFAULT 0");
