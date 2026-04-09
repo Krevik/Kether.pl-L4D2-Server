@@ -1645,40 +1645,26 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 
 	char line[256];
 
-	// Overview
-	Format(line, sizeof(line), "Total points: %.2f", g_fTotalPoints[target]);
+	// Very short overview only (hide details)
+	Format(line, sizeof(line), "Total points: %.2f | Rounds: %d | Avg: %.2f", g_fTotalPoints[target], g_iRoundsPlayed[target], avg);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Rounds played: %d", g_iRoundsPlayed[target]);
+	Format(line, sizeof(line), "Flow best: %.1f%% | Survival (rnd): %.0fs", g_fFlowBest[target], g_fSurvivalTime[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Average per round: %.2f", avg);
+	Format(line, sizeof(line), "FF dealt/taken: %d/%d | HS SI: %d", g_iFriendlyFireDealt[target], g_iFriendlyFireTaken[target], g_iHeadshotSI[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Flow best (no tank): %.1f%%", g_fFlowBest[target]);
+	menu.AddItem("x", "--- Survivors ---", ITEMDRAW_DISABLED);
+	int survActions = g_iSpecialClears[target] + g_iSmokerSelfClears[target] + g_iRevives[target] + g_iMedkitGives[target] + g_iRescuesFromSpecial[target] + g_iJockeyBlocks[target] + g_iChainClearBoom[target] + g_iSafeSaves[target] + g_iTankPlayActions[target];
+	Format(line, sizeof(line), "Dmg total: %d | Actions: %d | Skeets: %d", g_iDamageAsSurvivor[target], survActions, g_iSkeets[target] + g_iSkeetsMelee[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Survival time (this round): %.0fs", g_fSurvivalTime[target]);
+	Format(line, sizeof(line), "Crowns/Shoves: %d/%d | Alarms: %d", g_iWitchCrowns[target], g_iShoveSI[target], g_iAlarmTriggers[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "FF dealt / taken: %d / %d | HS SI: %d", g_iFriendlyFireDealt[target], g_iFriendlyFireTaken[target], g_iHeadshotSI[target]);
+	menu.AddItem("x", "--- Infected ---", ITEMDRAW_DISABLED);
+	int infActions = g_iPinAssists[target] + g_iBigHitAssists[target] + g_iSpitSetupAssists[target] + g_iBoomKillAssists[target] + g_iSharedFocus[target] + g_iBoomFocusAssist[target] + g_iChainControlAssist[target] + g_iTankSupportAssist[target] + g_iChargerMulti[target] + g_iSpitMultiHits[target] + g_iReviveInterrupts[target];
+	Format(line, sizeof(line), "Dmg: %d | Vomit hits: %d | Actions: %d", g_iDamageAsInfected[target], g_iBoomerVomitHits[target], infActions);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Survivors (summary) ---", ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Damage: %d (Tank %d | Witch %d | Common %d)", g_iDamageAsSurvivor[target], g_iTankDamageAsSurvivor[target], g_iWitchDamageAsSurvivor[target], g_iCommonKillsAsSurvivor[target]);
+	Format(line, sizeof(line), "Tank: hold %.0fs | kills %d | passes %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Clears/support: clears %d | self %d | revives %d | medkits %d | rescues %d | jockey blocks %d", g_iSpecialClears[target], g_iSmokerSelfClears[target], g_iRevives[target], g_iMedkitGives[target], g_iRescuesFromSpecial[target], g_iJockeyBlocks[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Skill shots: skeets %d | melee %d | rocks %d | deadstops %d", g_iSkeets[target], g_iSkeetsMelee[target], g_iRockSkeets[target], g_iDeadstops[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Team play: tank actions %d | chain clears %d | safe saves %d | zero FF %d | alarms %d", g_iTankPlayActions[target], g_iChainClearBoom[target], g_iSafeSaves[target], g_iZeroFFBonus[target], g_iAlarmTriggers[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Crowns/shoves: witch crowns %d | shoves SI %d | charger levels %d | tongue cuts %d | shove saves %d | rock eaten %d", g_iWitchCrowns[target], g_iShoveSI[target], g_iChargerLevels[target], g_iTongueCuts[target], g_iSpecialShoveSaves[target], g_iRockEatenPenalty[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Infected (summary) ---", ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Damage/booms: dmg %d | vomit hits/casts %d/%d", g_iDamageAsInfected[target], g_iBoomerVomitHits[target], g_iBoomerVomitCasts[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Pins/assists: pin %d | pin DPS %.0f | big-hit %d (score %.1f) | spit pins/incap %d/%d | setup %d | boom kill %d", g_iPinAssists[target], g_fPinDpsAssists[target], g_iBigHitAssists[target], g_fBigHitAssistScore[target], g_iSpitPinnedTicks[target], g_iSpitIncapTicks[target], g_iSpitSetupAssists[target], g_iBoomKillAssists[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Focus/chain: shared %d | boom focus %d | stagger setups %d | chain control %d | tank support %d | charger multi %d | spit multi %d | revive interrupts %d", g_iSharedFocus[target], g_iBoomFocusAssist[target], g_iStaggerSetup[target], g_iChainControlAssist[target], g_iTankSupportAssist[target], g_iChargerMulti[target], g_iSpitMultiHits[target], g_iReviveInterrupts[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Tank play: hold %.0fs | kills %d | passes %d | wipe bonus %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target], g_iTankWipeBonus[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "Tip: use !skilltop and !skillsim for more.", ITEMDRAW_DISABLED);
+	menu.AddItem("x", "Tip: use !skilltop / !skillsim", ITEMDRAW_DISABLED);
 
 	menu.ExitBackButton = showBackButton;
 	menu.Display(client, 20);
