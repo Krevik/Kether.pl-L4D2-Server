@@ -4,6 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <left4dhooks>
+#include <l4d2lib>
 #include <builtinvotes>
 #include <l4d2_skill_detect>
 
@@ -16,6 +17,16 @@
 
 #define ZC_TANK 8
 #define ZC_JOCKEY 5
+#define ZC_BOOMER 2
+#define ZC_SPITTER 4
+#define ZC_SMOKER 1
+#define ZC_HUNTER 3
+#define ZC_CHARGER 6
+
+#define PIN_ASSIST_WINDOW 10.0
+#define BOOM_ASSIST_WINDOW 20.0
+#define CHARGE_ASSIST_WINDOW 10.0
+#define SPIT_SETUP_WINDOW 2.0
 
 #define MIX_MIN_TEAM_SIZE 1
 #define MIX_MAX_TEAM_SIZE 4
@@ -23,6 +34,19 @@
 stock float FloatMax(float a, float b)
 {
 	return (a > b) ? a : b;
+}
+
+stock float FloatClamp(float value, float minVal, float maxVal)
+{
+	if (value < minVal)
+	{
+		return minVal;
+	}
+	if (value > maxVal)
+	{
+		return maxVal;
+	}
+	return value;
 }
 
 Database g_Db = null;
@@ -37,24 +61,51 @@ ConVar g_CvarWeightCommonKills;
 ConVar g_CvarWeightSpecialClear;
 ConVar g_CvarWeightSelfClear;
 ConVar g_CvarWeightSkeet;
+ConVar g_CvarWeightSkeetMelee;
 ConVar g_CvarWeightDeadstop;
 ConVar g_CvarWeightBoomerPop;
+ConVar g_CvarWeightBoomerPopSplash;
+ConVar g_CvarWeightPinAssist;
+ConVar g_CvarWeightPinDpsAssist;
+ConVar g_CvarWeightSpitPinnedTick;
+ConVar g_CvarWeightSpitIncapTick;
+ConVar g_CvarWeightTankBoomAssist;
+ConVar g_CvarWeightWitchAssist;
+ConVar g_CvarWeightSpitSetupAssist;
+ConVar g_CvarWeightBoomKillAssist;
+ConVar g_CvarWeightBigHitAssistScore;
+ConVar g_CvarWeightShoveSI;
+ConVar g_CvarWeightWitchCrown;
+ConVar g_CvarWeightChargerMulti;
+ConVar g_CvarWeightSpitMulti;
+ConVar g_CvarWeightRockSkeet;
 ConVar g_CvarWeightRevive;
 ConVar g_CvarWeightMedkitGive;
 ConVar g_CvarWeightRescue;
 ConVar g_CvarWeightJockeyBlock;
 ConVar g_CvarWeightTankPlayAction;
+ConVar g_CvarWeightFriendlyFire;
+ConVar g_CvarWeightHeadshotSI;
+ConVar g_CvarWeightSurvivalSec;
+ConVar g_CvarWeightFlowPercent;
+ConVar g_CvarWeightBoomerVomitHit;
+ConVar g_CvarWeightBoomerVomitCast;
 ConVar g_CvarTopMinRounds;
 ConVar g_CvarMixVotePct;
 ConVar g_CvarMixVoteCooldown;
 
 bool g_bRoundActive = false;
 bool g_bRoundFinalized = false;
+bool g_bRoundLive = false;
+bool g_bPaused = false;
 int g_iRoundNumber = 0;
 char g_sMapName[64];
+bool g_bReadyUpAvailable = false;
 
 float g_fTotalPoints[MAXPLAYERS + 1];
 int g_iRoundsPlayed[MAXPLAYERS + 1];
+char g_sFirstName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+char g_sLastName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 int g_iDamageAsInfected[MAXPLAYERS + 1];
 int g_iDamageAsSurvivor[MAXPLAYERS + 1];
@@ -65,20 +116,66 @@ int g_iCommonKillsAsSurvivor[MAXPLAYERS + 1];
 int g_iSpecialClears[MAXPLAYERS + 1];
 int g_iSmokerSelfClears[MAXPLAYERS + 1];
 int g_iSkeets[MAXPLAYERS + 1];
+int g_iSkeetsMelee[MAXPLAYERS + 1];
 int g_iDeadstops[MAXPLAYERS + 1];
 int g_iBoomerPopsNoVomit[MAXPLAYERS + 1];
+int g_iBoomerPopsSplash[MAXPLAYERS + 1];
+int g_iPinAssists[MAXPLAYERS + 1];
+int g_iBigHitAssists[MAXPLAYERS + 1];
+float g_fPinDpsAssists[MAXPLAYERS + 1];
+int g_iSpitPinnedTicks[MAXPLAYERS + 1];
+int g_iSpitIncapTicks[MAXPLAYERS + 1];
+int g_iTankBoomAssists[MAXPLAYERS + 1];
+int g_iWitchAssists[MAXPLAYERS + 1];
+int g_iSpitSetupAssists[MAXPLAYERS + 1];
+int g_iBoomKillAssists[MAXPLAYERS + 1];
+float g_fBigHitAssistScore[MAXPLAYERS + 1];
+int g_iShoveSI[MAXPLAYERS + 1];
+int g_iWitchCrowns[MAXPLAYERS + 1];
+int g_iChargerMulti[MAXPLAYERS + 1];
+int g_iSpitMultiHits[MAXPLAYERS + 1];
+int g_iChargerCarryCount[MAXPLAYERS + 1];
+float g_fSpitHitWindowStart[MAXPLAYERS + 1];
+int g_iSpitHitWindowCount[MAXPLAYERS + 1];
+int g_iSpitHitWindowLastVictim[MAXPLAYERS + 1];
+int g_iRockSkeets[MAXPLAYERS + 1];
+// g_iBigHitAssists retained earlier; no duplicate declaration here.
 int g_iRevives[MAXPLAYERS + 1];
 int g_iMedkitGives[MAXPLAYERS + 1];
 int g_iRescuesFromSpecial[MAXPLAYERS + 1];
 int g_iJockeyBlocks[MAXPLAYERS + 1];
 int g_iTankPlayActions[MAXPLAYERS + 1];
+int g_iFriendlyFireDealt[MAXPLAYERS + 1];
+int g_iFriendlyFireTaken[MAXPLAYERS + 1];
+int g_iHeadshotSI[MAXPLAYERS + 1];
+int g_iBoomerVomitCasts[MAXPLAYERS + 1];
+int g_iBoomerVomitHits[MAXPLAYERS + 1];
+
+float g_fLifeStart[MAXPLAYERS + 1];
+float g_fSurvivalTime[MAXPLAYERS + 1];
+bool g_bAliveAtEnd[MAXPLAYERS + 1];
+float g_fFlowBest[MAXPLAYERS + 1];
+Handle g_hFlowTimer = null;
+bool g_bIncapped[MAXPLAYERS + 1];
+
+int g_iLastBoomerKiller[MAXPLAYERS + 1];
+float g_fLastBoomerDeathTime[MAXPLAYERS + 1];
+int g_iLastBoomerVomitHits[MAXPLAYERS + 1];
+float g_fLastBoomerVomitTime[MAXPLAYERS + 1];
+int g_iLastPinner[MAXPLAYERS + 1];
+int g_iLastPinnerClass[MAXPLAYERS + 1];
+float g_fLastPinStart[MAXPLAYERS + 1];
+float g_fLastPinEnd[MAXPLAYERS + 1];
+int g_iLastBoomerForVictim[MAXPLAYERS + 1];
+float g_fLastBoomTime[MAXPLAYERS + 1];
+int g_iLastSpitterForVictim[MAXPLAYERS + 1];
+float g_fLastSpitTime[MAXPLAYERS + 1];
 
 bool g_bHealStartedToOther[MAXPLAYERS + 1];
 
 bool g_bMixVoteInProgress = false;
 Handle g_hMixVote = INVALID_HANDLE;
 float g_fLastMixVoteTime = 0.0;
-bool g_bRebuildInProgress = false;
 
 public Plugin myinfo =
 {
@@ -110,14 +207,36 @@ public void OnPluginStart()
 	g_CvarWeightSpecialClear = CreateConVar("sm_skill_w_special_clear", "12.0", "Special clear weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSelfClear = CreateConVar("sm_skill_w_self_clear", "14.0", "Self clear weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSkeet = CreateConVar("sm_skill_w_skeet", "15.0", "Skeet weight", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSkeetMelee = CreateConVar("sm_skill_w_skeet_melee", "22.0", "Melee skeet weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightDeadstop = CreateConVar("sm_skill_w_deadstop", "12.0", "Deadstop weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerPop = CreateConVar("sm_skill_w_boomer_pop", "8.0", "No-vomit boomer pop weight", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBoomerPopSplash = CreateConVar("sm_skill_w_boomer_pop_splash", "-10.0", "Penalty when a popped boomer vomits on teammates", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightPinAssist = CreateConVar("sm_skill_w_pin_assist", "8.0", "Assist weight for pin -> kill/incap synergy", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightPinDpsAssist = CreateConVar("sm_skill_w_pin_dps_assist", "0.08", "Assist weight per damage dealt to pinned target by teammate (awarded to pinner)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitPinnedTick = CreateConVar("sm_skill_w_spit_pinned_tick", "1.0", "Spitter tick on pinned target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitIncapTick = CreateConVar("sm_skill_w_spit_incap_tick", "0.6", "Spitter tick on incapped target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankBoomAssist = CreateConVar("sm_skill_w_tank_boom_assist", "3.0", "Boomer assist when tank hits boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightWitchAssist = CreateConVar("sm_skill_w_witch_assist", "4.0", "Assist when witch downs a recently pinned/boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitSetupAssist = CreateConVar("sm_skill_w_spit_setup_assist", "6.0", "Assist when spit sets up a big hit within a short window", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBoomKillAssist = CreateConVar("sm_skill_w_boom_kill_assist", "4.0", "Boomer assist when any SI kills a boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBigHitAssistScore = CreateConVar("sm_skill_w_bighit_assist_score", "10.0", "Assist weight scaled by damage for CC-enabled big hits", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightShoveSI = CreateConVar("sm_skill_w_shove_si", "3.0", "Weight per effective shove on special infected", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightWitchCrown = CreateConVar("sm_skill_w_witch_crown", "12.0", "Weight for clean witch crown/kill", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightChargerMulti = CreateConVar("sm_skill_w_charger_multi", "6.0", "Weight for charger multi-hit (2nd+ victim in one charge)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitMulti = CreateConVar("sm_skill_w_spit_multi", "4.0", "Weight for spitter hitting multiple survivors in same spit tick window", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightRockSkeet = CreateConVar("sm_skill_w_rock_skeet", "16.0", "Weight per tank rock skeet by survivors", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRevive = CreateConVar("sm_skill_w_revive", "10.0", "Revive weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightMedkitGive = CreateConVar("sm_skill_w_medkit_give", "10.0", "Heal other with medkit weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRescue = CreateConVar("sm_skill_w_rescue", "8.0", "Rescue from special pin weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightJockeyBlock = CreateConVar("sm_skill_w_jockey_block", "10.0", "Jockey block/shove-interrupt weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightTankPlayAction = CreateConVar("sm_skill_w_tankplay_action", "4.0", "Bonus for high-skill actions performed while tank is in play", FCVAR_NONE, true, 0.0, false);
-	g_CvarTopMinRounds = CreateConVar("sm_skill_top_min_rounds", "5", "Minimum rounds for top ranking", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightFriendlyFire = CreateConVar("sm_skill_w_ff", "-0.4", "Penalty per friendly fire damage dealt", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightHeadshotSI = CreateConVar("sm_skill_w_headshot_si", "6.0", "Weight per headshot on special infected", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSurvivalSec = CreateConVar("sm_skill_w_survival_sec", "0.02", "Weight per second alive in round", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightFlowPercent = CreateConVar("sm_skill_w_flow_percent", "0.15", "Weight per % flow progress (best without tank)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBoomerVomitHit = CreateConVar("sm_skill_w_boomer_vomit_hit", "2.0", "Weight per boomer vomit victim (infected side)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBoomerVomitCast = CreateConVar("sm_skill_w_boomer_vomit_cast", "-0.5", "Penalty per boomer vomit cast (infected side)", FCVAR_NONE, false, 0.0, false);
+	g_CvarTopMinRounds = CreateConVar("sm_skill_top_min_rounds", "10", "Minimum rounds for top ranking (hard floor 10)", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixVotePct = CreateConVar("sm_skill_mix_vote_pct", "51", "Percent votes required for skill mix", FCVAR_NONE, true, 1.0, true, 100.0);
 	g_CvarMixVoteCooldown = CreateConVar("sm_skill_mix_vote_cooldown", "120.0", "Cooldown between skill mix votes", FCVAR_NONE, true, 0.0, false);
 
@@ -128,18 +247,34 @@ public void OnPluginStart()
 	HookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Post);
 	HookEvent("infected_hurt", Event_InfectedHurt, EventHookMode_Post);
 	HookEvent("infected_death", Event_InfectedDeath, EventHookMode_Post);
+	HookEvent("player_incapacitated", Event_PlayerIncapacitated, EventHookMode_Post);
+	HookEvent("player_now_it", Event_PlayerBoomed, EventHookMode_Post);
+	HookEvent("tongue_grab", Event_PinStart_Smoker, EventHookMode_Post);
+	HookEvent("tongue_pull_stopped", Event_PinEnd_Generic, EventHookMode_Post);
+	HookEvent("choke_start", Event_PinStart_Smoker, EventHookMode_Post);
+	HookEvent("choke_stopped", Event_PinEnd_Generic, EventHookMode_Post);
+	HookEvent("jockey_ride", Event_PinStart_Jockey, EventHookMode_Post);
+	HookEvent("jockey_ride_end", Event_PinEnd_Generic, EventHookMode_Post);
+	HookEvent("charger_carry_start", Event_PinStart_Charger, EventHookMode_Post);
+	HookEvent("charger_carry_end", Event_PinEnd_Generic, EventHookMode_Post);
+	HookEvent("charger_pummel_start", Event_PinStart_Charger, EventHookMode_Post);
+	HookEvent("charger_pummel_end", Event_PinEnd_Generic, EventHookMode_Post);
+	HookEvent("lunge_pounce", Event_PinStart_Hunter, EventHookMode_Post);
 	HookEvent("revive_success", Event_ReviveSuccess, EventHookMode_Post);
 	HookEvent("heal_begin", Event_HealBegin, EventHookMode_Post);
 	HookEvent("heal_success", Event_HealSuccess, EventHookMode_Post);
+	HookEvent("ability_use", Event_AbilityUse, EventHookMode_Post);
+	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
+HookEvent("player_shoved", Event_PlayerShoved, EventHookMode_Post);
+HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
 
 	RegConsoleCmd("sm_skill", Command_Skill, "Show your skill rating");
 	RegConsoleCmd("sm_myskill", Command_Skill, "Show your skill rating");
 	RegConsoleCmd("sm_skilltop", Command_SkillTop, "Show top skill players");
 	RegConsoleCmd("sm_skillsim", Command_SkillSim, "Show players with a similar profile");
 	RegConsoleCmd("sm_skillmix", Command_SkillMixVote, "Call vote to mix teams by skill");
-	RegAdminCmd("sm_skillrebuild", Command_SkillRebuild, ADMFLAG_ROOT, "Rebuild players totals from round_stats");
 
-	StartPlayersBackfillMigration();
+	g_bReadyUpAvailable = LibraryExists("readyup");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -153,6 +288,27 @@ public void OnPluginStart()
 public void OnMapStart()
 {
 	GetCurrentMap(g_sMapName, sizeof(g_sMapName));
+}
+
+public void OnAllPluginsLoaded()
+{
+	g_bReadyUpAvailable = LibraryExists("readyup");
+}
+
+public void OnLibraryAdded(const char[] name)
+{
+	if (StrEqual(name, "readyup"))
+	{
+		g_bReadyUpAvailable = true;
+	}
+}
+
+public void OnLibraryRemoved(const char[] name)
+{
+	if (StrEqual(name, "readyup"))
+	{
+		g_bReadyUpAvailable = false;
+	}
 }
 
 public void OnMapEnd()
@@ -179,6 +335,8 @@ public void OnClientDisconnect(int client)
 	ResetRoundStats(client);
 	g_fTotalPoints[client] = 0.0;
 	g_iRoundsPlayed[client] = 0;
+	g_sFirstName[client][0] = '\0';
+	g_sLastName[client][0] = '\0';
 }
 
 public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -189,19 +347,132 @@ public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 	}
 
 	g_bRoundActive = true;
+	g_bRoundLive = g_bReadyUpAvailable ? false : true;
 	g_bRoundFinalized = false;
+	g_bPaused = false;
 	g_iRoundNumber++;
 	GetCurrentMap(g_sMapName, sizeof(g_sMapName));
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		ResetRoundStats(i);
+		g_fLifeStart[i] = GetEngineTime();
+		g_bAliveAtEnd[i] = true;
 	}
+
+	if (g_hFlowTimer != null)
+	{
+		CloseHandle(g_hFlowTimer);
+	}
+	g_hFlowTimer = CreateTimer(1.0, Timer_FlowSnapshot, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Timer_FlowSnapshot(Handle timer)
+{
+	if (!g_bRoundActive || g_bRoundFinalized)
+	{
+		return Plugin_Stop;
+	}
+
+	if (!g_bRoundLive || g_bPaused)
+	{
+		return Plugin_Continue;
+	}
+
+	if (IsTankInPlayActive())
+	{
+		return Plugin_Continue;
+	}
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i))
+		{
+			continue;
+		}
+
+		float progress = GetFlowPercentSafe(i);
+		if (progress > g_fFlowBest[i])
+		{
+			g_fFlowBest[i] = progress;
+		}
+	}
+
+	return Plugin_Continue;
 }
 
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
 {
 	FinalizeRoundIfNeeded();
+}
+
+public void OnRoundIsLive()
+{
+	if (!g_CvarEnabled.BoolValue || g_bRoundFinalized)
+	{
+		return;
+	}
+
+	g_bRoundLive = true;
+	g_bPaused = false;
+
+	float now = GetEngineTime();
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i))
+		{
+			continue;
+		}
+		g_fLifeStart[i] = now;
+	}
+}
+
+public void OnPause()
+{
+	if (!g_bRoundActive || g_bRoundFinalized || g_bPaused)
+	{
+		return;
+	}
+
+	g_bPaused = true;
+	float now = GetEngineTime();
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i))
+		{
+			continue;
+		}
+		if (g_bRoundLive)
+		{
+			g_fSurvivalTime[i] += now - g_fLifeStart[i];
+		}
+		g_fLifeStart[i] = now;
+	}
+}
+
+public void OnUnpause()
+{
+	if (!g_bRoundActive || g_bRoundFinalized)
+	{
+		return;
+	}
+
+	g_bPaused = false;
+
+	if (!g_bRoundLive)
+	{
+		return;
+	}
+
+	float now = GetEngineTime();
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i))
+		{
+			continue;
+		}
+		g_fLifeStart[i] = now;
+	}
 }
 
 public Action L4D2_OnEndVersusModeRound(bool countSurvivors)
@@ -219,6 +490,23 @@ void FinalizeRoundIfNeeded()
 
 	g_bRoundFinalized = true;
 	g_bRoundActive = false;
+
+	if (!IsRoundEligibleForStats())
+	{
+		PrintToServer("[SkillRating] Round skipped: requires minimum 3v3 human players.");
+		if (g_hFlowTimer != null)
+		{
+			CloseHandle(g_hFlowTimer);
+			g_hFlowTimer = null;
+		}
+		return;
+	}
+
+	if (g_hFlowTimer != null)
+	{
+		CloseHandle(g_hFlowTimer);
+		g_hFlowTimer = null;
+	}
 
 	float teamPool = g_CvarRoundPool.FloatValue;
 	float teamRawSum[4];
@@ -244,6 +532,11 @@ void FinalizeRoundIfNeeded()
 		if (team != TEAM_SURVIVOR && team != TEAM_INFECTED)
 		{
 			continue;
+		}
+
+		if (team == TEAM_SURVIVOR && g_bAliveAtEnd[i] && g_bRoundLive && !g_bPaused)
+		{
+			g_fSurvivalTime[i] += GetEngineTime() - g_fLifeStart[i];
 		}
 
 		rawScore[i] = ComputeRawRoundScore(i, team);
@@ -279,6 +572,9 @@ void FinalizeRoundIfNeeded()
 
 		SaveRoundAndUpdatePlayer(i, team, rawScore[i], awarded);
 	}
+
+	g_bRoundLive = false;
+	g_bPaused = false;
 }
 
 float ComputeRawRoundScore(int client, int team)
@@ -288,6 +584,19 @@ float ComputeRawRoundScore(int client, int team)
 	if (team == TEAM_INFECTED)
 	{
 		score += float(g_iDamageAsInfected[client]) * g_CvarWeightInfDamage.FloatValue;
+		score += float(g_iBoomerVomitHits[client]) * g_CvarWeightBoomerVomitHit.FloatValue;
+		score += float(g_iBoomerVomitCasts[client]) * g_CvarWeightBoomerVomitCast.FloatValue;
+		score += g_fPinDpsAssists[client] * g_CvarWeightPinDpsAssist.FloatValue;
+		score += float(g_iPinAssists[client]) * g_CvarWeightPinAssist.FloatValue;
+		score += g_fBigHitAssistScore[client] * g_CvarWeightBigHitAssistScore.FloatValue;
+		score += float(g_iSpitPinnedTicks[client]) * g_CvarWeightSpitPinnedTick.FloatValue;
+		score += float(g_iSpitIncapTicks[client]) * g_CvarWeightSpitIncapTick.FloatValue;
+		score += float(g_iTankBoomAssists[client]) * g_CvarWeightTankBoomAssist.FloatValue;
+		score += float(g_iWitchAssists[client]) * g_CvarWeightWitchAssist.FloatValue;
+		score += float(g_iSpitSetupAssists[client]) * g_CvarWeightSpitSetupAssist.FloatValue;
+		score += float(g_iBoomKillAssists[client]) * g_CvarWeightBoomKillAssist.FloatValue;
+		score += float(g_iChargerMulti[client]) * g_CvarWeightChargerMulti.FloatValue;
+		score += float(g_iSpitMultiHits[client]) * g_CvarWeightSpitMulti.FloatValue;
 		return score;
 	}
 
@@ -298,6 +607,7 @@ float ComputeRawRoundScore(int client, int team)
 	score += float(g_iSpecialClears[client]) * g_CvarWeightSpecialClear.FloatValue;
 	score += float(g_iSmokerSelfClears[client]) * g_CvarWeightSelfClear.FloatValue;
 	score += float(g_iSkeets[client]) * g_CvarWeightSkeet.FloatValue;
+	score += float(g_iSkeetsMelee[client]) * g_CvarWeightSkeetMelee.FloatValue;
 	score += float(g_iDeadstops[client]) * g_CvarWeightDeadstop.FloatValue;
 	score += float(g_iBoomerPopsNoVomit[client]) * g_CvarWeightBoomerPop.FloatValue;
 	score += float(g_iRevives[client]) * g_CvarWeightRevive.FloatValue;
@@ -305,6 +615,22 @@ float ComputeRawRoundScore(int client, int team)
 	score += float(g_iRescuesFromSpecial[client]) * g_CvarWeightRescue.FloatValue;
 	score += float(g_iJockeyBlocks[client]) * g_CvarWeightJockeyBlock.FloatValue;
 	score += float(g_iTankPlayActions[client]) * g_CvarWeightTankPlayAction.FloatValue;
+	score += float(g_iPinAssists[client]) * g_CvarWeightPinAssist.FloatValue;
+	score += g_fBigHitAssistScore[client] * g_CvarWeightBigHitAssistScore.FloatValue;
+	score += float(g_iSpitPinnedTicks[client]) * g_CvarWeightSpitPinnedTick.FloatValue;
+	score += float(g_iSpitIncapTicks[client]) * g_CvarWeightSpitIncapTick.FloatValue;
+	score += float(g_iTankBoomAssists[client]) * g_CvarWeightTankBoomAssist.FloatValue;
+	score += float(g_iWitchAssists[client]) * g_CvarWeightWitchAssist.FloatValue;
+	score += float(g_iSpitSetupAssists[client]) * g_CvarWeightSpitSetupAssist.FloatValue;
+	score += float(g_iBoomKillAssists[client]) * g_CvarWeightBoomKillAssist.FloatValue;
+	score += float(g_iFriendlyFireDealt[client]) * g_CvarWeightFriendlyFire.FloatValue;
+	score += float(g_iHeadshotSI[client]) * g_CvarWeightHeadshotSI.FloatValue;
+	score += g_fSurvivalTime[client] * g_CvarWeightSurvivalSec.FloatValue;
+	score += g_fFlowBest[client] * g_CvarWeightFlowPercent.FloatValue;
+	score += float(g_iBoomerPopsSplash[client]) * g_CvarWeightBoomerPopSplash.FloatValue;
+	score += float(g_iShoveSI[client]) * g_CvarWeightShoveSI.FloatValue;
+	score += float(g_iWitchCrowns[client]) * g_CvarWeightWitchCrown.FloatValue;
+	score += float(g_iRockSkeets[client]) * g_CvarWeightRockSkeet.FloatValue;
 
 	return score;
 }
@@ -319,18 +645,69 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	int damage = event.GetInt("dmg_health") + event.GetInt("dmg_armor");
+	int hitgroup = event.GetInt("hitgroup");
 
-	if (damage <= 0 || !IsValidHuman(attacker) || attacker == victim)
+	if (damage <= 0 || attacker == victim)
 	{
 		return;
 	}
 
-	int attackerTeam = GetClientTeam(attacker);
+	bool attackerValid = IsValidHuman(attacker);
+	int attackerTeam = attackerValid ? GetClientTeam(attacker) : 0;
+
+	if (!attackerValid)
+	{
+		if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
+		{
+			int spitter = g_iLastSpitterForVictim[victim];
+			if (spitter > 0 && (GetEngineTime() - g_fLastSpitTime[victim]) <= SPIT_SETUP_WINDOW)
+			{
+				AddSpitMultiHit(spitter, victim);
+			}
+		}
+		return;
+	}
 	if (attackerTeam == TEAM_INFECTED)
 	{
 		if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
 		{
 			g_iDamageAsInfected[attacker] += damage;
+			AddPinDpsAssist(attacker, victim, damage);
+
+			int zClassAtt = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+
+			int spitter = 0;
+			// Spitter utility on pinned/incapped
+			if (zClassAtt == ZC_SPITTER)
+			{
+				spitter = attacker;
+				int tmpClass;
+				if (GetRecentPinner(victim, PIN_ASSIST_WINDOW, tmpClass) > 0)
+				{
+					g_iSpitPinnedTicks[attacker]++;
+				}
+				if (g_bIncapped[victim])
+				{
+					g_iSpitIncapTicks[attacker]++;
+				}
+			}
+			else if (g_iLastSpitterForVictim[victim] > 0 && (GetEngineTime() - g_fLastSpitTime[victim]) <= SPIT_SETUP_WINDOW)
+			{
+				spitter = g_iLastSpitterForVictim[victim];
+			}
+
+			if (spitter > 0)
+			{
+				AddSpitMultiHit(spitter, victim);
+			}
+
+			// Big-hit assist: tank/charger damage helped by pins or boom.
+			if (zClassAtt == ZC_CHARGER || zClassAtt == ZC_TANK)
+			{
+				AddBigHitAssistForVictim(victim, damage);
+				AddBoomAssistIfRecent(victim);
+				AddSpitSetupAssist(victim);
+			}
 		}
 		return;
 	}
@@ -348,6 +725,25 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 		if (zClass == ZC_TANK)
 		{
 			g_iTankDamageAsSurvivor[attacker] += damage;
+		}
+		if (hitgroup == 1)
+		{
+			g_iHeadshotSI[attacker]++;
+		}
+	}
+	else if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
+	{
+		g_iFriendlyFireDealt[attacker] += damage;
+		g_iFriendlyFireTaken[victim] += damage;
+	}
+	// Track last spitter damage on victim (for setup assists)
+	if (attackerTeam == TEAM_INFECTED)
+	{
+		int zClassAtt = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+		if (zClassAtt == ZC_SPITTER && GetClientTeam(victim) == TEAM_SURVIVOR)
+		{
+			g_iLastSpitterForVictim[victim] = attacker;
+			g_fLastSpitTime[victim] = GetEngineTime();
 		}
 	}
 }
@@ -386,6 +782,58 @@ public void Event_InfectedDeath(Event event, const char[] name, bool dontBroadca
 	}
 }
 
+public void Event_PlayerIncapacitated(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	if (!IsValidClient(victim))
+	{
+		return;
+	}
+
+	if (GetClientTeam(victim) == TEAM_SURVIVOR)
+	{
+		g_bIncapped[victim] = true;
+		g_bAliveAtEnd[victim] = false;
+		if (g_bRoundLive && !g_bPaused)
+		{
+			g_fSurvivalTime[victim] += GetEngineTime() - g_fLifeStart[victim];
+		}
+		AddPinAssistForVictim(victim);
+		AddBoomAssistIfRecent(victim);
+		AddSpitSetupAssist(victim);
+		AddBoomKillAssist(victim);
+		MarkPinEnd(victim);
+
+		if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
+		{
+			int zc = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+			if (zc == ZC_CHARGER || zc == ZC_TANK)
+			{
+				AddBigHitAssistForVictim(victim, 0);
+				AddBoomAssistIfRecent(victim);
+				AddSpitSetupAssist(victim);
+			}
+		}
+	}
+}
+
+public void Event_PlayerBoomed(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int boomer = GetClientOfUserId(event.GetInt("attacker"));
+	if (!IsValidClient(victim))
+	{
+		return;
+	}
+	if (!IsValidHuman(boomer) || GetClientTeam(boomer) != TEAM_INFECTED)
+	{
+		return;
+	}
+	g_iLastBoomerForVictim[victim] = boomer;
+	g_fLastBoomTime[victim] = GetEngineTime();
+}
+
 public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadcast)
 {
 	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
@@ -402,6 +850,7 @@ public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadca
 		{
 			g_iTankPlayActions[reviver]++;
 		}
+		g_bIncapped[revived] = false;
 	}
 }
 
@@ -447,6 +896,195 @@ public void Event_HealSuccess(Event event, const char[] name, bool dontBroadcast
 	g_bHealStartedToOther[healer] = false;
 }
 
+public Action Event_AbilityUse(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
+	{
+		return Plugin_Continue;
+	}
+
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (!IsValidHuman(client) || GetClientTeam(client) != TEAM_INFECTED)
+	{
+		return Plugin_Continue;
+	}
+
+	char ability[64];
+	event.GetString("ability", ability, sizeof(ability));
+	if (StrEqual(ability, "ability_vomit", false))
+	{
+		g_iBoomerVomitCasts[client]++;
+	}
+
+	return Plugin_Continue;
+}
+
+public void Event_PlayerShoved(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
+	{
+		return;
+	}
+
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	if (!IsValidHuman(attacker) || GetClientTeam(attacker) != TEAM_SURVIVOR)
+	{
+		return;
+	}
+	if (!IsValidHuman(victim) || GetClientTeam(victim) != TEAM_INFECTED)
+	{
+		return;
+	}
+
+	g_iShoveSI[attacker]++;
+}
+
+public void Event_WitchKilled(Event event, const char[] name, bool dontBroadcast)
+{
+	if (!g_bRoundActive || !g_CvarEnabled.BoolValue)
+	{
+		return;
+	}
+
+	int killer = GetClientOfUserId(event.GetInt("userid"));
+	if (IsValidHuman(killer) && GetClientTeam(killer) == TEAM_SURVIVOR)
+	{
+		g_iWitchCrowns[killer]++;
+	}
+}
+
+public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+
+	if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
+	{
+		g_bAliveAtEnd[victim] = false;
+		if (g_bRoundLive && !g_bPaused)
+		{
+			g_fSurvivalTime[victim] += GetEngineTime() - g_fLifeStart[victim];
+		}
+		AddPinAssistForVictim(victim);
+		AddBoomAssistIfRecent(victim);
+		AddSpitSetupAssist(victim);
+		AddBoomKillAssist(victim);
+		MarkPinEnd(victim);
+	}
+
+	if (IsValidClient(victim))
+	{
+		int zClass = GetEntProp(victim, Prop_Send, "m_zombieClass");
+		if (zClass == ZC_BOOMER)
+		{
+			if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_SURVIVOR)
+			{
+				g_iLastBoomerKiller[victim] = attacker;
+				g_fLastBoomerDeathTime[victim] = GetEngineTime();
+			}
+		}
+	}
+
+	// Charger lethal synergy assist window
+	if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
+	{
+		int zc = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+		if (zc == ZC_CHARGER || zc == ZC_TANK)
+		{
+			AddBigHitAssistForVictim(victim, 0);
+			AddBoomAssistIfRecent(victim);
+			AddSpitSetupAssist(victim);
+		}
+	}
+	else if (!IsValidClient(attacker))
+	{
+		// Heuristic witch assist (non-client attacker)
+		AddWitchAssistHeuristic(victim);
+	}
+}
+
+public void Event_PinStart_Smoker(Event event, const char[] name, bool dontBroadcast)
+{
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	int victim = GetClientOfUserId(event.GetInt("victim"));
+	MarkPinStart(attacker, victim, ZC_SMOKER);
+}
+
+public void Event_PinStart_Jockey(Event event, const char[] name, bool dontBroadcast)
+{
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	int victim = GetClientOfUserId(event.GetInt("victim"));
+	MarkPinStart(attacker, victim, ZC_JOCKEY);
+}
+
+public void Event_PinStart_Charger(Event event, const char[] name, bool dontBroadcast)
+{
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	int victim = GetClientOfUserId(event.GetInt("victim"));
+	if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
+	{
+		if (g_iChargerCarryCount[attacker] > 0)
+		{
+			AddChargerMultiHit(attacker);
+		}
+		g_iChargerCarryCount[attacker]++;
+	}
+	MarkPinStart(attacker, victim, ZC_CHARGER);
+}
+
+public void Event_PinStart_Hunter(Event event, const char[] name, bool dontBroadcast)
+{
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	int victim = GetClientOfUserId(event.GetInt("victim"));
+	MarkPinStart(attacker, victim, ZC_HUNTER);
+}
+
+public void Event_PinEnd_Generic(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("victim"));
+	if (victim <= 0)
+	{
+		victim = GetClientOfUserId(event.GetInt("userid"));
+	}
+	MarkPinEnd(victim);
+
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
+	{
+		int zc = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+		if (zc == ZC_CHARGER)
+		{
+			g_iChargerCarryCount[attacker] = 0;
+		}
+	}
+}
+
+public void OnBoomerVomitLanded(int boomer, int amount)
+{
+	if (amount <= 0)
+	{
+		return;
+	}
+
+	if (IsValidHuman(boomer) && GetClientTeam(boomer) == TEAM_INFECTED)
+	{
+		g_iBoomerVomitHits[boomer] += amount;
+		g_iLastBoomerVomitHits[boomer] = amount;
+		g_fLastBoomerVomitTime[boomer] = GetEngineTime();
+	}
+
+	// If boomer already dead and recently killed by a survivor, treat as splash pop.
+	if (!IsPlayerAlive(boomer) && g_iLastBoomerKiller[boomer] > 0 && (GetEngineTime() - g_fLastBoomerDeathTime[boomer]) <= 1.0)
+	{
+		int killer = g_iLastBoomerKiller[boomer];
+		if (IsValidHuman(killer) && GetClientTeam(killer) == TEAM_SURVIVOR)
+		{
+			g_iBoomerPopsSplash[killer] += amount;
+		}
+	}
+}
+
 public void OnSpecialClear(int clearer, int pinner, int pinvictim, int zombieClass, float timeA, float timeB, bool withShove)
 {
 	if (!g_bRoundActive || !IsValidHuman(clearer))
@@ -467,6 +1105,7 @@ public void OnSpecialClear(int clearer, int pinner, int pinvictim, int zombieCla
 			g_iTankPlayActions[clearer]++;
 		}
 	}
+	MarkPinEnd(pinvictim);
 }
 
 public void OnSmokerSelfClear(int survivor, int smoker, bool withShove)
@@ -484,6 +1123,7 @@ public void OnSmokerSelfClear(int survivor, int smoker, bool withShove)
 			g_iTankPlayActions[survivor]++;
 		}
 	}
+	MarkPinEnd(survivor);
 }
 
 public void OnSkeet(int survivor, int hunter)
@@ -496,6 +1136,50 @@ public void OnSkeet(int survivor, int hunter)
 	if (GetClientTeam(survivor) == TEAM_SURVIVOR)
 	{
 		g_iSkeets[survivor]++;
+		if (IsTankInPlayActive())
+		{
+			g_iTankPlayActions[survivor]++;
+		}
+	}
+}
+
+public void OnSkeetMelee(int survivor, int hunter)
+{
+	if (!g_bRoundActive || !IsValidHuman(survivor))
+	{
+		return;
+	}
+
+	if (GetClientTeam(survivor) == TEAM_SURVIVOR)
+	{
+		g_iSkeetsMelee[survivor]++;
+		if (IsTankInPlayActive())
+		{
+			g_iTankPlayActions[survivor]++;
+		}
+	}
+}
+
+public void OnSkeetSniper(int survivor, int hunter)
+{
+	OnSkeet(survivor, hunter);
+}
+
+public void OnSkeetGL(int survivor, int hunter)
+{
+	OnSkeet(survivor, hunter);
+}
+
+public void OnTankRockSkeeted(int survivor, int tank)
+{
+	if (!g_bRoundActive || !IsValidHuman(survivor))
+	{
+		return;
+	}
+
+	if (GetClientTeam(survivor) == TEAM_SURVIVOR)
+	{
+		g_iRockSkeets[survivor]++;
 		if (IsTankInPlayActive())
 		{
 			g_iTankPlayActions[survivor]++;
@@ -558,6 +1242,7 @@ public void OnSpecialShoved(int survivor, int infected, int zombieClass)
 			g_iTankPlayActions[survivor]++;
 		}
 	}
+	MarkPinEnd(survivor);
 }
 
 public Action Command_Skill(int client, int args)
@@ -574,6 +1259,12 @@ public Action Command_Skill(int client, int args)
 		return Plugin_Handled;
 	}
 
+	if (args < 1)
+	{
+		ShowSkillMainMenu(client);
+		return Plugin_Handled;
+	}
+
 	int target = client;
 	if (args >= 1)
 	{
@@ -586,10 +1277,82 @@ public Action Command_Skill(int client, int args)
 		}
 	}
 
-	float avg = GetAveragePoints(target);
-	ReplyToCommand(client, "[Skill] %N | total: %.2f | rounds: %d | avg/round: %.2f", target, g_fTotalPoints[target], g_iRoundsPlayed[target], avg);
+	ShowSkillForTarget(client, target, false);
 
 	return Plugin_Handled;
+}
+
+void ShowSkillForTarget(int client, int target, bool showBackButton)
+{
+	if (!IsValidHuman(client) || !IsValidClient(target))
+	{
+		return;
+	}
+
+	float avg = GetAveragePoints(target);
+
+	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	char title[128];
+	char displayName[160];
+	BuildDisplayName(target, displayName, sizeof(displayName));
+	Format(title, sizeof(title), "Skill Summary: %s", displayName);
+	menu.SetTitle(title);
+
+	char line[256];
+
+	// Overview
+	Format(line, sizeof(line), "Total points: %.2f", g_fTotalPoints[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Rounds played: %d", g_iRoundsPlayed[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Average per round: %.2f", avg);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Flow best (no tank): %.1f%%", g_fFlowBest[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Survival time (this round): %.0fs", g_fSurvivalTime[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Headshots on SI: %d", g_iHeadshotSI[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "FF dealt / taken: %d / %d", g_iFriendlyFireDealt[target], g_iFriendlyFireTaken[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	menu.AddItem("x", "--- Survivors ---", ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Damage (all): %d", g_iDamageAsSurvivor[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Tank dmg: %d | Witch dmg: %d | Common kills: %d", g_iTankDamageAsSurvivor[target], g_iWitchDamageAsSurvivor[target], g_iCommonKillsAsSurvivor[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Special clears: %d | Self clears: %d", g_iSpecialClears[target], g_iSmokerSelfClears[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Skeets: %d | Melee skeets: %d | Rock skeets: %d | Deadstops: %d", g_iSkeets[target], g_iSkeetsMelee[target], g_iRockSkeets[target], g_iDeadstops[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Boomer pops clean: %d | Splash pops: %d", g_iBoomerPopsNoVomit[target], g_iBoomerPopsSplash[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Revives: %d | Medkit gives: %d | Special rescues: %d", g_iRevives[target], g_iMedkitGives[target], g_iRescuesFromSpecial[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Jockey blocks: %d | Tank play actions: %d", g_iJockeyBlocks[target], g_iTankPlayActions[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Shoves on SI: %d | Witch crowns: %d", g_iShoveSI[target], g_iWitchCrowns[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	menu.AddItem("x", "--- Infected ---", ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Infected damage: %d", g_iDamageAsInfected[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Boomer vomit hits/casts: %d / %d", g_iBoomerVomitHits[target], g_iBoomerVomitCasts[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Pin assists: %d | Pin DPS: %.0f", g_iPinAssists[target], g_fPinDpsAssists[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Big-hit assists: %d | Score: %.1f", g_iBigHitAssists[target], g_fBigHitAssistScore[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Spit ticks pinned/incap: %d / %d", g_iSpitPinnedTicks[target], g_iSpitIncapTicks[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Tank boom assists: %d | Witch assists: %d", g_iTankBoomAssists[target], g_iWitchAssists[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Spit setup assists: %d | Boom kill assists: %d", g_iSpitSetupAssists[target], g_iBoomKillAssists[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	Format(line, sizeof(line), "Charger multi-hits: %d | Spit multi-hits: %d", g_iChargerMulti[target], g_iSpitMultiHits[target]);
+	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	menu.AddItem("x", "Tip: use !skilltop and !skillsim for more.", ITEMDRAW_DISABLED);
+
+	menu.ExitBackButton = showBackButton;
+	menu.Display(client, 20);
 }
 
 public Action Command_SkillTop(int client, int args)
@@ -617,17 +1380,12 @@ public Action Command_SkillTop(int client, int args)
 	}
 
 	int minRounds = g_CvarTopMinRounds.IntValue;
+	if (minRounds < 10)
+	{
+		minRounds = 10;
+	}
 
-	char query[512];
-	Format(query, sizeof(query),
-		"SELECT name, total_points, rounds_played, "
-		... "CASE WHEN rounds_played > 0 THEN (total_points / rounds_played) ELSE 0 END AS avg_score "
-		... "FROM players WHERE rounds_played >= %d ORDER BY avg_score DESC, total_points DESC LIMIT %d;",
-		minRounds, limit);
-
-	DataPack pack = new DataPack();
-	pack.WriteCell(client);
-	g_Db.Query(SQL_ShowTop, query, pack);
+	RequestTopMenu(client, limit, minRounds, false);
 
 	return Plugin_Handled;
 }
@@ -658,25 +1416,7 @@ public Action Command_SkillSim(int client, int args)
 		}
 	}
 
-	char steamid[32];
-	if (!GetPlayerSteamId(target, steamid, sizeof(steamid)))
-	{
-		ReplyToCommand(client, "[Skill] Cannot resolve SteamID for target.");
-		return Plugin_Handled;
-	}
-
-	char query[1024];
-	Format(query, sizeof(query),
-		"SELECT p.steamid, p.name, p.total_points, p.rounds_played, "
-		... "COALESCE(SUM(r.dmg_survivor), 0), COALESCE(SUM(r.dmg_infected), 0), COALESCE(SUM(r.dmg_tank), 0), "
-		... "COALESCE(SUM(r.special_clears + r.self_clears + r.skeets + r.deadstops + r.boomer_pops + r.revives + r.medkit_gives + r.special_rescues + r.jockey_blocks + r.tank_play_actions), 0) "
-		... "FROM players p LEFT JOIN round_stats r ON p.steamid = r.steamid "
-		... "WHERE p.steamid = '%s' GROUP BY p.steamid;",
-		steamid);
-
-	DataPack pack = new DataPack();
-	pack.WriteCell(client);
-	g_Db.Query(SQL_LoadSimilarityTarget, query, pack);
+	RequestSimilarityMenu(client, target, false);
 
 	return Plugin_Handled;
 }
@@ -739,17 +1479,197 @@ public Action Command_SkillMixVote(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action Command_SkillRebuild(int client, int args)
+void ShowSkillMainMenu(int client)
 {
-	if (g_bRebuildInProgress)
+	Menu menu = new Menu(MenuHandler_SkillMain, MENU_ACTIONS_DEFAULT);
+	menu.SetTitle("=== Skill Rating ===");
+	menu.AddItem("x", "Choose an option:", ITEMDRAW_DISABLED);
+	menu.AddItem("my", "My skill");
+	menu.AddItem("top", "Top players");
+	menu.AddItem("sim", "Similar players to me");
+	menu.AddItem("mix", "Call skill mix vote");
+	if (CheckCommandAccess(client, "sm_skill_admin_reset", ADMFLAG_ROOT, true))
 	{
-		ReplyToCommand(client, "[Skill] Rebuild already in progress.");
-		return Plugin_Handled;
+		menu.AddItem("reset", "Admin: Reset selected player stats");
+	}
+	menu.ExitButton = true;
+	menu.Display(client, 20);
+}
+
+public int MenuHandler_SkillMain(Menu menu, MenuAction action, int client, int item)
+{
+	if (action == MenuAction_End)
+	{
+		delete menu;
+		return 0;
 	}
 
-	StartPlayersBackfillMigration();
-	ReplyToCommand(client, "[Skill] Rebuild started.");
-	return Plugin_Handled;
+	if (action != MenuAction_Select || !IsValidHuman(client))
+	{
+		return 0;
+	}
+
+	char info[32];
+	menu.GetItem(item, info, sizeof(info));
+
+	if (StrEqual(info, "my"))
+	{
+		ShowSkillForTarget(client, client, true);
+	}
+	else if (StrEqual(info, "top"))
+	{
+		int minRounds = g_CvarTopMinRounds.IntValue;
+		if (minRounds < 10)
+		{
+			minRounds = 10;
+		}
+		RequestTopMenu(client, 10, minRounds, true);
+	}
+	else if (StrEqual(info, "sim"))
+	{
+		RequestSimilarityMenu(client, client, true);
+	}
+	else if (StrEqual(info, "mix"))
+	{
+		Command_SkillMixVote(client, 0);
+	}
+	else if (StrEqual(info, "reset"))
+	{
+		ShowAdminResetPlayerMenu(client);
+	}
+
+	return 0;
+}
+
+void ShowAdminResetPlayerMenu(int client)
+{
+	if (!CheckCommandAccess(client, "sm_skill_admin_reset", ADMFLAG_ROOT, true))
+	{
+		ReplyToCommand(client, "[Skill] No access.");
+		return;
+	}
+
+	char query[512];
+	Format(query, sizeof(query),
+		"SELECT steamid, last_name, first_name, total_points, rounds_played "
+		... "FROM players ORDER BY rounds_played DESC, total_points DESC LIMIT 200;");
+
+	DataPack pack = new DataPack();
+	pack.WriteCell(client);
+	g_Db.Query(SQL_ShowAdminResetPlayersMenu, query, pack);
+}
+
+public int MenuHandler_AdminResetPlayer(Menu menu, MenuAction action, int client, int item)
+{
+	if (action == MenuAction_End)
+	{
+		delete menu;
+		return 0;
+	}
+
+	if (action == MenuAction_Cancel && item == MenuCancel_ExitBack && IsValidHuman(client))
+	{
+		ShowSkillMainMenu(client);
+		return 0;
+	}
+
+	if (action != MenuAction_Select || !IsValidHuman(client))
+	{
+		return 0;
+	}
+
+	char steamid[32];
+	menu.GetItem(item, steamid, sizeof(steamid));
+	ResetPlayerStatsBySteamId(steamid, client);
+	ShowAdminResetPlayerMenu(client);
+	return 0;
+}
+
+public void SQL_ShowAdminResetPlayersMenu(Database db, DBResultSet results, const char[] error, DataPack pack)
+{
+	pack.Reset();
+	int client = pack.ReadCell();
+	delete pack;
+
+	if (!IsValidHuman(client))
+	{
+		return;
+	}
+
+	if (results == null)
+	{
+		ReplyToCommand(client, "[Skill] Failed to load admin reset list: %s", error);
+		return;
+	}
+
+	Menu menu = new Menu(MenuHandler_AdminResetPlayer, MENU_ACTIONS_DEFAULT);
+	menu.SetTitle("Admin: Reset Player Stats");
+	menu.AddItem("x", "Select player from database:", ITEMDRAW_DISABLED);
+
+	int added = 0;
+	while (results.FetchRow())
+	{
+		char steamid[32];
+		char lastName[MAX_NAME_LENGTH];
+		char firstName[MAX_NAME_LENGTH];
+		float total = results.FetchFloat(3);
+		int rounds = results.FetchInt(4);
+		results.FetchString(0, steamid, sizeof(steamid));
+		results.FetchString(1, lastName, sizeof(lastName));
+		results.FetchString(2, firstName, sizeof(firstName));
+
+		if (lastName[0] == '\0' && firstName[0] != '\0')
+		{
+			strcopy(lastName, sizeof(lastName), firstName);
+		}
+
+		char label[192];
+		if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
+		{
+			Format(label, sizeof(label), "%s (%s) | rounds %d | total %.1f", lastName, firstName, rounds, total);
+		}
+		else
+		{
+			Format(label, sizeof(label), "%s | rounds %d | total %.1f", lastName, rounds, total);
+		}
+		menu.AddItem(steamid, label);
+		added++;
+	}
+
+	if (added == 0)
+	{
+		menu.AddItem("x", "No players found in database.", ITEMDRAW_DISABLED);
+	}
+
+	menu.ExitBackButton = true;
+	menu.Display(client, 30);
+}
+
+void ResetPlayerStatsBySteamId(const char[] steamid, int adminClient)
+{
+	if (steamid[0] == '\0')
+	{
+		return;
+	}
+
+	char q1[256];
+	Format(q1, sizeof(q1), "DELETE FROM round_stats WHERE steamid='%s';", steamid);
+	g_Db.Query(SQL_ErrorOnly, q1);
+
+	char q2[256];
+	Format(q2, sizeof(q2), "UPDATE players SET total_points=0.0, rounds_played=0 WHERE steamid='%s';", steamid);
+	g_Db.Query(SQL_ErrorOnly, q2);
+
+	int target = FindOnlineClientBySteamId(steamid);
+	if (target > 0)
+	{
+		g_fTotalPoints[target] = 0.0;
+		g_iRoundsPlayed[target] = 0;
+		ResetRoundStats(target);
+		PrintToChat(target, "[Skill] Your skill stats were reset by admin.");
+	}
+
+	ReplyToCommand(adminClient, "[Skill] Stats reset for steamid %s", steamid);
 }
 
 public void Handle_MixVoteAction(Handle vote, BuiltinVoteAction action, int param1, int param2)
@@ -916,6 +1836,27 @@ void SortByRatingDesc(int players[MAXPLAYERS + 1], float rating[MAXPLAYERS + 1],
 	}
 }
 
+int FindOnlineClientBySteamId(const char[] steamid)
+{
+	char current[32];
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i))
+		{
+			continue;
+		}
+		if (!GetPlayerSteamId(i, current, sizeof(current)))
+		{
+			continue;
+		}
+		if (StrEqual(current, steamid, false))
+		{
+			return i;
+		}
+	}
+	return 0;
+}
+
 int CollectEligibleVoters(int voters[MAXPLAYERS + 1], int &survCount, int &infCount)
 {
 	int count = 0;
@@ -1006,10 +1947,70 @@ int FindSurvivorBot()
 	return -1;
 }
 
+void RequestTopMenu(int client, int limit, int minRounds, bool showBackButton)
+{
+	char query[512];
+	Format(query, sizeof(query),
+		"SELECT last_name, first_name, total_points, rounds_played, "
+		... "CASE WHEN rounds_played > 0 THEN (total_points / rounds_played) ELSE 0 END AS avg_score "
+		... "FROM players WHERE rounds_played >= %d ORDER BY avg_score DESC, total_points DESC LIMIT %d;",
+		minRounds, limit);
+
+	DataPack pack = new DataPack();
+	pack.WriteCell(client);
+	pack.WriteCell(showBackButton ? 1 : 0);
+	pack.WriteCell(minRounds);
+	pack.WriteCell(limit);
+	g_Db.Query(SQL_ShowTop, query, pack);
+}
+
+void RequestSimilarityMenu(int client, int target, bool showBackButton)
+{
+	char steamid[32];
+	if (!GetPlayerSteamId(target, steamid, sizeof(steamid)))
+	{
+		ReplyToCommand(client, "[Skill] Cannot resolve SteamID for target.");
+		return;
+	}
+
+	char query[1024];
+	Format(query, sizeof(query),
+		"SELECT p.steamid, p.last_name, p.first_name, p.total_points, p.rounds_played, "
+		... "COALESCE(SUM(r.dmg_survivor), 0), COALESCE(SUM(r.dmg_infected), 0), COALESCE(SUM(r.dmg_tank), 0), "
+		... "COALESCE(SUM(r.special_clears + r.self_clears + r.skeets + r.skeets_melee + r.deadstops + r.boomer_pops + r.revives + r.medkit_gives + r.special_rescues + r.jockey_blocks + r.tank_play_actions), 0) "
+		... "FROM players p LEFT JOIN round_stats r ON p.steamid = r.steamid "
+		... "WHERE p.steamid = '%s' GROUP BY p.steamid;",
+		steamid);
+
+	DataPack pack = new DataPack();
+	pack.WriteCell(client);
+	pack.WriteCell(showBackButton ? 1 : 0);
+	g_Db.Query(SQL_LoadSimilarityTarget, query, pack);
+}
+
+public int MenuHandler_InfoBack(Menu menu, MenuAction action, int client, int item)
+{
+	if (action == MenuAction_End)
+	{
+		delete menu;
+		return 0;
+	}
+
+	if (action == MenuAction_Cancel && item == MenuCancel_ExitBack && IsValidHuman(client))
+	{
+		ShowSkillMainMenu(client);
+	}
+
+	return 0;
+}
+
 public void SQL_ShowTop(Database db, DBResultSet results, const char[] error, DataPack pack)
 {
 	pack.Reset();
 	int client = pack.ReadCell();
+	bool showBackButton = view_as<bool>(pack.ReadCell());
+	int minRounds = pack.ReadCell();
+	int limit = pack.ReadCell();
 	delete pack;
 
 	if (!IsValidClient(client))
@@ -1023,25 +2024,54 @@ public void SQL_ShowTop(Database db, DBResultSet results, const char[] error, Da
 		return;
 	}
 
+	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	char title[128];
+	Format(title, sizeof(title), "Top %d Players (min rounds: %d)", limit, minRounds);
+	menu.SetTitle(title);
+	menu.ExitBackButton = showBackButton;
+
 	int rank = 1;
-	ReplyToCommand(client, "[Skill] Top players:");
 	while (results.FetchRow())
 	{
-		char name[MAX_NAME_LENGTH];
-		results.FetchString(0, name, sizeof(name));
-		float total = results.FetchFloat(1);
-		int rounds = results.FetchInt(2);
-		float avg = results.FetchFloat(3);
+		char lastName[MAX_NAME_LENGTH];
+		char firstName[MAX_NAME_LENGTH];
+		results.FetchString(0, lastName, sizeof(lastName));
+		results.FetchString(1, firstName, sizeof(firstName));
+		float total = results.FetchFloat(2);
+		int rounds = results.FetchInt(3);
+		float avg = results.FetchFloat(4);
 
-		ReplyToCommand(client, "[Skill] #%d %s | avg: %.2f | total: %.1f | rounds: %d", rank, name, avg, total, rounds);
+		if (lastName[0] == '\0' && firstName[0] != '\0')
+		{
+			strcopy(lastName, sizeof(lastName), firstName);
+		}
+
+		char line[192];
+		if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
+		{
+			Format(line, sizeof(line), "#%d %s (%s) | avg %.2f | total %.1f | rounds %d", rank, lastName, firstName, avg, total, rounds);
+		}
+		else
+		{
+			Format(line, sizeof(line), "#%d %s | avg %.2f | total %.1f | rounds %d", rank, lastName, avg, total, rounds);
+		}
+		menu.AddItem("x", line, ITEMDRAW_DISABLED);
 		rank++;
 	}
+
+	if (rank == 1)
+	{
+		menu.AddItem("x", "No players match ranking criteria.", ITEMDRAW_DISABLED);
+	}
+
+	menu.Display(client, 20);
 }
 
 public void SQL_LoadSimilarityTarget(Database db, DBResultSet results, const char[] error, DataPack pack)
 {
 	pack.Reset();
 	int client = pack.ReadCell();
+	bool showBackButton = view_as<bool>(pack.ReadCell());
 	delete pack;
 
 	if (!IsValidClient(client))
@@ -1051,18 +2081,26 @@ public void SQL_LoadSimilarityTarget(Database db, DBResultSet results, const cha
 
 	if (results == null || !results.FetchRow())
 	{
-		ReplyToCommand(client, "[Skill] No data available for similarity.");
+		Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+		menu.SetTitle("Skill Similarity");
+		menu.AddItem("x", "No data available for similarity.", ITEMDRAW_DISABLED);
+		menu.ExitBackButton = showBackButton;
+		menu.Display(client, 20);
 		return;
 	}
 
 	char targetSteamid[32];
 	results.FetchString(0, targetSteamid, sizeof(targetSteamid));
-	float targetTotal = results.FetchFloat(2);
-	int targetRounds = results.FetchInt(3);
-	float targetDmgSurv = results.FetchFloat(4);
-	float targetDmgInf = results.FetchFloat(5);
-	float targetDmgTank = results.FetchFloat(6);
-	float targetActions = results.FetchFloat(7);
+	char targetLast[MAX_NAME_LENGTH];
+	char targetFirst[MAX_NAME_LENGTH];
+	results.FetchString(1, targetLast, sizeof(targetLast));
+	results.FetchString(2, targetFirst, sizeof(targetFirst));
+	float targetTotal = results.FetchFloat(3);
+	int targetRounds = results.FetchInt(4);
+	float targetDmgSurv = results.FetchFloat(5);
+	float targetDmgInf = results.FetchFloat(6);
+	float targetDmgTank = results.FetchFloat(7);
+	float targetActions = results.FetchFloat(8);
 
 	float r = float(targetRounds > 0 ? targetRounds : 1);
 	float targetAvgPts = targetTotal / r;
@@ -1071,17 +2109,29 @@ public void SQL_LoadSimilarityTarget(Database db, DBResultSet results, const cha
 	float targetAvgTank = targetDmgTank / r;
 	float targetAvgActions = targetActions / r;
 
+	char targetName[MAX_NAME_LENGTH * 2];
+	if (targetFirst[0] != '\0' && !StrEqual(targetFirst, targetLast, false))
+	{
+		Format(targetName, sizeof(targetName), "%s (%s)", targetLast, targetFirst);
+	}
+	else
+	{
+		strcopy(targetName, sizeof(targetName), targetLast);
+	}
+
 	char query[1024];
 	Format(query, sizeof(query),
-		"SELECT p.steamid, p.name, p.total_points, p.rounds_played, "
+		"SELECT p.steamid, p.last_name, p.first_name, p.total_points, p.rounds_played, "
 		... "COALESCE(SUM(r.dmg_survivor), 0), COALESCE(SUM(r.dmg_infected), 0), COALESCE(SUM(r.dmg_tank), 0), "
-		... "COALESCE(SUM(r.special_clears + r.self_clears + r.skeets + r.deadstops + r.boomer_pops + r.revives + r.medkit_gives + r.special_rescues + r.jockey_blocks + r.tank_play_actions), 0) "
+		... "COALESCE(SUM(r.special_clears + r.self_clears + r.skeets + r.skeets_melee + r.deadstops + r.boomer_pops + r.revives + r.medkit_gives + r.special_rescues + r.jockey_blocks + r.tank_play_actions), 0) "
 		... "FROM players p LEFT JOIN round_stats r ON p.steamid = r.steamid "
 		... "WHERE p.steamid != '%s' GROUP BY p.steamid;",
 		targetSteamid);
 
 	DataPack pack2 = new DataPack();
 	pack2.WriteCell(client);
+	pack2.WriteCell(showBackButton ? 1 : 0);
+	pack2.WriteString(targetName);
 	pack2.WriteFloat(targetAvgPts);
 	pack2.WriteFloat(targetAvgSurv);
 	pack2.WriteFloat(targetAvgInf);
@@ -1094,6 +2144,9 @@ public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] er
 {
 	pack.Reset();
 	int client = pack.ReadCell();
+	bool showBackButton = view_as<bool>(pack.ReadCell());
+	char targetName[MAX_NAME_LENGTH * 2];
+	pack.ReadString(targetName, sizeof(targetName));
 	float targetAvgPts = pack.ReadFloat();
 	float targetAvgSurv = pack.ReadFloat();
 	float targetAvgInf = pack.ReadFloat();
@@ -1112,7 +2165,7 @@ public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] er
 		return;
 	}
 
-	char topName[5][MAX_NAME_LENGTH];
+char topName[5][MAX_NAME_LENGTH * 2];
 	float topDist[5];
 	float topAvg[5];
 	int topRounds[5];
@@ -1127,14 +2180,16 @@ public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] er
 
 	while (results.FetchRow())
 	{
-		char name[MAX_NAME_LENGTH];
-		float total = results.FetchFloat(2);
-		int rounds = results.FetchInt(3);
-		float dmgSurv = results.FetchFloat(4);
-		float dmgInf = results.FetchFloat(5);
-		float dmgTank = results.FetchFloat(6);
-		float actions = results.FetchFloat(7);
-		results.FetchString(1, name, sizeof(name));
+		char lastName[MAX_NAME_LENGTH];
+		char firstName[MAX_NAME_LENGTH];
+		float total = results.FetchFloat(3);
+		int rounds = results.FetchInt(4);
+		float dmgSurv = results.FetchFloat(5);
+		float dmgInf = results.FetchFloat(6);
+		float dmgTank = results.FetchFloat(7);
+		float actions = results.FetchFloat(8);
+		results.FetchString(1, lastName, sizeof(lastName));
+		results.FetchString(2, firstName, sizeof(firstName));
 
 		if (rounds <= 0)
 		{
@@ -1169,11 +2224,27 @@ public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] er
 			topDist[worst] = dist;
 			topAvg[worst] = avgPts;
 			topRounds[worst] = rounds;
-			strcopy(topName[worst], sizeof(topName[]), name);
+			if (lastName[0] == '\0' && firstName[0] != '\0')
+			{
+				strcopy(lastName, sizeof(lastName), firstName);
+			}
+			if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
+			{
+				Format(topName[worst], sizeof(topName[]), "%s (%s)", lastName, firstName);
+			}
+			else
+			{
+				strcopy(topName[worst], sizeof(topName[]), lastName);
+			}
 		}
 	}
 
-	ReplyToCommand(client, "[Skill] Most similar players:");
+	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	char title[128];
+	Format(title, sizeof(title), "Players similar to %s", targetName);
+	menu.SetTitle(title);
+	menu.ExitBackButton = showBackButton;
+
 	for (int n = 0; n < 5; n++)
 	{
 		int best = -1;
@@ -1194,9 +2265,18 @@ public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] er
 			break;
 		}
 
-		ReplyToCommand(client, "[Skill] %s | avg: %.2f | rounds: %d", topName[best], topAvg[best], topRounds[best]);
+		char line[192];
+		Format(line, sizeof(line), "%s | avg %.2f | rounds %d", topName[best], topAvg[best], topRounds[best]);
+		menu.AddItem("x", line, ITEMDRAW_DISABLED);
 		topName[best][0] = '\0';
 	}
+
+	if (menu.ItemCount == 0)
+	{
+		menu.AddItem("x", "No similar players found.", ITEMDRAW_DISABLED);
+	}
+
+	menu.Display(client, 20);
 }
 
 void LoadPlayerProfile(int client)
@@ -1214,25 +2294,35 @@ void LoadPlayerProfile(int client)
 
 	char name[MAX_NAME_LENGTH];
 	GetClientName(client, name, sizeof(name));
+	strcopy(g_sLastName[client], sizeof(g_sLastName[]), name);
+	if (g_sFirstName[client][0] == '\0')
+	{
+		strcopy(g_sFirstName[client], sizeof(g_sFirstName[]), name);
+	}
 
 	char escName[MAX_NAME_LENGTH * 2 + 1];
 	g_Db.Escape(name, escName, sizeof(escName));
 
 	char qInsert[512];
 	Format(qInsert, sizeof(qInsert),
-		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
-		... "VALUES ('%s', '%s', 0.0, 0, strftime('%%s', 'now'));",
-		steamid, escName);
+		"INSERT OR IGNORE INTO players (steamid, name, first_name, last_name, total_points, rounds_played, last_seen) "
+		... "VALUES ('%s', '%s', '%s', '%s', 0.0, 0, strftime('%%s', 'now'));",
+		steamid, escName, escName, escName);
 	g_Db.Query(SQL_ErrorOnly, qInsert);
 
 	char qTouch[512];
 	Format(qTouch, sizeof(qTouch),
-		"UPDATE players SET name='%s', last_seen=strftime('%%s', 'now') WHERE steamid='%s';",
-		escName, steamid);
+		"UPDATE players SET "
+		... "name='%s', "
+		... "last_name='%s', "
+		... "first_name=CASE WHEN first_name='' THEN '%s' ELSE first_name END, "
+		... "last_seen=strftime('%%s', 'now') "
+		... "WHERE steamid='%s';",
+		escName, escName, escName, steamid);
 	g_Db.Query(SQL_ErrorOnly, qTouch);
 
 	char qLoad[256];
-	Format(qLoad, sizeof(qLoad), "SELECT total_points, rounds_played FROM players WHERE steamid='%s';", steamid);
+	Format(qLoad, sizeof(qLoad), "SELECT total_points, rounds_played, first_name, last_name FROM players WHERE steamid='%s';", steamid);
 	DataPack pack = new DataPack();
 	pack.WriteCell(client);
 	g_Db.Query(SQL_LoadPlayerProfile, qLoad, pack);
@@ -1256,6 +2346,17 @@ public void SQL_LoadPlayerProfile(Database db, DBResultSet results, const char[]
 
 	g_fTotalPoints[client] = results.FetchFloat(0);
 	g_iRoundsPlayed[client] = results.FetchInt(1);
+	results.FetchString(2, g_sFirstName[client], sizeof(g_sFirstName[]));
+	results.FetchString(3, g_sLastName[client], sizeof(g_sLastName[]));
+
+	if (g_sLastName[client][0] == '\0')
+	{
+		GetClientName(client, g_sLastName[client], sizeof(g_sLastName[]));
+	}
+	if (g_sFirstName[client][0] == '\0')
+	{
+		strcopy(g_sFirstName[client], sizeof(g_sFirstName[]), g_sLastName[client]);
+	}
 }
 
 void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarded)
@@ -1273,15 +2374,17 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 
 	char qInsertPlayer[512];
 	Format(qInsertPlayer, sizeof(qInsertPlayer),
-		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
-		... "VALUES ('%s', '%s', 0.0, 0, strftime('%%s', 'now'));",
-		steamid, escName);
+		"INSERT OR IGNORE INTO players (steamid, name, first_name, last_name, total_points, rounds_played, last_seen) "
+		... "VALUES ('%s', '%s', '%s', '%s', 0.0, 0, strftime('%%s', 'now'));",
+		steamid, escName, escName, escName);
 	g_Db.Query(SQL_ErrorOnly, qInsertPlayer);
 
 	char qUpdatePlayer[768];
 	Format(qUpdatePlayer, sizeof(qUpdatePlayer),
-		"UPDATE players SET name='%s', total_points=total_points+%.4f, rounds_played=rounds_played+1, last_seen=strftime('%%s', 'now') WHERE steamid='%s';",
-		escName, awarded, steamid);
+		"UPDATE players SET name='%s', last_name='%s', total_points=total_points+%.4f, rounds_played=rounds_played+1, last_seen=strftime('%%s', 'now'), "
+		... "first_name=CASE WHEN first_name='' THEN '%s' ELSE first_name END "
+		... "WHERE steamid='%s';",
+		escName, escName, awarded, escName, steamid);
 	g_Db.Query(SQL_ErrorOnly, qUpdatePlayer);
 
 	char escMap[128];
@@ -1290,8 +2393,8 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	char qRound[2048];
 	Format(qRound, sizeof(qRound),
 		"INSERT INTO round_stats (steamid, name, round_index, map_name, team, raw_points, awarded_points, "
-		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, deadstops, boomer_pops, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ts) "
-		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, strftime('%%s', 'now'));",
+		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, ts) "
+		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
 		steamid, escName, g_iRoundNumber, escMap, team, rawScore, awarded,
 		g_iDamageAsInfected[client],
 		g_iDamageAsSurvivor[client],
@@ -1301,17 +2404,205 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 		g_iSpecialClears[client],
 		g_iSmokerSelfClears[client],
 		g_iSkeets[client],
+		g_iSkeetsMelee[client],
 		g_iDeadstops[client],
 		g_iBoomerPopsNoVomit[client],
+		g_iBoomerPopsSplash[client],
+		g_iPinAssists[client],
+		g_fPinDpsAssists[client],
+		g_iBigHitAssists[client],
+		g_fBigHitAssistScore[client],
+		g_iSpitPinnedTicks[client],
+		g_iSpitIncapTicks[client],
+		g_iTankBoomAssists[client],
+		g_iWitchAssists[client],
+		g_iSpitSetupAssists[client],
+		g_iBoomKillAssists[client],
+		g_iChargerMulti[client],
+		g_iSpitMultiHits[client],
+		g_iShoveSI[client],
+		g_iWitchCrowns[client],
+		g_iRockSkeets[client],
 		g_iRevives[client],
 		g_iMedkitGives[client],
 		g_iRescuesFromSpecial[client],
 		g_iJockeyBlocks[client],
-		g_iTankPlayActions[client]);
+		g_iTankPlayActions[client],
+		g_iFriendlyFireDealt[client],
+		g_iFriendlyFireTaken[client],
+		g_iHeadshotSI[client],
+		g_iBoomerVomitCasts[client],
+		g_iBoomerVomitHits[client],
+		g_fFlowBest[client],
+		g_fSurvivalTime[client],
+		g_bAliveAtEnd[client] ? 1 : 0);
 	g_Db.Query(SQL_ErrorOnly, qRound);
 
 	g_fTotalPoints[client] += awarded;
 	g_iRoundsPlayed[client]++;
+}
+
+int GetRecentPinner(int victim, float window, int &zclass)
+{
+	int pinner = g_iLastPinner[victim];
+	if (pinner > 0 && IsValidHuman(pinner) && GetClientTeam(pinner) == TEAM_INFECTED)
+	{
+		float ago = GetEngineTime() - g_fLastPinEnd[victim];
+		if (ago <= window)
+		{
+			zclass = g_iLastPinnerClass[victim];
+			return pinner;
+		}
+	}
+	zclass = 0;
+	return 0;
+}
+
+void MarkPinStart(int pinner, int victim, int zclass)
+{
+	if (!IsValidHuman(pinner) || GetClientTeam(pinner) != TEAM_INFECTED || !IsValidClient(victim))
+	{
+		return;
+	}
+	g_iLastPinner[victim] = pinner;
+	g_iLastPinnerClass[victim] = zclass;
+	float now = GetEngineTime();
+	g_fLastPinStart[victim] = now;
+	g_fLastPinEnd[victim] = now;
+}
+
+void MarkPinEnd(int victim)
+{
+	if (!IsValidClient(victim))
+	{
+		return;
+	}
+	g_fLastPinEnd[victim] = GetEngineTime();
+}
+
+void AddPinAssistForVictim(int victim)
+{
+	int zc;
+	int pinner = GetRecentPinner(victim, PIN_ASSIST_WINDOW, zc);
+	if (pinner > 0)
+	{
+		g_iPinAssists[pinner]++;
+	}
+}
+
+void AddSpitMultiHit(int spitter, int victim)
+{
+	if (!IsValidHuman(spitter) || GetClientTeam(spitter) != TEAM_INFECTED || victim <= 0)
+	{
+		return;
+	}
+
+	float now = GetEngineTime();
+	if (now - g_fSpitHitWindowStart[spitter] > 0.4)
+	{
+		g_fSpitHitWindowStart[spitter] = now;
+		g_iSpitHitWindowCount[spitter] = 0;
+		g_iSpitHitWindowLastVictim[spitter] = 0;
+	}
+
+	if (g_iSpitHitWindowCount[spitter] > 0 && g_iSpitHitWindowLastVictim[spitter] != victim)
+	{
+		g_iSpitMultiHits[spitter]++;
+	}
+
+	g_iSpitHitWindowLastVictim[spitter] = victim;
+	g_iSpitHitWindowCount[spitter]++;
+}
+
+void AddChargerMultiHit(int charger)
+{
+	if (!IsValidHuman(charger) || GetClientTeam(charger) != TEAM_INFECTED)
+	{
+		return;
+	}
+	g_iChargerMulti[charger]++;
+}
+
+void AddPinDpsAssist(int attacker, int victim, int damage)
+{
+	if (damage <= 0)
+	{
+		return;
+	}
+
+	int zc;
+	int pinner = GetRecentPinner(victim, PIN_ASSIST_WINDOW, zc);
+	if (pinner > 0 && pinner != attacker)
+	{
+		g_fPinDpsAssists[pinner] += float(damage);
+	}
+}
+
+void AddBigHitAssistForVictim(int victim, int damage)
+{
+	int zc;
+	int pinner = GetRecentPinner(victim, CHARGE_ASSIST_WINDOW, zc);
+	if (pinner > 0)
+	{
+		float factor = 1.0;
+		if (damage > 0)
+		{
+			factor = FloatClamp(float(damage) / 100.0, 0.25, 1.5);
+		}
+		g_fBigHitAssistScore[pinner] += factor;
+		g_iBigHitAssists[pinner]++; // count for reference
+	}
+}
+
+void AddBoomAssistIfRecent(int victim)
+{
+	int boomer = g_iLastBoomerForVictim[victim];
+	if (boomer > 0 && IsValidHuman(boomer) && GetClientTeam(boomer) == TEAM_INFECTED)
+	{
+		if ((GetEngineTime() - g_fLastBoomTime[victim]) <= BOOM_ASSIST_WINDOW)
+		{
+			g_iTankBoomAssists[boomer]++;
+		}
+	}
+}
+
+void AddBoomKillAssist(int victim)
+{
+	int boomer = g_iLastBoomerForVictim[victim];
+	if (boomer > 0 && IsValidHuman(boomer) && GetClientTeam(boomer) == TEAM_INFECTED)
+	{
+		if ((GetEngineTime() - g_fLastBoomTime[victim]) <= BOOM_ASSIST_WINDOW)
+		{
+			g_iBoomKillAssists[boomer]++;
+		}
+	}
+}
+
+void AddWitchAssistHeuristic(int victim)
+{
+	int zc;
+	int pinner = GetRecentPinner(victim, PIN_ASSIST_WINDOW, zc);
+	if (pinner > 0)
+	{
+		g_iWitchAssists[pinner]++;
+	}
+	int boomer = g_iLastBoomerForVictim[victim];
+	if (boomer > 0 && (GetEngineTime() - g_fLastBoomTime[victim]) <= BOOM_ASSIST_WINDOW)
+	{
+		g_iWitchAssists[boomer]++;
+	}
+}
+
+void AddSpitSetupAssist(int victim)
+{
+	int spitter = g_iLastSpitterForVictim[victim];
+	if (spitter > 0 && IsValidHuman(spitter) && GetClientTeam(spitter) == TEAM_INFECTED)
+	{
+		if ((GetEngineTime() - g_fLastSpitTime[victim]) <= SPIT_SETUP_WINDOW)
+		{
+			g_iSpitSetupAssists[spitter]++;
+		}
+	}
 }
 
 void ResetRoundStats(int client)
@@ -1330,13 +2621,51 @@ void ResetRoundStats(int client)
 	g_iSpecialClears[client] = 0;
 	g_iSmokerSelfClears[client] = 0;
 	g_iSkeets[client] = 0;
+	g_iSkeetsMelee[client] = 0;
 	g_iDeadstops[client] = 0;
 	g_iBoomerPopsNoVomit[client] = 0;
+	g_iBoomerPopsSplash[client] = 0;
+	g_iPinAssists[client] = 0;
+	g_fPinDpsAssists[client] = 0.0;
+	g_iBigHitAssists[client] = 0;
+	g_iChargerMulti[client] = 0;
+	g_iChargerCarryCount[client] = 0;
+	g_iSpitMultiHits[client] = 0;
+	g_fSpitHitWindowStart[client] = 0.0;
+	g_iSpitHitWindowCount[client] = 0;
+	g_iSpitHitWindowLastVictim[client] = 0;
+	g_iSpitPinnedTicks[client] = 0;
+	g_iSpitIncapTicks[client] = 0;
+	g_iTankBoomAssists[client] = 0;
+	g_iWitchAssists[client] = 0;
 	g_iRevives[client] = 0;
 	g_iMedkitGives[client] = 0;
 	g_iRescuesFromSpecial[client] = 0;
 	g_iJockeyBlocks[client] = 0;
 	g_iTankPlayActions[client] = 0;
+	g_iFriendlyFireDealt[client] = 0;
+	g_iFriendlyFireTaken[client] = 0;
+	g_iHeadshotSI[client] = 0;
+	g_iBoomerVomitCasts[client] = 0;
+	g_iBoomerVomitHits[client] = 0;
+	g_iShoveSI[client] = 0;
+	g_iWitchCrowns[client] = 0;
+	g_iRockSkeets[client] = 0;
+	g_iLastBoomerKiller[client] = 0;
+	g_fLastBoomerDeathTime[client] = 0.0;
+	g_iLastBoomerVomitHits[client] = 0;
+	g_fLastBoomerVomitTime[client] = 0.0;
+	g_iLastPinner[client] = 0;
+	g_iLastPinnerClass[client] = 0;
+	g_fLastPinStart[client] = 0.0;
+	g_fLastPinEnd[client] = 0.0;
+	g_iLastBoomerForVictim[client] = 0;
+	g_fLastBoomTime[client] = 0.0;
+	g_fSurvivalTime[client] = 0.0;
+	g_fFlowBest[client] = 0.0;
+	g_bAliveAtEnd[client] = true;
+	g_fLifeStart[client] = GetEngineTime();
+	g_bIncapped[client] = false;
 
 	g_bHealStartedToOther[client] = false;
 }
@@ -1402,8 +2731,8 @@ void TryMergeSteamIdVariantsForClient(int client)
 	char query[2048];
 
 	Format(query, sizeof(query),
-		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
-		... "VALUES ('%s', '', 0.0, 0, strftime('%%s', 'now'));",
+		"INSERT OR IGNORE INTO players (steamid, name, first_name, last_name, total_points, rounds_played, last_seen) "
+		... "VALUES ('%s', '', '', '', 0.0, 0, strftime('%%s', 'now'));",
 		steam64);
 	g_Db.Query(SQL_ErrorOnly, query);
 
@@ -1411,9 +2740,12 @@ void TryMergeSteamIdVariantsForClient(int client)
 		"UPDATE players SET "
 		... "total_points = total_points + COALESCE((SELECT total_points FROM players WHERE steamid='%s'), 0.0), "
 		... "rounds_played = rounds_played + COALESCE((SELECT rounds_played FROM players WHERE steamid='%s'), 0), "
-		... "last_seen = MAX(last_seen, COALESCE((SELECT last_seen FROM players WHERE steamid='%s'), last_seen)) "
+		... "last_seen = MAX(last_seen, COALESCE((SELECT last_seen FROM players WHERE steamid='%s'), last_seen)), "
+		... "first_name = CASE WHEN first_name='' THEN COALESCE((SELECT first_name FROM players WHERE steamid='%s' LIMIT 1), '') ELSE first_name END, "
+		... "last_name = COALESCE((SELECT last_name FROM players WHERE steamid='%s' LIMIT 1), last_name), "
+		... "name = last_name "
 		... "WHERE steamid='%s';",
-		steam2, steam2, steam2, steam64);
+		steam2, steam2, steam2, steam2, steam2, steam64);
 	g_Db.Query(SQL_ErrorOnly, query);
 
 	Format(query, sizeof(query),
@@ -1427,9 +2759,93 @@ void TryMergeSteamIdVariantsForClient(int client)
 	g_Db.Query(SQL_ErrorOnly, query);
 }
 
+void BuildDisplayName(int client, char[] buffer, int size)
+{
+	buffer[0] = '\0';
+
+	char last[MAX_NAME_LENGTH];
+	char first[MAX_NAME_LENGTH];
+	last[0] = '\0';
+	first[0] = '\0';
+
+	if (client > 0 && client <= MaxClients)
+	{
+		if (g_sLastName[client][0] != '\0')
+		{
+			strcopy(last, sizeof(last), g_sLastName[client]);
+		}
+		else
+		{
+			GetClientName(client, last, sizeof(last));
+		}
+
+		if (g_sFirstName[client][0] != '\0')
+		{
+			strcopy(first, sizeof(first), g_sFirstName[client]);
+		}
+	}
+
+	if (last[0] == '\0')
+	{
+		strcopy(last, sizeof(last), "Unknown");
+	}
+
+	if (first[0] != '\0' && !StrEqual(first, last, false))
+	{
+		Format(buffer, size, "%s (%s)", last, first);
+	}
+	else
+	{
+		strcopy(buffer, size, last);
+	}
+}
+
 bool IsTankInPlayActive()
 {
 	return L4D2_IsTankInPlay();
+}
+
+bool IsRoundEligibleForStats()
+{
+	int surv = 0;
+	int inf = 0;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i))
+		{
+			continue;
+		}
+
+		int team = GetClientTeam(i);
+		if (team == TEAM_SURVIVOR)
+		{
+			surv++;
+		}
+		else if (team == TEAM_INFECTED)
+		{
+			inf++;
+		}
+	}
+
+	return (surv >= 3 && inf >= 3);
+}
+
+float GetFlowPercentSafe(int client)
+{
+	float maxFlow = L4D2Direct_GetMapMaxFlowDistance();
+	if (maxFlow <= 0.0)
+	{
+		return g_fFlowBest[client];
+	}
+
+	float flow = L4D2Direct_GetFlowDistance(client);
+	if (flow < 0.0)
+	{
+		flow = 0.0;
+	}
+
+	return (flow / maxFlow) * 100.0;
 }
 
 void CreateTables()
@@ -1440,6 +2856,8 @@ void CreateTables()
 		"CREATE TABLE IF NOT EXISTS players ("
 		... "steamid TEXT PRIMARY KEY, "
 		... "name TEXT NOT NULL DEFAULT '', "
+		... "first_name TEXT NOT NULL DEFAULT '', "
+		... "last_name TEXT NOT NULL DEFAULT '', "
 		... "total_points REAL NOT NULL DEFAULT 0.0, "
 		... "rounds_played INTEGER NOT NULL DEFAULT 0, "
 		... "last_seen INTEGER NOT NULL DEFAULT (strftime('%%s', 'now'))"
@@ -1464,19 +2882,76 @@ void CreateTables()
 		... "special_clears INTEGER NOT NULL DEFAULT 0, "
 		... "self_clears INTEGER NOT NULL DEFAULT 0, "
 		... "skeets INTEGER NOT NULL DEFAULT 0, "
+		... "skeets_melee INTEGER NOT NULL DEFAULT 0, "
 		... "deadstops INTEGER NOT NULL DEFAULT 0, "
 		... "boomer_pops INTEGER NOT NULL DEFAULT 0, "
+		... "boomer_pops_splash INTEGER NOT NULL DEFAULT 0, "
+		... "pin_assists INTEGER NOT NULL DEFAULT 0, "
+		... "pin_dps_assist REAL NOT NULL DEFAULT 0.0, "
+		... "big_hit_assists INTEGER NOT NULL DEFAULT 0, "
+		... "big_hit_assist_score REAL NOT NULL DEFAULT 0.0, "
+		... "spit_ticks_pinned INTEGER NOT NULL DEFAULT 0, "
+		... "spit_ticks_incap INTEGER NOT NULL DEFAULT 0, "
+		... "tank_boom_assists INTEGER NOT NULL DEFAULT 0, "
+		... "witch_assists INTEGER NOT NULL DEFAULT 0, "
+		... "spit_setup_assists INTEGER NOT NULL DEFAULT 0, "
+		... "boom_kill_assists INTEGER NOT NULL DEFAULT 0, "
+		... "charger_multi INTEGER NOT NULL DEFAULT 0, "
+		... "spit_multi_hits INTEGER NOT NULL DEFAULT 0, "
+		... "shove_si INTEGER NOT NULL DEFAULT 0, "
+		... "witch_crowns INTEGER NOT NULL DEFAULT 0, "
+		... "rock_skeets INTEGER NOT NULL DEFAULT 0, "
 		... "revives INTEGER NOT NULL DEFAULT 0, "
 		... "medkit_gives INTEGER NOT NULL DEFAULT 0, "
 		... "special_rescues INTEGER NOT NULL DEFAULT 0, "
 		... "jockey_blocks INTEGER NOT NULL DEFAULT 0, "
 		... "tank_play_actions INTEGER NOT NULL DEFAULT 0, "
+		... "ff_dealt INTEGER NOT NULL DEFAULT 0, "
+		... "ff_taken INTEGER NOT NULL DEFAULT 0, "
+		... "headshot_si INTEGER NOT NULL DEFAULT 0, "
+		... "boomer_vomit_casts INTEGER NOT NULL DEFAULT 0, "
+		... "boomer_vomit_hits INTEGER NOT NULL DEFAULT 0, "
+		... "flow_percent REAL NOT NULL DEFAULT 0.0, "
+		... "survival_time REAL NOT NULL DEFAULT 0.0, "
+		... "alive_end INTEGER NOT NULL DEFAULT 0, "
 		... "ts INTEGER NOT NULL DEFAULT (strftime('%%s', 'now'))"
 		... ");");
 	g_Db.Query(SQL_ErrorOnly, query);
 
 	EnsureColumn("round_stats", "jockey_blocks", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "tank_play_actions", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "skeets_melee", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "boomer_pops_splash", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "pin_assists", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "big_hit_assists", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "big_hit_assist_score", "REAL NOT NULL DEFAULT 0.0");
+	EnsureColumn("round_stats", "pin_dps_assist", "REAL NOT NULL DEFAULT 0.0");
+	EnsureColumn("round_stats", "spit_ticks_pinned", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spit_ticks_incap", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "tank_boom_assists", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "witch_assists", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spit_setup_assists", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "boom_kill_assists", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "charger_multi", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spit_multi_hits", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "shove_si", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "witch_crowns", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "rock_skeets", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "ff_dealt", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "ff_taken", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "headshot_si", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "boomer_vomit_casts", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "boomer_vomit_hits", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "flow_percent", "REAL NOT NULL DEFAULT 0.0");
+	EnsureColumn("round_stats", "survival_time", "REAL NOT NULL DEFAULT 0.0");
+	EnsureColumn("round_stats", "alive_end", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("players", "first_name", "TEXT NOT NULL DEFAULT ''");
+	EnsureColumn("players", "last_name", "TEXT NOT NULL DEFAULT ''");
+
+	Format(query, sizeof(query), "UPDATE players SET first_name = CASE WHEN first_name='' THEN name ELSE first_name END;");
+	g_Db.Query(SQL_ErrorOnly, query);
+	Format(query, sizeof(query), "UPDATE players SET last_name = CASE WHEN last_name='' THEN name ELSE last_name END;");
+	g_Db.Query(SQL_ErrorOnly, query);
 }
 
 void EnsureColumn(const char[] table, const char[] column, const char[] definition)
@@ -1535,61 +3010,4 @@ public void SQL_ErrorOnly(Database db, DBResultSet results, const char[] error, 
 	{
 		LogError("[SkillRating] SQL error: %s", error);
 	}
-}
-
-void StartPlayersBackfillMigration()
-{
-	if (g_Db == null || g_bRebuildInProgress)
-	{
-		return;
-	}
-
-	g_bRebuildInProgress = true;
-
-	char qInsertMissing[1024];
-	Format(qInsertMissing, sizeof(qInsertMissing),
-		"INSERT OR IGNORE INTO players (steamid, name, total_points, rounds_played, last_seen) "
-		... "SELECT rs.steamid, MAX(rs.name), 0.0, 0, COALESCE(MAX(rs.ts), strftime('%%s', 'now')) "
-		... "FROM round_stats rs GROUP BY rs.steamid;");
-	g_Db.Query(SQL_RebuildStepInsertDone, qInsertMissing);
-}
-
-public void SQL_RebuildStepInsertDone(Database db, DBResultSet results, const char[] error, any data)
-{
-	if (results == null)
-	{
-		g_bRebuildInProgress = false;
-		LogError("[SkillRating] Rebuild step insert failed: %s", error);
-		return;
-	}
-
-	char qUpdateTotals[1024];
-	Format(qUpdateTotals, sizeof(qUpdateTotals),
-		"UPDATE players SET "
-		... "total_points = COALESCE((SELECT SUM(rs.awarded_points) FROM round_stats rs WHERE rs.steamid = players.steamid), 0.0), "
-		... "rounds_played = COALESCE((SELECT COUNT(*) FROM round_stats rs WHERE rs.steamid = players.steamid), 0), "
-		... "last_seen = COALESCE((SELECT MAX(rs.ts) FROM round_stats rs WHERE rs.steamid = players.steamid), last_seen);");
-	g_Db.Query(SQL_RebuildStepUpdateDone, qUpdateTotals);
-}
-
-public void SQL_RebuildStepUpdateDone(Database db, DBResultSet results, const char[] error, any data)
-{
-	g_bRebuildInProgress = false;
-
-	if (results == null)
-	{
-		LogError("[SkillRating] Rebuild step update failed: %s", error);
-		return;
-	}
-
-	// Keep online cache in sync after DB rebuild.
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (IsValidHuman(i))
-		{
-			LoadPlayerProfile(i);
-		}
-	}
-
-	PrintToServer("[SkillRating] Players totals rebuild completed.");
 }
