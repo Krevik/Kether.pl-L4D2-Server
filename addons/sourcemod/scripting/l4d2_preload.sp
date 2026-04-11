@@ -275,6 +275,28 @@ public void OnMapStart()
 		PrecacheGeneric("scripts/melee/shovel.txt", true);
 	}
 
+	/* custom hats */
+	if (!IsModelPrecached("models/hats/dildo_box/dildo_box.mdl"))
+	{
+		PrecacheModel("models/hats/dildo_box/dildo_box.mdl", true);
+	}
+
+	AddFileToDownloadsTable("models/hats/dildo_box/dildo_box.mdl");
+	AddFileToDownloadsTable("models/hats/dildo_box/dildo_box.vvd");
+	AddFileToDownloadsTable("models/hats/dildo_box/dildo_box.dx90.vtx");
+
+	PrecacheGeneric("materials/models/hats/dildo/dd_c.vmt", true);
+	PrecacheGeneric("materials/models/hats/dildo/dd_diffuse.vmt", true);
+	PrecacheGeneric("materials/models/hats/dildo/dd_diffuse.vtf", true);
+	PrecacheGeneric("materials/models/hats/dildo/dd_normal.vmt", true);
+	PrecacheGeneric("materials/models/hats/dildo/dd_normal.vtf", true);
+
+	AddFileToDownloadsTable("materials/models/hats/dildo/dd_c.vmt");
+	AddFileToDownloadsTable("materials/models/hats/dildo/dd_diffuse.vmt");
+	AddFileToDownloadsTable("materials/models/hats/dildo/dd_diffuse.vtf");
+	AddFileToDownloadsTable("materials/models/hats/dildo/dd_normal.vmt");
+	AddFileToDownloadsTable("materials/models/hats/dildo/dd_normal.vtf");
+
 	new index = CreateEntityByName("weapon_sniper_scout");
 	DispatchSpawn(index);
 	RemoveEdict(index);

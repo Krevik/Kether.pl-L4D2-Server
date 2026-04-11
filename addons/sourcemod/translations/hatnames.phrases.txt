@@ -380,4 +380,8 @@
 	{
 		"en"		"Tug Boat"
 	}
+	"models/hats/dildo_box/dildo_box.mdl"
+	{
+		"en"		"Dildo"
+	}
 }
