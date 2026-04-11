@@ -1,4 +1,4 @@
-$modelname "models/hats/dildo_box/dildo_box.mdl"
+$modelname "hats/dildo_box/dildo_box.mdl"
 $body "Body" "dd.smd"
 $scale 1
 $surfaceprop "rubber"
