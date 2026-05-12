@@ -3010,6 +3010,19 @@
 	
 //-------- ↓↓↓ you can add custom info here ↓↓↓
 
+//=======================================================================
+//=============== Carried Off
+	"cwm4_building"
+	{
+		"tank_ban_flow"
+		{
+			"useless_mapa"
+			{
+				"min"		"0"
+				"max"		"75"
+			}
+		}
+	}
 
 
 
