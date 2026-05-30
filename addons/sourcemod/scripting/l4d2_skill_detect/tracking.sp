@@ -233,14 +233,7 @@ Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadcast)
 				{
 					// find rock entity through tank
 					if (g_iTankRock[attacker])
-					{
-						// remember that the rock wasn't shot
-						char rock_key[10];
-						FormatEx(rock_key, sizeof(rock_key), "%x", g_iTankRock[attacker]);
-						int rock_array[3];
-						rock_array[rckDamage] = -1;
-						SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
-					}
+						MarkRockHitSurvivor(g_iTankRock[attacker]);
 
 					if (IsValidSurvivor(victim))
 						HandleRockEaten(attacker, victim);
@@ -993,7 +986,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 		{
 			char rock_key[10];
 			FormatEx(rock_key, sizeof(rock_key), "%x", entity);
-			int rock_array[3];
+			int rock_array[strRockData];
 
 			// store which tank is throwing what rock
 			int tank = ShiftTankThrower();
@@ -1003,6 +996,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 				g_iTankRock[tank]	= entity;
 				rock_array[rckTank] = tank;
 			}
+			rock_array[rckHitSurvivor] = 0;
 			SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
 
 			SDKHook(entity, SDKHook_TraceAttack, TraceAttack_Rock);
@@ -1087,10 +1081,13 @@ public void OnEntityDestroyed(int entity)
 	char witch_key[10];
 	FormatEx(witch_key, sizeof(witch_key), "%x", entity);
 
-	int rock_array[3];
+	int rock_array[strRockData];
 	if (GetTrieArray(g_hRockTrie, witch_key, rock_array, sizeof(rock_array)))
 	{
 		// tank rock
+		if (rock_array[rckTank] > 0 && g_iTankRock[rock_array[rckTank]] == entity)
+			g_iTankRock[rock_array[rckTank]] = 0;
+
 		CreateTimer(ROCK_CHECK_TIME, Timer_CheckRockSkeet, entity);
 		SDKUnhook(entity, SDKHook_TraceAttack, TraceAttack_Rock);
 		return;
@@ -1117,7 +1114,7 @@ Action Timer_WitchKeyDelete(Handle timer, any witch)
 
 Action Timer_CheckRockSkeet(Handle timer, any rock)
 {
-	int	 rock_array[3];
+	int	 rock_array[strRockData];
 	char rock_key[10];
 	FormatEx(rock_key, sizeof(rock_key), "%x", rock);
 
@@ -1127,7 +1124,7 @@ Action Timer_CheckRockSkeet(Handle timer, any rock)
 	RemoveFromTrie(g_hRockTrie, rock_key);
 
 	// if rock didn't hit anyone / didn't touch anything, it was shot
-	if (rock_array[rckDamage] > 0)
+	if (rock_array[rckDamage] > 0 && rock_array[rckHitSurvivor] == 0)
 		HandleRockSkeeted(rock_array[rckSkeeter], rock_array[rckTank]);
 
 	return Plugin_Continue;
@@ -1450,6 +1447,40 @@ void CheckWitchCrown(int witch, int attacker, bool bOneShot = false)
 	// remove trie
 }
 
+void MarkRockHitSurvivor(int rock)
+{
+	if (rock <= 0 || !IsValidEntity(rock))
+		return;
+
+	char rock_key[10];
+	int rock_array[strRockData];
+	FormatEx(rock_key, sizeof(rock_key), "%x", rock);
+	if (!GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)))
+		return;
+
+	rock_array[rckDamage] = -1;
+	rock_array[rckHitSurvivor] = 1;
+	SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
+}
+
+void MarkRockTouched(int rock, bool hitSurvivor)
+{
+	if (rock <= 0 || !IsValidEntity(rock))
+		return;
+
+	char rock_key[10];
+	int rock_array[strRockData];
+	FormatEx(rock_key, sizeof(rock_key), "%x", rock);
+	if (!GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)))
+		return;
+
+	rock_array[rckDamage] = -1;
+	if (hitSurvivor)
+		rock_array[rckHitSurvivor] = 1;
+
+	SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
+}
+
 // tank rock
 Action TraceAttack_Rock(int victim, int& attacker, int& inflictor, float& damage, int& damagetype, int& ammotype, int hitbox, int hitgroup)
 {
@@ -1460,9 +1491,15 @@ Action TraceAttack_Rock(int victim, int& attacker, int& inflictor, float& damage
 			report the last shot -- the damage report is without distance falloff
 		*/
 		char rock_key[10];
-		int	 rock_array[3];
+		int	 rock_array[strRockData];
 		FormatEx(rock_key, sizeof(rock_key), "%x", victim);
-		GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array));
+		if (!GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)))
+			return Plugin_Continue;
+
+		// Rock already connected with a survivor/world; ignore late chip shots.
+		if (rock_array[rckDamage] < 0 || rock_array[rckHitSurvivor] != 0)
+			return Plugin_Continue;
+
 		rock_array[rckDamage] += RoundToFloor(damage);
 		rock_array[rckSkeeter] = attacker;
 		SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
@@ -1470,15 +1507,9 @@ Action TraceAttack_Rock(int victim, int& attacker, int& inflictor, float& damage
 	return Plugin_Continue;
 }
 
-void OnTouch_Rock(int entity)
+void OnTouch_Rock(int entity, int other)
 {
-	// remember that the rock wasn't shot
-	char rock_key[10];
-	FormatEx(rock_key, sizeof(rock_key), "%x", entity);
-	int rock_array[3];
-	rock_array[rckDamage] = -1;
-	SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
-
+	MarkRockTouched(entity, IsValidSurvivor(other));
 	SDKUnhook(entity, SDKHook_Touch, OnTouch_Rock);
 }
 

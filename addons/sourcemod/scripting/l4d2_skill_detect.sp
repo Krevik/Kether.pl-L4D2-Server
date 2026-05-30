@@ -142,6 +142,7 @@ enum
 	rckDamage,
 	rckTank,
 	rckSkeeter,
+	rckHitSurvivor,
 	strRockData
 };
 
