@@ -30,6 +30,10 @@
 
 #define MIX_MIN_TEAM_SIZE 1
 #define MIX_MAX_TEAM_SIZE 4
+#define SKILL_RANK_LIST_MAX 512
+#define SKILL_SIMILAR_COUNT 5
+#define SKILL_TOP_MIN_ROUNDS_FLOOR 100
+#define KSR_DISPLAY_SCALE 10.0
 
 stock float FloatMax(float a, float b)
 {
@@ -47,6 +51,22 @@ stock float FloatClamp(float value, float minVal, float maxVal)
 		return maxVal;
 	}
 	return value;
+}
+
+// Player-facing rating (MMR-style): internal per-round average * KSR_DISPLAY_SCALE.
+stock float PointsToKSR(float points)
+{
+	return points * KSR_DISPLAY_SCALE;
+}
+
+stock float GetClientKSR(int client)
+{
+	return PointsToKSR(GetAveragePoints(client));
+}
+
+stock void FormatKSR(float points, char[] buffer, int size)
+{
+	Format(buffer, size, "%.0f", PointsToKSR(points));
 }
 
 Database g_Db = null;
@@ -110,7 +130,6 @@ ConVar g_CvarWeightBoomerVomitHit;
 ConVar g_CvarWeightBoomerVomitCast;
 ConVar g_CvarTopMinRounds;
 ConVar g_CvarMixVotePct;
-ConVar g_CvarMixVoteCooldown;
 
 bool g_bRoundActive = false;
 bool g_bRoundFinalized = false;
@@ -220,7 +239,6 @@ bool g_bHealStartedToOther[MAXPLAYERS + 1];
 
 bool g_bMixVoteInProgress = false;
 Handle g_hMixVote = INVALID_HANDLE;
-float g_fLastMixVoteTime = 0.0;
 
 public Plugin myinfo =
 {
@@ -299,9 +317,8 @@ public void OnPluginStart()
 	g_CvarWeightFlowPercent = CreateConVar("sm_skill_w_flow_percent", "0.15", "Weight per % flow progress (best without tank)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerVomitHit = CreateConVar("sm_skill_w_boomer_vomit_hit", "2.0", "Weight per boomer vomit victim (infected side)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerVomitCast = CreateConVar("sm_skill_w_boomer_vomit_cast", "-0.5", "Penalty per boomer vomit cast (infected side)", FCVAR_NONE, false, 0.0, false);
-	g_CvarTopMinRounds = CreateConVar("sm_skill_top_min_rounds", "10", "Minimum rounds for top ranking (hard floor 10)", FCVAR_NONE, true, 0.0, false);
+	g_CvarTopMinRounds = CreateConVar("sm_skill_top_min_rounds", "100", "Minimum rounds for KSR top/similar ranking (hard floor 100)", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixVotePct = CreateConVar("sm_skill_mix_vote_pct", "51", "Percent votes required for skill mix", FCVAR_NONE, true, 1.0, true, 100.0);
-	g_CvarMixVoteCooldown = CreateConVar("sm_skill_mix_vote_cooldown", "120.0", "Cooldown between skill mix votes", FCVAR_NONE, true, 0.0, false);
 
 	AutoExecConfig(true, "kether_skill_rating");
 
@@ -336,11 +353,11 @@ public void OnPluginStart()
 	HookEvent("charger_carry_end", Event_PinEnd_Generic, EventHookMode_Post);
 	HookEvent("triggered_car_alarm", Event_CarAlarmTriggered, EventHookMode_Post);
 
-	RegConsoleCmd("sm_skill", Command_Skill, "Show your skill rating");
-	RegConsoleCmd("sm_myskill", Command_Skill, "Show your skill rating");
-	RegConsoleCmd("sm_skilltop", Command_SkillTop, "Show top skill players");
-	RegConsoleCmd("sm_skillsim", Command_SkillSim, "Show players with a similar profile");
-	RegConsoleCmd("sm_skillmix", Command_SkillMixVote, "Call vote to mix teams by skill");
+	RegConsoleCmd("sm_skill", Command_Skill, "Open KSR (Kether Skill Rating) menu");
+	RegConsoleCmd("sm_myskill", Command_Skill, "Open KSR (Kether Skill Rating) menu");
+	RegConsoleCmd("sm_skilltop", Command_SkillTop, "Show top KSR leaderboard");
+	RegConsoleCmd("sm_skillsim", Command_SkillSim, "Show players with similar KSR rank");
+	RegConsoleCmd("sm_skillmix", Command_SkillMixVote, "Call vote to mix teams by KSR");
 
 	g_bReadyUpAvailable = LibraryExists("readyup");
 
@@ -1594,13 +1611,13 @@ public Action Command_Skill(int client, int args)
 {
 	if (!g_CvarEnabled.BoolValue)
 	{
-		ReplyToCommand(client, "[Skill] Plugin is disabled.");
+		ReplyToCommand(client, "[KSR] Plugin is disabled.");
 		return Plugin_Handled;
 	}
 
 	if (!IsValidHuman(client))
 	{
-		ReplyToCommand(client, "[Skill] This command is in-game only.");
+		ReplyToCommand(client, "[KSR] This command is in-game only.");
 		return Plugin_Handled;
 	}
 
@@ -1634,19 +1651,21 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 		return;
 	}
 
-	float avg = GetAveragePoints(target);
-
 	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
 	char title[128];
 	char displayName[160];
 	BuildDisplayName(target, displayName, sizeof(displayName));
-	Format(title, sizeof(title), "Skill Summary: %s", displayName);
+	Format(title, sizeof(title), "KSR: %s", displayName);
 	menu.SetTitle(title);
 
 	char line[256];
+	char ksr[16];
+	char totalKsr[16];
 
-	// Very short overview only (hide details)
-	Format(line, sizeof(line), "Total points: %.2f | Rounds: %d | Avg: %.2f", g_fTotalPoints[target], g_iRoundsPlayed[target], avg);
+	FormatKSR(GetAveragePoints(target), ksr, sizeof(ksr));
+	FormatKSR(g_fTotalPoints[target], totalKsr, sizeof(totalKsr));
+
+	Format(line, sizeof(line), "KSR: %s | Rounds: %d | Total KSR: %s", ksr, g_iRoundsPlayed[target], totalKsr);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	Format(line, sizeof(line), "Flow best: %.1f%% | Survival (rnd): %.0fs", g_fFlowBest[target], g_fSurvivalTime[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
@@ -1664,7 +1683,7 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
 	Format(line, sizeof(line), "Tank: hold %.0fs | kills %d | passes %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "Tip: use !skilltop / !skillsim", ITEMDRAW_DISABLED);
+	menu.AddItem("x", "Tip: !skilltop / !skillsim for KSR ranks", ITEMDRAW_DISABLED);
 
 	menu.ExitBackButton = showBackButton;
 	menu.Display(client, 20);
@@ -1674,7 +1693,7 @@ public Action Command_SkillTop(int client, int args)
 {
 	if (!g_CvarEnabled.BoolValue)
 	{
-		ReplyToCommand(client, "[Skill] Plugin is disabled.");
+		ReplyToCommand(client, "[KSR] Plugin is disabled.");
 		return Plugin_Handled;
 	}
 
@@ -1694,13 +1713,7 @@ public Action Command_SkillTop(int client, int args)
 		}
 	}
 
-	int minRounds = g_CvarTopMinRounds.IntValue;
-	if (minRounds < 10)
-	{
-		minRounds = 10;
-	}
-
-	RequestTopMenu(client, limit, minRounds, false);
+	RequestTopMenu(client, limit, GetTopMinRounds(), false);
 
 	return Plugin_Handled;
 }
@@ -1709,13 +1722,13 @@ public Action Command_SkillSim(int client, int args)
 {
 	if (!g_CvarEnabled.BoolValue)
 	{
-		ReplyToCommand(client, "[Skill] Plugin is disabled.");
+		ReplyToCommand(client, "[KSR] Plugin is disabled.");
 		return Plugin_Handled;
 	}
 
 	if (!IsValidHuman(client))
 	{
-		ReplyToCommand(client, "[Skill] This command is in-game only.");
+		ReplyToCommand(client, "[KSR] This command is in-game only.");
 		return Plugin_Handled;
 	}
 
@@ -1740,25 +1753,25 @@ public Action Command_SkillMixVote(int client, int args)
 {
 	if (!g_CvarEnabled.BoolValue)
 	{
-		ReplyToCommand(client, "[SkillMix] Plugin is disabled.");
+		ReplyToCommand(client, "[KSR] Plugin is disabled.");
 		return Plugin_Handled;
 	}
 
 	if (!IsValidHuman(client))
 	{
-		ReplyToCommand(client, "[SkillMix] This command is in-game only.");
+		ReplyToCommand(client, "[KSR] This command is in-game only.");
 		return Plugin_Handled;
 	}
 
 	if (GetClientTeam(client) == TEAM_SPECTATOR)
 	{
-		ReplyToCommand(client, "[SkillMix] Spectators cannot call this vote.");
+		ReplyToCommand(client, "[KSR] Spectators cannot call this vote.");
 		return Plugin_Handled;
 	}
 
 	if (g_bMixVoteInProgress || IsBuiltinVoteInProgress())
 	{
-		ReplyToCommand(client, "[SkillMix] A vote is already in progress.");
+		ReplyToCommand(client, "[KSR] A vote is already in progress.");
 		return Plugin_Handled;
 	}
 
@@ -1769,27 +1782,18 @@ public Action Command_SkillMixVote(int client, int args)
 
 	if (!IsValidMixSetup(survCount, infCount))
 	{
-		ReplyToCommand(client, "[SkillMix] Mix requires equal teams with 1v1 up to 4v4.");
-		return Plugin_Handled;
-	}
-
-	float now = GetEngineTime();
-	float cooldown = g_CvarMixVoteCooldown.FloatValue;
-	if ((now - g_fLastMixVoteTime) < cooldown)
-	{
-		ReplyToCommand(client, "[SkillMix] Vote cooldown active.");
+		ReplyToCommand(client, "[KSR] Mix requires equal teams with 1v1 up to 4v4.");
 		return Plugin_Handled;
 	}
 
 	g_hMixVote = CreateBuiltinVote(Handle_MixVoteAction, BuiltinVoteType_Custom_YesNo, BuiltinVoteAction_Cancel | BuiltinVoteAction_VoteEnd | BuiltinVoteAction_End);
-	SetBuiltinVoteArgument(g_hMixVote, "Mix teams by skill rating?");
+	SetBuiltinVoteArgument(g_hMixVote, "Mix teams by KSR?");
 	SetBuiltinVoteInitiator(g_hMixVote, client);
 	SetBuiltinVoteResultCallback(g_hMixVote, Handle_MixVoteResult);
 	DisplayBuiltinVote(g_hMixVote, voters, voterCount, 15);
 	FakeClientCommand(client, "Vote Yes");
 
 	g_bMixVoteInProgress = true;
-	g_fLastMixVoteTime = now;
 
 	return Plugin_Handled;
 }
@@ -1797,12 +1801,12 @@ public Action Command_SkillMixVote(int client, int args)
 void ShowSkillMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_SkillMain, MENU_ACTIONS_DEFAULT);
-	menu.SetTitle("=== Skill Rating ===");
+	menu.SetTitle("=== Kether Skill Rating (KSR) ===");
 	menu.AddItem("x", "Choose an option:", ITEMDRAW_DISABLED);
-	menu.AddItem("my", "My skill");
-	menu.AddItem("top", "Top players");
-	menu.AddItem("sim", "Similar players to me");
-	menu.AddItem("mix", "Call skill mix vote");
+	menu.AddItem("my", "My KSR");
+	menu.AddItem("top", "Top KSR leaderboard");
+	menu.AddItem("sim", "Similar KSR rank");
+	menu.AddItem("mix", "Call KSR mix vote");
 	if (CheckCommandAccess(client, "sm_skill_admin_reset", ADMFLAG_ROOT, true))
 	{
 		menu.AddItem("reset", "Admin: Reset selected player stats");
@@ -1833,12 +1837,7 @@ public int MenuHandler_SkillMain(Menu menu, MenuAction action, int client, int i
 	}
 	else if (StrEqual(info, "top"))
 	{
-		int minRounds = g_CvarTopMinRounds.IntValue;
-		if (minRounds < 10)
-		{
-			minRounds = 10;
-		}
-		RequestTopMenu(client, 10, minRounds, true);
+		RequestTopMenu(client, 10, GetTopMinRounds(), true);
 	}
 	else if (StrEqual(info, "sim"))
 	{
@@ -1860,7 +1859,7 @@ void ShowAdminResetPlayerMenu(int client)
 {
 	if (!CheckCommandAccess(client, "sm_skill_admin_reset", ADMFLAG_ROOT, true))
 	{
-		ReplyToCommand(client, "[Skill] No access.");
+		ReplyToCommand(client, "[KSR] No access.");
 		return;
 	}
 
@@ -1913,7 +1912,7 @@ public void SQL_ShowAdminResetPlayersMenu(Database db, DBResultSet results, cons
 
 	if (results == null)
 	{
-		ReplyToCommand(client, "[Skill] Failed to load admin reset list: %s", error);
+		ReplyToCommand(client, "[KSR] Failed to load admin reset list: %s", error);
 		return;
 	}
 
@@ -1981,10 +1980,10 @@ void ResetPlayerStatsBySteamId(const char[] steamid, int adminClient)
 		g_fTotalPoints[target] = 0.0;
 		g_iRoundsPlayed[target] = 0;
 		ResetRoundStats(target);
-		PrintToChat(target, "[Skill] Your skill stats were reset by admin.");
+		PrintToChat(target, "[KSR] Your KSR stats were reset by admin.");
 	}
 
-	ReplyToCommand(adminClient, "[Skill] Stats reset for steamid %s", steamid);
+	ReplyToCommand(adminClient, "[KSR] Stats reset for steamid %s", steamid);
 }
 
 public void Handle_MixVoteAction(Handle vote, BuiltinVoteAction action, int param1, int param2)
@@ -2029,7 +2028,7 @@ public void Handle_MixVoteResult(Handle vote, int num_votes, int num_clients, co
 		return;
 	}
 
-	DisplayBuiltinVotePass(vote, "Applying skill mix...");
+	DisplayBuiltinVotePass(vote, "Applying KSR mix...");
 	PerformSkillMix();
 }
 
@@ -2070,7 +2069,7 @@ void PerformSkillMix()
 
 	if (!IsValidMixSetup(survCount, infCount))
 	{
-		PrintToChatAll("[SkillMix] Mix aborted: teams are no longer valid.");
+		PrintToChatAll("[KSR] Mix aborted: teams are no longer valid.");
 		return;
 	}
 
@@ -2128,7 +2127,7 @@ void PerformSkillMix()
 		MoveHumanToTeam(teamInf[i], TEAM_INFECTED);
 	}
 
-	PrintToChatAll("[SkillMix] Teams mixed by current skill rating.");
+	PrintToChatAll("[KSR] Teams mixed by current KSR.");
 }
 
 void SortByRatingDesc(int players[MAXPLAYERS + 1], float rating[MAXPLAYERS + 1], int count)
@@ -2262,6 +2261,16 @@ int FindSurvivorBot()
 	return -1;
 }
 
+int GetTopMinRounds()
+{
+	int minRounds = g_CvarTopMinRounds.IntValue;
+	if (minRounds < SKILL_TOP_MIN_ROUNDS_FLOOR)
+	{
+		minRounds = SKILL_TOP_MIN_ROUNDS_FLOOR;
+	}
+	return minRounds;
+}
+
 void RequestTopMenu(int client, int limit, int minRounds, bool showBackButton)
 {
 	char query[512];
@@ -2281,26 +2290,43 @@ void RequestTopMenu(int client, int limit, int minRounds, bool showBackButton)
 
 void RequestSimilarityMenu(int client, int target, bool showBackButton)
 {
-	char steamid[32];
-	if (!GetPlayerSteamId(target, steamid, sizeof(steamid)))
+	char targetSteamid[32];
+	if (!GetPlayerSteamId(target, targetSteamid, sizeof(targetSteamid)))
 	{
-		ReplyToCommand(client, "[Skill] Cannot resolve SteamID for target.");
+		ReplyToCommand(client, "[KSR] Cannot resolve SteamID for target.");
 		return;
 	}
 
-	char query[1024];
+	char targetName[MAX_NAME_LENGTH * 2];
+	if (g_sFirstName[target][0] != '\0' && !StrEqual(g_sFirstName[target], g_sLastName[target], false))
+	{
+		Format(targetName, sizeof(targetName), "%s (%s)", g_sLastName[target], g_sFirstName[target]);
+	}
+	else if (g_sLastName[target][0] != '\0')
+	{
+		strcopy(targetName, sizeof(targetName), g_sLastName[target]);
+	}
+	else
+	{
+		GetClientName(target, targetName, sizeof(targetName));
+	}
+
+	int minRounds = GetTopMinRounds();
+	char query[512];
 	Format(query, sizeof(query),
-		"SELECT p.steamid, p.last_name, p.first_name, p.total_points, p.rounds_played, "
-		... "COALESCE(SUM(r.dmg_survivor), 0), COALESCE(SUM(r.dmg_infected), 0), COALESCE(SUM(r.dmg_tank), 0), "
-		... "COALESCE(SUM(r.special_clears + r.self_clears + r.skeets + r.skeets_melee + r.deadstops + r.boomer_pops + r.revives + r.medkit_gives + r.special_rescues + r.jockey_blocks + r.tank_play_actions), 0) "
-		... "FROM players p LEFT JOIN round_stats r ON p.steamid = r.steamid "
-		... "WHERE p.steamid = '%s' GROUP BY p.steamid;",
-		steamid);
+		"SELECT steamid, last_name, first_name, total_points, rounds_played, "
+		... "CASE WHEN rounds_played > 0 THEN (total_points / rounds_played) ELSE 0 END AS avg_score "
+		... "FROM players WHERE rounds_played >= %d "
+		... "ORDER BY avg_score DESC, total_points DESC;",
+		minRounds);
 
 	DataPack pack = new DataPack();
 	pack.WriteCell(client);
 	pack.WriteCell(showBackButton ? 1 : 0);
-	g_Db.Query(SQL_LoadSimilarityTarget, query, pack);
+	pack.WriteString(targetSteamid);
+	pack.WriteString(targetName);
+	pack.WriteCell(minRounds);
+	g_Db.Query(SQL_ShowRankNeighbors, query, pack);
 }
 
 public int MenuHandler_InfoBack(Menu menu, MenuAction action, int client, int item)
@@ -2335,15 +2361,20 @@ public void SQL_ShowTop(Database db, DBResultSet results, const char[] error, Da
 
 	if (results == null)
 	{
-		ReplyToCommand(client, "[Skill] Top query failed: %s", error);
+		ReplyToCommand(client, "[KSR] Top query failed: %s", error);
 		return;
 	}
 
 	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
 	char title[128];
-	Format(title, sizeof(title), "Top %d Players (min rounds: %d)", limit, minRounds);
+	Format(title, sizeof(title), "Top %d KSR Leaderboard", limit);
 	menu.SetTitle(title);
 	menu.ExitBackButton = showBackButton;
+
+	char reqLine[128];
+	Format(reqLine, sizeof(reqLine), "Requires minimum %d rounds played to qualify.", minRounds);
+	menu.AddItem("x", reqLine, ITEMDRAW_DISABLED);
+	menu.AddItem("x", "--- Ranked players ---", ITEMDRAW_DISABLED);
 
 	int rank = 1;
 	while (results.FetchRow())
@@ -2352,23 +2383,30 @@ public void SQL_ShowTop(Database db, DBResultSet results, const char[] error, Da
 		char firstName[MAX_NAME_LENGTH];
 		results.FetchString(0, lastName, sizeof(lastName));
 		results.FetchString(1, firstName, sizeof(firstName));
-		float total = results.FetchFloat(2);
 		int rounds = results.FetchInt(3);
 		float avg = results.FetchFloat(4);
+
+		if (rounds < minRounds)
+		{
+			continue;
+		}
 
 		if (lastName[0] == '\0' && firstName[0] != '\0')
 		{
 			strcopy(lastName, sizeof(lastName), firstName);
 		}
 
+		char ksr[16];
+		FormatKSR(avg, ksr, sizeof(ksr));
+
 		char line[192];
 		if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
 		{
-			Format(line, sizeof(line), "#%d %s (%s) | avg %.2f | total %.1f | rounds %d", rank, lastName, firstName, avg, total, rounds);
+			Format(line, sizeof(line), "#%d %s (%s) | KSR %s | rounds %d", rank, lastName, firstName, ksr, rounds);
 		}
 		else
 		{
-			Format(line, sizeof(line), "#%d %s | avg %.2f | total %.1f | rounds %d", rank, lastName, avg, total, rounds);
+			Format(line, sizeof(line), "#%d %s | KSR %s | rounds %d", rank, lastName, ksr, rounds);
 		}
 		menu.AddItem("x", line, ITEMDRAW_DISABLED);
 		rank++;
@@ -2376,97 +2414,40 @@ public void SQL_ShowTop(Database db, DBResultSet results, const char[] error, Da
 
 	if (rank == 1)
 	{
-		menu.AddItem("x", "No players match ranking criteria.", ITEMDRAW_DISABLED);
+		menu.AddItem("x", "No players match KSR ranking criteria.", ITEMDRAW_DISABLED);
 	}
 
 	menu.Display(client, 20);
 }
 
-public void SQL_LoadSimilarityTarget(Database db, DBResultSet results, const char[] error, DataPack pack)
+void FormatSkillPlayerName(const char[] lastName, const char[] firstName, char[] buffer, int size)
 {
-	pack.Reset();
-	int client = pack.ReadCell();
-	bool showBackButton = view_as<bool>(pack.ReadCell());
-	delete pack;
-
-	if (!IsValidClient(client))
+	if (lastName[0] == '\0' && firstName[0] != '\0')
 	{
+		strcopy(buffer, size, firstName);
 		return;
 	}
 
-	if (results == null || !results.FetchRow())
+	if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
 	{
-		Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
-		menu.SetTitle("Skill Similarity");
-		menu.AddItem("x", "No data available for similarity.", ITEMDRAW_DISABLED);
-		menu.ExitBackButton = showBackButton;
-		menu.Display(client, 20);
-		return;
-	}
-
-	char targetSteamid[32];
-	results.FetchString(0, targetSteamid, sizeof(targetSteamid));
-	char targetLast[MAX_NAME_LENGTH];
-	char targetFirst[MAX_NAME_LENGTH];
-	results.FetchString(1, targetLast, sizeof(targetLast));
-	results.FetchString(2, targetFirst, sizeof(targetFirst));
-	float targetTotal = results.FetchFloat(3);
-	int targetRounds = results.FetchInt(4);
-	float targetDmgSurv = results.FetchFloat(5);
-	float targetDmgInf = results.FetchFloat(6);
-	float targetDmgTank = results.FetchFloat(7);
-	float targetActions = results.FetchFloat(8);
-
-	float r = float(targetRounds > 0 ? targetRounds : 1);
-	float targetAvgPts = targetTotal / r;
-	float targetAvgSurv = targetDmgSurv / r;
-	float targetAvgInf = targetDmgInf / r;
-	float targetAvgTank = targetDmgTank / r;
-	float targetAvgActions = targetActions / r;
-
-	char targetName[MAX_NAME_LENGTH * 2];
-	if (targetFirst[0] != '\0' && !StrEqual(targetFirst, targetLast, false))
-	{
-		Format(targetName, sizeof(targetName), "%s (%s)", targetLast, targetFirst);
+		Format(buffer, size, "%s (%s)", lastName, firstName);
 	}
 	else
 	{
-		strcopy(targetName, sizeof(targetName), targetLast);
+		strcopy(buffer, size, lastName);
 	}
-
-	char query[1024];
-	Format(query, sizeof(query),
-		"SELECT p.steamid, p.last_name, p.first_name, p.total_points, p.rounds_played, "
-		... "COALESCE(SUM(r.dmg_survivor), 0), COALESCE(SUM(r.dmg_infected), 0), COALESCE(SUM(r.dmg_tank), 0), "
-		... "COALESCE(SUM(r.special_clears + r.self_clears + r.skeets + r.skeets_melee + r.deadstops + r.boomer_pops + r.revives + r.medkit_gives + r.special_rescues + r.jockey_blocks + r.tank_play_actions), 0) "
-		... "FROM players p LEFT JOIN round_stats r ON p.steamid = r.steamid "
-		... "WHERE p.steamid != '%s' GROUP BY p.steamid;",
-		targetSteamid);
-
-	DataPack pack2 = new DataPack();
-	pack2.WriteCell(client);
-	pack2.WriteCell(showBackButton ? 1 : 0);
-	pack2.WriteString(targetName);
-	pack2.WriteFloat(targetAvgPts);
-	pack2.WriteFloat(targetAvgSurv);
-	pack2.WriteFloat(targetAvgInf);
-	pack2.WriteFloat(targetAvgTank);
-	pack2.WriteFloat(targetAvgActions);
-	g_Db.Query(SQL_ShowSimilarity, query, pack2);
 }
 
-public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] error, DataPack pack)
+public void SQL_ShowRankNeighbors(Database db, DBResultSet results, const char[] error, DataPack pack)
 {
 	pack.Reset();
 	int client = pack.ReadCell();
 	bool showBackButton = view_as<bool>(pack.ReadCell());
+	char targetSteamid[32];
+	pack.ReadString(targetSteamid, sizeof(targetSteamid));
 	char targetName[MAX_NAME_LENGTH * 2];
 	pack.ReadString(targetName, sizeof(targetName));
-	float targetAvgPts = pack.ReadFloat();
-	float targetAvgSurv = pack.ReadFloat();
-	float targetAvgInf = pack.ReadFloat();
-	float targetAvgTank = pack.ReadFloat();
-	float targetAvgActions = pack.ReadFloat();
+	int minRounds = pack.ReadCell();
 	delete pack;
 
 	if (!IsValidClient(client))
@@ -2474,121 +2455,172 @@ public void SQL_ShowSimilarity(Database db, DBResultSet results, const char[] er
 		return;
 	}
 
+	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	menu.ExitBackButton = showBackButton;
+
 	if (results == null)
 	{
-		ReplyToCommand(client, "[Skill] Similarity query failed: %s", error);
+		ReplyToCommand(client, "[KSR] Ranking query failed: %s", error);
 		return;
 	}
 
-char topName[5][MAX_NAME_LENGTH * 2];
-	float topDist[5];
-	float topAvg[5];
-	int topRounds[5];
+	char rankSteamid[SKILL_RANK_LIST_MAX][32];
+	char rankName[SKILL_RANK_LIST_MAX][MAX_NAME_LENGTH * 2];
+	float rankAvg[SKILL_RANK_LIST_MAX];
+	int rankRounds[SKILL_RANK_LIST_MAX];
+	int rankCount = 0;
 
-	for (int i = 0; i < 5; i++)
-	{
-		topDist[i] = 999999.0;
-		topAvg[i] = 0.0;
-		topRounds[i] = 0;
-		topName[i][0] = '\0';
-	}
-
-	while (results.FetchRow())
+	while (results.FetchRow() && rankCount < SKILL_RANK_LIST_MAX)
 	{
 		char lastName[MAX_NAME_LENGTH];
 		char firstName[MAX_NAME_LENGTH];
-		float total = results.FetchFloat(3);
-		int rounds = results.FetchInt(4);
-		float dmgSurv = results.FetchFloat(5);
-		float dmgInf = results.FetchFloat(6);
-		float dmgTank = results.FetchFloat(7);
-		float actions = results.FetchFloat(8);
+		results.FetchString(0, rankSteamid[rankCount], sizeof(rankSteamid[]));
 		results.FetchString(1, lastName, sizeof(lastName));
 		results.FetchString(2, firstName, sizeof(firstName));
+		results.FetchFloat(3); // total_points (unused here)
+		rankRounds[rankCount] = results.FetchInt(4);
+		rankAvg[rankCount] = results.FetchFloat(5);
 
-		if (rounds <= 0)
+		if (rankRounds[rankCount] < minRounds)
 		{
 			continue;
 		}
 
-		float rr = float(rounds);
-		float avgPts = total / rr;
-		float avgSurv = dmgSurv / rr;
-		float avgInf = dmgInf / rr;
-		float avgTank = dmgTank / rr;
-		float avgActions = actions / rr;
+		FormatSkillPlayerName(lastName, firstName, rankName[rankCount], sizeof(rankName[]));
+		rankCount++;
+	}
 
-		float dist = 0.0;
-		dist += FloatAbs(avgPts - targetAvgPts) / FloatMax(1.0, targetAvgPts);
-		dist += FloatAbs(avgSurv - targetAvgSurv) / FloatMax(1.0, targetAvgSurv);
-		dist += FloatAbs(avgInf - targetAvgInf) / FloatMax(1.0, targetAvgInf);
-		dist += FloatAbs(avgTank - targetAvgTank) / FloatMax(1.0, targetAvgTank);
-		dist += FloatAbs(avgActions - targetAvgActions) / FloatMax(1.0, targetAvgActions);
-
-		int worst = 0;
-		for (int i = 1; i < 5; i++)
+	int targetIdx = -1;
+	for (int i = 0; i < rankCount; i++)
+	{
+		if (StrEqual(rankSteamid[i], targetSteamid, false))
 		{
-			if (topDist[i] > topDist[worst])
-			{
-				worst = i;
-			}
-		}
-
-		if (dist < topDist[worst])
-		{
-			topDist[worst] = dist;
-			topAvg[worst] = avgPts;
-			topRounds[worst] = rounds;
-			if (lastName[0] == '\0' && firstName[0] != '\0')
-			{
-				strcopy(lastName, sizeof(lastName), firstName);
-			}
-			if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
-			{
-				Format(topName[worst], sizeof(topName[]), "%s (%s)", lastName, firstName);
-			}
-			else
-			{
-				strcopy(topName[worst], sizeof(topName[]), lastName);
-			}
+			targetIdx = i;
+			break;
 		}
 	}
 
-	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
-	char title[128];
-	Format(title, sizeof(title), "Players similar to %s", targetName);
-	menu.SetTitle(title);
-	menu.ExitBackButton = showBackButton;
-
-	for (int n = 0; n < 5; n++)
+	if (targetIdx == -1)
 	{
-		int best = -1;
-		for (int i = 0; i < 5; i++)
+		menu.SetTitle("KSR Similar Rank");
+		char line[128];
+		Format(line, sizeof(line), "%s needs at least %d rounds for KSR ranking.", targetName, minRounds);
+		menu.AddItem("x", line, ITEMDRAW_DISABLED);
+		menu.Display(client, 20);
+		return;
+	}
+
+	int targetRank = targetIdx + 1;
+	char title[160];
+	Format(title, sizeof(title), "KSR rank near %s (#%d)", targetName, targetRank);
+	menu.SetTitle(title);
+
+	char selfKsr[16];
+	FormatKSR(rankAvg[targetIdx], selfKsr, sizeof(selfKsr));
+	char selfLine[192];
+	Format(selfLine, sizeof(selfLine), "You: #%d | KSR %s | rounds %d", targetRank, selfKsr, rankRounds[targetIdx]);
+	menu.AddItem("x", selfLine, ITEMDRAW_DISABLED);
+	menu.AddItem("x", "--- Nearest KSR ranks ---", ITEMDRAW_DISABLED);
+
+	int pickIdx[SKILL_SIMILAR_COUNT];
+	int pickRank[SKILL_SIMILAR_COUNT];
+	float pickAvg[SKILL_SIMILAR_COUNT];
+	int pickRounds[SKILL_SIMILAR_COUNT];
+	char pickName[SKILL_SIMILAR_COUNT][MAX_NAME_LENGTH * 2];
+	int pickDist[SKILL_SIMILAR_COUNT];
+	int pickCount = 0;
+
+	for (int i = 0; i < SKILL_SIMILAR_COUNT; i++)
+	{
+		pickDist[i] = 999999;
+		pickIdx[i] = -1;
+	}
+
+	for (int i = 0; i < rankCount; i++)
+	{
+		if (i == targetIdx)
 		{
-			if (topName[i][0] == '\0')
+			continue;
+		}
+
+		int playerRank = i + 1;
+		int dist = playerRank - targetRank;
+		if (dist < 0)
+		{
+			dist = -dist;
+		}
+
+		int worst = 0;
+		for (int slot = 1; slot < SKILL_SIMILAR_COUNT; slot++)
+		{
+			if (pickDist[slot] > pickDist[worst])
 			{
-				continue;
-			}
-			if (best == -1 || topDist[i] < topDist[best])
-			{
-				best = i;
+				worst = slot;
 			}
 		}
 
-		if (best == -1)
+		bool replace = false;
+		if (pickCount < SKILL_SIMILAR_COUNT)
+		{
+			replace = true;
+		}
+		else if (dist < pickDist[worst])
+		{
+			replace = true;
+		}
+		else if (dist == pickDist[worst] && playerRank < pickRank[worst])
+		{
+			replace = true;
+		}
+
+		if (!replace)
+		{
+			continue;
+		}
+
+		pickIdx[worst] = i;
+		pickRank[worst] = playerRank;
+		pickAvg[worst] = rankAvg[i];
+		pickRounds[worst] = rankRounds[i];
+		strcopy(pickName[worst], sizeof(pickName[]), rankName[i]);
+		pickDist[worst] = dist;
+		if (pickCount < SKILL_SIMILAR_COUNT)
+		{
+			pickCount++;
+		}
+	}
+
+	for (int n = 0; n < SKILL_SIMILAR_COUNT; n++)
+	{
+		int bestSlot = -1;
+		for (int slot = 0; slot < SKILL_SIMILAR_COUNT; slot++)
+		{
+			if (pickIdx[slot] == -1)
+			{
+				continue;
+			}
+			if (bestSlot == -1 || pickRank[slot] < pickRank[bestSlot])
+			{
+				bestSlot = slot;
+			}
+		}
+
+		if (bestSlot == -1)
 		{
 			break;
 		}
 
+		char neighborKsr[16];
+		FormatKSR(pickAvg[bestSlot], neighborKsr, sizeof(neighborKsr));
 		char line[192];
-		Format(line, sizeof(line), "%s | avg %.2f | rounds %d", topName[best], topAvg[best], topRounds[best]);
+		Format(line, sizeof(line), "#%d %s | KSR %s | rounds %d", pickRank[bestSlot], pickName[bestSlot], neighborKsr, pickRounds[bestSlot]);
 		menu.AddItem("x", line, ITEMDRAW_DISABLED);
-		topName[best][0] = '\0';
+		pickIdx[bestSlot] = -1;
 	}
 
-	if (menu.ItemCount == 0)
+	if (pickCount == 0)
 	{
-		menu.AddItem("x", "No similar players found.", ITEMDRAW_DISABLED);
+		menu.AddItem("x", "No other KSR-ranked players nearby.", ITEMDRAW_DISABLED);
 	}
 
 	menu.Display(client, 20);
