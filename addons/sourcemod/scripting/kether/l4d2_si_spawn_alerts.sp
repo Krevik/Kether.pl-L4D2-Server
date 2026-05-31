@@ -1,4 +1,6 @@
 /*
+ * DEPRECATED — use l4d2_si_materialize_cue.sp (hooks materialize, correct switch, channel cvars).
+ *
  * Plugin: L4D2 Special Infected Spawn Alerts
  * Author: StarterX4, Gemini Code Assist
  * Version: 0.1
