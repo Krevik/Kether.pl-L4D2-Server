@@ -122,7 +122,7 @@ public void OnPluginStart() {
 		"Sound channel: 2=VOICE (vanilla-like), 0=AUTO (fallback if culled).", _, true, 0.0, true, 7.0);
 	g_CvarLevel   = CreateConVar("sm_si_materialize_cue_level", "95",
 		"Sound level (dB) for the cue.", _, true, 60.0, true, 110.0);
-	g_CvarClasses = CreateConVar("sm_si_materialize_cue_classes", "63",
+	g_CvarClasses = CreateConVar("sm_si_materialize_cue_classes", "59",
 		"Bitmask: 1=Smoker, 2=Boomer, 4=Hunter, 8=Spitter, 16=Jockey, 32=Charger, 64=Tank.", _, true, 0.0, true, 127.0);
 	g_CvarDelay   = CreateConVar("sm_si_materialize_cue_delay", "0.12",
 		"Seconds after materialize/spawn before playing the cue.", _, true, 0.0, true, 1.0);
