@@ -1,9 +1,8 @@
 /*
  * L4D2 SI Materialize Cue (Kether)
  *
- * Plays one spawn-in vocal when an SI materializes from ghost.
- * Never blocks Valve vocals — only adds a reliable cue if the engine was silent.
- * Hunter excluded via sm_si_materialize_cue_classes (default 59).
+ * One spawn-in vocal per materialize when Valve does not already play one.
+ * Never blocks Valve. Hunter excluded via classes bitmask (default 59).
  */
 
 #pragma semicolon 1
@@ -13,10 +12,11 @@
 #include <sdktools>
 #include <left4dhooks>
 
-#define PLUGIN_VERSION "1.4.0"
+#define PLUGIN_VERSION "1.5.0"
 
 #define TEAM_INFECTED 3
 #define MAX_GHOST_WAIT_FRAMES 30
+#define SPAWN_CUE_COOLDOWN    2.5
 
 #define ZC_SMOKER  1
 #define ZC_BOOMER  2
@@ -38,11 +38,13 @@ ConVar g_CvarEnable;
 ConVar g_CvarChannel;
 ConVar g_CvarLevel;
 ConVar g_CvarClasses;
+ConVar g_CvarDelay;
 
 bool g_bCuePending[MAXPLAYERS + 1];
 bool g_bCuePlayedThisSpawn[MAXPLAYERS + 1];
 bool g_bVanillaSpawnVocal[MAXPLAYERS + 1];
 int g_iGhostWaitFrames[MAXPLAYERS + 1];
+float g_flLastSpawnCueAt[MAXPLAYERS + 1];
 
 stock const char g_sJockeyCue[][] = {
 	"player/jockey/voice/alert/jockey_02.wav",
@@ -85,7 +87,7 @@ stock const char g_sSmokerCue[][] = {
 public Plugin myinfo = {
 	name        = "L4D2 SI Materialize Cue",
 	author      = "Kether.pl",
-	description = "Reliable spawn-in vocal when SI materialize from ghost (fill gaps, never blocks Valve).",
+	description = "One spawn-in vocal per materialize when Valve is silent.",
 	version     = PLUGIN_VERSION,
 	url         = "https://github.com/Krevik/Kether.pl-L4D2-Server",
 };
@@ -96,16 +98,15 @@ public void OnPluginStart() {
 	g_CvarChannel = CreateConVar("sm_si_materialize_cue_channel", "0",
 		"Sound channel: 0=AUTO (recommended), 2=VOICE.", _, true, 0.0, true, 7.0);
 	g_CvarLevel   = CreateConVar("sm_si_materialize_cue_level", "110",
-		"Sound level (dB). 110 matches unsilent_jockey / helicopter range.", _, true, 60.0, true, 120.0);
+		"Sound level (dB) for the plugin cue.", _, true, 60.0, true, 120.0);
 	g_CvarClasses = CreateConVar("sm_si_materialize_cue_classes", "59",
 		"Bitmask: 1=Smoker, 2=Boomer, 4=Hunter, 8=Spitter, 16=Jockey, 32=Charger, 64=Tank.", _, true, 0.0, true, 127.0);
+	g_CvarDelay   = CreateConVar("sm_si_materialize_cue_delay", "0.18",
+		"Seconds after !ghost to wait for Valve spawn vocals before plugin cue.", _, true, 0.0, true, 1.0);
 
-	// Obsolete in 1.4+ (replace mode removed). Kept so old cfgs do not error.
 	CreateConVar("sm_si_materialize_cue_mode", "0", "Deprecated. Ignored since 1.4.", FCVAR_NOTIFY);
-	CreateConVar("sm_si_materialize_cue_delay", "0.0", "Deprecated. Ignored since 1.4.", FCVAR_NOTIFY);
 
 	AddNormalSoundHook(SoundHook_DetectVanillaSpawnVocal);
-	HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_PostNoCopy);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_PostNoCopy);
 
 	AutoExecConfig(true, "l4d2_si_materialize_cue", "sourcemod");
@@ -130,38 +131,30 @@ void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast) {
 	}
 }
 
-void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast) {
-	if (!g_CvarEnable.BoolValue) {
-		return;
-	}
-
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client < 1 || !IsClientInGame(client) || GetClientTeam(client) != TEAM_INFECTED) {
-		return;
-	}
-
-	if (g_bCuePending[client] || g_bCuePlayedThisSpawn[client]) {
-		return;
-	}
-
-	BeginCueAttempt(client);
-}
-
 public void L4D_OnMaterializeFromGhost(int client) {
 	if (!g_CvarEnable.BoolValue || !IsClientInGame(client) || GetClientTeam(client) != TEAM_INFECTED) {
 		return;
 	}
 
-	g_bCuePlayedThisSpawn[client] = false;
+	// One materialize = one decision. Never reset after a cue was already handled.
+	if (g_bCuePlayedThisSpawn[client] || g_bCuePending[client]) {
+		return;
+	}
+
+	if (IsOnSpawnCueCooldown(client)) {
+		return;
+	}
+
 	g_bVanillaSpawnVocal[client] = false;
 	BeginCueAttempt(client);
 }
 
-void BeginCueAttempt(int client) {
-	if (g_bCuePending[client]) {
-		return;
-	}
+bool IsOnSpawnCueCooldown(int client) {
+	return g_flLastSpawnCueAt[client] > 0.0
+		&& (GetGameTime() - g_flLastSpawnCueAt[client]) < SPAWN_CUE_COOLDOWN;
+}
 
+void BeginCueAttempt(int client) {
 	g_bCuePending[client] = true;
 	g_iGhostWaitFrames[client] = 0;
 	RequestFrame(OnCueAttemptFrame, GetClientUserId(client));
@@ -193,18 +186,28 @@ void AttemptMaterializeCue(int client) {
 			RequestFrame(OnCueAttemptFrame, GetClientUserId(client));
 			return;
 		}
-		// Still ghost after ~0.5s — stop trying.
+
 		ResetClientCueState(client);
 		return;
 	}
 
-	TryPlayMaterializeCue(client);
+	float delay = g_CvarDelay.FloatValue;
+	if (delay > 0.0) {
+		CreateTimer(delay, Timer_FinalizeCue, GetClientUserId(client), TIMER_FLAG_NO_MAPCHANGE);
+	} else {
+		FinalizeMaterializeCue(client);
+	}
 }
 
-void TryPlayMaterializeCue(int client) {
+Action Timer_FinalizeCue(Handle timer, int userid) {
+	FinalizeMaterializeCue(GetClientOfUserId(userid));
+	return Plugin_Stop;
+}
+
+void FinalizeMaterializeCue(int client) {
 	g_bCuePending[client] = false;
 
-	if (!IsValidLiveSI(client)) {
+	if (!IsValidLiveSI(client) || g_bCuePlayedThisSpawn[client]) {
 		return;
 	}
 
@@ -213,11 +216,8 @@ void TryPlayMaterializeCue(int client) {
 		return;
 	}
 
-	if (g_bCuePlayedThisSpawn[client]) {
-		return;
-	}
+	MarkSpawnCueHandled(client);
 
-	// Valve already played a spawn alert/lurk — do not stack another vocal.
 	if (g_bVanillaSpawnVocal[client]) {
 		return;
 	}
@@ -236,18 +236,18 @@ void TryPlayMaterializeCue(int client) {
 	GetClientAbsOrigin(client, origin);
 
 	EmitSoundToAll(sound, client, sndChannel, g_CvarLevel.IntValue, SND_NOFLAGS, 1.0, 100, -1, origin);
+}
+
+void MarkSpawnCueHandled(int client) {
 	g_bCuePlayedThisSpawn[client] = true;
+	g_flLastSpawnCueAt[client] = GetGameTime();
 }
 
 Action SoundHook_DetectVanillaSpawnVocal(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH],
 	int &entity, int &channel, float &volume, int &level, int &pitch, int &flags,
 	char soundEntry[PLATFORM_MAX_PATH], int &seed)
 {
-	if (entity < 1 || entity > MaxClients) {
-		return Plugin_Continue;
-	}
-
-	if (!g_bCuePending[entity] && !g_bCuePlayedThisSpawn[entity]) {
+	if (entity < 1 || entity > MaxClients || !g_bCuePending[entity]) {
 		return Plugin_Continue;
 	}
 
@@ -276,6 +276,7 @@ void ResetClientCueState(int client) {
 	g_bCuePlayedThisSpawn[client] = false;
 	g_bVanillaSpawnVocal[client] = false;
 	g_iGhostWaitFrames[client] = 0;
+	g_flLastSpawnCueAt[client] = 0.0;
 }
 
 bool IsSpawnInVocalSample(const char[] sample) {
@@ -284,8 +285,10 @@ bool IsSpawnInVocalSample(const char[] sample) {
 	}
 
 	return StrContains(sample, "/alert/", false) != -1
+		|| StrContains(sample, "/warn", false) != -1
 		|| StrContains(sample, "lurk", false) != -1
-		|| StrContains(sample, "spotprey", false) != -1;
+		|| StrContains(sample, "spotprey", false) != -1
+		|| StrContains(sample, "recognize", false) != -1;
 }
 
 bool IsClassEnabled(int zombieClass) {
