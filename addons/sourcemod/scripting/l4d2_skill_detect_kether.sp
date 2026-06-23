@@ -182,7 +182,6 @@ enum
     rckDamage,
     rckTank,
     rckSkeeter,
-    rckHitSurvivor,
     strRockData
 };
 
@@ -261,9 +260,6 @@ new     Handle:         g_hCarTrie                                          = IN
 new     Float:          g_fSpawnTime            [MAXPLAYERS + 1];                               // time the SI spawned up
 new     Float:          g_fPinTime              [MAXPLAYERS + 1][2];                            // time the SI pinned a target: 0 = start of pin (tongue pull, charger carry); 1 = carry end / tongue reigned in
 new                     g_iSpecialVictim        [MAXPLAYERS + 1];                               // current victim (set in traceattack, so we can check on death)
-new     Float:          g_fLastClearReportTime  [MAXPLAYERS + 1];                               // dedupe insta-clear chat / forwards for the same clear
-new                     g_iLastClearReportAttacker[MAXPLAYERS + 1];
-new                     g_iLastClearReportPin   [MAXPLAYERS + 1];
 
 // hunters: skeets/pounces
 new                     g_iHunterShotDmgTeam    [MAXPLAYERS + 1];                               // counting shotgun blast damage for hunter, counting entire survivor team's damage
@@ -285,11 +281,9 @@ new                     g_iChargerHealth        [MAXPLAYERS + 1];               
 new     Float:          g_fChargeTime           [MAXPLAYERS + 1];                               // time the charger's charge last started, or if victim, when impact started
 new                     g_iChargeVictim         [MAXPLAYERS + 1];                               // who got charged
 new     Float:          g_fChargeVictimPos      [MAXPLAYERS + 1][3];                            // location of each survivor when it got hit by the charger
-new     Float:          g_fChargeMaxZ           [MAXPLAYERS + 1];                               // highest Z seen during charge flight (for DC height)
 new                     g_iVictimCharger        [MAXPLAYERS + 1];                               // for a victim, by whom they got charge(impacted)
 new                     g_iVictimFlags          [MAXPLAYERS + 1];                               // flags stored per charge victim: VICFLAGS_ 
 new                     g_iVictimMapDmg         [MAXPLAYERS + 1];                               // for a victim, how much the cumulative map damage is so far (trigger hurt / drowning)
-new     bool:           g_bDeathChargeReported  [MAXPLAYERS + 1];                               // prevent duplicate DC reports
 
 // pops
 new     bool:           g_bBoomerHitSomebody    [MAXPLAYERS + 1];                               // false if boomer didn't puke/exploded on anybody
@@ -852,7 +846,12 @@ public Action: Event_PlayerHurt( Handle:event, const String:name[], bool:dontBro
                     // find rock entity through tank
                     if ( g_iTankRock[attacker] )
                     {
-                        MarkRockHitSurvivor(g_iTankRock[attacker]);
+                        // remember that the rock wasn't shot
+                        decl String:rock_key[10];
+                        FormatEx(rock_key, sizeof(rock_key), "%x", g_iTankRock[attacker]);
+                        new rock_array[3];
+                        rock_array[rckDamage] = -1;
+                        SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
                     }
                     
                     if ( IS_VALID_SURVIVOR(victim) )
@@ -897,9 +896,6 @@ public Action: Event_PlayerSpawn( Handle:event, const String:name[], bool:dontBr
     g_fSpawnTime[client] = GetGameTime();
     g_fPinTime[client][0] = 0.0;
     g_fPinTime[client][1] = 0.0;
-    g_fLastClearReportTime[client] = 0.0;
-    g_iLastClearReportAttacker[client] = 0;
-    g_iLastClearReportPin[client] = 0;
     
     switch ( zClass )
     {
@@ -980,7 +976,6 @@ public Action: TraceAttack_Hunter (victim, &attacker, &inflictor, &Float:damage,
 {
     // track pinning
     g_iSpecialVictim[victim] = GetEntPropEnt(victim, Prop_Send, "m_pounceVictim");
-    if ( g_iSpecialVictim[victim] > 0 ) { EnsurePinTimeStarted(victim); }
     
     if ( !IS_VALID_SURVIVOR(attacker) || !IsValidEdict(inflictor) ) { return; }
     
@@ -1003,14 +998,12 @@ public Action: TraceAttack_Charger (victim, &attacker, &inflictor, &Float:damage
     } else {
         g_iSpecialVictim[victim] = GetEntPropEnt(victim, Prop_Send, "m_pummelVictim");
     }
-    if ( g_iSpecialVictim[victim] > 0 ) { EnsurePinTimeStarted(victim); }
     
 }
 public Action: TraceAttack_Jockey (victim, &attacker, &inflictor, &Float:damage, &damagetype, &ammotype, hitbox, hitgroup)
 {
     // track pinning
     g_iSpecialVictim[victim] = GetEntPropEnt(victim, Prop_Send, "m_jockeyVictim");
-    if ( g_iSpecialVictim[victim] > 0 ) { EnsurePinTimeStarted(victim); }
 }
 
 public Action: Event_PlayerDeath( Handle:hEvent, const String:name[], bool:dontBroadcast )
@@ -1053,16 +1046,16 @@ public Action: Event_PlayerDeath( Handle:hEvent, const String:name[], bool:dontB
                         HandleNonSkeet( attacker, victim, g_iHunterShotDmg[victim][attacker] );
                     }
                 }
-                
-                // pinned clear (also covers hunter skeet kills that still had a pounce victim)
-                new pinVictim = GetClearPinVictim(victim, ZC_HUNTER);
-                if ( pinVictim > 0 )
-                {
-                    HandleClear( attacker, victim, pinVictim,
-                            ZC_HUNTER,
-                            GetPinDuration(victim),
-                            -1.0
-                        );
+                else {
+                    // check whether it was a clear
+                    if ( g_iSpecialVictim[victim] > 0 )
+                    {
+                        HandleClear( attacker, victim, g_iSpecialVictim[victim],
+                                ZC_HUNTER,
+                                GetGameTime() - g_fPinTime[victim][0],
+                                -1.0
+                            );
+                    }
                 }
                 
                 ResetHunter(victim);
@@ -1071,8 +1064,6 @@ public Action: Event_PlayerDeath( Handle:hEvent, const String:name[], bool:dontB
             case ZC_SMOKER:
             {
                 if ( !IS_VALID_SURVIVOR(attacker) ) { return Plugin_Continue; }
-                
-                new pinVictim = GetClearPinVictim(victim, ZC_SMOKER);
                 
                 if (    g_bSmokerClearCheck[victim] &&
                         g_iSmokerVictim[victim] == attacker &&
@@ -1085,25 +1076,16 @@ public Action: Event_PlayerDeath( Handle:hEvent, const String:name[], bool:dontB
                     g_bSmokerClearCheck[victim] = false;
                     g_iSmokerVictim[victim] = 0;
                 }
-                
-                if ( pinVictim > 0 && attacker != pinVictim )
-                {
-                    HandleClear( attacker, victim, pinVictim,
-                            ZC_SMOKER,
-                            GetClearTimeA(victim),
-                            GetPinDuration(victim)
-                        );
-                }
             }
             
             case ZC_JOCKEY:
             {
-                new pinVictim = GetClearPinVictim(victim, ZC_JOCKEY);
-                if ( pinVictim > 0 )
+                // check whether it was a clear
+                if ( g_iSpecialVictim[victim] > 0 )
                 {
-                    HandleClear( attacker, victim, pinVictim,
+                    HandleClear( attacker, victim, g_iSpecialVictim[victim],
                             ZC_JOCKEY,
-                            GetPinDuration(victim),
+                            GetGameTime() - g_fPinTime[victim][0],
                             -1.0
                         );
                 }
@@ -1117,13 +1099,13 @@ public Action: Event_PlayerDeath( Handle:hEvent, const String:name[], bool:dontB
                     g_fChargeTime[ g_iChargeVictim[victim] ] = GetGameTime();
                 }
                 
-                new pinVictim = GetClearPinVictim(victim, ZC_CHARGER);
-                if ( pinVictim > 0 )
+                // check whether it was a clear
+                if ( g_iSpecialVictim[victim] > 0 )
                 {
-                    HandleClear( attacker, victim, pinVictim,
+                    HandleClear( attacker, victim, g_iSpecialVictim[victim],
                             ZC_CHARGER,
-                            GetClearTimeA(victim),
-                            GetPinDuration(victim)
+                            (g_fPinTime[victim][1] > 0.0) ? (GetGameTime() - g_fPinTime[victim][1]) : -1.0,
+                            GetGameTime() - g_fPinTime[victim][0]
                         );
                 }
             }
@@ -1143,17 +1125,8 @@ public Action: Event_PlayerDeath( Handle:hEvent, const String:name[], bool:dontB
         }
         else if ( IS_VALID_INFECTED(attacker) && attacker != g_iVictimCharger[victim] )
         {
-            // fall/drown deaths during a charge often keep the last SI as attacker; don't disqualify the DC
-            if ( !(dmgtype & (DMG_FALL | DMG_DROWN)) )
-            {
-                g_iVictimFlags[victim] = g_iVictimFlags[victim] | VICFLG_KILLEDBYOTHER;
-            }
-        }
-        
-        // run after flags are set (timer from ChargeCheck can fire before player_death)
-        if ( g_iVictimCharger[victim] > 0 )
-        {
-            CreateTimer( 0.05, Timer_DeathChargeCheck, victim, TIMER_FLAG_NO_MAPCHANGE );
+            // if something other than the charger killed them, remember (not a DC)
+            g_iVictimFlags[victim] = g_iVictimFlags[victim] | VICFLG_KILLEDBYOTHER;
         }
     }
     
@@ -1183,24 +1156,22 @@ public Action: Event_PlayerShoved( Handle:event, const String:name[], bool:dontB
         switch ( zClass )
         {
             case ZC_HUNTER: {
-                new pinVictim = GetClearPinVictim(victim, ZC_HUNTER);
-                if ( pinVictim > 0 )
+                if ( GetEntPropEnt(victim, Prop_Send, "m_pounceVictim") > 0 )
                 {
-                    HandleClear( attacker, victim, pinVictim,
+                    HandleClear( attacker, victim, GetEntPropEnt(victim, Prop_Send, "m_pounceVictim"),
                             ZC_HUNTER,
-                            GetPinDuration(victim),
+                            GetGameTime() - g_fPinTime[victim][0],
                             -1.0,
                             true
                         );
                 }
             }
             case ZC_JOCKEY: {
-                new pinVictim = GetClearPinVictim(victim, ZC_JOCKEY);
-                if ( pinVictim > 0 )
+                if ( GetEntPropEnt(victim, Prop_Send, "m_jockeyVictim") > 0 )
                 {
-                    HandleClear( attacker, victim, pinVictim,
+                    HandleClear( attacker, victim, GetEntPropEnt(victim, Prop_Send, "m_jockeyVictim"),
                             ZC_JOCKEY,
-                            GetPinDuration(victim),
+                            GetGameTime() - g_fPinTime[victim][0],
                             -1.0,
                             true
                         );
@@ -1523,10 +1494,8 @@ public Action: Event_ChargeCarryStart( Handle:event, const String:name[], bool:d
     g_iVictimFlags[victim] = VICFLG_CARRIED;    // reset flags for checking later - we know only this now
     g_fChargeTime[victim] = g_fChargeTime[client];
     g_iVictimMapDmg[victim] = 0;
-    g_bDeathChargeReported[victim] = false;
     
     GetClientAbsOrigin( victim, g_fChargeVictimPos[victim] );
-    g_fChargeMaxZ[victim] = g_fChargeVictimPos[victim][2];
     
     //CreateTimer( CHARGE_CHECK_TIME, Timer_ChargeCheck, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE );
     CreateTimer( CHARGE_CHECK_TIME, Timer_ChargeCheck, victim, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE );
@@ -1545,10 +1514,6 @@ public Action: Event_ChargeImpact( Handle:event, const String:name[], bool:dontB
     g_iVictimFlags[victim] = 0;             // reset flags for checking later
     g_fChargeTime[victim] = GetGameTime();  // store time per victim, for impacts
     g_iVictimMapDmg[victim] = 0;
-    g_bDeathChargeReported[victim] = false;
-    
-    GetClientAbsOrigin( victim, g_fChargeVictimPos[victim] );
-    g_fChargeMaxZ[victim] = g_fChargeVictimPos[victim][2];
     
     CreateTimer( CHARGE_CHECK_TIME, Timer_ChargeCheck, victim, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE );
 }
@@ -1586,13 +1551,6 @@ public Action: Timer_ChargeCheck( Handle:timer, any:client )
     if ( !IS_VALID_SURVIVOR(client) || !g_iVictimCharger[client] || g_fChargeTime[client] == 0.0 || (GetGameTime() - g_fChargeTime[client]) > MAX_CHARGE_TIME )
     {
         return Plugin_Stop;
-    }
-    
-    new Float: curPos[3];
-    GetClientAbsOrigin( client, curPos );
-    if ( curPos[2] > g_fChargeMaxZ[client] )
-    {
-        g_fChargeMaxZ[client] = curPos[2];
     }
     
     // we're done checking if either the victim reached the ground, or died
@@ -1634,10 +1592,26 @@ public Action: Timer_DeathChargeCheck( Handle:timer, any:client )
     {
         new Float: pos[3];
         GetClientAbsOrigin( client, pos );
-        new Float: fHeight = GetChargeDropHeight( client, pos );
+        new Float: fHeight = g_fChargeVictimPos[client][2] - pos[2];
         
-        if ( IsDeathChargeVictim( client, flags, fHeight ) )
-        {
+        /*
+            it's a deathcharge when:
+                the survivor is dead AND
+                    they drowned/fell AND took enough damage or died in mid-air
+                    AND not killed by someone else
+                    OR is in an unreachable spot AND dropped at least X height
+                    OR took plenty of map damage
+                
+            old.. need?
+                fHeight > GetConVarFloat(g_hCvarDeathChargeHeight)
+        */
+        if (    (   ( flags & VICFLG_DROWN || flags & VICFLG_FALL ) &&
+                    ( flags & VICFLG_HURTLOTS || flags & VICFLG_AIRDEATH ) ||
+                    ( flags & VICFLG_WEIRDFLOW && fHeight >= MIN_FLOWDROPHEIGHT ) ||
+                    g_iVictimMapDmg[client] >= MIN_DC_TRIGGER_DMG
+                ) &&
+                !( flags & VICFLG_KILLEDBYOTHER )
+        ) {
             HandleDeathCharge( g_iVictimCharger[client], client, fHeight, GetVectorDistance(g_fChargeVictimPos[client], pos, false), bool:(flags & VICFLG_CARRIED) );
         }
     }
@@ -1650,45 +1624,6 @@ public Action: Timer_DeathChargeCheck( Handle:timer, any:client )
         
         CreateTimer( CHARGE_END_RECHECK, Timer_DeathChargeCheck, client, TIMER_FLAG_NO_MAPCHANGE );
     }
-}
-
-stock Float:GetChargeDropHeight( client, const Float:deathPos[3] )
-{
-    new Float: fHeight = g_fChargeMaxZ[client] - deathPos[2];
-    new Float: fHeightStart = g_fChargeVictimPos[client][2] - deathPos[2];
-    
-    if ( fHeightStart > fHeight )
-    {
-        fHeight = fHeightStart;
-    }
-    if ( fHeight < 0.0 )
-    {
-        fHeight = 0.0;
-    }
-    return fHeight;
-}
-
-stock bool:IsDeathChargeVictim( client, flags, Float:fHeight )
-{
-    if ( flags & VICFLG_KILLEDBYOTHER ) { return false; }
-    if ( !g_iVictimCharger[client] ) { return false; }
-    
-    // mid-air death during charge (ChargeCheck can run before player_death sets VICFLG_FALL)
-    if ( flags & VICFLG_AIRDEATH ) { return true; }
-    
-    if (    ( flags & VICFLG_DROWN || flags & VICFLG_FALL ) &&
-            ( flags & VICFLG_HURTLOTS || flags & VICFLG_AIRDEATH )
-    ) {
-        return true;
-    }
-    
-    if ( (flags & VICFLG_CARRIED) && (flags & VICFLG_FALL) ) { return true; }
-    
-    if ( ( flags & VICFLG_WEIRDFLOW ) && fHeight >= MIN_FLOWDROPHEIGHT ) { return true; }
-    
-    if ( g_iVictimMapDmg[client] >= MIN_DC_TRIGGER_DMG ) { return true; }
-    
-    return false;
 }
 
 stock ResetHunter(client)
@@ -1720,7 +1655,7 @@ public OnEntityCreated ( entity, const String:classname[] )
         {
             decl String:rock_key[10];
             FormatEx(rock_key, sizeof(rock_key), "%x", entity);
-            new rock_array[strRockData];
+            new rock_array[3];
             
             // store which tank is throwing what rock
             new tank = ShiftTankThrower();
@@ -1730,7 +1665,6 @@ public OnEntityCreated ( entity, const String:classname[] )
                 g_iTankRock[tank] = entity;
                 rock_array[rckTank] = tank;
             }
-            rock_array[rckHitSurvivor] = 0;
             SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
             
             SDKHook(entity, SDKHook_TraceAttack, TraceAttack_Rock);
@@ -1818,14 +1752,10 @@ public OnEntityDestroyed ( entity )
     decl String:witch_key[10];
     FormatEx(witch_key, sizeof(witch_key), "%x", entity);
     
-	decl rock_array[strRockData];
+	decl rock_array[3];
     if ( GetTrieArray(g_hRockTrie, witch_key, rock_array, sizeof(rock_array)) )
     {
         // tank rock
-        if ( rock_array[rckTank] > 0 && g_iTankRock[rock_array[rckTank]] == entity )
-        {
-            g_iTankRock[rock_array[rckTank]] = 0;
-        }
         CreateTimer( ROCK_CHECK_TIME, Timer_CheckRockSkeet, entity );
         SDKUnhook(entity, SDKHook_TraceAttack, TraceAttack_Rock);
         return;
@@ -1852,7 +1782,7 @@ public Action: Timer_WitchKeyDelete (Handle:timer, any:witch)
 
 public Action: Timer_CheckRockSkeet (Handle:timer, any:rock)
 {
-    decl rock_array[strRockData];
+    decl rock_array[3];
     decl String: rock_key[10];
     FormatEx(rock_key, sizeof(rock_key), "%x", rock);
     if (!GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)) ) { return Plugin_Continue; }
@@ -1860,7 +1790,7 @@ public Action: Timer_CheckRockSkeet (Handle:timer, any:rock)
     RemoveFromTrie(g_hRockTrie, rock_key);
     
     // if rock didn't hit anyone / didn't touch anything, it was shot
-    if ( rock_array[rckDamage] > 0 && rock_array[rckHitSurvivor] == 0 )
+    if ( rock_array[rckDamage] > 0 )
     {
         HandleRockSkeeted( rock_array[rckSkeeter], rock_array[rckTank] );
     }
@@ -2167,49 +2097,6 @@ stock CheckWitchCrown ( witch, attacker, bool: bOneShot = false )
 
 }
 
-MarkRockHitSurvivor(rock)
-{
-    if ( rock <= 0 || !IsValidEntity(rock) )
-    {
-        return;
-    }
-
-    decl String:rock_key[10];
-    decl rock_array[strRockData];
-    FormatEx(rock_key, sizeof(rock_key), "%x", rock);
-    if ( !GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)) )
-    {
-        return;
-    }
-
-    rock_array[rckDamage] = -1;
-    rock_array[rckHitSurvivor] = 1;
-    SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
-}
-
-MarkRockTouched(rock, bool hitSurvivor)
-{
-    if ( rock <= 0 || !IsValidEntity(rock) )
-    {
-        return;
-    }
-
-    decl String:rock_key[10];
-    decl rock_array[strRockData];
-    FormatEx(rock_key, sizeof(rock_key), "%x", rock);
-    if ( !GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)) )
-    {
-        return;
-    }
-
-    rock_array[rckDamage] = -1;
-    if ( hitSurvivor )
-    {
-        rock_array[rckHitSurvivor] = 1;
-    }
-    SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
-}
-
 // tank rock
 public Action: TraceAttack_Rock (victim, &attacker, &inflictor, &Float:damage, &damagetype, &ammotype, hitbox, hitgroup)
 {
@@ -2220,29 +2107,24 @@ public Action: TraceAttack_Rock (victim, &attacker, &inflictor, &Float:damage, &
             report the last shot -- the damage report is without distance falloff
         */
         decl String:rock_key[10];
-        decl rock_array[strRockData];
+        decl rock_array[3];
         FormatEx(rock_key, sizeof(rock_key), "%x", victim);
-        if ( !GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array)) )
-        {
-            return Plugin_Continue;
-        }
-
-        // Rock already connected with a survivor/world; ignore late chip shots.
-        if ( rock_array[rckDamage] < 0 || rock_array[rckHitSurvivor] != 0 )
-        {
-            return Plugin_Continue;
-        }
-
+        GetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array));
         rock_array[rckDamage] += RoundToFloor(damage);
         rock_array[rckSkeeter] = attacker;
         SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
     }
-    return Plugin_Continue;
 }
 
-public OnTouch_Rock ( entity, other )
+public OnTouch_Rock ( entity )
 {
-    MarkRockTouched(entity, IS_VALID_SURVIVOR(other));
+    // remember that the rock wasn't shot
+    decl String:rock_key[10];
+    FormatEx(rock_key, sizeof(rock_key), "%x", entity);
+    new rock_array[3];
+    rock_array[rckDamage] = -1;
+    SetTrieArray(g_hRockTrie, rock_key, rock_array, sizeof(rock_array), true);
+
     SDKUnhook(entity, SDKHook_Touch, OnTouch_Rock);
 }
 
@@ -2259,8 +2141,8 @@ public Action: Event_TonguePullStopped (Handle:event, const String:name[], bool:
     // clear check -  if the smoker itself was not shoved, handle the clear
     HandleClear( attacker, smoker, victim,
             ZC_SMOKER,
-            GetClearTimeA(smoker),
-            GetPinDuration(smoker),
+            (g_fPinTime[smoker][1] > 0.0) ? (GetGameTime() - g_fPinTime[smoker][1]) : -1.0,
+            GetGameTime() - g_fPinTime[smoker][0],
             bool:( reason != CUT_SLASH && reason != CUT_KILL )
         );
     
@@ -2329,8 +2211,8 @@ public Action: Event_ChokeStop (Handle:event, const String:name[], bool:dontBroa
     // if the smoker itself was not shoved, handle the clear
     HandleClear( attacker, smoker, victim,
             ZC_SMOKER,
-            GetClearTimeA(smoker),
-            GetPinDuration(smoker),
+            (g_fPinTime[smoker][1] > 0.0) ? (GetGameTime() - g_fPinTime[smoker][1]) : -1.0,
+            GetGameTime() - g_fPinTime[smoker][0],
             bool:( reason != CUT_SLASH && reason != CUT_KILL )
         );
 }
@@ -2946,9 +2828,6 @@ stock HandleJockeyDP( attacker, victim, Float:height )
 // deathcharges
 stock HandleDeathCharge( attacker, victim, Float:height, Float:distance, bool:bCarried = true )
 {
-    if ( g_bDeathChargeReported[victim] ) { return; }
-    g_bDeathChargeReported[victim] = true;
-    
     // report?
     if (    GetConVarBool(g_hCvarReport) &&
             height >= GetConVarFloat(g_hCvarDeathChargeHeight)
@@ -2981,70 +2860,9 @@ stock HandleDeathCharge( attacker, victim, Float:height, Float:distance, bool:bC
     Call_Finish();
 }
 
-stock EnsurePinTimeStarted( si )
-{
-    if ( g_fPinTime[si][0] <= 0.0 )
-    {
-        g_fPinTime[si][0] = GetGameTime();
-    }
-}
-
-stock GetClearPinVictim( si, zClass )
-{
-    new pinVictim = 0;
-    
-    switch ( zClass )
-    {
-        case ZC_HUNTER: { pinVictim = GetEntPropEnt(si, Prop_Send, "m_pounceVictim"); }
-        case ZC_JOCKEY: { pinVictim = GetEntPropEnt(si, Prop_Send, "m_jockeyVictim"); }
-        case ZC_CHARGER:
-        {
-            pinVictim = GetEntPropEnt(si, Prop_Send, "m_carryVictim");
-            if ( pinVictim == -1 ) { pinVictim = GetEntPropEnt(si, Prop_Send, "m_pummelVictim"); }
-        }
-        case ZC_SMOKER:
-        {
-            pinVictim = GetEntPropEnt(si, Prop_Send, "m_tongueVictim");
-            if ( pinVictim <= 0 ) { pinVictim = g_iSmokerVictim[si]; }
-        }
-    }
-    
-    if ( pinVictim <= 0 ) { pinVictim = g_iSpecialVictim[si]; }
-    return pinVictim;
-}
-
-stock Float:GetPinDuration( si )
-{
-    if ( g_fPinTime[si][0] > 0.0 )
-    {
-        return GetGameTime() - g_fPinTime[si][0];
-    }
-    return 0.0;
-}
-
-stock Float:GetClearTimeA( si )
-{
-    if ( g_fPinTime[si][1] > 0.0 )
-    {
-        return GetGameTime() - g_fPinTime[si][1];
-    }
-    return -1.0;
-}
-
 // SI clears    (cleartimeA = pummel/pounce/ride/choke, cleartimeB = tongue drag, charger carry)
 stock HandleClear( attacker, victim, pinVictim, zombieClass, Float:clearTimeA, Float:clearTimeB, bool:bWithShove = false )
 {
-    if (    g_fLastClearReportTime[victim] != 0.0 &&
-            (GetGameTime() - g_fLastClearReportTime[victim]) < 1.0 &&
-            g_iLastClearReportAttacker[victim] == attacker &&
-            g_iLastClearReportPin[victim] == pinVictim
-    ) {
-        return;
-    }
-    g_fLastClearReportTime[victim] = GetGameTime();
-    g_iLastClearReportAttacker[victim] = attacker;
-    g_iLastClearReportPin[victim] = pinVictim;
-    
     // sanity check:
     if ( clearTimeA < 0 && clearTimeA != -1.0 ) { clearTimeA = 0.0; }
     if ( clearTimeB < 0 && clearTimeB != -1.0 ) { clearTimeB = 0.0; }
@@ -3055,17 +2873,7 @@ stock HandleClear( attacker, victim, pinVictim, zombieClass, Float:clearTimeA, F
     {
         new Float: fMinTime = GetConVarFloat(g_hCvarInstaTime);
         new Float: fClearTime = clearTimeA;
-        if ( zombieClass == ZC_CHARGER || zombieClass == ZC_SMOKER )
-        {
-            if ( clearTimeA >= 0.0 )
-            {
-                fClearTime = clearTimeA;
-            }
-            else
-            {
-                fClearTime = clearTimeB;
-            }
-        }
+        if ( zombieClass == ZC_CHARGER || zombieClass == ZC_SMOKER ) { fClearTime = clearTimeB; }
         
         
         if ( fClearTime != -1.0 && fClearTime <= fMinTime )
