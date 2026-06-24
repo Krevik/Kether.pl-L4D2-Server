@@ -8,14 +8,14 @@
 #define BIND_SUGGESTION_API_URL "http://21370000.xyz/api/bind_suggestions/addBindSuggestion"
 
 bool canAddNewBind[MAXPLAYERS + 1];
-char pendingBindText[MAXPLAYERS + 1][384];
+char pendingBindDisplay[MAXPLAYERS + 1][512];
 
 public Plugin myinfo =
 {
 	name = "[ANY] Proposed binds (REST API)",
 	author = "Krevik, StarterX4, Cursor AI",
 	description = "Lets players suggest new binds via the Kether website REST API (successor to the database plugin).",
-	version = "2.0.0",
+	version = "2.1.0",
 	url = "https://kether.pl"
 };
 
@@ -85,6 +85,18 @@ void ParseBindContent(const char[] content, char[] author, int authorLen, char[]
 	}
 }
 
+void FormatBindDisplay(const char[] author, const char[] text, char[] buffer, int maxlen)
+{
+	if (author[0] != '\0')
+	{
+		Format(buffer, maxlen, "%s :  %s", author, text);
+	}
+	else
+	{
+		Format(buffer, maxlen, " :  %s", text);
+	}
+}
+
 void postBindSuggestionRequest(int clientID, const char[] author, const char[] text)
 {
 	if (clientID <= 0 || clientID > MaxClients)
@@ -100,7 +112,7 @@ void postBindSuggestionRequest(int clientID, const char[] author, const char[] t
 	char proposedBy[MAX_NAME_LENGTH];
 	GetClientName(clientID, proposedBy, sizeof(proposedBy));
 
-	strcopy(pendingBindText[clientID], sizeof(pendingBindText[]), text);
+	FormatBindDisplay(author, text, pendingBindDisplay[clientID], sizeof(pendingBindDisplay[]));
 
 	JSONObject payload = new JSONObject();
 	payload.SetString("author", author);
@@ -125,7 +137,7 @@ void OnBindSuggestionPosted(HTTPResponse response, int clientID)
 		CPrintToChatAll(
 			"{blue}%N{default} suggested a new bind: {green}%s{default}",
 			clientID,
-			pendingBindText[clientID]
+			pendingBindDisplay[clientID]
 		);
 		return;
 	}
