@@ -82,10 +82,13 @@ void UpdatePanel()
 	int survivorReady = IsTeamReady(L4D2Team_Survivor);
 	int infectedReady = IsTeamReady(L4D2Team_Infected);
 
-	g_cvServerNamer.GetString(ServerName, sizeof(ServerName));
+	if (g_cvServerNamer != null)
+		g_cvServerNamer.GetString(ServerName, sizeof(ServerName));
+	else
+		strcopy(ServerName, sizeof(ServerName), "Unknown");
 	
 	l4d_ready_cfg_name.GetString(cfgName, sizeof(cfgName));
-	Format(ServerBuffer, sizeof(ServerBuffer), "%t", "PanelSections", ServerName, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, cfgName);
+	Format(ServerBuffer, sizeof(ServerBuffer), "%t", "PanelSections", ServerName, GetSeriousClientCount(), MaxClients, cfgName);
 	menuPanel.DrawText(ServerBuffer);
 	
 	FormatTime(ServerBuffer, sizeof(ServerBuffer), "▸ %m/%d/%Y - %I:%M%p");

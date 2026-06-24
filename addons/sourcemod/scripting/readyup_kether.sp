@@ -74,7 +74,7 @@ ConVar
 // Plugin Cvars
 ConVar 
 	// basic
-	l4d_ready_enabled, l4d_ready_cfg_name, l4d_ready_server_cvar, l4d_ready_max_players,
+	l4d_ready_enabled, l4d_ready_cfg_name, l4d_ready_server_cvar, l4d_ready_max_players, l4d_ready_autoready,
 	// game
 	l4d_ready_disable_spawns, l4d_ready_survivor_freeze,
 	// sound
@@ -159,6 +159,8 @@ public void OnPluginStart()
 	SetupConVars();
 	SetupCommands();
 	
+	FillServerNamer();
+	
 	nativeFooter = new Footer();
 	
 	readySurvFreeze = l4d_ready_survivor_freeze.BoolValue;
@@ -193,6 +195,9 @@ void FillServerNamer()
 	l4d_ready_server_cvar.GetString(buffer, sizeof buffer);
 	if ((g_cvServerNamer = FindConVar(buffer)) == null)
 		g_cvServerNamer = FindConVar("hostname");
+	
+	if (g_cvServerNamer == null)
+		LogError("Failed to find server name ConVar (tried \"%s\" and \"hostname\")", buffer);
 }
 
 void FindCasterSystem()
