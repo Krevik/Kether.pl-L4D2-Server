@@ -3014,9 +3014,9 @@
 //=============== Highway To Hell
 	"highway01_apt_20130613"
 	{
-		"start_point"		"400.137 -1070.73 24"
+		"start_point"		"380.373 -1074.32 16.031"
 		"start_dist"		"100.000000"
-		"start_extra_dist"	"0.000000"
+		"start_extra_dist"	"280.000000"
 		"end_point"			"-537 2812 -272"
 		"end_dist"			"200.000000"
 		"max_distance"		"400"
