@@ -87,7 +87,10 @@ void UpdatePanel()
 	else
 		strcopy(ServerName, sizeof(ServerName), "Unknown");
 	
-	l4d_ready_cfg_name.GetString(cfgName, sizeof(cfgName));
+	if (l4d_ready_cfg_name != null)
+		l4d_ready_cfg_name.GetString(cfgName, sizeof(cfgName));
+	else
+		cfgName[0] = '\0';
 	Format(ServerBuffer, sizeof(ServerBuffer), "▸ Server: %s \n▸ Slots: %d/%d\n▸ Config: %s", ServerName, GetSeriousClientCount(), MaxClients, cfgName);
 	menuPanel.DrawText(ServerBuffer);
 	
@@ -144,7 +147,7 @@ void UpdatePanel()
 				}
 				else
 				{
-					if (playerCount <= l4d_ready_max_players.IntValue)
+					if (playerCount <= GetReadyMaxPlayers())
 					{
 						Format(nameBuf, sizeof(nameBuf), "%s\n", nameBuf);
 						StrCat(specBuffer, sizeof(specBuffer), nameBuf);
@@ -197,7 +200,7 @@ void UpdatePanel()
 		Format(nameBuf, sizeof(nameBuf), "->%d. Spectator%s", ++textCount, specCount > 1 ? "s" : "");
 		menuPanel.DrawText(nameBuf);
 		ReplaceString(specBuffer, sizeof(specBuffer), "#", "_");
-		if (playerCount > l4d_ready_max_players.IntValue && specCount - casterCount > 1)
+		if (playerCount > GetReadyMaxPlayers() && specCount - casterCount > 1)
 			FormatEx(specBuffer, sizeof(specBuffer), "**Many** (%d)", specCount - casterCount);
 		menuPanel.DrawText(specBuffer);
 	}

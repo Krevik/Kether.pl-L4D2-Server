@@ -175,6 +175,11 @@ public void OnPluginEnd()
 	InitiateLive(false);
 }
 
+public void OnConfigsExecuted()
+{
+	FillServerNamer();
+}
+
 public void OnAllPluginsLoaded()
 {
 	FillServerNamer();

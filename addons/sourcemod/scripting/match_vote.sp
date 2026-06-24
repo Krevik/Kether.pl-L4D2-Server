@@ -76,16 +76,53 @@ public void OnPluginStart()
 	AddCommandListener(Listener_Quit, "crash");
 
 	g_hSvMaxPlayers		  = FindConVar("sv_maxplayers");
+	g_hMaxPlayers.AddChangeHook(OnMaxPlayersChanged);
 	g_bIsConfoglAvailable = LibraryExists("confogl");
+
+	RequestFrame(TryApplyServerMaxPlayers);
+}
+
+bool ApplyServerMaxPlayers(bool force = false)
+{
+	if (g_hMaxPlayers == null)
+		return false;
+
+	if (g_hSvMaxPlayers == null)
+		g_hSvMaxPlayers = FindConVar("sv_maxplayers");
+
+	if (g_hSvMaxPlayers == null)
+		return false;
+
+	if (!force && g_bOnSet)
+		return true;
+
+	int target = g_hMaxPlayers.IntValue;
+	if (g_hSvMaxPlayers.IntValue != target)
+		g_hSvMaxPlayers.SetInt(target);
+
+	return true;
+}
+
+void TryApplyServerMaxPlayers()
+{
+	if (!g_bOnSet && ApplyServerMaxPlayers())
+		g_bOnSet = true;
+}
+
+void OnMaxPlayersChanged(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (ApplyServerMaxPlayers(true))
+		g_bOnSet = true;
 }
 
 public void OnConfigsExecuted()
 {
-	if (!g_bOnSet)
-	{
-		g_hSvMaxPlayers.SetInt(g_hMaxPlayers.IntValue);
-		g_bOnSet = true;
-	}
+	TryApplyServerMaxPlayers();
+}
+
+public void OnMapStart()
+{
+	TryApplyServerMaxPlayers();
 }
 
 Action Listener_Quit(int iClient, const char[] sCommand, int iArgc)
@@ -99,7 +136,7 @@ public void OnPluginEnd()
 	if (g_bShutdown)
 		return;
 
-	g_hSvMaxPlayers.SetInt(g_hMaxPlayers.IntValue);
+	ApplyServerMaxPlayers(true);
 }
 
 public void OnLibraryRemoved(const char[] sPluginName)

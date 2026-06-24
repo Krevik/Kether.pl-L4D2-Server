@@ -40,9 +40,9 @@ void InitiateReadyUp(bool real = true)
 	SetAllowSpawns(l4d_ready_disable_spawns.BoolValue);
 	CreateTimer(0.3, Timer_RestartCountdowns, false, TIMER_FLAG_NO_MAPCHANGE);
 	
-	sv_infinite_primary_ammo.SetBool(true, .notify = false);
-	god.SetBool(true, .notify = false);
-	sb_stop.SetBool(true, .notify = false);
+	SetGameConVarBool(sv_infinite_primary_ammo, true);
+	SetGameConVarBool(god, true);
+	SetGameConVarBool(sb_stop, true);
 	
 	if (real)
 	{
@@ -73,9 +73,9 @@ void InitiateLive(bool real = true)
 	
 	SetTeamFrozen(L4D2Team_Survivor, false);
 	
-	sv_infinite_primary_ammo.SetBool(false, .notify = false);
-	god.SetBool(false, .notify = false);
-	sb_stop.SetBool(false, .notify = false);
+	SetGameConVarBool(sv_infinite_primary_ammo, false);
+	SetGameConVarBool(god, false);
+	SetGameConVarBool(sb_stop, false);
 	
 	ToggleCommandListeners(false);
 	
@@ -206,8 +206,8 @@ bool CheckFullReady()
 	if (readyUpMode == ReadyMode_TeamReady)
 		return survReadyCount && infReadyCount;
 	
-	int survLimit = survivor_limit.IntValue;
-	int zombLimit = z_max_player_zombies.IntValue;
+	int survLimit = (survivor_limit != null) ? survivor_limit.IntValue : 4;
+	int zombLimit = (z_max_player_zombies != null) ? z_max_player_zombies.IntValue : 4;
 	
 	if (l4d_ready_unbalanced_start.BoolValue)
 	{

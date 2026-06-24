@@ -155,7 +155,8 @@ void ResetSurvivorState()
 
 void SetAllowSpawns(bool allow)
 {
-	director_no_specials.BoolValue = allow;
+	if (director_no_specials != null)
+		director_no_specials.BoolValue = allow;
 }
 
 // l4d2util_stocks

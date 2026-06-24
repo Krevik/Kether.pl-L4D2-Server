@@ -3,15 +3,35 @@
 #endif
 #define _readyup_util_included
 
+int GetReadyMaxPlayers()
+{
+	if (l4d_ready_max_players == null)
+		return 12;
+
+	return l4d_ready_max_players.IntValue;
+}
+
+void SetGameConVarBool(ConVar convar, bool value)
+{
+	if (convar != null)
+		convar.SetBool(value, .notify = false);
+}
+
 int GetMaxAllowedPlayers()
 {
+	if (survivor_limit == null)
+		return 4;
+
 	int survLimit = survivor_limit.IntValue;
-	
+
 	if (L4D_GetGameModeType() & (GAMEMODE_VERSUS|GAMEMODE_SCAVENGE))
 	{
+		if (z_max_player_zombies == null)
+			return survLimit;
+
 		return survLimit + z_max_player_zombies.IntValue;
 	}
-	
+
 	return survLimit;
 }
 

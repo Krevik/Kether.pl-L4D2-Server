@@ -100,12 +100,7 @@ public void OnPluginStart()
 
 	LoadPluginTranslations();
 	
-	(	survivor_limit			= FindConVar("survivor_limit")			).AddChangeHook(GameConVarChanged);
-	(	versus_boss_buffer		= FindConVar("versus_boss_buffer")		).AddChangeHook(GameConVarChanged);
-	(	sv_maxplayers			= FindConVar("sv_maxplayers")			).AddChangeHook(GameConVarChanged);
-	(	tank_burn_duration		= FindConVar("tank_burn_duration")		).AddChangeHook(GameConVarChanged);
-
-	GetGameCvars();
+	SetupGameConVars();
 	
 	FillBossPercents();
 	FillServerNamer();
@@ -146,12 +141,34 @@ public void OnPluginStart()
 // ======================================================================
 //  ConVar Maintenance
 // ======================================================================
+void HookOptionalGameConVar(ConVar &store, const char[] name)
+{
+	if (store != null)
+	{
+		store.RemoveChangeHook(GameConVarChanged);
+		store = null;
+	}
+
+	store = FindConVar(name);
+	if (store != null)
+		store.AddChangeHook(GameConVarChanged);
+}
+
+void SetupGameConVars()
+{
+	HookOptionalGameConVar(survivor_limit, "survivor_limit");
+	HookOptionalGameConVar(versus_boss_buffer, "versus_boss_buffer");
+	HookOptionalGameConVar(sv_maxplayers, "sv_maxplayers");
+	HookOptionalGameConVar(tank_burn_duration, "tank_burn_duration");
+	GetGameCvars();
+}
+
 void GetGameCvars()
 {
-	iSurvivorLimit		= survivor_limit.IntValue;
-	fVersusBossBuffer	= versus_boss_buffer.FloatValue;
-	iMaxPlayers			= sv_maxplayers.IntValue;
-	fTankBurnDuration	= tank_burn_duration.FloatValue;
+	iSurvivorLimit		= (survivor_limit != null) ? survivor_limit.IntValue : 4;
+	fVersusBossBuffer	= (versus_boss_buffer != null) ? versus_boss_buffer.FloatValue : 0.0;
+	iMaxPlayers			= (sv_maxplayers != null) ? sv_maxplayers.IntValue : MaxClients;
+	fTankBurnDuration	= (tank_burn_duration != null) ? tank_burn_duration.FloatValue : 30.0;
 }
 
 void GetCurrentGameMode()
@@ -179,10 +196,19 @@ void FillServerNamer()
 	}
 	
 	if (convar == null)
-	{
 		convar = FindConVar("hostname");
+
+	if (convar == null)
+	{
+		if (hServerNamer != null)
+		{
+			hServerNamer.RemoveChangeHook(ServerCvarChanged);
+			hServerNamer = null;
+		}
+		strcopy(sHostname, sizeof(sHostname), "Unknown");
+		return;
 	}
-	
+
 	if (hServerNamer == null)
 	{
 		hServerNamer = convar;
@@ -194,8 +220,15 @@ void FillServerNamer()
 		hServerNamer = convar;
 		hServerNamer.AddChangeHook(ServerCvarChanged);
 	}
-	
+
 	hServerNamer.GetString(sHostname, sizeof(sHostname));
+}
+
+public void OnConfigsExecuted()
+{
+	SetupGameConVars();
+	FillServerNamer();
+	FillReadyConfig();
 }
 
 void FillReadyConfig()
