@@ -2039,6 +2039,7 @@ void PerformSkillMix()
 	int count = 0;
 	int survCount = 0;
 	int infCount = 0;
+	float defaultRating = GetRankedMixPoolAverage();
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -2054,7 +2055,7 @@ void PerformSkillMix()
 		}
 
 		players[count] = i;
-		rating[count] = GetAveragePoints(i);
+		rating[count] = GetMixRating(i, defaultRating);
 		count++;
 
 		if (team == TEAM_SURVIVOR)
@@ -2741,7 +2742,7 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	Format(qRound, sizeof(qRound),
 		"INSERT INTO round_stats (steamid, name, round_index, map_name, team, raw_points, awarded_points, "
 		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, chain_clear_boom, safe_saves, zero_ff_bonus, shared_focus, boom_focus, stagger_setup, chain_control, tank_support, alarm_triggers, tank_hold_time, tank_passes, tank_kills, tank_wipe_bonus, charger_levels, tongue_cuts, special_shove_saves, rock_eaten_penalty, revive_interrupts, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, ts) "
-		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
+		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, strftime('%%s', 'now'));",
 		steamid, escName, g_iRoundNumber, escMap, team, rawScore, awarded,
 		g_iDamageAsInfected[client],
 		g_iDamageAsSurvivor[client],
@@ -3191,6 +3192,51 @@ float GetAveragePoints(int client)
 	return g_fTotalPoints[client] / float(g_iRoundsPlayed[client]);
 }
 
+float GetRankedMixPoolAverage()
+{
+	float sum = 0.0;
+	int count = 0;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i))
+		{
+			continue;
+		}
+
+		int team = GetClientTeam(i);
+		if (team != TEAM_SURVIVOR && team != TEAM_INFECTED)
+		{
+			continue;
+		}
+
+		if (g_iRoundsPlayed[i] <= 0)
+		{
+			continue;
+		}
+
+		sum += GetAveragePoints(i);
+		count++;
+	}
+
+	if (count <= 0)
+	{
+		return 0.0;
+	}
+
+	return sum / float(count);
+}
+
+float GetMixRating(int client, float defaultRating)
+{
+	if (g_iRoundsPlayed[client] > 0)
+	{
+		return GetAveragePoints(client);
+	}
+
+	return defaultRating;
+}
+
 bool IsValidClient(int client)
 {
 	return (client > 0 && client <= MaxClients && IsClientConnected(client) && IsClientInGame(client));
@@ -3430,6 +3476,7 @@ void CreateTables()
 		... "tongue_cuts INTEGER NOT NULL DEFAULT 0, "
 		... "special_shove_saves INTEGER NOT NULL DEFAULT 0, "
 		... "rock_eaten_penalty INTEGER NOT NULL DEFAULT 0, "
+		... "revive_interrupts INTEGER NOT NULL DEFAULT 0, "
 		... "revives INTEGER NOT NULL DEFAULT 0, "
 		... "medkit_gives INTEGER NOT NULL DEFAULT 0, "
 		... "special_rescues INTEGER NOT NULL DEFAULT 0, "
