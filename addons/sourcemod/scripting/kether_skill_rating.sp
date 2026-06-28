@@ -1665,25 +1665,12 @@ void ShowSkillForTarget(int client, int target, bool showBackButton)
 	FormatKSR(GetAveragePoints(target), ksr, sizeof(ksr));
 	FormatKSR(g_fTotalPoints[target], totalKsr, sizeof(totalKsr));
 
-	Format(line, sizeof(line), "KSR: %s | Rounds: %d | Total KSR: %s", ksr, g_iRoundsPlayed[target], totalKsr);
+	Format(line, sizeof(line), "Average KSR: %s", ksr);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Flow best: %.1f%% | Survival (rnd): %.0fs", g_fFlowBest[target], g_fSurvivalTime[target]);
+	Format(line, sizeof(line), "Total KSR: %s", totalKsr);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "FF dealt/taken: %d/%d | HS SI: %d", g_iFriendlyFireDealt[target], g_iFriendlyFireTaken[target], g_iHeadshotSI[target]);
+	Format(line, sizeof(line), "Rounds: %d", g_iRoundsPlayed[target]);
 	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Survivors ---", ITEMDRAW_DISABLED);
-	int survActions = g_iSpecialClears[target] + g_iSmokerSelfClears[target] + g_iRevives[target] + g_iMedkitGives[target] + g_iRescuesFromSpecial[target] + g_iJockeyBlocks[target] + g_iChainClearBoom[target] + g_iSafeSaves[target] + g_iTankPlayActions[target];
-	Format(line, sizeof(line), "Dmg total: %d | Actions: %d | Skeets: %d", g_iDamageAsSurvivor[target], survActions, g_iSkeets[target] + g_iSkeetsMelee[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Crowns/Shoves: %d/%d | Alarms: %d", g_iWitchCrowns[target], g_iShoveSI[target], g_iAlarmTriggers[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Infected ---", ITEMDRAW_DISABLED);
-	int infActions = g_iPinAssists[target] + g_iBigHitAssists[target] + g_iSpitSetupAssists[target] + g_iBoomKillAssists[target] + g_iSharedFocus[target] + g_iBoomFocusAssist[target] + g_iChainControlAssist[target] + g_iTankSupportAssist[target] + g_iChargerMulti[target] + g_iSpitMultiHits[target] + g_iReviveInterrupts[target];
-	Format(line, sizeof(line), "Dmg: %d | Vomit hits: %d | Actions: %d", g_iDamageAsInfected[target], g_iBoomerVomitHits[target], infActions);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	Format(line, sizeof(line), "Tank: hold %.0fs | kills %d | passes %d", g_fTankHoldTime[target], g_iTankKills[target], g_iTankPasses[target]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "Tip: !skilltop / !skillsim for KSR ranks", ITEMDRAW_DISABLED);
 
 	menu.ExitBackButton = showBackButton;
 	menu.Display(client, 20);
@@ -1806,6 +1793,7 @@ void ShowSkillMainMenu(int client)
 	menu.AddItem("my", "My KSR");
 	menu.AddItem("top", "Top KSR leaderboard");
 	menu.AddItem("sim", "Similar KSR rank");
+	menu.AddItem("teams", "Team KSR sum / average");
 	menu.AddItem("mix", "Call KSR mix vote");
 	if (CheckCommandAccess(client, "sm_skill_admin_reset", ADMFLAG_ROOT, true))
 	{
@@ -1842,6 +1830,10 @@ public int MenuHandler_SkillMain(Menu menu, MenuAction action, int client, int i
 	else if (StrEqual(info, "sim"))
 	{
 		RequestSimilarityMenu(client, client, true);
+	}
+	else if (StrEqual(info, "teams"))
+	{
+		PrintTeamKsrSummary(client);
 	}
 	else if (StrEqual(info, "mix"))
 	{
@@ -2128,7 +2120,79 @@ void PerformSkillMix()
 		MoveHumanToTeam(teamInf[i], TEAM_INFECTED);
 	}
 
-	PrintToChatAll("[KSR] Teams mixed by current KSR.");
+	PrintToChatAll("\x04[KSR]\x01 Teams mixed by current KSR.");
+	PrintTeamKsrSummary(0);
+}
+
+void PrintTeamKsrSummary(int client)
+{
+	float defaultRating = GetRankedMixPoolAverage();
+	float sumSurv = 0.0;
+	float sumInf = 0.0;
+	int survCount = 0;
+	int infCount = 0;
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsValidHuman(i))
+		{
+			continue;
+		}
+
+		int team = GetClientTeam(i);
+		if (team == TEAM_SURVIVOR)
+		{
+			sumSurv += GetMixRating(i, defaultRating);
+			survCount++;
+		}
+		else if (team == TEAM_INFECTED)
+		{
+			sumInf += GetMixRating(i, defaultRating);
+			infCount++;
+		}
+	}
+
+	if (survCount == 0 && infCount == 0)
+	{
+		if (client > 0)
+		{
+			PrintToChat(client, "\x04[KSR]\x01 No players on Survivor/Infected teams.");
+		}
+		else
+		{
+			PrintToChatAll("\x04[KSR]\x01 No players on Survivor/Infected teams.");
+		}
+		return;
+	}
+
+	char sumSurvStr[16];
+	char avgSurvStr[16];
+	char sumInfStr[16];
+	char avgInfStr[16];
+	FormatKSR(sumSurv, sumSurvStr, sizeof(sumSurvStr));
+	FormatKSR(survCount > 0 ? sumSurv / float(survCount) : 0.0, avgSurvStr, sizeof(avgSurvStr));
+	FormatKSR(sumInf, sumInfStr, sizeof(sumInfStr));
+	FormatKSR(infCount > 0 ? sumInf / float(infCount) : 0.0, avgInfStr, sizeof(avgInfStr));
+
+	char survLine[192];
+	char infLine[192];
+	Format(survLine, sizeof(survLine),
+		"\x04[KSR]\x01 \x04Survivors\x01 (\x05%dx\x01): sum \x05%s\x01 | avg \x05%s\x01",
+		survCount, sumSurvStr, avgSurvStr);
+	Format(infLine, sizeof(infLine),
+		"\x04[KSR]\x01 \x08Infected\x01 (\x05%dx\x01): sum \x05%s\x01 | avg \x05%s\x01",
+		infCount, sumInfStr, avgInfStr);
+
+	if (client > 0)
+	{
+		PrintToChat(client, "%s", survLine);
+		PrintToChat(client, "%s", infLine);
+	}
+	else
+	{
+		PrintToChatAll("%s", survLine);
+		PrintToChatAll("%s", infLine);
+	}
 }
 
 void SortByRatingDesc(int players[MAXPLAYERS + 1], float rating[MAXPLAYERS + 1], int count)
