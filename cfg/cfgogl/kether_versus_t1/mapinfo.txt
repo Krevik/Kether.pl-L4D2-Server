@@ -1651,6 +1651,14 @@
 		"start_extra_dist"	"148.034637"
 		"end_point"			"1857.567749 5826.479980 -3.932751"
 		"end_dist"			"513.700989"
+		"tank_ban_flow"
+		{
+			"1"
+			{
+				"min"		"55"
+				"max"		"88"
+			}
+		}
 	}
 	"uf4_airfield"
 	{
