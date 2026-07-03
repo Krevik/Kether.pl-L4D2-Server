@@ -36,7 +36,7 @@ public Plugin myinfo =
 	name		= "Match Vote",
 	author		= "vintik, Sir, StarterX4",
 	description = "!match !rmatch !chmatch - Change Hostname and Slots while you're at it!",
-	version		= "1.5",
+	version		= "1.5.1",
 	url			= "https://github.com/L4D-Community/L4D2-Competitive-Framework"
 };
 
@@ -163,15 +163,20 @@ public void OnCedapugEnded()
 
 Action MatchRequest(int iClient, int iArgs)
 {
-	if (!g_hEnabled.BoolValue)
-	{
-		CPrintToChat(iClient, "%t %t", "Tag", "Disabled");
-		return Plugin_Handled;
-	}
-
 	if (!iClient)
 	{
 		CReplyToCommand(iClient, "%t %t", "Tag", "NoConsole");
+		return Plugin_Handled;
+	}
+
+	if (!IsClientInGame(iClient))
+	{
+		return Plugin_Handled;
+	}
+
+	if (!g_hEnabled.BoolValue)
+	{
+		CPrintToChat(iClient, "%t %t", "Tag", "Disabled");
 		return Plugin_Handled;
 	}
 
@@ -403,15 +408,20 @@ void MatchVoteResultHandler(Handle vote, int num_votes, int num_clients, const i
 
 Action MatchReset(int iClient, int iArgs)
 {
-	if (!g_hEnabled.BoolValue)
-	{
-		CPrintToChat(iClient, "%t %t", "Tag", "Disabled");
-		return Plugin_Handled;
-	}
-
 	if (!iClient)
 	{
 		CReplyToCommand(iClient, "%t %t", "Tag", "NoConsole");
+		return Plugin_Handled;
+	}
+
+	if (!IsClientInGame(iClient))
+	{
+		return Plugin_Handled;
+	}
+
+	if (!g_hEnabled.BoolValue)
+	{
+		CPrintToChat(iClient, "%t %t", "Tag", "Disabled");
 		return Plugin_Handled;
 	}
 
@@ -498,15 +508,20 @@ void ResetMatchVoteResultHandler(Handle vote, int num_votes, int num_clients, co
 
 Action ChangeMatchRequest(int iClient, int iArgs)
 {
-	if (!g_hEnabled.BoolValue)
-	{
-		CPrintToChat(iClient, "%t %t", "Tag", "Disabled");
-		return Plugin_Handled;
-	}
-
 	if (!iClient)
 	{
 		CReplyToCommand(iClient, "%t %t", "Tag", "NoConsole");
+		return Plugin_Handled;
+	}
+
+	if (!IsClientInGame(iClient))
+	{
+		return Plugin_Handled;
+	}
+
+	if (!g_hEnabled.BoolValue)
+	{
+		CPrintToChat(iClient, "%t %t", "Tag", "Disabled");
 		return Plugin_Handled;
 	}
 
