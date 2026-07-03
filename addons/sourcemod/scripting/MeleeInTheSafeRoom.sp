@@ -347,11 +347,11 @@ stock GetScriptName( const String:Class[32], String:ScriptName[32] )
     {
         if( StrContains( g_sMeleeClass[i], Class, false ) == 0 )
         {
-            Format( ScriptName, 32, "%s", g_sMeleeClass[i] );
+            strcopy( ScriptName, 32, g_sMeleeClass[i] );
             return;
         }
     }
-    Format( ScriptName, 32, "%s", g_sMeleeClass[0] );   
+    strcopy( ScriptName, 32, g_sMeleeClass[0] );   
 }
 
 stock GetInGameClient()
