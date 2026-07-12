@@ -9,7 +9,7 @@
 #undef REQUIRE_PLUGIN
 #include <caster_system>
 
-#define PLUGIN_VERSION "10.2.4"
+#define PLUGIN_VERSION "10.2.6"
 
 public Plugin myinfo =
 {
@@ -134,7 +134,6 @@ char g_sDisruptReason[disruptType_SIZE][] =
 #include "readyup/command_kether.inc"
 #include "readyup/game.inc"
 #include "readyup/native.inc"
-//#include "readyup/panel_kether.inc" //panel translations target bug (everyone's getting whoever's translation?)
 #include "readyup/panel.inc"
 #include "readyup/player.inc"
 #include "readyup/setup_kether.inc"
@@ -331,7 +330,7 @@ public void OnMapEnd()
 	}
 }
 
-public void OnClientPostAdminCheck(int client)
+public void OnClientPutInServer(int client)
 {
 	if (inReadyUp && L4D2_IsScavengeMode() && !IsFakeClient(client))
 	{
