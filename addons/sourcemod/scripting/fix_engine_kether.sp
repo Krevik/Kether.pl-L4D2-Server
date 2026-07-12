@@ -1,4 +1,4 @@
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -72,6 +72,10 @@ public void OnPluginStart()
 	RegConsoleCmd("debug", CmdDebug);
 #endif
 }
+
+#if debug
+static Handle g_hDebugTimer[MAXPLAYERS+1];
+#endif
 
 public void OnMapEnd()
 {
@@ -470,7 +474,7 @@ void EF_ToogleEvents(bool bHook)
 		HookEvent("heal_success", EF_ev_HealSuccess);
 		HookEvent("revive_success", EF_ev_HealSuccess);
 		HookEvent("player_incapacitated", EF_ev_HealSuccess);
-		
+
 		bIsHooked = true;
 	}
 	else if (bIsHooked && !bHook){
@@ -481,7 +485,7 @@ void EF_ToogleEvents(bool bHook)
 		UnhookEvent("heal_success", EF_ev_HealSuccess);
 		UnhookEvent("revive_success", EF_ev_HealSuccess);
 		UnhookEvent("player_incapacitated", EF_ev_HealSuccess);
-		
+
 		bIsHooked = false;
 	}
 }
@@ -497,7 +501,7 @@ bool IsValidClient(int client)
                                         +==========================================+
 */
 #if debug
-static bool g_bDebugEnabled[MAXPLAYERS+1], Handle g_hDebugTimer[MAXPLAYERS+1];
+static bool g_bDebugEnabled[MAXPLAYERS+1];
 
 Action CmdDebug(int client, int args)
 {
@@ -519,6 +523,7 @@ Action CmdDebug(int client, int args)
 Action EF_t_LoadDebug(Handle timer, int client)
 {
 	g_hDebugTimer[client] = CreateTimer(0.1, EF_t_DebugMe, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	return Plugin_Handled;
 }
 
 Action EF_t_DebugMe(Handle timer, int client)
@@ -550,6 +555,8 @@ Action EF_t_DebugMe(Handle timer, int client)
 	}
 	else
 		DisableDebug(client);
+
+	return Plugin_Continue;
 }
 
 void DisableDebug(int client)
