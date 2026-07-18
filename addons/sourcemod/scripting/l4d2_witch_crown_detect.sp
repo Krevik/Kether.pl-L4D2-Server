@@ -301,9 +301,10 @@ public Action PrintAnyway(Handle timer, DataPack pack)
     Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
     GetTrieValue(witchPrintedTrie, witch_printed_key, printed);
 
-    // Already announced (including kill-within-3s), or witch entity is gone.
-    // Do not use m_iHealth — L4D2 often reports 0 for an active chasing witch.
-    if (printed != 0 || !IsWitch(witchID))
+    // Only dedup on the printed flag. Do NOT gate on IsWitch/m_iHealth: the whole point of
+    // this delayed print is to report after the witch has fled or died, when the entity is
+    // already gone. The printed flag (kept across cleanUp) prevents any double-print.
+    if (printed != 0)
         return Plugin_Continue;
 
     int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
