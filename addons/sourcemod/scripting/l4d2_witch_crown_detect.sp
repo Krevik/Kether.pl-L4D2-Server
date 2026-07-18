@@ -30,7 +30,7 @@ public Plugin myinfo =
 	name = "Witch Damage Manager",
 	author = "Krevik",
 	description = "Manages witch damage",
-	version = "1.0",
+	version = "1.1",
 	url = "Kether.pl"
 };
 
@@ -190,8 +190,8 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
         }
     }
 
-    CalculateAndPrintDamage(witchID);
-    //PrintToConsoleAll("[DEBUG] Witch was killed, tries are cleared.");
+    // Final announce (skipped if already printed while witch was alive); always cleans up.
+    CalculateAndPrintDamage(witchID, true);
 }
 
 void cleanUp(int witchID){
@@ -270,21 +270,23 @@ public Action PrintAnyway(Handle timer, DataPack pack)
     int printed = 0;
     char witch_printed_key[20];
     int witchMaxHealth = GetConVarInt(FindConVar("z_witch_health"));
-    int maxSurvivors = GetConVarInt(FindConVar("survivor_limit"));
     int witchID;
     pack.Reset();
     witchID = pack.ReadCell();
     Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
     GetTrieValue(witchPrintedTrie, witch_printed_key, printed);
 
-    if(printed == 0){
-        int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
-        int witchRemainingHealth = witchMaxHealth - OneHundredPercentDamageValue;
-        if(witchRemainingHealth > 1){
-            CPrintToChatAll("{default}[{green}!{default}] {blue}Witch {default}had {olive}%d {default}health remaining", witchRemainingHealth);
-        }
-        CalculateAndPrintDamage(witchID);
-    }
+    // Already announced, or witch died / despawned before the delay finished.
+    if (printed != 0 || !IsWitch(witchID) || GetEntProp(witchID, Prop_Data, "m_iHealth") <= 0)
+        return Plugin_Continue;
+
+    int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
+    int witchRemainingHealth = witchMaxHealth - OneHundredPercentDamageValue;
+    if (witchRemainingHealth > 1)
+        CPrintToChatAll("{default}[{green}!{default}] {blue}Witch {default}had {olive}%d {default}health remaining", witchRemainingHealth);
+
+    // Keep damage tracking so crown detection still works if she is killed later.
+    CalculateAndPrintDamage(witchID, false);
     return Plugin_Continue;
 }
 
@@ -312,11 +314,11 @@ public int getTotalDamageDoneToWitchBySurvivors(int witchID){
 }
 
 
-public void CalculateAndPrintDamage(int witchID){
+public void CalculateAndPrintDamage(int witchID, bool finalCleanup)
+{
     int maxSurvivors = GetConVarInt(FindConVar("survivor_limit"));
     int damagersPercents[MAXPLAYERS + 1];
     int witchDamageCollector[MAXPLAYERS + 1];
-    int witchShotsCollector[MAXPLAYERS + 1];
     int printed = 0;
     char witch_dmg_key[20];
     char witch_printed_key[20];
@@ -324,49 +326,62 @@ public void CalculateAndPrintDamage(int witchID){
     Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
     GetTrieArray(witchDamageTrie, witch_dmg_key, witchDamageCollector, sizeof(witchDamageCollector));
     GetTrieValue(witchPrintedTrie, witch_printed_key, printed);
+
+    // Already announced while witch was alive (e.g. after a survivor death) — do not reprint.
+    if (printed != 0)
+    {
+        if (finalCleanup)
+            cleanUp(witchID);
+        return;
+    }
+
     int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
 
     //now we can successfully calculate percent of damage done to witch by survivors
     int survivorsTMP = 0;
-    for(int client = 1; client <= MAXPLAYERS; client++){
-        if(IsValidClient(client)){
+    for (int client = 1; client <= MAXPLAYERS; client++)
+    {
+        if (IsValidClient(client))
+        {
             damagersPercents[client] = getPercentDamageDone(witchDamageCollector[client], OneHundredPercentDamageValue);
             //optimization
-            if(GetClientTeam(client) == TEAM_SURVIVOR){
+            if (GetClientTeam(client) == TEAM_SURVIVOR)
                 survivorsTMP++;
-            }
-            if(survivorsTMP >= maxSurvivors){
+            if (survivorsTMP >= maxSurvivors)
                 break;
-            }
         }
     }
 
     //sort???? do we need sorting actually? let's leave it unsorted now
 
-    if(OneHundredPercentDamageValue > 1){
-	    CPrintToChatAll("{default}[{green}!{default}] {blue}Damage {default}dealt to {blue}Witch:");
+    if (OneHundredPercentDamageValue > 1)
+    {
+        CPrintToChatAll("{default}[{green}!{default}] {blue}Damage {default}dealt to {blue}Witch:");
         survivorsTMP = 0;
         int printedDamage = 0;
         for (int client = 1; client <= MAXPLAYERS; client++)
         {
-            if(IsValidClient(client)){
-                if(witchDamageCollector[client] > 0){
+            if (IsValidClient(client))
+            {
+                if (witchDamageCollector[client] > 0)
+                {
                     CPrintToChatAll("{blue}[{default}%d{blue}] ({default}%i%%{blue}) {olive}%N", witchDamageCollector[client], getPercentDamageDone(witchDamageCollector[client], OneHundredPercentDamageValue), client);
                     printedDamage += witchDamageCollector[client];
                 }
                 //optimization
-                if(GetClientTeam(client) == TEAM_SURVIVOR){
+                if (GetClientTeam(client) == TEAM_SURVIVOR)
                     survivorsTMP++;
-                }
-                if(survivorsTMP >= maxSurvivors || printedDamage >= OneHundredPercentDamageValue){
+                if (survivorsTMP >= maxSurvivors || printedDamage >= OneHundredPercentDamageValue)
                     break;
-                }
             }
         }
     }
-    printed = 1;
-    SetTrieValue(witchPrintedTrie, witch_printed_key, printed, true);
-    cleanUp(witchID);
+
+    SetTrieValue(witchPrintedTrie, witch_printed_key, 1, true);
+
+    // Only wipe tracking on death/final path. Alive prints must keep data for crown detection.
+    if (finalCleanup)
+        cleanUp(witchID);
 }
 
 int getPercentDamageDone(int damageDone, int OneHundredPercentDamageValue){
