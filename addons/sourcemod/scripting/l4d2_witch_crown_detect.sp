@@ -30,7 +30,7 @@ public Plugin myinfo =
 	name = "Witch Damage Manager",
 	author = "Krevik",
 	description = "Manages witch damage",
-	version = "1.1",
+	version = "1.1.1",
 	url = "Kether.pl"
 };
 
@@ -45,9 +45,30 @@ public void OnPluginStart(){
     HookEvent("witch_harasser_set", Event_WitchHarasserSet, EventHookMode_Post);
     HookEvent("witch_killed", WitchKilled_Event, EventHookMode_Post);
     HookEvent("player_death", PlayerDied_Event, EventHookMode_Post);
+    HookEvent("round_start", RoundStart_Event, EventHookMode_PostNoCopy);
 
     crownForward = CreateGlobalForward("Kether_OnWitchCrown", ET_Ignore, Param_Cell, Param_Cell );
     drawCrownForward = CreateGlobalForward("Kether_OnWitchDrawCrown", ET_Ignore, Param_Cell, Param_Cell );
+}
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+    if (StrEqual(classname, "witch", false))
+    {
+        char witch_printed_key[20];
+        Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", entity);
+        RemoveFromTrie(witchPrintedTrie, witch_printed_key);
+        clearDamageTracking(entity);
+    }
+}
+
+void RoundStart_Event(Event event, const char[] name, bool dontBroadcast)
+{
+    ClearTrie(witchDamageTrie);
+    ClearTrie(witchHarasserTrie);
+    ClearTrie(witchUnharassedDamageTrie);
+    ClearTrie(witchShotsTrie);
+    ClearTrie(witchPrintedTrie);
 }
 
 //TODO: detect witch incaps - possibly by player death and player hurt events
@@ -194,25 +215,29 @@ public void WitchKilled_Event(Event event, const char[] name, bool dontBroadcast
     CalculateAndPrintDamage(witchID, true);
 }
 
-void cleanUp(int witchID){
+void clearDamageTracking(int witchID)
+{
     char witch_dmg_key[20];
     char witch_unharassed_dmg_key[20];
     char witch_harasser_key[20];
     char witch_shots_key[20];
-    char witch_printed_key[20];
 
     Format(witch_dmg_key, sizeof(witch_dmg_key), "%x_dmg", witchID);
     Format(witch_unharassed_dmg_key, sizeof(witch_unharassed_dmg_key), "%x_uh_dmg", witchID);
     Format(witch_harasser_key, sizeof(witch_harasser_key), "%x_harasser", witchID);
     Format(witch_shots_key, sizeof(witch_shots_key), "%x_shots", witchID);
-    Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
 
     RemoveFromTrie(witchDamageTrie, witch_dmg_key);
     RemoveFromTrie(witchUnharassedDamageTrie, witch_unharassed_dmg_key);
     RemoveFromTrie(witchHarasserTrie, witch_harasser_key);
     RemoveFromTrie(witchShotsTrie, witch_shots_key);
-    RemoveFromTrie(witchPrintedTrie, witch_printed_key);
+}
 
+void cleanUp(int witchID)
+{
+    // Keep the printed flag so a delayed PrintAnyway after witch_killed does not reprint.
+    // Flag is cleared on round_start / new witch entity at the same index.
+    clearDamageTracking(witchID);
 }
 
 void HandleCrown(int attacker, int damage){
@@ -276,8 +301,9 @@ public Action PrintAnyway(Handle timer, DataPack pack)
     Format(witch_printed_key, sizeof(witch_printed_key), "%x_print", witchID);
     GetTrieValue(witchPrintedTrie, witch_printed_key, printed);
 
-    // Already announced, or witch died / despawned before the delay finished.
-    if (printed != 0 || !IsWitch(witchID) || GetEntProp(witchID, Prop_Data, "m_iHealth") <= 0)
+    // Already announced (including kill-within-3s), or witch entity is gone.
+    // Do not use m_iHealth — L4D2 often reports 0 for an active chasing witch.
+    if (printed != 0 || !IsWitch(witchID))
         return Plugin_Continue;
 
     int OneHundredPercentDamageValue = getTotalDamageDoneToWitchBySurvivors(witchID);
