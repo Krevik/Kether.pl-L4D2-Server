@@ -12,9 +12,9 @@
 				"this"  "ignore"
 				"arguments"
 				{
-					"EntIndex"
+					"bot"
 					{
-						"type"    "charptr"
+						"type"    "int"
 					}
 				}
 			}

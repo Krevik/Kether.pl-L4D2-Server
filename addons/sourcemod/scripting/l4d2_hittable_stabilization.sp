@@ -14,11 +14,21 @@
 * > Stabilizes hittable physics when Tank punches them
 * > Ensures hittables fly in the direction the Tank is looking
 * > Reduces random angular velocity that causes unpredictable flight paths
+* > Per-class speed/vertical multipliers (lightweight, cars, dumpsters)
+* > Optional launch-speed scale toward official 30-tick feel
 *
 ******************************************************************/
 
 #define L4D2Team_Infected 3
 #define L4D2Infected_Tank 8
+
+enum HittableClass
+{
+	HittableClass_Default = 0,
+	HittableClass_Lightweight,
+	HittableClass_Car,
+	HittableClass_Dumpster
+}
 
 ConVar hStabilizationEnabled;
 ConVar hStabilizationDelay;
@@ -27,6 +37,13 @@ ConVar hForceDirection;
 ConVar hDebug;
 ConVar hLightweightSpeedMultiplier;
 ConVar hLightweightVerticalMultiplier;
+ConVar hCarSpeedMultiplier;
+ConVar hCarVerticalMultiplier;
+ConVar hDumpsterSpeedMultiplier;
+ConVar hDumpsterVerticalMultiplier;
+ConVar hTickrateCompensate;
+ConVar hTickrateRef;
+ConVar hTickrateCompensatePower;
 
 bool g_bStabilizationEnabled;
 float g_fStabilizationDelay;
@@ -35,13 +52,20 @@ bool g_bForceDirection;
 bool g_bDebug;
 float g_fLightweightSpeedMultiplier;
 float g_fLightweightVerticalMultiplier;
+float g_fCarSpeedMultiplier;
+float g_fCarVerticalMultiplier;
+float g_fDumpsterSpeedMultiplier;
+float g_fDumpsterVerticalMultiplier;
+bool g_bTickrateCompensate;
+float g_fTickrateRef;
+float g_fTickrateCompensatePower;
 
 public Plugin myinfo = 
 {
 	name = "L4D2 Hittable Stabilization",
 	author = "Auto",
 	description = "Stabilizes hittable physics to make tank throws more predictable",
-	version = "1.0",
+	version = "1.1",
 	url = ""
 };
 
@@ -74,6 +98,34 @@ public void OnPluginStart()
 	hLightweightVerticalMultiplier = CreateConVar("hc_lightweight_vertical_mult", "0.3",
 		"Vertical velocity multiplier for lightweight hittables - lower = less upward flight",
 		FCVAR_NONE, true, 0.0, true, 2.0);
+
+	hCarSpeedMultiplier = CreateConVar("hc_car_speed_mult", "0.75",
+		"Speed multiplier for cars, vans, taxis, alarm cars - lower = slower",
+		FCVAR_NONE, true, 0.1, true, 2.0);
+
+	hCarVerticalMultiplier = CreateConVar("hc_car_vertical_mult", "0.5",
+		"Vertical velocity multiplier for cars - lower = less upward flight",
+		FCVAR_NONE, true, 0.0, true, 2.0);
+
+	hDumpsterSpeedMultiplier = CreateConVar("hc_dumpster_speed_mult", "0.7",
+		"Speed multiplier for dumpsters/containers - lower = slower",
+		FCVAR_NONE, true, 0.1, true, 2.0);
+
+	hDumpsterVerticalMultiplier = CreateConVar("hc_dumpster_vertical_mult", "0.4",
+		"Vertical velocity multiplier for dumpsters/containers - lower = less upward flight",
+		FCVAR_NONE, true, 0.0, true, 2.0);
+
+	hTickrateCompensate = CreateConVar("hc_tickrate_compensate", "0",
+		"Scale launch speed toward official 30-tick feel. Does not rewind VPhysics (bounces/rolling stay high-tick). 0: off, 1: on",
+		FCVAR_NONE, true, 0.0, true, 1.0);
+
+	hTickrateRef = CreateConVar("hc_tickrate_ref", "30",
+		"Reference tickrate used when hc_tickrate_compensate is enabled (official Valve servers are 30)",
+		FCVAR_NONE, true, 10.0, true, 128.0);
+
+	hTickrateCompensatePower = CreateConVar("hc_tickrate_compensate_power", "0.4",
+		"Exponent for tickrate scale: (ref/current)^power. 1.0 is linear (too strong on 108 tick). 0.4 on 108 tick is ~0.62",
+		FCVAR_NONE, true, 0.0, true, 2.0);
 	
 	hStabilizationEnabled.AddChangeHook(OnConVarChanged);
 	hStabilizationDelay.AddChangeHook(OnConVarChanged);
@@ -82,6 +134,13 @@ public void OnPluginStart()
 	hDebug.AddChangeHook(OnConVarChanged);
 	hLightweightSpeedMultiplier.AddChangeHook(OnConVarChanged);
 	hLightweightVerticalMultiplier.AddChangeHook(OnConVarChanged);
+	hCarSpeedMultiplier.AddChangeHook(OnConVarChanged);
+	hCarVerticalMultiplier.AddChangeHook(OnConVarChanged);
+	hDumpsterSpeedMultiplier.AddChangeHook(OnConVarChanged);
+	hDumpsterVerticalMultiplier.AddChangeHook(OnConVarChanged);
+	hTickrateCompensate.AddChangeHook(OnConVarChanged);
+	hTickrateRef.AddChangeHook(OnConVarChanged);
+	hTickrateCompensatePower.AddChangeHook(OnConVarChanged);
 	
 	GetCvars();
 	
@@ -143,6 +202,13 @@ void GetCvars()
 	g_bDebug = hDebug.BoolValue;
 	g_fLightweightSpeedMultiplier = hLightweightSpeedMultiplier.FloatValue;
 	g_fLightweightVerticalMultiplier = hLightweightVerticalMultiplier.FloatValue;
+	g_fCarSpeedMultiplier = hCarSpeedMultiplier.FloatValue;
+	g_fCarVerticalMultiplier = hCarVerticalMultiplier.FloatValue;
+	g_fDumpsterSpeedMultiplier = hDumpsterSpeedMultiplier.FloatValue;
+	g_fDumpsterVerticalMultiplier = hDumpsterVerticalMultiplier.FloatValue;
+	g_bTickrateCompensate = hTickrateCompensate.BoolValue;
+	g_fTickrateRef = hTickrateRef.FloatValue;
+	g_fTickrateCompensatePower = hTickrateCompensatePower.FloatValue;
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -235,7 +301,7 @@ Action StabilizeHittable(Handle timer, int data)
 	
 	// Get current velocity
 	float currentVelocity[3];
-	GetEntPropVector(hittable, Prop_Data, "m_vecVelocity", currentVelocity);
+	GetEntPropVector(hittable, Prop_Data, "m_vecAbsVelocity", currentVelocity);
 	
 	float speed = GetVectorLength(currentVelocity);
 	
@@ -248,20 +314,20 @@ Action StabilizeHittable(Handle timer, int data)
 		}
 		return Plugin_Stop;
 	}
+
+	HittableClass hittableClass = GetHittableClass(hittable);
+	float speedMultiplier;
+	float verticalMultiplier;
+	GetClassMultipliers(hittableClass, speedMultiplier, verticalMultiplier);
+
+	float tickrateScale = GetTickrateSpeedScale();
+	speed *= speedMultiplier * tickrateScale;
 	
-	// Check if this is a lightweight hittable
-	bool isLightweight = IsLightweightHittable(hittable);
-	float speedMultiplier = isLightweight ? g_fLightweightSpeedMultiplier : 1.0;
-	float verticalMultiplier = isLightweight ? g_fLightweightVerticalMultiplier : 1.0;
-	
-	if (g_bDebug && isLightweight)
+	if (g_bDebug)
 	{
-		PrintToServer("[HittableStabilization] Detected lightweight hittable %d, applying multipliers: speed=%.2f, vertical=%.2f", 
-			hittable, speedMultiplier, verticalMultiplier);
+		PrintToServer("[HittableStabilization] Class %d entity %d multipliers: speed=%.2f vertical=%.2f tickrate=%.2f -> launch=%.2f",
+			view_as<int>(hittableClass), hittable, speedMultiplier, verticalMultiplier, tickrateScale, speed);
 	}
-	
-	// Apply speed multiplier for lightweight objects
-	speed *= speedMultiplier;
 	
 	float newVelocity[3];
 	
@@ -278,7 +344,7 @@ Action StabilizeHittable(Handle timer, int data)
 			// This creates a more predictable arc
 			float horizontalSpeed = SquareRoot(newVelocity[0] * newVelocity[0] + newVelocity[1] * newVelocity[1]);
 			float baseUpward = horizontalSpeed * 0.15 + 50.0; // Small upward component
-			newVelocity[2] = baseUpward * verticalMultiplier; // Apply vertical multiplier for lightweight
+			newVelocity[2] = baseUpward * verticalMultiplier;
 		}
 		else
 		{
@@ -298,7 +364,6 @@ Action StabilizeHittable(Handle timer, int data)
 		NormalizeVector(currentVelocity, newVelocity);
 		newVelocity[0] *= speed;
 		newVelocity[1] *= speed;
-		// Apply vertical multiplier for lightweight objects
 		newVelocity[2] = currentVelocity[2] * verticalMultiplier;
 		
 		if (g_bDebug)
@@ -308,8 +373,8 @@ Action StabilizeHittable(Handle timer, int data)
 		}
 	}
 	
-	// Apply new velocity
-	SetEntPropVector(hittable, Prop_Data, "m_vecVelocity", newVelocity);
+	SetEntPropVector(hittable, Prop_Data, "m_vecAbsVelocity", newVelocity);
+	TeleportEntity(hittable, NULL_VECTOR, NULL_VECTOR, newVelocity);
 	
 	// Reduce angular velocity to prevent spinning
 	if (g_fAngularVelocityDamping < 1.0)
@@ -332,6 +397,49 @@ Action StabilizeHittable(Handle timer, int data)
 	}
 	
 	return Plugin_Stop;
+}
+
+void GetClassMultipliers(HittableClass hittableClass, float &speedMultiplier, float &verticalMultiplier)
+{
+	switch (hittableClass)
+	{
+		case HittableClass_Lightweight:
+		{
+			speedMultiplier = g_fLightweightSpeedMultiplier;
+			verticalMultiplier = g_fLightweightVerticalMultiplier;
+		}
+		case HittableClass_Car:
+		{
+			speedMultiplier = g_fCarSpeedMultiplier;
+			verticalMultiplier = g_fCarVerticalMultiplier;
+		}
+		case HittableClass_Dumpster:
+		{
+			speedMultiplier = g_fDumpsterSpeedMultiplier;
+			verticalMultiplier = g_fDumpsterVerticalMultiplier;
+		}
+		default:
+		{
+			speedMultiplier = 1.0;
+			verticalMultiplier = 1.0;
+		}
+	}
+}
+
+float GetTickrateSpeedScale()
+{
+	if (!g_bTickrateCompensate)
+		return 1.0;
+
+	float tickInterval = GetTickInterval();
+	if (tickInterval <= 0.0)
+		return 1.0;
+
+	float currentTick = 1.0 / tickInterval;
+	if (currentTick <= g_fTickrateRef)
+		return 1.0;
+
+	return Pow(g_fTickrateRef / currentTick, g_fTickrateCompensatePower);
 }
 
 bool IsTank(int client)
@@ -360,15 +468,39 @@ bool IsTankHittable(int entity)
 	return false;
 }
 
-bool IsLightweightHittable(int entity)
+HittableClass GetHittableClass(int entity)
 {
 	if (!IsValidEntity(entity))
-		return false;
-	
+		return HittableClass_Default;
+
+	char className[64];
+	GetEdictClassname(entity, className, sizeof(className));
+	if (StrEqual(className, "prop_car_alarm"))
+		return HittableClass_Car;
+
 	char sModelName[PLATFORM_MAX_PATH];
 	GetEntPropString(entity, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
 	ReplaceString(sModelName, sizeof(sModelName), "\\", "/", false);
-	
+
+	if (StrContains(sModelName, "dumpster", false) != -1)
+		return HittableClass_Dumpster;
+
+	if (StrContains(sModelName, "cara_", false) != -1
+	 || StrContains(sModelName, "taxi_", false) != -1
+	 || StrContains(sModelName, "police_car", false) != -1
+	 || StrContains(sModelName, "utility_truck", false) != -1
+	 || StrEqual(sModelName, "models/props_vehicles/van.mdl", false)
+	 || StrEqual(sModelName, "models/props_fairgrounds/bumpercar.mdl", false))
+		return HittableClass_Car;
+
+	if (IsLightweightModel(sModelName))
+		return HittableClass_Lightweight;
+
+	return HittableClass_Default;
+}
+
+bool IsLightweightModel(const char[] sModelName)
+{
 	// Forklifts (wózki widłowe)
 	if (StrEqual(sModelName, "models/props/cs_assault/forklift.mdl", false))
 		return true;
