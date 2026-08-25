@@ -50,3 +50,31 @@ Turbo:
     • Smoker right click releases the victim;
     • Smoker can drag the victim;
     • Weapon reload interrupt.
+
+Prop Hunt (matchmode "prophunt", plugin kether_prophunt.smx):
+-classic hide-and-seek gamemode built on top of mp_gamemode "versus", plugin-managed round loop
+	on a continuous rotation (many short rounds per map instead of the native 2-round versus flow)
+-two teams: Hunters (survivors, the seekers) and Props (infected, the hiders)
+-Hunters are picked each round via a fairness counter + volunteer queue (!hunt to volunteer);
+	everyone else plays as a Prop
+-Props spawn as weaponless, attack-disabled Hunters (m_zombieClass forced to Hunter) - they
+	cannot pounce, claw or otherwise fight back
+-round starts with a hide phase: Hunters are frozen and blinded while Props pick a disguise
+	by aiming at a world prop (entity or static) and pressing +use; a menu (!prop) is the
+	fallback/admin path
+-disguised Props can rotate freely, use !lock to freeze themselves in place (blocked over an
+	active hazard trigger), get an automatic thirdperson camera, and taunt (!taunt) with a
+	special infected sound on a cooldown
+-once the seek phase starts, Props periodically and automatically emit a random special
+	infected sound (every ~45s by default, with a warning beforehand) so they can't camp
+	silently forever
+-Hunters lose HP for every shot fired and regain HP for landing hits, with a bonus for
+	eliminating a Prop - encourages careful, confirmed shots instead of spraying every prop
+	in sight
+-round ends when every Prop has been found (Hunters win) or the round timer expires with at
+	least one Prop still alive (Props win)
+-no common infected, no AI special infected, no tank/witch; weapon/item spawns and any way to
+	end the map (changelevel/finale/rescue triggers) are stripped out via cfg/stripper/prophunt
+-anti-cheat scan kicks Hunters caught with r_staticpropinfo enabled, since that cvar reveals
+	static prop names/bounds and would trivially expose disguised Props
+-tunable via ph_* cvars (see plugin_commands_cvars.md), commands: !hunt, !prop, !lock, !taunt, !ph

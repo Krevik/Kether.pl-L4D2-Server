@@ -1,0 +1,123 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default}"
+	}
+
+	// PH_Hud_AnnounceRoundStart
+	"PropHunt_RoundStart"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} Round {blue}%d{default} started - {olive}%d{default} Prop(s) are hiding."
+	}
+	"PropHunt_YouAreHunter"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} You are a {blue}Hunter{default}. Stay put for {olive}%d{default}s while the Props hide."
+	}
+	"PropHunt_YouAreProp"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} You are a {red}Prop{default}. You have {olive}%d{default}s to disguise ({olive}+use{default}) and hide!"
+	}
+
+	// PH_Hud_AnnounceSeekStart
+	"PropHunt_SeekStart"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} The hiding phase is over - {blue}Hunters{default} are on the move!"
+	}
+
+	// PH_Hud_AnnouncePropEliminated
+	"PropHunt_PropEliminated"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} {red}%s{default} was found and eliminated! ({olive}%d{default}/{olive}%d{default} Props remain)"
+	}
+
+	// PH_Hud_AnnounceRoundEnd
+	"PropHunt_HuntersWin"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} All Props have been found - {blue}Hunters win{default} this round!"
+	}
+	"PropHunt_PropsWin"
+	{
+		"en"		"{olive}[{green}Prop Hunt{olive}]{default} Time is up - the surviving {red}Props win{default} this round!"
+	}
+
+	// PH_Hud_WarnCueIncoming
+	"PropHunt_CueWarning"
+	{
+		"en"		"A forced sound cue is coming up soon..."
+	}
+
+	// PH_Timer_HudUpdate
+	"PropHunt_Hud_Hide"
+	{
+		"en"		"Hide! %d s left\nProps: %d/%d"
+	}
+	"PropHunt_Hud_Seek"
+	{
+		"en"		"Seek! %d s left\nProps: %d/%d"
+	}
+
+	// cues.sp - PH_DoTaunt
+	"PropHunt_TauntCooldown"
+	{
+		"en"		"You must wait before taunting again."
+	}
+
+	// selection.sp / commands.sp - PH_TrySelectProp, PH_OpenPropMenu
+	"PropHunt_ChangeLimitReached"
+	{
+		"en"		"You have reached the disguise change limit for this round."
+	}
+	"PropHunt_NoPropFound"
+	{
+		"en"		"No valid prop found nearby."
+	}
+	"PropHunt_DisguiseFailed"
+	{
+		"en"		"Failed to disguise as that prop."
+	}
+	"PropHunt_Disguised"
+	{
+		"en"		"Disguised as: %s"
+	}
+
+	// selection.sp - PH_ToggleLock, PH_TrySelectProp guards
+	"PropHunt_NotDisguisedYet"
+	{
+		"en"		"You need to disguise as a prop first."
+	}
+	"PropHunt_HazardBelow"
+	{
+		"en"		"You cannot lock here - there is a hazard beneath you."
+	}
+	"PropHunt_Locked"
+	{
+		"en"		"Position locked. Use !lock again to unlock."
+	}
+	"PropHunt_Unlocked"
+	{
+		"en"		"Position unlocked."
+	}
+
+	// teams.sp - PH_Teams_ToggleVolunteer
+	"PropHunt_VolunteeredHunter"
+	{
+		"en"		"You have volunteered to be a Hunter next round."
+	}
+	"PropHunt_VolunteerCancelled"
+	{
+		"en"		"You are no longer volunteering to be a Hunter."
+	}
+
+	// commands.sp - PH_OpenPropMenu
+	"PropHunt_MenuTitle"
+	{
+		"en"		"Prop Hunt - Choose your disguise"
+	}
+
+	// stealth.sp - PH_OnAnticheatConVarQueried
+	"PropHunt_AnticheatKickReason"
+	{
+		"en"		"Kicked: r_staticpropinfo must be disabled to play Prop Hunt."
+	}
+}

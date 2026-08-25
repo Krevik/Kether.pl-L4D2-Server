@@ -1,0 +1,123 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default}"
+	}
+
+	// PH_Hud_AnnounceRoundStart
+	"PropHunt_RoundStart"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} Runda {blue}%d{default} rozpoczęta - {olive}%d{default} rekwizyt(ów) się chowa."
+	}
+	"PropHunt_YouAreHunter"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} Jesteś {blue}Myśliwym{default}. Stój w miejscu przez {olive}%d{default}s, aż Rekwizyty się ukryją."
+	}
+	"PropHunt_YouAreProp"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} Jesteś {red}Rekwizytem{default}. Masz {olive}%d{default}s, aby przebrać się ({olive}+use{default}) i ukryć!"
+	}
+
+	// PH_Hud_AnnounceSeekStart
+	"PropHunt_SeekStart"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} Faza chowania się zakończona - {blue}Myśliwi{default} ruszają do akcji!"
+	}
+
+	// PH_Hud_AnnouncePropEliminated
+	"PropHunt_PropEliminated"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} {red}%s{default} został znaleziony i wyeliminowany! (pozostało {olive}%d{default}/{olive}%d{default} Rekwizytów)"
+	}
+
+	// PH_Hud_AnnounceRoundEnd
+	"PropHunt_HuntersWin"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} Wszystkie Rekwizyty zostały znalezione - {blue}Myśliwi wygrywają{default} tę rundę!"
+	}
+	"PropHunt_PropsWin"
+	{
+		"pl"		"{olive}[{green}Prop Hunt{olive}]{default} Czas minął - ocalałe {red}Rekwizyty wygrywają{default} tę rundę!"
+	}
+
+	// PH_Hud_WarnCueIncoming
+	"PropHunt_CueWarning"
+	{
+		"pl"		"Wymuszony dźwięk odezwie się za chwilę..."
+	}
+
+	// PH_Timer_HudUpdate
+	"PropHunt_Hud_Hide"
+	{
+		"pl"		"Ukryj się! Pozostało %d s\nRekwizyty: %d/%d"
+	}
+	"PropHunt_Hud_Seek"
+	{
+		"pl"		"Szukaj! Pozostało %d s\nRekwizyty: %d/%d"
+	}
+
+	// cues.sp - PH_DoTaunt
+	"PropHunt_TauntCooldown"
+	{
+		"pl"		"Musisz poczekać, aby ponownie wydać dźwięk."
+	}
+
+	// selection.sp / commands.sp - PH_TrySelectProp, PH_OpenPropMenu
+	"PropHunt_ChangeLimitReached"
+	{
+		"pl"		"Osiągnięto limit zmian przebrania w tej rundzie."
+	}
+	"PropHunt_NoPropFound"
+	{
+		"pl"		"Nie znaleziono odpowiedniego rekwizytu w pobliżu."
+	}
+	"PropHunt_DisguiseFailed"
+	{
+		"pl"		"Nie udało się przebrać za ten rekwizyt."
+	}
+	"PropHunt_Disguised"
+	{
+		"pl"		"Przebrano za: %s"
+	}
+
+	// selection.sp - PH_ToggleLock, PH_TrySelectProp guards
+	"PropHunt_NotDisguisedYet"
+	{
+		"pl"		"Musisz najpierw przebrać się za rekwizyt."
+	}
+	"PropHunt_HazardBelow"
+	{
+		"pl"		"Nie możesz się tu zablokować - pod tobą jest zagrożenie."
+	}
+	"PropHunt_Locked"
+	{
+		"pl"		"Pozycja zablokowana. Użyj !lock ponownie, aby odblokować."
+	}
+	"PropHunt_Unlocked"
+	{
+		"pl"		"Pozycja odblokowana."
+	}
+
+	// teams.sp - PH_Teams_ToggleVolunteer
+	"PropHunt_VolunteeredHunter"
+	{
+		"pl"		"Zgłosiłeś się na Myśliwego w następnej rundzie."
+	}
+	"PropHunt_VolunteerCancelled"
+	{
+		"pl"		"Nie zgłaszasz się już na Myśliwego."
+	}
+
+	// commands.sp - PH_OpenPropMenu
+	"PropHunt_MenuTitle"
+	{
+		"pl"		"Prop Hunt - Wybierz swoje przebranie"
+	}
+
+	// stealth.sp - PH_OnAnticheatConVarQueried
+	"PropHunt_AnticheatKickReason"
+	{
+		"pl"		"Wyrzucono: r_staticpropinfo musi być wyłączone, aby grać w Prop Hunt."
+	}
+}

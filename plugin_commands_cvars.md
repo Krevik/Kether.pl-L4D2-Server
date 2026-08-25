@@ -109,3 +109,38 @@ https://github.com/SirPlease/L4D2-Competitive-Rework
 
 CVARS:
 * **deathcam_skip_announce**: If **1** (*default*), globally print an info about the player who tried to exploit.
+
+---
+>**kether_prophunt.smx**  
+[L4D2] Kether Prop Hunt  
+Versus-based hide-and-seek gamemode for the `prophunt` cfgogl matchmode. Survivors are "Hunters" (seekers). Infected spawn as attack-disabled Hunters and use **+use** to disguise as a world prop (model swap + a non-solid visual child prop), then try to survive the round without being found. Only active while the `prophunt` matchmode is loaded.
+
+<ins>Commands:</ins>
+- "**sm_hunt**": Volunteer to be picked as a Hunter next round (fairness-queue rotation still applies).
+- "**sm_prop**": Open the disguise menu - the fallback/admin path for picking a prop when aiming isn't precise enough.
+- "**sm_lock**": Toggle your rotation/position lock once disguised (blocked over an active `trigger_hurt`).
+- "**sm_taunt**": Play a voluntary special-infected sound (has a cooldown, see `ph_taunt_cooldown`).
+- "**sm_ph**": Show the current round number, phase and Props remaining.
+- "**sm_ph_forceround**" *(admin, `ADMFLAG_CHANGEMAP`)*: Force-end the current round.
+
+<ins>CVARS:</ins>
+- **ph_hunters**: Number of Hunters (survivor slots) selected each round. The rest of the connected players are Props. *(default 4, 1-8)*
+- **ph_hide_time**: Seconds Hunters are frozen and blinded at the start of a round while Props hide. *(default 45)*
+- **ph_round_time**: Seconds a round lasts once the seek phase starts. Props still alive when it expires win the round. *(default 240)*
+- **ph_round_end_delay**: Seconds to show the round-end scoreline before starting the next round. *(default 8)*
+- **ph_guaranteed_hunter_turns**: Rounds a client is guaranteed to stay a Prop after having been a Hunter, before being eligible again. *(default 3)*
+- **ph_prop_min_size** / **ph_prop_max_size**: Minimum/maximum prop bounding-box diagonal (Hammer units) a Prop is allowed to disguise as. *(default 20 / 260)*
+- **ph_prop_select_distance**: Maximum distance (Hammer units) to a prop for +use to select it. *(default 180)*
+- **ph_prop_change_limit**: Times a Prop may re-pick a disguise per round. 0 = unlimited. *(default 0)*
+- **ph_proplock_enabled**: 1 = Props may lock their rotation/position in place (bound to `sm_lock`/+reload). *(default 1)*
+- **ph_auto_freeze_time**: Seconds a disguised Prop must stand still before being auto-locked in place. 0 = disabled. *(default 5)*
+- **ph_thirdperson**: 1 = Props automatically get a third-person camera while disguised. *(default 1)*
+- **ph_cue_interval**: Seconds between forced special-infected sound cues, so Props can't camp silently forever. 0 = disabled. *(default 45)*
+- **ph_cue_warn_fraction**: Fraction of `ph_cue_interval` at which a chat/hint warning is sent before the forced cue plays. *(default 0.5)*
+- **ph_taunt_enabled**: 1 = Props may voluntarily taunt (play a special infected sound) with `sm_taunt`. *(default 1)*
+- **ph_taunt_cooldown**: Seconds between voluntary taunts from the same Prop. *(default 10)*
+- **ph_hp_hunter_dec**: HP a Hunter loses for every shot fired. *(default 5)*
+- **ph_hp_hunter_inc**: HP a Hunter regains for landing a hit on a Prop. *(default 15)*
+- **ph_hp_hunter_bonus**: Bonus HP a Hunter regains for eliminating a Prop. *(default 40)*
+- **ph_hide_blood**: 1 = Suppress blood decals/particles when a Hunter hits a Prop. *(default 1)*
+- **ph_anticheat_kick**: 1 = Kick Hunters found with `r_staticpropinfo` enabled (reveals static prop names/bounds client-side). *(default 1)*

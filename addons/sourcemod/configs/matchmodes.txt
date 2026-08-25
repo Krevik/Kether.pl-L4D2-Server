@@ -189,6 +189,13 @@
 			"name" "1v1 ZoneHunters"
 		}
 	}
+	"Prop Hunt Configs"
+	{
+		"prophunt"
+		{
+			"name" "Prop Hunt"
+		}
+	}
 	"ScavOgl Configs"
 	{
 		"scavogl"
