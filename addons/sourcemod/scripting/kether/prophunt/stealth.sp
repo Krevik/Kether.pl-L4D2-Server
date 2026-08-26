@@ -3,12 +3,20 @@
 #endif
 #define __ph_stealth_included
 
-// Strip the movement-attack buttons every tick for Props, on top of the SDKHook_OnTakeDamage
-// zeroing in hunters.sp - belt and suspenders so a Hunter never even sees the claw/pounce
-// swing animation play out on a disguised Prop.
+// Strip all of the Hunter class's attack buttons every tick for Props - Props are forced into
+// PH_ZOMBIECLASS_HUNTER, whose claw weapon has no "just swing in place" state at all: +attack
+// always applies some forward push, and +duck only changes how *far* that push travels (crouch
+// for ~1s to fully charge the long pounce vs. an uncharged minimum-distance push). There's no
+// button combination that gets a stationary melee swing out of this weapon, so IN_ATTACK can't
+// be allowed through unconditionally like it briefly was - see PH_Selection_TryBashDoor()
+// (selection.sp) for how door-bashing is now handled instead: it traces for a nearby
+// prop_door_rotating and applies damage to it directly, entirely independent of this button
+// ever reaching the Hunter's actual weapon code. IN_DUCK is blocked too since Props have no
+// gameplay reason to crouch, and IN_ATTACK2/IN_ATTACK3 stay blocked as the class's other, wholly
+// unrelated specials.
 void PH_Stealth_BlockPropButtons(int &buttons)
 {
-	buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3);
+	buttons &= ~(IN_ATTACK | IN_ATTACK2 | IN_ATTACK3 | IN_DUCK);
 }
 
 // A human Hunter/Prop model constantly plays idle vocalizations and footstep voice lines that

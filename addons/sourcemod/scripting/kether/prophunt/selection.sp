@@ -6,31 +6,166 @@
 // Buttons: +use picks a prop, +reload toggles the rotation/position lock, +attack taunts,
 // +attack2 toggles first/third person manually. Props never hold a weapon, so all four are
 // otherwise idle for this team.
+//
+// Press-edge detection is done by hand against the previous tick's buttons rather than reading
+// the "m_afButtonPressed" netprop - that prop isn't reliably populated yet for the current tick
+// at the point OnPlayerRunCmd fires, so comparing it against the live "buttons" bitmask could
+// miss the edge and require mashing a key a few times before a press actually registered.
 void PH_Selection_OnPlayerRunCmd(int client, int buttons)
 {
 	if (!PH_IsProp(client) || !IsPlayerAlive(client))
+	{
+		g_iLastButtons[client] = 0;
 		return;
+	}
 
 	if (g_ePhase != PHPhase_Hide && g_ePhase != PHPhase_Seek)
 		return;
 
-	int changed = GetEntProp(client, Prop_Data, "m_afButtonPressed");
+	int pressed = buttons & ~g_iLastButtons[client];
+	g_iLastButtons[client] = buttons;
 
-	if ((buttons & IN_USE) && (changed & IN_USE))
-		PH_TrySelectProp(client);
+	if (pressed & IN_USE)
+	{
+		// Doors take priority over prop selection when aimed at - a door is never a valid
+		// disguise candidate anyway (PH_FindEntityProp only matches prop_dynamic/prop_physics),
+		// so there's no ambiguity in which action +use should perform.
+		if (!PH_TryUseDoor(client))
+			PH_TrySelectProp(client);
+	}
 
-	if (g_bCvarProplockEnabled && (buttons & IN_RELOAD) && (changed & IN_RELOAD))
+	if (g_bCvarProplockEnabled && (pressed & IN_RELOAD))
 		PH_ToggleLock(client);
 
-	if (g_bCvarTauntEnabled && (buttons & IN_ATTACK) && (changed & IN_ATTACK))
+	if (g_bCvarTauntEnabled && (pressed & IN_ATTACK))
 		PH_DoTaunt(client);
 
-	if ((buttons & IN_ATTACK2) && (changed & IN_ATTACK2))
+	// Held, not just the press-edge, so bashing a stuck door repeats at ph_doorbash_interval for
+	// as long as +attack stays down, like a normal melee weapon's swing cadence.
+	if (buttons & IN_ATTACK)
+		PH_Selection_TryBashDoor(client);
+
+	if (pressed & IN_ATTACK2)
 		PH_UpdateThirdperson(client, !g_bThirdperson[client]);
 
 	PH_Selection_UpdateAutoFreeze(client, buttons);
 }
 
+// L4D2's Hunter claw weapon has no way to swing without also pushing the attacker forward (see
+// stealth.sp's PH_Stealth_BlockPropButtons for why IN_ATTACK is fully blocked before it reaches
+// the game), so a disguised Prop can never bash "stuck" doors the normal way. Instead we drive
+// the same underlying mechanism ourselves: those doors are plain prop_door_rotating entities
+// with a health pool that a melee swing just damages directly, so trace for one and apply the
+// damage server-side - ported from the trace+SDKHooks_TakeDamage pattern in the repo's own
+// archive/tankdoorfix.sp.
+void PH_Selection_TryBashDoor(int client)
+{
+	float now = GetGameTime();
+	if (now < g_flNextDoorBashTime[client])
+		return;
+
+	float direction[3];
+	int door = PH_FindBashableDoor(client, direction);
+	if (door == -1)
+		return;
+
+	g_flNextDoorBashTime[client] = now + g_flCvarDoorBashInterval;
+	SDKHooks_TakeDamage(door, client, client, g_flCvarDoorBashDamage, DMG_CLUB, _, direction);
+}
+
+// Returns the prop_door_rotating (not prop_door_rotating_checkpoint - saferoom doors use a
+// different lock/+use mechanism entirely) the client is aiming at and within melee range of, or
+// -1 if none. Range check and damage-force direction match archive/tankdoorfix.sp's
+// IsLookingAtBreakableDoor().
+int PH_FindBashableDoor(int client, float direction[3])
+{
+	int target = GetClientAimTarget(client, false);
+	if (target <= 0)
+		return -1;
+
+	char classname[64];
+	if (!GetEntityClassname(target, classname, sizeof(classname)))
+		return -1;
+
+	if (!StrEqual(classname, "prop_door_rotating"))
+		return -1;
+
+	// Our Open/bash paths fire directly on the entity, bypassing the engine's own team-gated
+	// Use() handler entirely (see PH_TryUseDoor) - which means they'd otherwise also bypass any
+	// mapper-intended lock (a one-way door, an area not meant to be reachable this way, etc.)
+	// that the engine's own handler would normally respect for a real Survivor.
+	if (Entity_IsLocked(target))
+		return -1;
+
+	float clientPos[3], doorPos[3];
+	GetClientAbsOrigin(client, clientPos);
+	GetEntPropVector(target, Prop_Send, "m_vecOrigin", doorPos);
+
+	if (GetVectorDistance(clientPos, doorPos, true) > 8100.0) // 90.0 units
+		return -1;
+
+	SubtractVectors(doorPos, clientPos, direction);
+	return target;
+}
+
+// The L4D2 engine restricts +use door interaction to the Survivor team - special infected
+// players never receive door Use() callbacks at all, no matter what OnPlayerRunCmd does with
+// IN_USE (confirmed by the existence of community workaround plugins like "SI Doors Use" for
+// exactly this limitation). Props are forced onto the Infected team, so a normal door press
+// would silently do nothing; we bypass the broken native path entirely by finding the door
+// ourselves and firing its "Open" entity input directly, which isn't gated by team at all.
+// Returns true if a door was found and opened (whether or not it was already open), so the
+// caller can skip falling back to prop selection.
+bool PH_TryUseDoor(int client)
+{
+	float now = GetGameTime();
+	if (now < g_flNextDoorUseTime[client])
+		return false;
+
+	int door = PH_FindUsableDoor(client);
+	if (door == -1)
+		return false;
+
+	g_flNextDoorUseTime[client] = now + g_flCvarDoorUseInterval;
+	AcceptEntityInput(door, "Open", client, client);
+	return true;
+}
+
+// Same aim-target + classname pattern as PH_FindBashableDoor(), but at the normal +use
+// interaction distance (ph_dooruse_range) rather than melee-bash range.
+int PH_FindUsableDoor(int client)
+{
+	int target = GetClientAimTarget(client, false);
+	if (target <= 0)
+		return -1;
+
+	char classname[64];
+	if (!GetEntityClassname(target, classname, sizeof(classname)))
+		return -1;
+
+	if (!StrEqual(classname, "prop_door_rotating"))
+		return -1;
+
+	// See the matching comment in PH_FindBashableDoor() - firing "Open" directly bypasses the
+	// engine's own lock check too, so it must be done manually here.
+	if (Entity_IsLocked(target))
+		return -1;
+
+	float clientPos[3], doorPos[3];
+	GetClientAbsOrigin(client, clientPos);
+	GetEntPropVector(target, Prop_Send, "m_vecOrigin", doorPos);
+
+	if (GetVectorDistance(clientPos, doorPos) > g_flCvarDoorUseRange)
+		return -1;
+
+	return target;
+}
+
+// Only ever auto-clears the *idle* auto-freeze - a manual +reload/!lock lock (g_bPropManualLock)
+// is deliberate and must not be undone just because the player is holding a movement key (which
+// happens easily, e.g. leaning on "W" while looking around) even though MOVETYPE_NONE means they
+// don't actually go anywhere while locked. Only another manual toggle, a new disguise, or round
+// end should clear a manual lock.
 void PH_Selection_UpdateAutoFreeze(int client, int buttons)
 {
 	if (g_flCvarAutoFreezeTime <= 0.0 || !g_bPropDisguised[client])
@@ -41,7 +176,7 @@ void PH_Selection_UpdateAutoFreeze(int client, int buttons)
 	if (moving)
 	{
 		g_flAutoFreezeIdleSince[client] = 0.0;
-		if (g_bPropFrozen[client])
+		if (g_bPropFrozen[client] && !g_bPropManualLock[client])
 			PH_SetPropFrozen(client, false);
 		return;
 	}
@@ -77,6 +212,7 @@ void PH_ToggleLock(int client)
 	}
 
 	PH_SetPropFrozen(client, !g_bPropFrozen[client]);
+	g_bPropManualLock[client] = g_bPropFrozen[client];
 	EmitSoundToClient(client, g_bPropFrozen[client] ? "buttons/button3.wav" : "buttons/button24.wav");
 	PrintHintText(client, "%t", g_bPropFrozen[client] ? "PropHunt_Locked" : "PropHunt_Unlocked");
 }

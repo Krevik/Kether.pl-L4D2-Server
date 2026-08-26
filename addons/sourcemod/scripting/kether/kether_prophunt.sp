@@ -32,7 +32,14 @@
 #include <smlib>
 #include <left4dhooks>
 #include <confogl>
+
+// Optional - only used to exclude registered casters from the Hunter/Prop pool (teams.sp),
+// guarded at every call site with GetFeatureStatus. <sourcemod> defines REQUIRE_PLUGIN by
+// default, so this has to be explicitly un/redefined around the include or SourceMod refuses
+// to load kether_prophunt.smx at all when caster_system.smx isn't installed/loaded.
+#undef REQUIRE_PLUGIN
 #include <caster_system>
+#define REQUIRE_PLUGIN
 
 #include "prophunt/globals.sp"
 #include "prophunt/convars.sp"

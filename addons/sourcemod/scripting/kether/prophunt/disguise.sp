@@ -64,6 +64,7 @@ bool PH_ApplyDisguise(int client, const char[] model, PHPropType type, const flo
 	g_ePropType[client] = type;
 	g_bPropDisguised[client] = true;
 	g_bPropFrozen[client] = false;
+	g_bPropManualLock[client] = false;
 
 	if (g_bCvarThirdperson)
 		PH_UpdateThirdperson(client, true);
@@ -80,6 +81,7 @@ void PH_ClearDisguise(int client)
 	g_iVisualProp[client] = -1;
 	g_bPropDisguised[client] = false;
 	g_bPropFrozen[client] = false;
+	g_bPropManualLock[client] = false;
 	g_sDisguiseModel[client][0] = '\0';
 	g_ePropType[client] = PHProp_None;
 

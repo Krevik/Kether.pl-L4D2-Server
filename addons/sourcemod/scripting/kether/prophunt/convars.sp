@@ -25,9 +25,15 @@ ConVar g_hCvarTauntCooldown;
 ConVar g_hCvarHpHunterDec;
 ConVar g_hCvarHpHunterIncHit;
 ConVar g_hCvarHpHunterBonus;
+ConVar g_hCvarHpHunterMax;
 ConVar g_hCvarHideBlood;
 
 ConVar g_hCvarAnticheatKick;
+
+ConVar g_hCvarDoorBashDamage;
+ConVar g_hCvarDoorBashInterval;
+ConVar g_hCvarDoorUseRange;
+ConVar g_hCvarDoorUseInterval;
 
 int g_iCvarHunters;
 float g_flCvarHideTime;
@@ -51,9 +57,15 @@ float g_flCvarTauntCooldown;
 int g_iCvarHpHunterDec;
 int g_iCvarHpHunterIncHit;
 int g_iCvarHpHunterBonus;
+int g_iCvarHpHunterMax;
 bool g_bCvarHideBlood;
 
 bool g_bCvarAnticheatKick;
+
+float g_flCvarDoorBashDamage;
+float g_flCvarDoorBashInterval;
+float g_flCvarDoorUseRange;
+float g_flCvarDoorUseInterval;
 
 void PH_Convars_Init()
 {
@@ -79,9 +91,16 @@ void PH_Convars_Init()
 	g_hCvarHpHunterDec            = CreateConVar("ph_hp_hunter_dec", "5", "HP a Hunter loses for every shot fired.", _, true, 0.0);
 	g_hCvarHpHunterIncHit         = CreateConVar("ph_hp_hunter_inc", "15", "HP a Hunter regains for landing a hit on a Prop.", _, true, 0.0);
 	g_hCvarHpHunterBonus          = CreateConVar("ph_hp_hunter_bonus", "40", "Bonus HP a Hunter regains for eliminating a Prop.", _, true, 0.0);
+	g_hCvarHpHunterMax            = CreateConVar("ph_hp_hunter_max", "100", "Maximum HP a Hunter can regain from ph_hp_hunter_inc/ph_hp_hunter_bonus - without this cap a successful Hunter's HP would grow without bound, defeating the ph_hp_hunter_dec shooting penalty.", _, true, 1.0);
 	g_hCvarHideBlood              = CreateConVar("ph_hide_blood", "1", "1 = Suppress blood decals/particles when a Hunter hits a Prop.");
 
 	g_hCvarAnticheatKick          = CreateConVar("ph_anticheat_kick", "1", "1 = Kick Hunters found with r_staticpropinfo enabled (reveals static prop names/bounds client-side).");
+
+	g_hCvarDoorBashDamage         = CreateConVar("ph_doorbash_damage", "50.0", "Damage a Prop deals to a stuck prop_door_rotating per bash hit (+attack near it). IN_ATTACK never reaches the Hunter weapon itself, so this is the only way Props can bash doors open.", _, true, 0.0);
+	g_hCvarDoorBashInterval       = CreateConVar("ph_doorbash_interval", "0.5", "Minimum seconds between door-bash hits from the same Prop while holding +attack.", _, true, 0.05);
+
+	g_hCvarDoorUseRange           = CreateConVar("ph_dooruse_range", "80.0", "Maximum distance (Hammer units) a Prop can be from a normal door to open it with +use. The engine restricts +use door interaction to the Survivor team, so Props (Infected team) need this handled manually.", _, true, 0.0);
+	g_hCvarDoorUseInterval        = CreateConVar("ph_dooruse_interval", "1.0", "Minimum seconds between +use door-open attempts from the same Prop.", _, true, 0.0);
 
 	AutoExecConfig(true, "kether_prophunt");
 
@@ -104,8 +123,13 @@ void PH_Convars_Init()
 	HookConVarChange(g_hCvarHpHunterDec, PH_CvarChanged);
 	HookConVarChange(g_hCvarHpHunterIncHit, PH_CvarChanged);
 	HookConVarChange(g_hCvarHpHunterBonus, PH_CvarChanged);
+	HookConVarChange(g_hCvarHpHunterMax, PH_CvarChanged);
 	HookConVarChange(g_hCvarHideBlood, PH_CvarChanged);
 	HookConVarChange(g_hCvarAnticheatKick, PH_CvarChanged);
+	HookConVarChange(g_hCvarDoorBashDamage, PH_CvarChanged);
+	HookConVarChange(g_hCvarDoorBashInterval, PH_CvarChanged);
+	HookConVarChange(g_hCvarDoorUseRange, PH_CvarChanged);
+	HookConVarChange(g_hCvarDoorUseInterval, PH_CvarChanged);
 
 	PH_Convars_Cache();
 }
@@ -139,7 +163,14 @@ void PH_Convars_Cache()
 	g_iCvarHpHunterDec            = g_hCvarHpHunterDec.IntValue;
 	g_iCvarHpHunterIncHit         = g_hCvarHpHunterIncHit.IntValue;
 	g_iCvarHpHunterBonus          = g_hCvarHpHunterBonus.IntValue;
+	g_iCvarHpHunterMax            = g_hCvarHpHunterMax.IntValue;
 	g_bCvarHideBlood              = g_hCvarHideBlood.BoolValue;
 
 	g_bCvarAnticheatKick          = g_hCvarAnticheatKick.BoolValue;
+
+	g_flCvarDoorBashDamage        = g_hCvarDoorBashDamage.FloatValue;
+	g_flCvarDoorBashInterval      = g_hCvarDoorBashInterval.FloatValue;
+
+	g_flCvarDoorUseRange          = g_hCvarDoorUseRange.FloatValue;
+	g_flCvarDoorUseInterval       = g_hCvarDoorUseInterval.FloatValue;
 }

@@ -32,8 +32,10 @@ PHRoundPhase g_ePhase = PHPhase_Warmup;
 // Per-client round state.
 bool g_bPropEliminated[MAXPLAYERS + 1];	// True once a prop has died this round - blocks re-materializing.
 bool g_bPropDisguised[MAXPLAYERS + 1];		// True once a prop has picked a model this round.
-bool g_bPropFrozen[MAXPLAYERS + 1];		// Rotation-lock state.
+bool g_bPropFrozen[MAXPLAYERS + 1];		// Rotation-lock state (manual lock or auto-freeze).
+bool g_bPropManualLock[MAXPLAYERS + 1];	// True when g_bPropFrozen was set by +reload/!lock rather than the idle auto-freeze - only another manual toggle (or a new disguise/round) should clear it.
 bool g_bThirdperson[MAXPLAYERS + 1];
+int g_iLastButtons[MAXPLAYERS + 1];		// Previous tick's buttons for PH_Selection_OnPlayerRunCmd()'s own press-edge detection (m_afButtonPressed is unreliable to read inside OnPlayerRunCmd).
 int g_iVisualProp[MAXPLAYERS + 1] = {-1, ...};	// Entity reference of the parented visual prop.
 char g_sDisguiseModel[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 PHPropType g_ePropType[MAXPLAYERS + 1];
@@ -41,6 +43,14 @@ int g_iPropChanges[MAXPLAYERS + 1];		// How many times this client re-picked a m
 float g_flNextTauntTime[MAXPLAYERS + 1];
 float g_flAutoFreezeIdleSince[MAXPLAYERS + 1];
 float g_flNextChangeAllowed[MAXPLAYERS + 1];
+float g_flNextDoorBashTime[MAXPLAYERS + 1];	// Cooldown gate for PH_Selection_TryBashDoor() (selection.sp).
+float g_flNextDoorUseTime[MAXPLAYERS + 1];		// Cooldown gate for PH_TryUseDoor() (selection.sp).
+
+// Set while PH_Props_SpawnForRound()/PH_Timer_RetryPropSpawn() are forcing a client through the
+// ghost->materialize dance (rounds.sp). L4D_BecomeGhost() kills a currently-alive client to get
+// them into ghost state, which fires player_death - this flag tells PH_Event_PlayerDeath (see
+// hunters.sp) to ignore that death instead of treating it as a real Prop elimination.
+bool g_bPropMaterializing[MAXPLAYERS + 1];
 
 // Rotation / fairness (teams.sp).
 int g_iGuaranteedHunterTurns[MAXPLAYERS + 1];	// Rounds left before this client can be picked as hunter again.
@@ -90,10 +100,15 @@ stock void PH_ResetClientRoundState(int client)
 	g_bPropEliminated[client] = false;
 	g_bPropDisguised[client] = false;
 	g_bPropFrozen[client] = false;
+	g_bPropManualLock[client] = false;
+	g_bPropMaterializing[client] = false;
+	g_iLastButtons[client] = 0;
 	g_iPropChanges[client] = 0;
 	g_flNextTauntTime[client] = 0.0;
 	g_flAutoFreezeIdleSince[client] = 0.0;
 	g_flNextChangeAllowed[client] = 0.0;
+	g_flNextDoorBashTime[client] = 0.0;
+	g_flNextDoorUseTime[client] = 0.0;
 	g_sDisguiseModel[client][0] = '\0';
 	g_ePropType[client] = PHProp_None;
 }

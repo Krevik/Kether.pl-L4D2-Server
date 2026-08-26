@@ -68,7 +68,12 @@ public Action PH_OnTraceAttack(int victim, int &attacker, int &inflictor, float 
 		return Plugin_Continue;
 
 	if (g_iCvarHpHunterIncHit > 0 && IsPlayerAlive(attacker))
-		SetEntityHealth(attacker, GetClientHealth(attacker) + g_iCvarHpHunterIncHit);
+	{
+		int newHealth = GetClientHealth(attacker) + g_iCvarHpHunterIncHit;
+		if (newHealth > g_iCvarHpHunterMax)
+			newHealth = g_iCvarHpHunterMax;
+		SetEntityHealth(attacker, newHealth);
+	}
 
 	if (!g_bCvarHideBlood)
 		return Plugin_Continue;
@@ -109,8 +114,18 @@ public void PH_Event_PlayerDeath(Event event, const char[] name, bool dontBroadc
 
 	if (victim > 0 && IsClientInGame(victim) && PH_IsProp(victim))
 	{
+		// PH_Props_SpawnForRound() kills an already-alive client via L4D_BecomeGhost() to force
+		// them through the ghost state - that death is our own plumbing, not a real elimination.
+		if (g_bPropMaterializing[victim])
+			return;
+
 		if (attacker > 0 && attacker <= MaxClients && PH_IsHunter(attacker) && g_iCvarHpHunterBonus > 0)
-			SetEntityHealth(attacker, GetClientHealth(attacker) + g_iCvarHpHunterBonus);
+		{
+			int newHealth = GetClientHealth(attacker) + g_iCvarHpHunterBonus;
+			if (newHealth > g_iCvarHpHunterMax)
+				newHealth = g_iCvarHpHunterMax;
+			SetEntityHealth(attacker, newHealth);
+		}
 
 		PH_Rounds_OnPropDeath(victim);
 	}

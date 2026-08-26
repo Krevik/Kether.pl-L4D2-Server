@@ -95,20 +95,33 @@ void PH_StartRound()
 // every few seconds like a regular versus wave. This is the part most likely to need live-server
 // tuning: if L4D_MaterializeFromGhost silently no-ops for a given client state, the 1s retry
 // below is the fallback net.
+//
+// The client can reach here either already dead (fresh round/match start, before anyone has
+// spawned) or still alive (a Hunter being rotated onto Props for the next round, or the debug
+// !ph_forceprop command mid-round) - left4dhooks.inc exposes two different natives for those two
+// cases (L4D_BecomeGhost for an alive client vs L4D_State_Transition(STATE_GHOST) for a dead
+// one), so branch on IsPlayerAlive() rather than only handling the dead case.
 void PH_Props_SpawnForRound(int client)
 {
 	L4D_SetClass(client, PH_ZOMBIECLASS_HUNTER);
 
-	if (!IsPlayerAlive(client))
-	{
+	g_bPropMaterializing[client] = true;
+
+	if (IsPlayerAlive(client))
+		L4D_BecomeGhost(client);
+	else
 		L4D_State_Transition(client, STATE_GHOST);
-		L4D_MaterializeFromGhost(client);
-	}
+
+	L4D_MaterializeFromGhost(client);
 
 	if (IsPlayerAlive(client))
 	{
+		g_bPropMaterializing[client] = false;
 		SetEntityHealth(client, 100);
 		PH_Stealth_ClearGlow(client);
+
+		if (g_bCvarThirdperson)
+			PH_UpdateThirdperson(client, true);
 	}
 	else
 	{
@@ -120,23 +133,51 @@ public Action PH_Timer_RetryPropSpawn(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
 	if (client <= 0 || !IsClientInGame(client) || !PH_IsModeActive() || g_ePhase == PHPhase_End)
+	{
+		if (client > 0)
+			g_bPropMaterializing[client] = false;
 		return Plugin_Stop;
+	}
 
 	if (!IsPlayerAlive(client))
 	{
 		L4D_SetClass(client, PH_ZOMBIECLASS_HUNTER);
-		L4D_State_Transition(client, STATE_GHOST);
+
+		if (IsPlayerAlive(client))
+			L4D_BecomeGhost(client);
+		else
+			L4D_State_Transition(client, STATE_GHOST);
+
 		L4D_MaterializeFromGhost(client);
 	}
+
+	g_bPropMaterializing[client] = false;
 
 	if (IsPlayerAlive(client))
 	{
 		SetEntityHealth(client, 100);
 		PH_Stealth_ClearGlow(client);
+
+		if (g_bCvarThirdperson)
+			PH_UpdateThirdperson(client, true);
 	}
 	else
 	{
 		LogError("[PropHunt] Client %N still not alive one second after being assigned to Props - check L4D_MaterializeFromGhost behaviour on this server.", client);
+
+		// This client is stuck as a permanent ghost - it can never be seen/damaged/killed, so
+		// leaving it counted as "alive" would make the "all Props eliminated" win condition
+		// uncatchable for the rest of the round. Treat it as removed from play instead, the
+		// same way a normal Prop kill does.
+		if (!g_bPropEliminated[client])
+		{
+			g_bPropEliminated[client] = true;
+			g_iPropsAliveCount--;
+			g_iPropsTotalCount--;
+
+			if (g_iPropsAliveCount <= 0)
+				PH_EndRound(true); // All Props eliminated (or stuck) - Hunters win.
+		}
 	}
 
 	return Plugin_Stop;
@@ -212,10 +253,17 @@ void PH_EndRound(bool huntersWon)
 
 	PH_Hud_AnnounceRoundEnd(huntersWon);
 
+	// When Props win by round timeout (or an admin force-ends the round), any Prop still alive
+	// and disguised never otherwise gets cleaned up here - PH_ClearDisguise() is only called
+	// individually as each Prop dies (PH_Rounds_OnPropDeath), so a *surviving* Prop would
+	// carry their invisible body/parented visual prop/thirdperson view into next round, even
+	// if fairness rotation makes them a Hunter. PH_ClearDisguise() already resets the freeze/
+	// manual-lock flags too, and is a safe no-op for Hunters or already-cleared Props (same
+	// pattern already used in PH_Rounds_OnMatchUnloaded()).
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && g_bPropFrozen[i])
-			PH_SetPropFrozen(i, false);
+		if (IsClientInGame(i))
+			PH_ClearDisguise(i);
 	}
 
 	g_hTimerRoundEndDelay = CreateTimer(g_flCvarRoundEndDelay, PH_Timer_StartNextRound, _, TIMER_FLAG_NO_MAPCHANGE);

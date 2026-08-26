@@ -13,6 +13,8 @@ void PH_Commands_Init()
 	RegConsoleCmd("sm_taunt", PH_Cmd_Taunt, "Prop Hunt: play a voluntary special-infected sound.");
 	RegConsoleCmd("sm_ph", PH_Cmd_Status, "Prop Hunt: show the current round status.");
 	RegAdminCmd("sm_ph_forceround", PH_Cmd_ForceRound, ADMFLAG_CHANGEMAP, "Prop Hunt: force-end the current round.");
+	RegAdminCmd("sm_ph_forcehunter", PH_Cmd_ForceHunter, ADMFLAG_ROOT, "Prop Hunt: debug - force yourself onto the Hunter team mid-round.");
+	RegAdminCmd("sm_ph_forceprop", PH_Cmd_ForceProp, ADMFLAG_ROOT, "Prop Hunt: debug - force yourself onto the Props team mid-round.");
 }
 
 public Action PH_Cmd_Hunt(int client, int args)
@@ -82,6 +84,83 @@ public Action PH_Cmd_ForceRound(int client, int args)
 
 	ReplyToCommand(client, "[PropHunt] Round force-ended.");
 	return Plugin_Handled;
+}
+
+public Action PH_Cmd_ForceHunter(int client, int args)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "[PropHunt] Run this from in-game, not the server console.");
+		return Plugin_Handled;
+	}
+
+	PH_Debug_ForceTeam(client, PH_TEAM_HUNTER);
+	return Plugin_Handled;
+}
+
+public Action PH_Cmd_ForceProp(int client, int args)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "[PropHunt] Run this from in-game, not the server console.");
+		return Plugin_Handled;
+	}
+
+	PH_Debug_ForceTeam(client, PH_TEAM_PROP);
+	return Plugin_Handled;
+}
+
+// Debug/testing helper - moves the caller to the requested team *through* the same helpers
+// PH_StartRound() itself uses, instead of a raw ChangeClientTeam() (e.g. an external !swapto),
+// so a lone tester can reach the Props team without getting stuck in the native versus
+// "Entering spawn mode..." ghost wait - see the plan doc for why that happens otherwise.
+void PH_Debug_ForceTeam(int client, int wantedTeam)
+{
+	if (!PH_IsModeActive())
+	{
+		ReplyToCommand(client, "[PropHunt] Mode not active.");
+		return;
+	}
+
+	if (g_ePhase == PHPhase_Warmup || g_ePhase == PHPhase_End)
+		PH_StartRound();
+
+	if (!PH_IsModeActive() || (g_ePhase != PHPhase_Hide && g_ePhase != PHPhase_Seek))
+	{
+		ReplyToCommand(client, "[PropHunt] Could not start a round to join.");
+		return;
+	}
+
+	if (GetClientTeam(client) == wantedTeam)
+	{
+		ReplyToCommand(client, "[PropHunt] Already on that team.");
+		return;
+	}
+
+	if (PH_IsProp(client) && !g_bPropEliminated[client])
+	{
+		PH_ClearDisguise(client);
+		g_iPropsAliveCount--;
+		g_iPropsTotalCount--;
+	}
+
+	ChangeClientTeam(client, wantedTeam);
+	PH_ResetClientRoundState(client);
+
+	if (wantedTeam == PH_TEAM_PROP)
+	{
+		PH_Props_SpawnForRound(client);
+		g_iPropsAliveCount++;
+		g_iPropsTotalCount++;
+		ReplyToCommand(client, "[PropHunt] Debug: forced onto the Props team.");
+	}
+	else if (wantedTeam == PH_TEAM_HUNTER)
+	{
+		PH_Hunters_FreezeForHide(client);
+		if (g_ePhase == PHPhase_Seek)
+			PH_Hunters_ReleaseForSeek(client);
+		ReplyToCommand(client, "[PropHunt] Debug: forced onto the Hunter team.");
+	}
 }
 
 stock void PH_GetPhaseName(PHRoundPhase phase, char[] buffer, int maxlen)
