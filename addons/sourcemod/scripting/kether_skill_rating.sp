@@ -57,6 +57,48 @@ stock float FloatClamp(float value, float minVal, float maxVal)
 	return value;
 }
 
+// Every scored component, so the "where do my points come from" screen covers the
+// whole model rather than a hand-picked sample of it. Adding a weight to
+// ComputeRawRoundScore means adding a line to RegisterStats() as well.
+#define KSR_MAX_STATS 64
+#define KSR_CATEGORIES 12
+
+enum struct KsrStat
+{
+	char label[28];
+	char column[28];
+	int side;
+	int category;
+	ConVar weight;
+	bool lowerIsBetter;
+}
+
+KsrStat g_Stats[KSR_MAX_STATS];
+int g_iStatCount = 0;
+
+char g_sCategoryName[KSR_CATEGORIES][] = {
+	"Damage and kills",
+	"Clears and saves",
+	"Technical plays",
+	"Support",
+	"Progress",
+	"Discipline",
+	"Pins and control",
+	"Big plays",
+	"Boomer",
+	"Spitter",
+	"Tank",
+	"Teamwork and damage"
+};
+
+// Cached result of the last breakdown query, per viewer, so the category
+// drill-down does not have to hit the database again.
+float g_fBdMine[MAXPLAYERS + 1][KSR_MAX_STATS];
+float g_fBdAvg[MAXPLAYERS + 1][KSR_MAX_STATS];
+int g_iBdRounds[MAXPLAYERS + 1][4];
+char g_sBdName[MAXPLAYERS + 1][160];
+bool g_bBdReady[MAXPLAYERS + 1];
+
 Database g_Db = null;
 
 ConVar g_CvarEnabled;
@@ -428,6 +470,8 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_skillstats", Command_SkillBreakdown, "Show where your KSR points come from");
 
 	g_bReadyUpAvailable = LibraryExists("readyup");
+
+	RegisterStats();
 
 	SeedBaselines();
 	LoadBaselines();
@@ -2142,12 +2186,8 @@ public Action Command_SkillBreakdown(int client, int args)
 	return Plugin_Handled;
 }
 
-#define KSR_BD_COLS "AVG(skeets + skeets_melee), AVG(deadstops), AVG(special_clears), AVG(self_clears), " ... \
-	"AVG(boomer_pops), AVG(rock_skeets), AVG(safe_saves + chain_clear_boom), AVG(revives + medkit_gives), " ... \
-	"AVG(dmg_survivor), AVG(ff_dealt), AVG(pin_assists), AVG(big_hit_assist_score), " ... \
-	"AVG(boomer_vomit_hits), AVG(spit_ticks_pinned), AVG(tank_hold_time), AVG(dmg_infected), COUNT(*)"
-
-// Player averages next to the server averages, per side. This is the screen that
+// Player averages next to the server averages for every scored component, shown
+// as the points each one actually contributes per round. This is the screen that
 // answers "why is my rating what it is" without anyone having to guess.
 void RequestBreakdown(int client, int target, bool showBackButton)
 {
@@ -2158,13 +2198,25 @@ void RequestBreakdown(int client, int target, bool showBackButton)
 		return;
 	}
 
-	char query[2048];
+	// Roughly 21 bytes per stat, repeated four times in the UNION below. At 60 stats
+	// that is about 5 KB, so the buffers carry room for a good deal more.
+	char cols[4096];
+	cols[0] = '\0';
+	for (int i = 0; i < g_iStatCount; i++)
+	{
+		Format(cols, sizeof(cols), "%s, AVG(%s)", cols, g_Stats[i].column);
+	}
+
+	char query[12288];
 	Format(query, sizeof(query),
-		"SELECT 0, " ... KSR_BD_COLS ... " FROM round_stats WHERE steamid='%s' AND team=%d "
-		... "UNION ALL SELECT 1, " ... KSR_BD_COLS ... " FROM round_stats WHERE team=%d "
-		... "UNION ALL SELECT 2, " ... KSR_BD_COLS ... " FROM round_stats WHERE steamid='%s' AND team=%d "
-		... "UNION ALL SELECT 3, " ... KSR_BD_COLS ... " FROM round_stats WHERE team=%d;",
-		steamid, TEAM_SURVIVOR, TEAM_SURVIVOR, steamid, TEAM_INFECTED, TEAM_INFECTED);
+		"SELECT 0%s, COUNT(*) FROM round_stats WHERE steamid='%s' AND team=%d"
+		... " UNION ALL SELECT 1%s, COUNT(*) FROM round_stats WHERE team=%d"
+		... " UNION ALL SELECT 2%s, COUNT(*) FROM round_stats WHERE steamid='%s' AND team=%d"
+		... " UNION ALL SELECT 3%s, COUNT(*) FROM round_stats WHERE team=%d;",
+		cols, steamid, TEAM_SURVIVOR,
+		cols, TEAM_SURVIVOR,
+		cols, steamid, TEAM_INFECTED,
+		cols, TEAM_INFECTED);
 
 	char displayName[160];
 	BuildDisplayName(target, displayName, sizeof(displayName));
@@ -2196,32 +2248,59 @@ public void SQL_ShowBreakdown(Database db, DBResultSet results, const char[] err
 		return;
 	}
 
-	float vals[4][17];
-	int rounds[4];
-	bool got[4];
+	for (int i = 0; i < g_iStatCount; i++)
+	{
+		g_fBdMine[client][i] = 0.0;
+		g_fBdAvg[client][i] = 0.0;
+	}
+	g_iBdRounds[client][TEAM_SURVIVOR] = 0;
+	g_iBdRounds[client][TEAM_INFECTED] = 0;
 
 	while (results.FetchRow())
 	{
 		int row = results.FetchInt(0);
-		if (row < 0 || row > 3)
+		int side = (row < 2) ? TEAM_SURVIVOR : TEAM_INFECTED;
+		bool mine = (row == 0 || row == 2);
+
+		for (int i = 0; i < g_iStatCount; i++)
 		{
-			continue;
+			if (g_Stats[i].side != side)
+			{
+				continue;
+			}
+
+			float v = results.IsFieldNull(i + 1) ? 0.0 : results.FetchFloat(i + 1);
+			if (mine)
+			{
+				g_fBdMine[client][i] = v;
+			}
+			else
+			{
+				g_fBdAvg[client][i] = v;
+			}
 		}
-		for (int c = 0; c < 16; c++)
+
+		if (mine)
 		{
-			vals[row][c] = results.IsFieldNull(c + 1) ? 0.0 : results.FetchFloat(c + 1);
+			g_iBdRounds[client][side] = results.FetchInt(g_iStatCount + 1);
 		}
-		rounds[row] = results.FetchInt(17);
-		got[row] = true;
 	}
 
-	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	strcopy(g_sBdName[client], sizeof(g_sBdName[]), displayName);
+	g_bBdReady[client] = true;
+
+	ShowBreakdownCategories(client, showBackButton);
+}
+
+void ShowBreakdownCategories(int client, bool showBackButton)
+{
+	Menu menu = new Menu(MenuHandler_BreakdownCategory, MENU_ACTIONS_DEFAULT);
 	char title[192];
-	Format(title, sizeof(title), "KSR breakdown: %s", displayName);
+	Format(title, sizeof(title), "Points per round: %s", g_sBdName[client]);
 	menu.SetTitle(title);
 	menu.ExitBackButton = showBackButton;
 
-	if (!got[0] || rounds[0] < 5)
+	if (g_iBdRounds[client][TEAM_SURVIVOR] < 5 && g_iBdRounds[client][TEAM_INFECTED] < 5)
 	{
 		menu.AddItem("x", "Not enough rounds recorded yet.", ITEMDRAW_DISABLED);
 		menu.Display(client, 30);
@@ -2229,64 +2308,168 @@ public void SQL_ShowBreakdown(Database db, DBResultSet results, const char[] err
 	}
 
 	char line[192];
-	Format(line, sizeof(line), "--- Survivor (%d rounds) ---", rounds[0]);
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
-	AddBreakdownRow(menu, "Skeets", vals[0][0], vals[1][0], false);
-	AddBreakdownRow(menu, "Deadstops", vals[0][1], vals[1][1], false);
-	AddBreakdownRow(menu, "Clears", vals[0][2], vals[1][2], false);
-	AddBreakdownRow(menu, "Self clears", vals[0][3], vals[1][3], false);
-	AddBreakdownRow(menu, "Boomer pops", vals[0][4], vals[1][4], false);
-	AddBreakdownRow(menu, "Rock skeets", vals[0][5], vals[1][5], false);
-	AddBreakdownRow(menu, "Saves", vals[0][6], vals[1][6], false);
-	AddBreakdownRow(menu, "Revives/heals", vals[0][7], vals[1][7], false);
-	AddBreakdownRow(menu, "Damage", vals[0][8], vals[1][8], false);
-	AddBreakdownRow(menu, "Friendly fire", vals[0][9], vals[1][9], true);
+	char info[8];
+	int lastSide = 0;
 
-	if (got[2] && rounds[2] >= 5)
+	for (int cat = 0; cat < KSR_CATEGORIES; cat++)
 	{
-		Format(line, sizeof(line), "--- Infected (%d rounds) ---", rounds[2]);
-		menu.AddItem("x", line, ITEMDRAW_DISABLED);
-		AddBreakdownRow(menu, "Pin assists", vals[2][10], vals[3][10], false);
-		AddBreakdownRow(menu, "Big hits", vals[2][11], vals[3][11], false);
-		AddBreakdownRow(menu, "Boomer hits", vals[2][12], vals[3][12], false);
-		AddBreakdownRow(menu, "Spit on pins", vals[2][13], vals[3][13], false);
-		AddBreakdownRow(menu, "Tank time", vals[2][14], vals[3][14], false);
-		AddBreakdownRow(menu, "Damage", vals[2][15], vals[3][15], false);
+		int side = CategorySide(cat);
+		if (g_iBdRounds[client][side] < 5)
+		{
+			continue;
+		}
+
+		if (side != lastSide)
+		{
+			Format(line, sizeof(line), "--- %s (%d rounds) ---",
+				(side == TEAM_SURVIVOR) ? "Survivor" : "Infected", g_iBdRounds[client][side]);
+			menu.AddItem("x", line, ITEMDRAW_DISABLED);
+			lastSide = side;
+		}
+
+		float mine = 0.0;
+		float avg = 0.0;
+		CategoryPoints(client, cat, mine, avg);
+
+		Format(info, sizeof(info), "%d", cat);
+		Format(line, sizeof(line), "%s: %.1f pts (avg %.1f) %s",
+			g_sCategoryName[cat], mine, avg, DeltaLabel(mine, avg, false));
+		menu.AddItem(info, line);
 	}
 
 	menu.Display(client, 30);
 }
 
-// lowerIsBetter flips the sign of the comparison, for things like friendly fire.
-void AddBreakdownRow(Menu menu, const char[] label, float mine, float avg, bool lowerIsBetter)
+int CategorySide(int category)
 {
-	char line[192];
-	char delta[32];
+	return (category < 6) ? TEAM_SURVIVOR : TEAM_INFECTED;
+}
 
-	if (avg > 0.0001)
+void CategoryPoints(int client, int category, float &mine, float &avg)
+{
+	mine = 0.0;
+	avg = 0.0;
+
+	for (int i = 0; i < g_iStatCount; i++)
+	{
+		if (g_Stats[i].category != category)
+		{
+			continue;
+		}
+
+		float w = g_Stats[i].weight.FloatValue;
+		mine += g_fBdMine[client][i] * w;
+		avg += g_fBdAvg[client][i] * w;
+	}
+}
+
+public int MenuHandler_BreakdownCategory(Menu menu, MenuAction action, int client, int item)
+{
+	if (action == MenuAction_End)
+	{
+		delete menu;
+		return 0;
+	}
+
+	if (action == MenuAction_Cancel && item == MenuCancel_ExitBack && IsValidHuman(client))
+	{
+		ShowSkillMainMenu(client);
+		return 0;
+	}
+
+	if (action != MenuAction_Select || !IsValidHuman(client) || !g_bBdReady[client])
+	{
+		return 0;
+	}
+
+	char info[8];
+	menu.GetItem(item, info, sizeof(info));
+	ShowBreakdownDetail(client, StringToInt(info));
+	return 0;
+}
+
+void ShowBreakdownDetail(int client, int category)
+{
+	if (category < 0 || category >= KSR_CATEGORIES)
+	{
+		return;
+	}
+
+	Menu menu = new Menu(MenuHandler_BreakdownDetail, MENU_ACTIONS_DEFAULT);
+	char title[192];
+	Format(title, sizeof(title), "%s: %s", g_sCategoryName[category], g_sBdName[client]);
+	menu.SetTitle(title);
+	menu.ExitBackButton = true;
+
+	char line[192];
+	for (int i = 0; i < g_iStatCount; i++)
+	{
+		if (g_Stats[i].category != category)
+		{
+			continue;
+		}
+
+		float w = g_Stats[i].weight.FloatValue;
+		float minePts = g_fBdMine[client][i] * w;
+		float avgPts = g_fBdAvg[client][i] * w;
+
+		// Counts as well as points: a raw average of 3200 damage says more about
+		// what you actually do than the 23 points it turns into.
+		if (g_fBdMine[client][i] >= 100.0 || g_fBdAvg[client][i] >= 100.0)
+		{
+			Format(line, sizeof(line), "%s: %.0f -> %.1f pts (avg %.1f) %s",
+				g_Stats[i].label, g_fBdMine[client][i], minePts, avgPts,
+				DeltaLabel(g_fBdMine[client][i], g_fBdAvg[client][i], g_Stats[i].lowerIsBetter));
+		}
+		else
+		{
+			Format(line, sizeof(line), "%s: %.2f -> %.1f pts (avg %.1f) %s",
+				g_Stats[i].label, g_fBdMine[client][i], minePts, avgPts,
+				DeltaLabel(g_fBdMine[client][i], g_fBdAvg[client][i], g_Stats[i].lowerIsBetter));
+		}
+
+		menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	}
+
+	menu.Display(client, 30);
+}
+
+public int MenuHandler_BreakdownDetail(Menu menu, MenuAction action, int client, int item)
+{
+	if (action == MenuAction_End)
+	{
+		delete menu;
+		return 0;
+	}
+
+	if (action == MenuAction_Cancel && item == MenuCancel_ExitBack && IsValidHuman(client))
+	{
+		ShowBreakdownCategories(client, true);
+	}
+
+	return 0;
+}
+
+// lowerIsBetter flips the sign, so "friendly fire -40%" reads as a good thing.
+char[] DeltaLabel(float mine, float avg, bool lowerIsBetter)
+{
+	char out[24];
+
+	if (avg > 0.0001 || avg < -0.0001)
 	{
 		float pct = ((mine / avg) - 1.0) * 100.0;
 		if (lowerIsBetter)
 		{
 			pct = -pct;
 		}
-		Format(delta, sizeof(delta), "%s%.0f%%", (pct >= 0.0) ? "+" : "", pct);
+		Format(out, sizeof(out), "%s%.0f%%", (pct >= 0.0) ? "+" : "", pct);
 	}
 	else
 	{
-		strcopy(delta, sizeof(delta), "n/a");
+		strcopy(out, sizeof(out), "");
 	}
 
-	if (mine >= 100.0)
-	{
-		Format(line, sizeof(line), "%s: %.0f /round (avg %.0f)  %s", label, mine, avg, delta);
-	}
-	else
-	{
-		Format(line, sizeof(line), "%s: %.2f /round (avg %.2f)  %s", label, mine, avg, delta);
-	}
-
-	menu.AddItem("x", line, ITEMDRAW_DISABLED);
+	return out;
 }
 
 public Action Command_SkillMixVote(int client, int args)
@@ -4186,6 +4369,7 @@ void ResetRatingCache(int client)
 	g_iRatingRounds[client] = 0;
 	g_fLastRoundZ[client] = 0.0;
 	g_bProfileLoaded[client] = false;
+	g_bBdReady[client] = false;
 
 	for (int t = TEAM_SURVIVOR; t <= TEAM_INFECTED; t++)
 	{
@@ -4687,6 +4871,90 @@ void CreateTables()
 	g_Db.Query(SQL_ErrorOnly, query);
 	Format(query, sizeof(query), "UPDATE players SET last_name = CASE WHEN last_name='' THEN name ELSE last_name END;");
 	g_Db.Query(SQL_ErrorOnly, query);
+}
+
+void RegisterStat(const char[] label, const char[] column, int side, int category, ConVar weight, bool lowerIsBetter)
+{
+	if (g_iStatCount >= KSR_MAX_STATS)
+	{
+		LogError("[SkillRating] Stat registry full, '%s' dropped. Raise KSR_MAX_STATS.", label);
+		return;
+	}
+
+	strcopy(g_Stats[g_iStatCount].label, 28, label);
+	strcopy(g_Stats[g_iStatCount].column, 28, column);
+	g_Stats[g_iStatCount].side = side;
+	g_Stats[g_iStatCount].category = category;
+	g_Stats[g_iStatCount].weight = weight;
+	g_Stats[g_iStatCount].lowerIsBetter = lowerIsBetter;
+	g_iStatCount++;
+}
+
+void RegisterStats()
+{
+	g_iStatCount = 0;
+
+	RegisterStat("Damage to SI", "dmg_survivor", TEAM_SURVIVOR, 0, g_CvarWeightSurvDamage, false);
+	RegisterStat("Tank damage (extra)", "dmg_tank", TEAM_SURVIVOR, 0, g_CvarWeightTankDamage, false);
+	RegisterStat("Witch damage", "dmg_witch", TEAM_SURVIVOR, 0, g_CvarWeightWitchDamage, false);
+	RegisterStat("Common damage", "common_damage", TEAM_SURVIVOR, 0, g_CvarWeightCommonDamage, false);
+	RegisterStat("Common kills", "common_kills", TEAM_SURVIVOR, 0, g_CvarWeightCommonKills, false);
+	RegisterStat("Headshots on SI", "headshot_si", TEAM_SURVIVOR, 0, g_CvarWeightHeadshotSI, false);
+	RegisterStat("Special clears", "special_clears", TEAM_SURVIVOR, 1, g_CvarWeightSpecialClear, false);
+	RegisterStat("Teammate rescues", "special_rescues", TEAM_SURVIVOR, 1, g_CvarWeightRescue, false);
+	RegisterStat("Jockey clears", "jockey_blocks", TEAM_SURVIVOR, 1, g_CvarWeightJockeyBlock, false);
+	RegisterStat("Fast saves", "safe_saves", TEAM_SURVIVOR, 1, g_CvarWeightSafeSave, false);
+	RegisterStat("Clears after boom", "chain_clear_boom", TEAM_SURVIVOR, 1, g_CvarWeightChainClearBoom, false);
+	RegisterStat("Shoves on SI", "shove_si", TEAM_SURVIVOR, 1, g_CvarWeightShoveSI, false);
+	RegisterStat("Pin-breaking shoves", "special_shove_saves", TEAM_SURVIVOR, 1, g_CvarWeightSpecialShove, false);
+	RegisterStat("Skeets", "skeets", TEAM_SURVIVOR, 2, g_CvarWeightSkeet, false);
+	RegisterStat("Melee skeets", "skeets_melee", TEAM_SURVIVOR, 2, g_CvarWeightSkeetMelee, false);
+	RegisterStat("Deadstops", "deadstops", TEAM_SURVIVOR, 2, g_CvarWeightDeadstop, false);
+	RegisterStat("Self clears", "self_clears", TEAM_SURVIVOR, 2, g_CvarWeightSelfClear, false);
+	RegisterStat("Rock skeets", "rock_skeets", TEAM_SURVIVOR, 2, g_CvarWeightRockSkeet, false);
+	RegisterStat("Clean boomer pops", "boomer_pops", TEAM_SURVIVOR, 2, g_CvarWeightBoomerPop, false);
+	RegisterStat("Tongue cuts", "tongue_cuts", TEAM_SURVIVOR, 2, g_CvarWeightTongueCut, false);
+	RegisterStat("Charger levels", "charger_levels", TEAM_SURVIVOR, 2, g_CvarWeightChargerLevel, false);
+	RegisterStat("Witch crowns", "witch_crowns", TEAM_SURVIVOR, 2, g_CvarWeightWitchCrown, false);
+	RegisterStat("Witch kills", "witch_kills", TEAM_SURVIVOR, 2, g_CvarWeightWitchKill, false);
+	RegisterStat("Revives", "revives", TEAM_SURVIVOR, 3, g_CvarWeightRevive, false);
+	RegisterStat("Heals given", "medkit_gives", TEAM_SURVIVOR, 3, g_CvarWeightMedkitGive, false);
+	RegisterStat("Plays during tank", "tank_play_actions", TEAM_SURVIVOR, 3, g_CvarWeightTankPlayAction, false);
+	RegisterStat("Time alive", "survival_time", TEAM_SURVIVOR, 4, g_CvarWeightSurvivalSec, false);
+	RegisterStat("Map progress", "flow_percent", TEAM_SURVIVOR, 4, g_CvarWeightFlowPercent, false);
+	RegisterStat("Friendly fire", "ff_dealt", TEAM_SURVIVOR, 5, g_CvarWeightFriendlyFire, true);
+	RegisterStat("Rocks eaten", "rock_eaten_penalty", TEAM_SURVIVOR, 5, g_CvarWeightRockEatenPenalty, true);
+	RegisterStat("Car alarms", "alarm_triggers", TEAM_SURVIVOR, 5, g_CvarWeightAlarmPenalty, true);
+	RegisterStat("Bad boomer pops", "boomer_pops_splash", TEAM_SURVIVOR, 5, g_CvarWeightBoomerPopSplash, true);
+	RegisterStat("Clean rounds", "zero_ff_bonus", TEAM_SURVIVOR, 5, g_CvarWeightZeroFFBonus, false);
+
+	RegisterStat("Pin assists", "pin_assists", TEAM_INFECTED, 6, g_CvarWeightPinAssist, false);
+	RegisterStat("Damage on pins", "pin_dps_assist", TEAM_INFECTED, 6, g_CvarWeightPinDpsAssist, false);
+	RegisterStat("Chain control", "chain_control", TEAM_INFECTED, 6, g_CvarWeightChainControl, false);
+	RegisterStat("Revive interrupts", "revive_interrupts", TEAM_INFECTED, 6, g_CvarWeightReviveInterrupt, false);
+	RegisterStat("Death charges", "death_charges", TEAM_INFECTED, 7, g_CvarWeightDeathCharge, false);
+	RegisterStat("Hunter pounce dmg", "hunter_pounce_dmg", TEAM_INFECTED, 7, g_CvarWeightHunterPounceDmg, false);
+	RegisterStat("Jockey high pounces", "jockey_high_pounces", TEAM_INFECTED, 7, g_CvarWeightJockeyHighPounce, false);
+	RegisterStat("Big hits", "big_hit_assist_score", TEAM_INFECTED, 7, g_CvarWeightBigHitAssistScore, false);
+	RegisterStat("Multi charges", "charger_multi", TEAM_INFECTED, 7, g_CvarWeightChargerMulti, false);
+	RegisterStat("Vomit hits", "boomer_vomit_hits", TEAM_INFECTED, 8, g_CvarWeightBoomerVomitHit, false);
+	RegisterStat("Vomit casts", "boomer_vomit_casts", TEAM_INFECTED, 8, g_CvarWeightBoomerVomitCast, true);
+	RegisterStat("Boom kill assists", "boom_kill_assists", TEAM_INFECTED, 8, g_CvarWeightBoomKillAssist, false);
+	RegisterStat("Boom follow-up", "boom_focus", TEAM_INFECTED, 8, g_CvarWeightBoomFocus, false);
+	RegisterStat("Boom for tank", "tank_boom_assists", TEAM_INFECTED, 8, g_CvarWeightTankBoomAssist, false);
+	RegisterStat("Spit on pinned", "spit_ticks_pinned", TEAM_INFECTED, 9, g_CvarWeightSpitPinnedTick, false);
+	RegisterStat("Spit on incapped", "spit_ticks_incap", TEAM_INFECTED, 9, g_CvarWeightSpitIncapTick, false);
+	RegisterStat("Spit multi-hits", "spit_multi_hits", TEAM_INFECTED, 9, g_CvarWeightSpitMulti, false);
+	RegisterStat("Spit setups", "spit_setup_assists", TEAM_INFECTED, 9, g_CvarWeightSpitSetupAssist, false);
+	RegisterStat("Tank time", "tank_hold_time", TEAM_INFECTED, 10, g_CvarWeightTankHoldSec, false);
+	RegisterStat("Tank kills", "tank_kills", TEAM_INFECTED, 10, g_CvarWeightTankKill, false);
+	RegisterStat("Tank wipes", "tank_wipe_bonus", TEAM_INFECTED, 10, g_CvarWeightTankWipe, false);
+	RegisterStat("Tank passes", "tank_passes", TEAM_INFECTED, 10, g_CvarWeightTankPassPenalty, true);
+	RegisterStat("Setups for tank", "tank_support", TEAM_INFECTED, 10, g_CvarWeightTankSupport, false);
+	RegisterStat("Focus fire", "shared_focus", TEAM_INFECTED, 11, g_CvarWeightSharedFocus, false);
+	RegisterStat("Stagger setups", "stagger_setup", TEAM_INFECTED, 11, g_CvarWeightStaggerSetup, false);
+	RegisterStat("Witch assists", "witch_assists", TEAM_INFECTED, 11, g_CvarWeightWitchAssist, false);
+	RegisterStat("Damage to survivors", "dmg_infected", TEAM_INFECTED, 11, g_CvarWeightInfDamage, false);
 }
 
 void SeedBaselines()
