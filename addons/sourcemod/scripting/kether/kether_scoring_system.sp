@@ -25,11 +25,12 @@ int	   aliveSurvs[2]; // Including incaps
 int	   teamSize;
 float  mapDistanceFactor;
 int	   playerIncaps[64];
+bool   roundScored[2];	 // Round already finalized -> its stored bonus must not be recalculated
 
 float  WITCH_CROWN_BONUS					= 24.0;
 float  TANK_KILL_BONUS						= 24.0;
 float  TANK_PASS_BONUS						= 48.0;
-float  SURVIVOR_SURVIVED_BONUS_BASE			= 36.0;
+float  SURVIVOR_SURVIVED_BONUS_BASE			= 9.0;
 float  FULL_HP_SURVIVOR_SURVIVED_BONUS_BASE = 24.0;
 float  PILLS_ADRENALINE_BONUS_BASE			= 12.0;
 float  MEDKIT_BONUS_BASE					= 28.0;
@@ -39,7 +40,7 @@ public Plugin myinfo =
 	name		= "L4D2 Scoring plugin",
 	author		= "Krevik",
 	description = "Gives score bonuses for pills, adrenaline, HP, tank kill/pass, witch crown",
-	version		= "1.10",
+	version		= "1.11",
 	url			= "kether.pl"
 };
 
@@ -58,6 +59,11 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_mapinfo", CMD_print_bonus_info, "Let's print those bonuses info.");
 
 	HookEvent("player_incapacitated", Event_OnPlayerIncapped);
+	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
+
+	// Single keep-alive timer: mapDistanceFactor is only ever overwritten with a valid (non zero)
+	// value, so a frozen distance (tank in play) can never wipe it.
+	CreateTimer(1.0, UpdateMapDistanceFactor, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public OnPluginEnd()
@@ -69,7 +75,6 @@ public OnPluginEnd()
 public void OnMapStart()
 {
 	clearSavedBonusParameters();
-	CreateTimer(0.1, UpdateMapDistanceFactor);
 }
 
 public void OnMapEnd()
@@ -79,13 +84,14 @@ public void OnMapEnd()
 
 public void Event_RoundStart(Event hEvent, const char[] sEventName, bool bDontBroadcast)
 {
-	int team = InSecondHalfOfRound();
-	if (team == 0)
+	// Only wipe everything on a genuine first half start - never after round 1 has been scored,
+	// otherwise a late/duplicated round_start would throw away the round 1 results.
+	if (InSecondHalfOfRound() == 0 && !roundScored[0])
 	{
 		clearSavedBonusParameters();
 	}
-	CreateTimer(0.1, UpdateMapDistanceFactor);
-	// Rest player incaps counter
+	RefreshMapDistanceFactor();
+	// Reset player incaps counter for the half that is starting
 	for (int i = 1; i <= MaxClients; i++)
 	{
 		playerIncaps[i] = 0;
@@ -122,11 +128,16 @@ public Action CMD_print_bonus_info(int client, int args)
 // PRINT actual bonuses
 public Action CMD_print_bonuses(int client, int args)
 {
-	int round				 = InSecondHalfOfRound();
-	survivorsSurvived[round] = GetNotIncappedSurvivorsCount();
-	UpdateSurvivalBonus(round);
-	UpdateCurrentHealthAndHealthItemsBonus(round);
-	UpdateTotalBonus(round);
+	int round = InSecondHalfOfRound();
+	// The round end results are final - recalculating them here (e.g. while the round end scoreboard
+	// is up and everybody is already dead) would overwrite them with zeros.
+	if (!roundScored[round])
+	{
+		survivorsSurvived[round] = GetNotIncappedSurvivorsCount();
+		UpdateSurvivalBonus(round);
+		UpdateCurrentHealthAndHealthItemsBonus(round);
+		UpdateTotalBonus(round);
+	}
 
 	if (round == 0)
 	{
@@ -168,8 +179,8 @@ void PrintCurrentBonusInfo(int round, int client = -1)
 public Action L4D2_OnEndVersusModeRound(bool countSurvivors)
 {
 	int round				 = InSecondHalfOfRound();
-	// save factors
-	mapDistanceFactor		 = GetMapDistanceFactor();
+	// save factors - keeps the last valid value if the distance is currently frozen (tank in play)
+	RefreshMapDistanceFactor();
 	survivorsSurvived[round] = GetNotIncappedSurvivorsCount();
 	UpdateSurvivalBonus(round);
 	UpdateCurrentHealthAndHealthItemsBonus(round);
@@ -183,6 +194,7 @@ public Action L4D2_OnEndVersusModeRound(bool countSurvivors)
 		GameRules_SetProp("m_iVersusDefibsUsed", 1, 4, GameRules_GetProp("m_bAreTeamsFlipped", 4, 0));
 		SetConVarInt(g_hCvarDefibPenalty, -RoundToNearest(totalBonus[round]));
 	}
+	roundScored[round] = true;
 	CreateTimer(3.5, PrintRoundEndStats, _, TIMER_FLAG_NO_MAPCHANGE);
 	return Plugin_Continue;
 }
@@ -217,10 +229,11 @@ public void clearSavedBonusParameters()
 		tankKillBonus[round]	 = 0.0;
 		witchCrownBonus[round]	 = 0.0;
 		survivorsSurvived[round] = 0;
+		roundScored[round]		 = false;
 		mapDistanceFactor		 = 0.0;
 	}
 
-	CreateTimer(0.1, UpdateMapDistanceFactor);
+	RefreshMapDistanceFactor();
 }
 
 void UpdateSurvivalBonus(int round)
@@ -298,17 +311,20 @@ int GetNotIncappedSurvivorsCount()
 
 public Action UpdateMapDistanceFactor(Handle timer)
 {
-	if(L4D2_IsTankInPlay() || L4D_GetVersusMaxCompletionScore() == 0) {
-		CreateTimer(2.0, UpdateMapDistanceFactor);
-		return Plugin_Continue;
-	}
-	
+	RefreshMapDistanceFactor();
+	return Plugin_Continue;
+}
+
+// l4d_tank_rush freezes the distance by setting the versus max completion score to 0 while a tank
+// is in play, and the score is also not available yet right after a map start. In both cases we
+// must keep the last known good factor instead of overwriting it with 0.
+void RefreshMapDistanceFactor()
+{
 	float newFactor = GetMapDistanceFactor();
-	if (newFactor > 0.0) {  // Only update if we get a valid value
+	if (newFactor > 0.0)
+	{
 		mapDistanceFactor = newFactor;
 	}
-
-	return Plugin_Continue;
 }
 
 float GetMapDistanceFactor()
