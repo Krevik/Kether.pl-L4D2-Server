@@ -21,7 +21,6 @@ float  tankKillBonus[2];
 float  tankPassBonus[2];
 float  witchCrownBonus[2];
 int	   survivorsSurvived[2]; // Excluding incaps
-int	   aliveSurvs[2]; // Including incaps
 int	   teamSize;
 float  mapDistanceFactor;
 int	   playerIncaps[64];
@@ -40,7 +39,7 @@ public Plugin myinfo =
 	name		= "L4D2 Scoring plugin",
 	author		= "Krevik",
 	description = "Gives score bonuses for pills, adrenaline, HP, tank kill/pass, witch crown",
-	version		= "1.11",
+	version		= "1.12",
 	url			= "kether.pl"
 };
 
@@ -220,7 +219,6 @@ public void clearSavedBonusParameters()
 
 	for (int round = 0; round <= 1; round++)
 	{
-		aliveSurvs[round]		 = 0;
 		totalBonus[round]		 = 0.0;
 		healthItemsBonus[round]	 = 0.0;
 		healthBonus[round]		 = 0.0;
@@ -406,17 +404,10 @@ public void OnTankDeath()
 	int survs = GetNotIncappedSurvivorsCount();
 	if (survs > 0)
 	{
-		for (int i = 1; i <= MaxClients; i++)
-		{
-			if (IsSurvivor(i) && IsPlayerAlive(i))
-			{
-				aliveSurvs[round]++;
-			}
-		}
-		//float difficultyMultipier = (float(survs[round]) / float(teamSize)); // ¼
-		float difficultyMultipier = ((float(aliveSurvs[round]) + float(teamSize)) / (2.0 * float(teamSize)));
-		tankKillBonus[round] += TANK_KILL_BONUS / difficultyMultipier;
-		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(tankKillBonus[round]));
+		// Flat bonus - both teams get the same amount for the same tank, no matter how many
+		// survivors were still alive when it died.
+		tankKillBonus[round] += TANK_KILL_BONUS;
+		CPrintToChatAll("Tank has been killed resulting in: {olive}%d {default}points bonus", RoundToNearest(TANK_KILL_BONUS));
 	}
 }
 
