@@ -177,6 +177,8 @@ ConVar g_CvarSeedInfSd;
 ConVar g_CvarWeightDeathCharge;
 ConVar g_CvarWeightHunterPounceDmg;
 ConVar g_CvarWeightJockeyHighPounce;
+ConVar g_CvarMixShapeWarn;
+ConVar g_CvarMixStackPenalty;
 ConVar g_CvarMixTolerance;
 ConVar g_CvarMixWarnDelta;
 ConVar g_CvarReadyBalanceInfo;
@@ -430,6 +432,8 @@ public void OnPluginStart()
 	g_CvarWeightDeathCharge = CreateConVar("sm_skill_w_death_charge", "60.0", "Weight per death charge - the highest value single play the infected side has", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightHunterPounceDmg = CreateConVar("sm_skill_w_hunter_pounce_dmg", "0.5", "Weight per point of damage on a hunter high pounce", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightJockeyHighPounce = CreateConVar("sm_skill_w_jockey_high_pounce", "20.0", "Weight per jockey high pounce", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixShapeWarn = CreateConVar("sm_skill_mix_shape_warn", "250.0", "Difference in internal spread between the two teams, in KSR, above which the mix preview warns that equal sums hide an uneven match-up. 0 disables the warning", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixStackPenalty = CreateConVar("sm_skill_mix_stack_penalty", "150.0", "Extra team-sum difference, in KSR, that is acceptable in order to keep the two highest rated players apart. Measured cost of never stacking them: about 4 KSR in an average lobby", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixTolerance = CreateConVar("sm_skill_mix_tolerance", "0.0", "KSR the split search may give up on team-sum balance for a better shaped match-up. 0 = never trade away balance, secondary criteria only break exact ties", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixWarnDelta = CreateConVar("sm_skill_mix_warn_delta", "150.0", "KSR gap between teams above which a mix is suggested during ready-up", FCVAR_NONE, true, 0.0, false);
 	g_CvarReadyBalanceInfo = CreateConVar("sm_skill_ready_balance_info", "1", "Announce team KSR balance when the live countdown starts", FCVAR_NONE, true, 0.0, true, 1.0);
@@ -3101,6 +3105,48 @@ void AnnouncePlannedSplit()
 		char balance[192];
 		BuildBalanceLine(sumSurv / float(g_iPlannedSurvCount), sumInf / float(g_iPlannedInfCount), balance, sizeof(balance));
 		PrintToChatAll("%s", balance);
+		AnnounceShapeWarning();
+	}
+}
+
+// Equal sums are not the whole story. Head to head over 445 map pairs, the single
+// best player predicts how many survivors reach the saferoom about as well as the
+// whole team's sum does - so a team built as star-plus-passenger is not really the
+// same as four even players, even when the totals match. The search already avoids
+// the worst case, but where a gap in shape remains it is called out so people can
+// re-roll instead of finding out the hard way.
+void AnnounceShapeWarning()
+{
+	float topSurv = 0.0, lowSurv = 0.0, topInf = 0.0, lowInf = 0.0;
+
+	for (int i = 0; i < g_iPlannedSurvCount; i++)
+	{
+		float r = GetMixRating(g_iPlannedSurv[i]);
+		if (i == 0 || r > topSurv) { topSurv = r; }
+		if (i == 0 || r < lowSurv) { lowSurv = r; }
+	}
+	for (int i = 0; i < g_iPlannedInfCount; i++)
+	{
+		float r = GetMixRating(g_iPlannedInf[i]);
+		if (i == 0 || r > topInf) { topInf = r; }
+		if (i == 0 || r < lowInf) { lowInf = r; }
+	}
+
+	float spreadSurv = topSurv - lowSurv;
+	float spreadInf = topInf - lowInf;
+	float shapeGap = spreadSurv - spreadInf;
+	if (shapeGap < 0.0)
+	{
+		shapeGap = -shapeGap;
+	}
+
+	PrintToChatAll("\x04[KSR]\x01 Shape: \x04S\x01 %.0f-%.0f  |  \x08I\x01 %.0f-%.0f",
+		lowSurv, topSurv, lowInf, topInf);
+
+	if (shapeGap >= g_CvarMixShapeWarn.FloatValue)
+	{
+		PrintToChatAll("\x04[KSR]\x01 \x03Heads up:\x01 sums match but one side is far more top-heavy (%.0f KSR apart).",
+			shapeGap);
 	}
 }
 
@@ -3134,7 +3180,7 @@ bool FindBestSplit(const float rating[MAXPLAYERS + 1], int count, int teamSize,
 			continue;
 		}
 
-		float diff = SplitSumDiff(mask, rating, count);
+		float diff = SplitSumDiff(mask, rating, count) + StackPenalty(mask);
 		if (bestDiff < 0.0 || diff < bestDiff)
 		{
 			bestDiff = diff;
@@ -3158,7 +3204,7 @@ bool FindBestSplit(const float rating[MAXPLAYERS + 1], int count, int teamSize,
 			continue;
 		}
 
-		if (SplitSumDiff(mask, rating, count) > limit)
+		if (SplitSumDiff(mask, rating, count) + StackPenalty(mask) > limit)
 		{
 			continue;
 		}
@@ -3198,6 +3244,19 @@ bool FindBestSplit(const float rating[MAXPLAYERS + 1], int count, int teamSize,
 	}
 
 	return true;
+}
+
+// players[] arrives sorted by rating descending and index 0 is pinned to one side,
+// so the two best players share a team exactly when bit 1 is set as well.
+//
+// Equal sums do not mean equal teams. A real lobby split 1518/1190/1017/674 against
+// four flat 1090s came to within 39 points on paper and was still one-sided: an
+// elite player has no ceiling, while a weak one can only cost you so much. Keeping
+// the top two apart costs about 4 KSR of sum balance in an average lobby, which is
+// nearly free, and this penalty is what pays for it in the lopsided ones.
+float StackPenalty(int mask)
+{
+	return (mask & 2) ? g_CvarMixStackPenalty.FloatValue : 0.0;
 }
 
 bool HasExactBits(int mask, int count, int wanted)
