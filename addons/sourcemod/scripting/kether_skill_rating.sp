@@ -16,6 +16,11 @@
 // so rounds from different revisions can be told apart in round_stats.
 #define KSR_SCORING_VERSION 2
 
+// Bumped whenever a model default changes, because AutoExecConfig will not rewrite
+// values in a config that already exists - a new filename is the only way to make
+// new defaults actually take effect on a server that already ran the old build.
+#define KSR_CONFIG_NAME "kether_skill_rating_v3"
+
 #define TEAM_SPECTATOR 1
 #define TEAM_SURVIVOR 2
 #define TEAM_INFECTED 3
@@ -441,7 +446,7 @@ public void OnPluginStart()
 	// v2 changed almost every weight default. AutoExecConfig never rewrites values
 	// that already exist in a config, so the old file would silently pin the whole
 	// plugin back to the v1 weights - hence the new filename.
-	AutoExecConfig(true, "kether_skill_rating_v2");
+	AutoExecConfig(true, KSR_CONFIG_NAME);
 
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 	HookEvent("round_end", Event_RoundEnd, EventHookMode_PostNoCopy);
@@ -485,6 +490,14 @@ public void OnPluginStart()
 
 	SeedBaselines();
 	LoadBaselines();
+
+	// AutoExecConfig only ever ADDS missing cvars to an existing config; it never
+	// rewrites a value that is already in the file. So once the config exists, every
+	// later change to a default in this plugin is silently ignored on that server.
+	// That bit us for real: the model shipped with a 500 round memory while the live
+	// server kept running the 65 round one from the first generated config, and
+	// nobody could see it. Checked one tick after AutoExecConfig has run.
+	CreateTimer(1.0, Timer_WarnStaleConfig, _, TIMER_FLAG_NO_MAPCHANGE);
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -4955,6 +4968,46 @@ void CreateTables()
 	g_Db.Query(SQL_ErrorOnly, query);
 	Format(query, sizeof(query), "UPDATE players SET last_name = CASE WHEN last_name='' THEN name ELSE last_name END;");
 	g_Db.Query(SQL_ErrorOnly, query);
+}
+
+// The handful of cvars that define the model rather than tune it. A stale value
+// here does not misconfigure the plugin slightly - it runs a different model.
+void CheckModelCvar(ConVar cv, int &mismatches)
+{
+	char current[32];
+	char preferred[32];
+	cv.GetString(current, sizeof(current));
+	cv.GetDefault(preferred, sizeof(preferred));
+
+	if (StrEqual(current, preferred))
+	{
+		return;
+	}
+
+	char name[64];
+	cv.GetName(name, sizeof(name));
+	LogError("[SkillRating] %s is %s but this build expects %s. A stale cfg/sourcemod/%s.cfg pins the old value - delete it and let it regenerate, or set the cvar.",
+		name, current, preferred, KSR_CONFIG_NAME);
+	PrintToServer("[SkillRating] WARNING: %s = %s, build expects %s", name, current, preferred);
+	mismatches++;
+}
+
+public Action Timer_WarnStaleConfig(Handle timer)
+{
+	int mismatches = 0;
+	CheckModelCvar(g_CvarRatingEmaMin, mismatches);
+	CheckModelCvar(g_CvarRatingShrinkRounds, mismatches);
+	CheckModelCvar(g_CvarRatingScale, mismatches);
+	CheckModelCvar(g_CvarCarryWeight, mismatches);
+	CheckModelCvar(g_CvarWeightSurvivalSec, mismatches);
+	CheckModelCvar(g_CvarWeightFlowPercent, mismatches);
+
+	if (mismatches > 0)
+	{
+		PrintToServer("[SkillRating] %d model cvar(s) differ from this build. The ranking is not running the model you think it is.", mismatches);
+	}
+
+	return Plugin_Stop;
 }
 
 void RegisterStat(const char[] label, const char[] column, int side, int category, ConVar weight, bool lowerIsBetter)
