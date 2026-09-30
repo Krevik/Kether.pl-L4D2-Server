@@ -36,7 +36,9 @@
 #define MIX_MIN_TEAM_SIZE 1
 #define MIX_MAX_TEAM_SIZE 8
 #define SKILL_RANK_LIST_MAX 512
-#define SKILL_SIMILAR_COUNT 5
+// Ranks shown above and below the player on the "around me" screen. Three each
+// side plus the player is seven lines, which is exactly one menu page.
+#define SKILL_SIMILAR_SIDE 3
 #define SKILL_TOP_MIN_ROUNDS_FLOOR 20
 
 // Rating scale: KSR = KSR_BASE + scale * shrunk rating. Rating itself is an EMA of
@@ -158,11 +160,13 @@ ConVar g_CvarWeightSurvivalSec;
 ConVar g_CvarWeightFlowPercent;
 ConVar g_CvarWeightBoomerVomitHit;
 ConVar g_CvarWeightBoomerVomitCast;
+ConVar g_CvarTopListMax;
 ConVar g_CvarTopMinRounds;
 ConVar g_CvarMixVotePct;
 ConVar g_CvarWeightCommonDamage;
 ConVar g_CvarWeightWitchKill;
 ConVar g_CvarRatingScale;
+ConVar g_CvarCarryWeight;
 ConVar g_CvarRatingEmaMin;
 ConVar g_CvarRatingShrinkRounds;
 ConVar g_CvarBaselineEma;
@@ -404,18 +408,20 @@ public void OnPluginStart()
 	g_CvarWeightTankPlayAction = CreateConVar("sm_skill_w_tankplay_action", "3.0", "Bonus for high-skill actions performed while tank is in play", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightFriendlyFire = CreateConVar("sm_skill_w_ff", "-3.0", "Penalty per friendly fire damage dealt", FCVAR_NONE, false, 0.0, false);
 	g_CvarWeightHeadshotSI = CreateConVar("sm_skill_w_headshot_si", "1.5", "Weight per headshot on special infected", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightSurvivalSec = CreateConVar("sm_skill_w_survival_sec", "0.029", "Weight per second alive in round", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightFlowPercent = CreateConVar("sm_skill_w_flow_percent", "0.32", "Weight per % flow progress (best without tank)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSurvivalSec = CreateConVar("sm_skill_w_survival_sec", "0.0", "Weight per second alive in round. Zero by default: how long the team survived is the round result, not a measure of the player", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightFlowPercent = CreateConVar("sm_skill_w_flow_percent", "0.0", "Weight per % flow progress. Zero by default: map progress is the round result, shared by the whole team", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerVomitHit = CreateConVar("sm_skill_w_boomer_vomit_hit", "25.0", "Weight per boomer vomit victim (infected side)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerVomitCast = CreateConVar("sm_skill_w_boomer_vomit_cast", "-10.0", "Penalty per boomer vomit cast (infected side)", FCVAR_NONE, false, 0.0, false);
+	g_CvarTopListMax = CreateConVar("sm_skill_top_list_max", "100", "How many ranked players the leaderboard loads. The menu pages through them seven at a time", FCVAR_NONE, true, 7.0, false);
 	g_CvarTopMinRounds = CreateConVar("sm_skill_top_min_rounds", "20", "Minimum rounds for KSR top/similar ranking (hard floor 20)", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixVotePct = CreateConVar("sm_skill_mix_vote_pct", "51", "Percent votes required for skill mix", FCVAR_NONE, true, 1.0, true, 100.0);
 	g_CvarWeightCommonDamage = CreateConVar("sm_skill_w_common_damage", "0.0", "Damage dealt to common infected (0 = already covered by sm_skill_w_common_kills)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightWitchKill = CreateConVar("sm_skill_w_witch_kill", "6.0", "Weight for killing a witch without a clean crown", FCVAR_NONE, true, 0.0, false);
 
-	g_CvarRatingScale = CreateConVar("sm_skill_rating_scale", "600.0", "KSR points per 1.0 of internal rating. Higher = wider spread between players", FCVAR_NONE, true, 50.0, false);
-	g_CvarRatingEmaMin = CreateConVar("sm_skill_rating_ema", "0.03", "Minimum EMA factor per round. 0.03 is roughly a 65 round memory", FCVAR_NONE, true, 0.001, true, 1.0);
-	g_CvarRatingShrinkRounds = CreateConVar("sm_skill_rating_shrink", "20", "Rounds of shrinkage towards the average for players with little history", FCVAR_NONE, true, 0.0, false);
+	g_CvarRatingScale = CreateConVar("sm_skill_rating_scale", "1200.0", "KSR points per 1.0 of internal rating. Higher = wider spread between players. Pure presentation: it cannot change the order, only how far apart the numbers look", FCVAR_NONE, true, 50.0, false);
+	g_CvarCarryWeight = CreateConVar("sm_skill_carry_weight", "0.5", "How much of the round score is judged against your own team instead of the server average. 0 = pure absolute score, which drags a good player down whenever his team loses. 1 = pure carry, which stops being comparable between teams", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_CvarRatingEmaMin = CreateConVar("sm_skill_rating_ema", "0.004", "Minimum EMA factor per round. 0.004 is roughly a 500 round memory. A short window tracks form but makes the ranking itself unstable, and form has its own line in the profile", FCVAR_NONE, true, 0.001, true, 1.0);
+	g_CvarRatingShrinkRounds = CreateConVar("sm_skill_rating_shrink", "80", "Rounds of shrinkage towards the average for players with little history. Measured: at 20, players with 25 rounds outranked 700 round regulars", FCVAR_NONE, true, 0.0, false);
 	g_CvarBaselineEma = CreateConVar("sm_skill_baseline_ema", "0.003", "EMA factor for the rolling per-side score baseline, applied once per scored player", FCVAR_NONE, true, 0.0001, true, 1.0);
 	g_CvarSeedSurvMean = CreateConVar("sm_skill_seed_surv_mean", "248.0", "Seed value for the survivor raw score baseline", FCVAR_NONE, true, 1.0, false);
 	g_CvarSeedSurvSd = CreateConVar("sm_skill_seed_surv_sd", "141.0", "Seed value for the survivor raw score spread", FCVAR_NONE, true, 1.0, false);
@@ -970,7 +976,8 @@ void FinalizeRoundIfNeeded()
 			}
 		}
 
-		ApplyRoundRating(i, team, rawScore[i]);
+		float teamMean = (teamCount[team] > 0) ? (teamRawSum[team] / float(teamCount[team])) : rawScore[i];
+		ApplyRoundRating(i, team, rawScore[i], teamMean);
 		SaveRoundAndUpdatePlayer(i, team, rawScore[i], awarded);
 	}
 
@@ -1016,12 +1023,26 @@ void UpdateZeroFFBonus(int client, int team)
 	}
 }
 
-// Converts a raw round score into a z-score against the rolling baseline for that
-// side, then folds it into the player's rating with an EMA. Unlike the old pool
-// share this does not depend on how good the other three players were, so the
-// rating measures the player rather than the gap to his own team - which is what
-// makes the numbers comparable between teams, and therefore usable for a mix.
-void ApplyRoundRating(int client, int team, float raw)
+// Converts a raw round score into a z-score, then folds it into the player's
+// rating with an EMA.
+//
+// The z is a blend of two views of the same round:
+//
+//   absolute - against the rolling server baseline. Comparable between teams,
+//              which is what makes the numbers addable for a mix, but it moves
+//              with the round result: when a team gets wiped early, everyone on
+//              it scores badly, including whoever played well.
+//   carry    - against the player's own team in that round. Immune to the result
+//              by construction: standing out from your team is exactly what
+//              carrying a losing round looks like.
+//
+// Measured over the whole database, blending the two halves cuts how much a
+// player's score is really his team's score from 0.73 to 0.28, leaves ranking
+// stability untouched at 0.94, and slightly improves how well the rating predicts
+// round outcomes. Pure carry would score better still on coupling, but a purely
+// team-relative number averages to zero on every team and stops being comparable
+// between them, which would break the mix.
+void ApplyRoundRating(int client, int team, float raw, float teamMean)
 {
 	float sd = g_fBaseSd[team];
 	if (sd < 1.0)
@@ -1029,7 +1050,11 @@ void ApplyRoundRating(int client, int team, float raw)
 		sd = 1.0;
 	}
 
-	float z = FloatClamp((raw - g_fBaseMean[team]) / sd, -KSR_Z_CLAMP, KSR_Z_CLAMP);
+	float carry = g_CvarCarryWeight.FloatValue;
+	float zAbsolute = (raw - g_fBaseMean[team]) / sd;
+	float zCarry = (raw - teamMean) / sd;
+
+	float z = FloatClamp((1.0 - carry) * zAbsolute + carry * zCarry, -KSR_Z_CLAMP, KSR_Z_CLAMP);
 
 	// Running average while history is thin, EMA once there is enough of it: new
 	// players converge fast, veterans keep a rolling window instead of a lifetime
@@ -2104,19 +2129,19 @@ public Action Command_SkillTop(int client, int args)
 		return Plugin_Handled;
 	}
 
-	int limit = 10;
+	int limit = g_CvarTopListMax.IntValue;
 	if (args >= 1)
 	{
 		char arg[16];
 		GetCmdArg(1, arg, sizeof(arg));
 		limit = StringToInt(arg);
-		if (limit < 1)
+		if (limit < 7)
 		{
-			limit = 1;
+			limit = 7;
 		}
-		if (limit > 20)
+		if (limit > SKILL_RANK_LIST_MAX)
 		{
-			limit = 20;
+			limit = SKILL_RANK_LIST_MAX;
 		}
 	}
 
@@ -2182,22 +2207,26 @@ public Action Command_SkillBreakdown(int client, int args)
 		}
 	}
 
-	RequestBreakdown(client, target, false);
+	char steamid[32];
+	if (!GetPlayerSteamId(target, steamid, sizeof(steamid)))
+	{
+		ReplyToCommand(client, "[KSR] Cannot resolve SteamID for target.");
+		return Plugin_Handled;
+	}
+
+	char displayName[160];
+	BuildDisplayName(target, displayName, sizeof(displayName));
+	RequestBreakdown(client, steamid, displayName, false);
 	return Plugin_Handled;
 }
 
 // Player averages next to the server averages for every scored component, shown
 // as the points each one actually contributes per round. This is the screen that
 // answers "why is my rating what it is" without anyone having to guess.
-void RequestBreakdown(int client, int target, bool showBackButton)
+// Takes a steamid rather than a client, so the leaderboard can open the card of
+// somebody who is not on the server right now.
+void RequestBreakdown(int client, const char[] steamid, const char[] displayName, bool showBackButton)
 {
-	char steamid[32];
-	if (!GetPlayerSteamId(target, steamid, sizeof(steamid)))
-	{
-		ReplyToCommand(client, "[KSR] Cannot resolve SteamID for target.");
-		return;
-	}
-
 	// Roughly 21 bytes per stat, repeated four times in the UNION below. At 60 stats
 	// that is about 5 KB, so the buffers carry room for a good deal more.
 	char cols[4096];
@@ -2217,9 +2246,6 @@ void RequestBreakdown(int client, int target, bool showBackButton)
 		cols, TEAM_SURVIVOR,
 		cols, steamid, TEAM_INFECTED,
 		cols, TEAM_INFECTED);
-
-	char displayName[160];
-	BuildDisplayName(target, displayName, sizeof(displayName));
 
 	DataPack pack = new DataPack();
 	pack.WriteCell(GetClientUserId(client));
@@ -2541,8 +2567,8 @@ void ShowSkillMainMenu(int client)
 	menu.SetTitle("=== Kether Skill Rating (KSR) ===");
 	menu.AddItem("my", "My KSR profile");
 	menu.AddItem("break", "Where my points come from");
-	menu.AddItem("top", "Top KSR leaderboard");
-	menu.AddItem("sim", "Similar KSR rank");
+	menu.AddItem("top", "Leaderboard - browse all players");
+	menu.AddItem("sim", "My place in the ranking");
 	menu.AddItem("teams", "Current team balance");
 	menu.AddItem("mix", "Call KSR mix vote");
 	if (CheckCommandAccess(client, "sm_skill_admin_reset", ADMFLAG_ROOT, true))
@@ -2575,11 +2601,17 @@ public int MenuHandler_SkillMain(Menu menu, MenuAction action, int client, int i
 	}
 	else if (StrEqual(info, "break"))
 	{
-		RequestBreakdown(client, client, true);
+		char mySteamid[32];
+		char myName[160];
+		if (GetPlayerSteamId(client, mySteamid, sizeof(mySteamid)))
+		{
+			BuildDisplayName(client, myName, sizeof(myName));
+			RequestBreakdown(client, mySteamid, myName, true);
+		}
 	}
 	else if (StrEqual(info, "top"))
 	{
-		RequestTopMenu(client, 10, GetTopMinRounds(), true);
+		RequestTopMenu(client, g_CvarTopListMax.IntValue, GetTopMinRounds(), true);
 	}
 	else if (StrEqual(info, "sim"))
 	{
@@ -3521,9 +3553,14 @@ void RequestTopMenu(int client, int limit, int minRounds, bool showBackButton)
 {
 	char query[512];
 	Format(query, sizeof(query),
-		"SELECT last_name, first_name, rating, rating_rounds, rating AS score "
-		... "FROM players WHERE rating_rounds >= %d ORDER BY score DESC, rating_rounds DESC LIMIT %d;",
-		minRounds, limit);
+		"SELECT last_name, first_name, rating, rating_rounds, steamid "
+		... "FROM players WHERE rating_rounds >= %d "
+		// Order by the value that is actually shown. Sorting on the bare rating puts
+		// thin-history players above their own displayed KSR, because shrinkage pulls
+		// the number down after the sort has already happened.
+		... "ORDER BY (rating * rating_rounds / (rating_rounds + %.4f)) DESC, rating_rounds DESC "
+		... "LIMIT %d;",
+		minRounds, g_CvarRatingShrinkRounds.FloatValue, limit);
 
 	DataPack pack = new DataPack();
 	pack.WriteCell(client);
@@ -3561,8 +3598,8 @@ void RequestSimilarityMenu(int client, int target, bool showBackButton)
 	Format(query, sizeof(query),
 		"SELECT steamid, last_name, first_name, rating, rating_rounds, rating AS score "
 		... "FROM players WHERE rating_rounds >= %d "
-		... "ORDER BY score DESC, rating_rounds DESC;",
-		minRounds);
+		... "ORDER BY (rating * rating_rounds / (rating_rounds + %.4f)) DESC, rating_rounds DESC;",
+		minRounds, g_CvarRatingShrinkRounds.FloatValue);
 
 	DataPack pack = new DataPack();
 	pack.WriteCell(client);
@@ -3609,59 +3646,89 @@ public void SQL_ShowTop(Database db, DBResultSet results, const char[] error, Da
 		return;
 	}
 
-	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	// Rows are selectable, which is what makes SourceMod page through them seven
+	// at a time instead of cutting the list off, and lets a name be opened.
+	Menu menu = new Menu(MenuHandler_TopList, MENU_ACTIONS_DEFAULT);
 	char title[128];
-	Format(title, sizeof(title), "Top %d KSR Leaderboard", limit);
+	Format(title, sizeof(title), "KSR leaderboard - min %d rounds", minRounds);
 	menu.SetTitle(title);
 	menu.ExitBackButton = showBackButton;
 
-	char reqLine[128];
-	Format(reqLine, sizeof(reqLine), "Requires minimum %d rounds played to qualify.", minRounds);
-	menu.AddItem("x", reqLine, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Ranked players ---", ITEMDRAW_DISABLED);
-
-	int rank = 1;
-	while (results.FetchRow())
+	int rank = 0;
+	while (results.FetchRow() && rank < limit)
 	{
 		char lastName[MAX_NAME_LENGTH];
 		char firstName[MAX_NAME_LENGTH];
+		char steamid[32];
 		results.FetchString(0, lastName, sizeof(lastName));
 		results.FetchString(1, firstName, sizeof(firstName));
+		float rating = results.FetchFloat(2);
 		int rounds = results.FetchInt(3);
-		float avg = results.FetchFloat(4);
+		results.FetchString(4, steamid, sizeof(steamid));
 
-		if (rounds < minRounds)
-		{
-			continue;
-		}
+		char name[MAX_NAME_LENGTH * 2];
+		FormatSkillPlayerName(lastName, firstName, name, sizeof(name));
 
-		if (lastName[0] == '\0' && firstName[0] != '\0')
-		{
-			strcopy(lastName, sizeof(lastName), firstName);
-		}
-
-		char ksr[32];
-		FormatKSRValue(avg, rounds, ksr, sizeof(ksr));
+		rank++;
 
 		char line[192];
-		if (firstName[0] != '\0' && !StrEqual(firstName, lastName, false))
-		{
-			Format(line, sizeof(line), "#%d %s (%s) | KSR %s | rounds %d", rank, lastName, firstName, ksr, rounds);
-		}
-		else
-		{
-			Format(line, sizeof(line), "#%d %s | KSR %s | rounds %d", rank, lastName, ksr, rounds);
-		}
-		menu.AddItem("x", line, ITEMDRAW_DISABLED);
-		rank++;
+		Format(line, sizeof(line), "#%d %s | KSR %.0f | %d rounds",
+			rank, name, RatingToKSR(rating, rounds), rounds);
+		menu.AddItem(steamid, line);
 	}
 
-	if (rank == 1)
+	if (rank == 0)
 	{
 		menu.AddItem("x", "No players match KSR ranking criteria.", ITEMDRAW_DISABLED);
 	}
 
-	menu.Display(client, 20);
+	menu.Display(client, 60);
+}
+
+public int MenuHandler_TopList(Menu menu, MenuAction action, int client, int item)
+{
+	if (action == MenuAction_End)
+	{
+		delete menu;
+		return 0;
+	}
+
+	if (action == MenuAction_Cancel && item == MenuCancel_ExitBack && IsValidHuman(client))
+	{
+		ShowSkillMainMenu(client);
+		return 0;
+	}
+
+	if (action != MenuAction_Select || !IsValidHuman(client))
+	{
+		return 0;
+	}
+
+	char steamid[32];
+	char display[192];
+	menu.GetItem(item, steamid, sizeof(steamid), _, display, sizeof(display));
+	if (StrEqual(steamid, "x"))
+	{
+		return 0;
+	}
+
+	// The label already reads "#4 name | KSR ...", so trim it back to the name for
+	// the card's title.
+	char name[192];
+	strcopy(name, sizeof(name), display);
+	int bar = FindCharInString(name, '|');
+	if (bar > 1)
+	{
+		name[bar - 1] = '\0';
+	}
+	int space = FindCharInString(name, ' ');
+	if (space >= 0)
+	{
+		strcopy(name, sizeof(name), name[space + 1]);
+	}
+
+	RequestBreakdown(client, steamid, name, true);
+	return 0;
 }
 
 void FormatSkillPlayerName(const char[] lastName, const char[] firstName, char[] buffer, int size)
@@ -3699,12 +3766,13 @@ public void SQL_ShowRankNeighbors(Database db, DBResultSet results, const char[]
 		return;
 	}
 
-	Menu menu = new Menu(MenuHandler_InfoBack, MENU_ACTIONS_DEFAULT);
+	Menu menu = new Menu(MenuHandler_TopList, MENU_ACTIONS_DEFAULT);
 	menu.ExitBackButton = showBackButton;
 
 	if (results == null)
 	{
 		ReplyToCommand(client, "[KSR] Ranking query failed: %s", error);
+		delete menu;
 		return;
 	}
 
@@ -3756,118 +3824,75 @@ public void SQL_ShowRankNeighbors(Database db, DBResultSet results, const char[]
 
 	int targetRank = targetIdx + 1;
 	char title[160];
-	Format(title, sizeof(title), "KSR rank near %s (#%d)", targetName, targetRank);
+	Format(title, sizeof(title), "KSR around %s (#%d of %d)", targetName, targetRank, rankCount);
 	menu.SetTitle(title);
 
-	char selfKsr[32];
-	FormatKSRWithConfidence(rankAvg[targetIdx], rankRounds[targetIdx], selfKsr, sizeof(selfKsr));
-	char selfLine[192];
-	Format(selfLine, sizeof(selfLine), "You: #%d | KSR %s | rounds %d", targetRank, selfKsr, rankRounds[targetIdx]);
-	menu.AddItem("x", selfLine, ITEMDRAW_DISABLED);
-	menu.AddItem("x", "--- Nearest KSR ranks ---", ITEMDRAW_DISABLED);
-
-	int pickIdx[SKILL_SIMILAR_COUNT];
-	int pickRank[SKILL_SIMILAR_COUNT];
-	float pickAvg[SKILL_SIMILAR_COUNT];
-	int pickRounds[SKILL_SIMILAR_COUNT];
-	char pickName[SKILL_SIMILAR_COUNT][MAX_NAME_LENGTH * 2];
-	int pickDist[SKILL_SIMILAR_COUNT];
-	int pickCount = 0;
-
-	for (int i = 0; i < SKILL_SIMILAR_COUNT; i++)
+	// A window centred on the player: SKILL_SIMILAR_SIDE ranks above, the player,
+	// and the same number below. Near either end of the ladder the window slides
+	// instead of shrinking, so it always shows the same number of names.
+	int span = SKILL_SIMILAR_SIDE * 2 + 1;
+	int first = targetIdx - SKILL_SIMILAR_SIDE;
+	if (first < 0)
 	{
-		pickDist[i] = 999999;
-		pickIdx[i] = -1;
+		first = 0;
 	}
-
-	for (int i = 0; i < rankCount; i++)
+	if (first + span > rankCount)
 	{
-		if (i == targetIdx)
+		first = rankCount - span;
+		if (first < 0)
 		{
-			continue;
-		}
-
-		int playerRank = i + 1;
-		int dist = playerRank - targetRank;
-		if (dist < 0)
-		{
-			dist = -dist;
-		}
-
-		int worst = 0;
-		for (int slot = 1; slot < SKILL_SIMILAR_COUNT; slot++)
-		{
-			if (pickDist[slot] > pickDist[worst])
-			{
-				worst = slot;
-			}
-		}
-
-		bool replace = false;
-		if (pickCount < SKILL_SIMILAR_COUNT)
-		{
-			replace = true;
-		}
-		else if (dist < pickDist[worst])
-		{
-			replace = true;
-		}
-		else if (dist == pickDist[worst] && playerRank < pickRank[worst])
-		{
-			replace = true;
-		}
-
-		if (!replace)
-		{
-			continue;
-		}
-
-		pickIdx[worst] = i;
-		pickRank[worst] = playerRank;
-		pickAvg[worst] = rankAvg[i];
-		pickRounds[worst] = rankRounds[i];
-		strcopy(pickName[worst], sizeof(pickName[]), rankName[i]);
-		pickDist[worst] = dist;
-		if (pickCount < SKILL_SIMILAR_COUNT)
-		{
-			pickCount++;
+			first = 0;
 		}
 	}
 
-	for (int n = 0; n < SKILL_SIMILAR_COUNT; n++)
+	int last = first + span;
+	if (last > rankCount)
 	{
-		int bestSlot = -1;
-		for (int slot = 0; slot < SKILL_SIMILAR_COUNT; slot++)
+		last = rankCount;
+	}
+
+	if (first > 0)
+	{
+		char above[64];
+		Format(above, sizeof(above), "... %d higher", first);
+		menu.AddItem("x", above, ITEMDRAW_DISABLED);
+	}
+
+	for (int i = first; i < last; i++)
+	{
+		bool self = (i == targetIdx);
+		char ksr[32];
+		if (self)
 		{
-			if (pickIdx[slot] == -1)
-			{
-				continue;
-			}
-			if (bestSlot == -1 || pickRank[slot] < pickRank[bestSlot])
-			{
-				bestSlot = slot;
-			}
+			FormatKSRWithConfidence(rankAvg[i], rankRounds[i], ksr, sizeof(ksr));
+		}
+		else
+		{
+			FormatKSRValue(rankAvg[i], rankRounds[i], ksr, sizeof(ksr));
 		}
 
-		if (bestSlot == -1)
-		{
-			break;
-		}
-
-		char neighborKsr[32];
-		FormatKSRValue(pickAvg[bestSlot], pickRounds[bestSlot], neighborKsr, sizeof(neighborKsr));
 		char line[192];
-		Format(line, sizeof(line), "#%d %s | KSR %s | rounds %d", pickRank[bestSlot], pickName[bestSlot], neighborKsr, pickRounds[bestSlot]);
-		menu.AddItem("x", line, ITEMDRAW_DISABLED);
-		pickIdx[bestSlot] = -1;
+		Format(line, sizeof(line), "%s#%d %s | KSR %s | %d rounds",
+			self ? ">> " : "", i + 1, rankName[i], ksr, rankRounds[i]);
+
+		if (self)
+		{
+			menu.AddItem("x", line, ITEMDRAW_DISABLED);
+		}
+		else
+		{
+			menu.AddItem(rankSteamid[i], line);
+		}
 	}
 
-	if (pickCount == 0)
+	if (last < rankCount)
 	{
-		menu.AddItem("x", "No other KSR-ranked players nearby.", ITEMDRAW_DISABLED);
+		char below[64];
+		Format(below, sizeof(below), "... %d lower", rankCount - last);
+		menu.AddItem("x", below, ITEMDRAW_DISABLED);
 	}
 
-	menu.Display(client, 20);
+	menu.Display(client, 60);
 }
 
 void LoadPlayerProfile(int client)
