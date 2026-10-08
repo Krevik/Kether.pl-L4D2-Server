@@ -229,6 +229,7 @@ int g_iLiveSurvCount = 0;
 int g_iLiveInfCount = 0;
 
 int g_iReadyFooterIndex = -1;
+Handle g_hReadyFooterTimer = null;
 char g_sFirstName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 char g_sLastName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
@@ -473,6 +474,7 @@ public void OnPluginStart()
 	HookEvent("revive_end", Event_ReviveEnd, EventHookMode_Post);
 	HookEvent("ability_use", Event_AbilityUse, EventHookMode_Post);
 	HookEvent("player_death", Event_PlayerDeath, EventHookMode_Post);
+	HookEvent("player_team", Event_PlayerTeam, EventHookMode_Post);
 	HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
 	HookEvent("tank_spawn", Event_TankSpawn, EventHookMode_PostNoCopy);
 	HookEvent("charger_impact", Event_ChargerImpact, EventHookMode_Post);
@@ -543,6 +545,7 @@ public void OnMapEnd()
 	FinalizeRoundIfNeeded();
 	delete g_hFlowTimer;
 	delete g_hMixApplyTimer;
+	delete g_hReadyFooterTimer;
 }
 
 public void Event_TankSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -569,6 +572,7 @@ public void OnClientPostAdminCheck(int client)
 	ResetRatingCache(client);
 	g_bWasLive[client] = false;
 	LoadPlayerProfile(client);
+	RequestReadyFooterUpdate();
 }
 
 public void OnClientDisconnect(int client)
@@ -584,6 +588,7 @@ public void OnClientDisconnect(int client)
 	g_bWasLive[client] = false;
 	g_sFirstName[client][0] = '\0';
 	g_sLastName[client][0] = '\0';
+	RequestReadyFooterUpdate();
 }
 
 public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -673,17 +678,49 @@ public void OnRoundLiveCountdown()
 
 public void OnReadyUpInitiate()
 {
-	UpdateReadyFooter();
+	RequestReadyFooterUpdate();
 }
 
 public void OnPlayerReady(int client)
 {
-	UpdateReadyFooter();
+	RequestReadyFooterUpdate();
 }
 
 public void OnPlayerUnready(int client)
 {
+	RequestReadyFooterUpdate();
+}
+
+public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+{
+	RequestReadyFooterUpdate();
+}
+
+// Coalesces a burst of triggers into one redraw, and - the reason the delay is
+// needed rather than nice to have - it runs after the event that caused it has
+// finished. A disconnecting client is still on his team inside
+// OnClientDisconnect, and a player_team event fires before the new team is in
+// place, so reading the rosters immediately would count the wrong line-up.
+void RequestReadyFooterUpdate()
+{
+	if (!g_CvarEnabled.BoolValue || !g_bReadyUpAvailable || !g_CvarReadyBalanceInfo.BoolValue)
+	{
+		return;
+	}
+
+	if (g_hReadyFooterTimer != null)
+	{
+		return;
+	}
+
+	g_hReadyFooterTimer = CreateTimer(0.3, Timer_ReadyFooterUpdate, _, TIMER_FLAG_NO_MAPCHANGE);
+}
+
+public Action Timer_ReadyFooterUpdate(Handle timer)
+{
+	g_hReadyFooterTimer = null;
 	UpdateReadyFooter();
+	return Plugin_Stop;
 }
 
 void AnnounceTeamBalance()
@@ -4055,6 +4092,10 @@ public void SQL_LoadPlayerProfile(Database db, DBResultSet results, const char[]
 	g_fRatingSide[TEAM_INFECTED][client] = results.FetchFloat(8);
 	g_iRatingSideRounds[TEAM_INFECTED][client] = results.FetchInt(9);
 	g_bProfileLoaded[client] = true;
+
+	// The rating only exists once this query returns, so the redraw triggered by
+	// the connect itself would still have shown this player as an unknown 1000.
+	RequestReadyFooterUpdate();
 
 	if (g_sLastName[client][0] == '\0')
 	{
