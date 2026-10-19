@@ -34,10 +34,10 @@ DAEMON="$DIR/srcds_run"
 
 # The current settings will start the Server on 100 Tick on Dead Center 1.
 SVNUM=1
-IP=54.36.179.182
+IP=104.245.245.137
 PORT=27015
 NAME=L4D2_Server$SVNUM
-PARAMS="-game left4dead2 -ip $IP -port $PORT +sv_clockcorrection_msecs 25 -timeout 1 -tickrate 128 +map c8m1_apartment -maxplayers 32 +servercfgfile server$SVNUM.cfg -hltv +tv_enable 1"
+PARAMS="-game left4dead2 -ip $IP -port $PORT +sv_clockcorrection_msecs 25 -timeout 1 -tickrate 100 +map c8m1_apartment -maxplayers 32 +servercfgfile server$SVNUM.cfg -hltv +tv_enable 1"
 DESC="L4D2 Dedicated Server #$SVNUM on port $PORT"
 
 
