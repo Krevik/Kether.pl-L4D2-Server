@@ -595,6 +595,11 @@
 		"max_distance"		"500"
 		"tank_ban_flow"
 		{
+			"Cola event (tank spawn behind the unexploded and unbreakable door will always make new players disoriented)"
+			{
+				"min"		"35"
+				"max"		"41"
+			}
 			"Before elevator (bugged spawn)"
 			{
 				"min"		"42"
