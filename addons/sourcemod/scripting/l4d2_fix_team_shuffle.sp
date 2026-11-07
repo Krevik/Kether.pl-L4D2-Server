@@ -16,7 +16,7 @@ public Plugin myinfo =
 	name = "L4D2 - Fix team shuffle",
 	author = "Altair Sossai",
 	description = "Fix teams shuffling during map switching",
-	version = "1.0.1",
+	version = "1.0.2",
 	url = "https://github.com/SirPlease/L4D2-Competitive-Rework"
 };
 
@@ -24,6 +24,8 @@ public void OnPluginStart()
 {
 	HookEvent("round_start", RoundStart_Event, EventHookMode_PostNoCopy);
 	HookEvent("player_team", PlayerTeam_Event);
+	// Real disconnects only (unlike OnClientDisconnect, this is not fired on map change).
+	HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
 
 	winners = CreateArray(64);
 	losers = CreateArray(64);
@@ -68,6 +70,12 @@ void PlayerTeam_Event(Event event, const char[] name, bool dontBroadcast)
 		int oldteam = event.GetInt("oldteam");
 		if (oldteam == L4D2_TEAM_NONE)
 			CreateTimer(0.5, ReSpec_Timer, client);
+		else if (IsInSavedTeam(client, oldteam))
+		{
+			// Player left his saved team on purpose (e.g. to let a substitute in) - release his slot.
+			RemoveSavedPlayer(client);
+			CreateTimer(1.0, FixTeam_Timer);
+		}
 
 		return;
 	}
@@ -80,6 +88,55 @@ void PlayerTeam_Event(Event event, const char[] name, bool dontBroadcast)
 	}
 
 	CreateTimer(1.0, FixTeam_Timer);
+}
+
+void PlayerDisconnect_Event(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client <= 0 || client > MaxClients)
+		return;
+
+	// Player left the server - don't hold his slot, let a substitute join.
+	if (RemoveSavedPlayer(client))
+		CreateTimer(1.0, FixTeam_Timer);
+}
+
+bool IsInSavedTeam(int client, int team)
+{
+	if (TeamsDataIsEmpty())
+		return false;
+
+	bool survivorsAreWinning = SurvivorsAreWinning();
+	int winnerTeam = survivorsAreWinning ? L4D2_TEAM_SURVIVOR : L4D2_TEAM_INFECTED;
+	int losersTeam = survivorsAreWinning ? L4D2_TEAM_INFECTED : L4D2_TEAM_SURVIVOR;
+
+	if (team == winnerTeam)
+		return FindValueInArray(winners, client) != -1;
+
+	if (team == losersTeam)
+		return FindValueInArray(losers, client) != -1;
+
+	return false;
+}
+
+bool RemoveSavedPlayer(int client)
+{
+	bool removed = false;
+	int index;
+
+	if ((index = FindValueInArray(winners, client)) != -1)
+	{
+		RemoveFromArray(winners, index);
+		removed = true;
+	}
+
+	if ((index = FindValueInArray(losers, client)) != -1)
+	{
+		RemoveFromArray(losers, index);
+		removed = true;
+	}
+
+	return removed;
 }
 
 Action ReSpec_Timer(Handle timer, any client)
@@ -170,14 +227,40 @@ void FixTeams()
 
 void MoveToSpectatorWhoIsNotInTheTeam(ArrayList arrayList, int team)
 {
-    for (int client = 1; client <= MaxClients; client++)
+    // Only free as many slots as saved players actually need (substitutes may fill the rest).
+    int slotsNeeded = SavedPlayersMissingFromTeam(arrayList, team) - (TeamSize() - NumberOfPlayersInTheTeam(team));
+
+    for (int client = 1; client <= MaxClients && slotsNeeded > 0; client++)
     {
         if (!IsClientInGame(client) || IsFakeClient(client) || GetClientTeam(client) != team)
             continue;
 
         if (FindValueInArray(arrayList, client) == -1)
+        {
             MovePlayerToTeam(client, L4D2_TEAM_SPECTATOR);
+            slotsNeeded--;
+        }
     }
+}
+
+int SavedPlayersMissingFromTeam(ArrayList arrayList, int team)
+{
+	int count = 0;
+	int arraySize = GetArraySize(arrayList);
+
+	for (int i = 0; i < arraySize; i++)
+	{
+		int client = GetArrayCell(arrayList, i);
+
+		// Still connecting players keep their slot reserved.
+		if (!IsClientConnected(client) || IsFakeClient(client))
+			continue;
+
+		if (!IsClientInGame(client) || GetClientTeam(client) != team)
+			count++;
+	}
+
+	return count;
 }
 
 void MoveSpectatorsToTheCorrectTeam(ArrayList arrayList, int team)
@@ -200,7 +283,11 @@ bool PlayersInCorrectTeam(ArrayList arrayList, int team)
 	{
 		int client = GetArrayCell(arrayList, i);
 
-		if (!IsClientInGame(client) || IsFakeClient(client) || GetClientTeam(client) != team)
+		// Nobody in this slot anymore - don't keep the lock active for him.
+		if (!IsClientConnected(client) || IsFakeClient(client))
+			continue;
+
+		if (!IsClientInGame(client) || GetClientTeam(client) != team)
 			return false;
 	}
 
