@@ -133,23 +133,44 @@ void AddWeaponRule(int match, int to)
 
 void WeaponSearchLoop()
 {
-	int entcnt = GetEntityCount();
-	for (int ent = 1; ent <= entcnt; ent++) {
+	/*
+		Two-pass on purpose: ConvertWeaponSpawn() kills the entity and creates a new one
+		at any free index. Converting while iterating made converted spawns get processed
+		again depending on the index they landed on (e.g. sniper_awp -> smg_mp5 -> smg_silenced),
+		which differs between versus halves. Collect first, then convert: each rule applies once.
+	*/
+	ArrayList hTargets = new ArrayList(2);
+	int maxEnts = GetMaxEntities();
+	for (int ent = MaxClients + 1; ent < maxEnts; ent++) {
 		int source = IdentifyWeapon(ent);
 		if (source > WEPID_NONE && g_GlobalWeaponRules[source] != -1) {
-			if (g_GlobalWeaponRules[source] == WEPID_NONE) {
-				AcceptEntityInput(ent, "kill");
-				#if DEBUG
-				PrintToServer("Found Weapon %d, killing", source);
-				#endif
-			} else {
-				#if DEBUG
-				PrintToServer("Found Weapon %d, converting to %d", source, g_GlobalWeaponRules[source]);
-				#endif
-				ConvertWeaponSpawn(ent, g_GlobalWeaponRules[source]);
-			}
+			int idx = hTargets.Push(EntIndexToEntRef(ent));
+			hTargets.Set(idx, source, 1);
 		}
 	}
+
+	int len = hTargets.Length;
+	for (int i = 0; i < len; i++) {
+		int ent = EntRefToEntIndex(hTargets.Get(i, 0));
+		if (ent == INVALID_ENT_REFERENCE) {
+			continue;
+		}
+
+		int source = hTargets.Get(i, 1);
+		if (g_GlobalWeaponRules[source] == WEPID_NONE) {
+			AcceptEntityInput(ent, "kill");
+			#if DEBUG
+			PrintToServer("Found Weapon %d, killing", source);
+			#endif
+		} else {
+			#if DEBUG
+			PrintToServer("Found Weapon %d, converting to %d", source, g_GlobalWeaponRules[source]);
+			#endif
+			ConvertWeaponSpawn(ent, g_GlobalWeaponRules[source]);
+		}
+	}
+
+	delete hTargets;
 }
 
 // Tries the given weapon name directly, and upon failure,

@@ -9,7 +9,10 @@
 
 #define MAX_SEL_LEN 32
 
+#define RESOLVE_TIMEOUT 3.0
+
 bool g_bManaged[2049];
+float g_fPollStart[2049];
 StringMap g_hSpawnResults;
 
 public Plugin myinfo =
@@ -88,6 +91,29 @@ void OnSpawnerSpawnPostFrame(int ref)
 		return;
 
 	g_bManaged[entity] = false;
+	g_fPollStart[entity] = GetEngineTime();
+
+	SyncSpawnResult(EntIndexToEntRef(entity));
+}
+
+/*
+	Director-managed spawners ("spawn_without_director" "0", e.g. Valve's tier2_any spots)
+	resolve their weapon later than Spawn(). Wait until m_weaponID is set, otherwise
+	we'd store/compare an unresolved value and the halves would not be synced.
+*/
+void SyncSpawnResult(int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if (entity == INVALID_ENT_REFERENCE)
+		return;
+
+	if (GetEntProp(entity, Prop_Send, "m_weaponID") <= WEPID_NONE)
+	{
+		if (GetEngineTime() - g_fPollStart[entity] < RESOLVE_TIMEOUT)
+			RequestFrame(SyncSpawnResult, ref);
+
+		return;
+	}
 
 	float origin[3];
 	GetEntPropVector(entity, Prop_Send, "m_vecOrigin", origin);
