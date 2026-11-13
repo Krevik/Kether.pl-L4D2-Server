@@ -12,9 +12,12 @@
  * and is gone if that packet is lost.
  *
  * What this plugin does, per materialize (hunters never, they spawn silently on purpose):
- *  - the game's own spawn-time vocal is caught, blocked and re-emitted unchanged (same entity,
- *    channel, level, pitch, recipients) through Tickrate Enabler's te_reliable_sound, so it can't
- *    be lost; nothing is added, the spawn is heard once.
+ *  - the game's own spawn-time vocal is caught, blocked and re-emitted (same entity, channel, level,
+ *    pitch) through te_reliable_sound, so it can't be lost; nothing is added, the spawn is heard once.
+ *    The game only sends it to players whose PAS contains the spawn point and who are within
+ *    2000 / attenuation units (CPASAttenuationFilter), so a spawn behind walls in another part of
+ *    the map may reach nobody. With sm_si_materialize_cue_relay_everyone 1 it goes to every player,
+ *    like the plugin's own cue; distance still makes it quieter on the client.
  *  - if the game stays silent for sm_si_materialize_cue_delay seconds, the plugin plays its own
  *    class cue instead (reliably when possible), and a late duplicate idle vocal from the game is
  *    blocked for sm_si_materialize_cue_guard seconds.
@@ -33,7 +36,7 @@
 #include <sdktools>
 #include <left4dhooks>
 
-#define PLUGIN_VERSION "2.1.0"
+#define PLUGIN_VERSION "2.2.0"
 
 #define TEAM_SURVIVOR 2
 #define TEAM_INFECTED 3
@@ -66,6 +69,7 @@ ConVar g_CvarDelay;
 ConVar g_CvarReliable;
 ConVar g_CvarSource;
 ConVar g_CvarGuard;
+ConVar g_CvarRelayEveryone;
 ConVar g_CvarDebug;
 
 bool g_bWaitingForVanilla[MAXPLAYERS + 1];	// spawn decision still open
@@ -141,7 +145,9 @@ public void OnPluginStart() {
 		"Source of the plugin's own cue: 0=the SI (moves with it), 1=the world at the SI's position.", _, true, 0.0, true, 1.0);
 	g_CvarGuard    = CreateConVar("sm_si_materialize_cue_guard", "1.5",
 		"After the plugin's own cue, block one late idle vocal from the game for this many seconds after materializing (no double spawn sound).", _, true, 0.0, true, 5.0);
-	g_CvarDebug    = CreateConVar("sm_si_materialize_cue_debug", "0",
+	g_CvarRelayEveryone = CreateConVar("sm_si_materialize_cue_relay_everyone", "1",
+		"Who gets the game's own spawn vocal: 0=only the players the game picked (PAS + range), 1=every player, like the plugin's own cue.", _, true, 0.0, true, 1.0);
+	g_CvarDebug   = CreateConVar("sm_si_materialize_cue_debug", "0",
 		"Log every spawn sound decision to logs/l4d2_si_materialize_cue.log (0=off, 1=on).", _, true, 0.0, true, 1.0);
 
 	CreateConVar("sm_si_materialize_cue_mode", "0", "Deprecated. Ignored since 1.4.", FCVAR_NOTIFY);
@@ -265,6 +271,17 @@ bool IsRelayable(int channel, int level, float volume, int pitch, int flags) {
 		&& flags >= 0;
 }
 
+// Every player who should hear sounds: humans and SourceTV, not bots.
+int FillEveryone(int clients[MAXPLAYERS]) {
+	int count = 0;
+	for (int i = 1; i <= MaxClients && count < MAXPLAYERS; i++) {
+		if (IsClientInGame(i) && (!IsFakeClient(i) || IsClientSourceTV(i))) {
+			clients[count++] = i;
+		}
+	}
+	return count;
+}
+
 bool IsVoiceSample(const char[] sample) {
 	return StrContains(sample, "/voice/", false) != -1;
 }
@@ -304,8 +321,10 @@ Action SoundHook_SpawnVocal(int clients[MAXPLAYERS], int &numClients, char sampl
 	if (g_bWaitingForVanilla[entity]) {
 		// The game's own spawn-time vocal: this is the spawn sound, nothing else will be added.
 		g_bWaitingForVanilla[entity] = false;
+		bool everyone = g_CvarRelayEveryone.BoolValue;
 
-		if (numClients > 0 && ReliableSoundAvailable() && IsRelayable(channel, level, volume, pitch, flags)) {
+		// numClients in the log is always the game's own pick, so PAS / range cuts stay visible.
+		if ((everyone || numClients > 0) && ReliableSoundAvailable() && IsRelayable(channel, level, volume, pitch, flags)) {
 			DataPack pack = new DataPack();
 			pack.WriteCell(GetClientUserId(entity));
 			pack.WriteCell(g_iSpawnSerial[entity]);
@@ -315,14 +334,22 @@ Action SoundHook_SpawnVocal(int clients[MAXPLAYERS], int &numClients, char sampl
 			pack.WriteCell(pitch);
 			pack.WriteCell(flags);
 			pack.WriteString(sample);
+			pack.WriteCell(everyone);
 			pack.WriteCell(numClients);
 			for (int i = 0; i < numClients; i++) {
 				pack.WriteCell(clients[i]);
 			}
 			// Re-emit on the next frame, outside of SourceMod's sound hook.
 			RequestFrame(Frame_RelayReliably, pack);
-			LogDecision(entity, "relay (reliable)", sample, numClients);
+			LogDecision(entity, everyone ? "relay (reliable, to everyone)" : "relay (reliable)", sample, numClients);
 			return Plugin_Stop;
+		}
+
+		if (everyone) {
+			// No te_reliable_sound: still send it to every player, the normal (unreliable) way.
+			LogDecision(entity, "vanilla to everyone (unreliable)", sample, numClients);
+			numClients = FillEveryone(clients);
+			return Plugin_Changed;
 		}
 
 		LogDecision(entity, "vanilla (unreliable)", sample, numClients);
@@ -354,6 +381,7 @@ void Frame_RelayReliably(any data) {
 	int flags = pack.ReadCell();
 	char sample[PLATFORM_MAX_PATH];
 	pack.ReadString(sample, sizeof(sample));
+	bool everyone = pack.ReadCell();
 	int numClients = pack.ReadCell();
 	int recipients[MAXPLAYERS];
 	int count = 0;
@@ -366,19 +394,27 @@ void Frame_RelayReliably(any data) {
 	delete pack;
 
 	// Same spawn, still a live, materialized SI: otherwise the vocal would play after its death or respawn.
-	if (client < 1 || serial != g_iSpawnSerial[client] || count == 0 || !IsClientInGame(client)
+	if (client < 1 || serial != g_iSpawnSerial[client] || (!everyone && count == 0) || !IsClientInGame(client)
 		|| !IsPlayerAlive(client) || GetClientTeam(client) != TEAM_INFECTED || GetEntProp(client, Prop_Send, "m_isGhost")) {
 		return;
 	}
 
 	if (ReliableSoundAvailable()) {
-		char list[256];
-		for (int i = 0; i < count; i++) {
-			Format(list, sizeof(list), "%s%s%d", list, i > 0 ? "," : "", recipients[i]);
+		if (everyone) {
+			// No client list: every human player and SourceTV.
+			ServerCommand("%s %d %d %d %.3f %d %d - \"%s\"", RELIABLE_SOUND_COMMAND,
+				client, channel, level, volume, pitch, flags, sample);
+		} else {
+			char list[256];
+			for (int i = 0; i < count; i++) {
+				Format(list, sizeof(list), "%s%s%d", list, i > 0 ? "," : "", recipients[i]);
+			}
+			ServerCommand("%s %d %d %d %.3f %d %d - \"%s\" %s", RELIABLE_SOUND_COMMAND,
+				client, channel, level, volume, pitch, flags, sample, list);
 		}
-		ServerCommand("%s %d %d %d %.3f %d %d - \"%s\" %s", RELIABLE_SOUND_COMMAND,
-			client, channel, level, volume, pitch, flags, sample, list);
 		ServerExecute();
+	} else if (everyone) {
+		EmitSoundToAll(sample, client, channel, level, flags, volume, pitch);
 	} else {
 		// te_reliable_sound went away in the meantime: play it the normal way rather than lose it.
 		EmitSound(recipients, count, sample, client, channel, level, flags, volume, pitch);
