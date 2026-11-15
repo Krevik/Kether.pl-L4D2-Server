@@ -47,3 +47,7 @@ motd_lerp.smx
 logs/
 cfg/rcon_password.cfg
 OUTDIR/
+
+# Other
+agent.py
+vmf_entities.py
