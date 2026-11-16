@@ -9,17 +9,17 @@
 #include <l4d2_skill_detect>
 #include <readyup>
 
-#define PLUGIN_VERSION "2.0.0"
+#define PLUGIN_VERSION "2.1.0"
 #define DB_NAME "kether_skill_rating"
 
 // Scoring model revision. Bumped whenever weights or detection semantics change,
 // so rounds from different revisions can be told apart in round_stats.
-#define KSR_SCORING_VERSION 2
+#define KSR_SCORING_VERSION 3
 
 // Bumped whenever a model default changes, because AutoExecConfig will not rewrite
 // values in a config that already exists - a new filename is the only way to make
 // new defaults actually take effect on a server that already ran the old build.
-#define KSR_CONFIG_NAME "kether_skill_rating_v3"
+#define KSR_CONFIG_NAME "kether_skill_rating_v4"
 
 #define TEAM_SPECTATOR 1
 #define TEAM_SURVIVOR 2
@@ -187,6 +187,7 @@ ConVar g_CvarMixStackPenalty;
 ConVar g_CvarMixTolerance;
 ConVar g_CvarMixWarnDelta;
 ConVar g_CvarReadyBalanceInfo;
+ConVar g_CvarMixShrink;
 
 bool g_bRoundActive = false;
 bool g_bRoundFinalized = false;
@@ -290,6 +291,23 @@ int g_iDeathCharges[MAXPLAYERS + 1];
 int g_iHunterPounceDamage[MAXPLAYERS + 1];
 int g_iJockeyHighPounces[MAXPLAYERS + 1];
 
+// Logged with every round but not scored yet. The infected score separates players
+// far less reliably than the survivor one, and these are the candidates for fixing
+// that: they need a few hundred rounds of data before any of them earns a weight.
+int g_iDamageAsTank[MAXPLAYERS + 1];
+int g_iInfIncaps[MAXPLAYERS + 1];
+int g_iInfKills[MAXPLAYERS + 1];
+int g_iPinsLanded[MAXPLAYERS + 1];
+int g_iGotSkeeted[MAXPLAYERS + 1];
+int g_iGotDeadstopped[MAXPLAYERS + 1];
+int g_iGotPopped[MAXPLAYERS + 1];
+int g_iGotLeveled[MAXPLAYERS + 1];
+int g_iGotTongueCut[MAXPLAYERS + 1];
+// Indexed by zombie class, smoker (1) to charger (6): which class a player rolled
+// is luck, so damage has to be read against the lives he actually had on it.
+int g_iClassDamage[ZC_CHARGER + 1][MAXPLAYERS + 1];
+int g_iClassSpawns[ZC_CHARGER + 1][MAXPLAYERS + 1];
+
 int g_iReviveTargetForReviver[MAXPLAYERS + 1];
 float g_fReviveStartTime[MAXPLAYERS + 1];
 int g_iRevives[MAXPLAYERS + 1];
@@ -365,7 +383,7 @@ public void OnPluginStart()
 
 	g_CvarEnabled = CreateConVar("sm_skill_rating_enabled", "1", "Enable/disable skill rating plugin", FCVAR_NONE, true, 0.0, true, 1.0);
 	g_CvarRoundPool = CreateConVar("sm_skill_rating_round_pool", "100.0", "Points distributed per team per round", FCVAR_NONE, true, 1.0, false);
-	g_CvarWeightInfDamage = CreateConVar("sm_skill_w_inf_damage", "0.207", "Infected damage weight (damage dealt to survivors)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightInfDamage = CreateConVar("sm_skill_w_inf_damage", "0.62", "Infected damage weight (damage dealt to survivors)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSurvDamage = CreateConVar("sm_skill_w_surv_damage", "0.0073", "Survivor damage weight (all damage to infected, tank included)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightTankDamage = CreateConVar("sm_skill_w_tank_damage", "0.018", "Extra weight for tank damage, stacks on top of sm_skill_w_surv_damage", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightWitchDamage = CreateConVar("sm_skill_w_witch_damage", "0.010", "Damage dealt to a witch (real witch only, see sm_skill_w_common_damage)", FCVAR_NONE, true, 0.0, false);
@@ -377,38 +395,38 @@ public void OnPluginStart()
 	g_CvarWeightDeadstop = CreateConVar("sm_skill_w_deadstop", "40.0", "Deadstop weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerPop = CreateConVar("sm_skill_w_boomer_pop", "20.0", "No-vomit boomer pop weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerPopSplash = CreateConVar("sm_skill_w_boomer_pop_splash", "-25.0", "Penalty per teammate hit when a popped boomer still vomits", FCVAR_NONE, false, 0.0, false);
-	g_CvarWeightPinAssist = CreateConVar("sm_skill_w_pin_assist", "38.0", "Assist weight for pin -> kill/incap synergy", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightPinDpsAssist = CreateConVar("sm_skill_w_pin_dps_assist", "0.58", "Assist weight per damage dealt to a pinned target by a teammate", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightSpitPinnedTick = CreateConVar("sm_skill_w_spit_pinned_tick", "2.1", "Spitter tick on pinned target", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightSpitIncapTick = CreateConVar("sm_skill_w_spit_incap_tick", "1.3", "Spitter tick on incapped target", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightTankBoomAssist = CreateConVar("sm_skill_w_tank_boom_assist", "11.0", "Boomer assist when tank hits boomed target", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightWitchAssist = CreateConVar("sm_skill_w_witch_assist", "20.0", "Assist when witch downs a recently pinned/boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightPinAssist = CreateConVar("sm_skill_w_pin_assist", "0.0", "Assist weight for pin -> kill/incap synergy", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightPinDpsAssist = CreateConVar("sm_skill_w_pin_dps_assist", "0.0", "Assist weight per damage dealt to a pinned target by a teammate", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitPinnedTick = CreateConVar("sm_skill_w_spit_pinned_tick", "0.0", "Spitter tick on pinned target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitIncapTick = CreateConVar("sm_skill_w_spit_incap_tick", "0.0", "Spitter tick on incapped target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankBoomAssist = CreateConVar("sm_skill_w_tank_boom_assist", "0.0", "Boomer assist when tank hits boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightWitchAssist = CreateConVar("sm_skill_w_witch_assist", "0.0", "Assist when witch downs a recently pinned/boomed target", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSpitSetupAssist = CreateConVar("sm_skill_w_spit_setup_assist", "6.0", "Assist when spit sets up a big hit within a short window", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomKillAssist = CreateConVar("sm_skill_w_boom_kill_assist", "20.0", "Boomer assist when any SI kills a boomed target", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBigHitAssistScore = CreateConVar("sm_skill_w_bighit_assist_score", "11.0", "Assist weight scaled by damage for CC-enabled big hits", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightShoveSI = CreateConVar("sm_skill_w_shove_si", "4.0", "Weight per shove on special infected", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightWitchCrown = CreateConVar("sm_skill_w_witch_crown", "45.0", "Weight for a validated witch crown", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightChargerMulti = CreateConVar("sm_skill_w_charger_multi", "25.0", "Weight per extra survivor clipped by one charge (charger_impact)", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightSpitMulti = CreateConVar("sm_skill_w_spit_multi", "1.5", "Weight for spitter hitting multiple survivors in same tick window", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightChargerMulti = CreateConVar("sm_skill_w_charger_multi", "0.0", "Weight per extra survivor clipped by one charge (charger_impact)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSpitMulti = CreateConVar("sm_skill_w_spit_multi", "0.0", "Weight for spitter hitting multiple survivors in same tick window", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRockSkeet = CreateConVar("sm_skill_w_rock_skeet", "40.0", "Weight per tank rock skeet by survivors", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightChainClearBoom = CreateConVar("sm_skill_w_chain_clear_boom", "20.0", "Weight for clearing/picking up a boomed teammate quickly", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSafeSave = CreateConVar("sm_skill_w_safe_save", "8.0", "Weight for fast save on pinned/incapped teammate", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightZeroFFBonus = CreateConVar("sm_skill_w_zero_ff_bonus", "15.0", "Bonus for a round with zero FF and sufficient actions", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightSharedFocus = CreateConVar("sm_skill_w_shared_focus", "0.85", "Weight per shared focus hit (multiple SI on same target window)", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightBoomFocus = CreateConVar("sm_skill_w_boom_focus", "1.5", "Weight for boomer when teammates follow-up on boomed target", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightStaggerSetup = CreateConVar("sm_skill_w_stagger_setup", "2.7", "Weight for setups (stagger/slow) that enable other SI", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightChainControl = CreateConVar("sm_skill_w_chain_control", "25.0", "Weight for Smoker->Hunter/Jockey chain control assist", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightTankSupport = CreateConVar("sm_skill_w_tank_support", "8.0", "Weight for assisting tank hits via boom/pin setup", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightSharedFocus = CreateConVar("sm_skill_w_shared_focus", "0.0", "Weight per shared focus hit (multiple SI on same target window)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightBoomFocus = CreateConVar("sm_skill_w_boom_focus", "0.0", "Weight for boomer when teammates follow-up on boomed target", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightStaggerSetup = CreateConVar("sm_skill_w_stagger_setup", "0.0", "Weight for setups (stagger/slow) that enable other SI", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightChainControl = CreateConVar("sm_skill_w_chain_control", "40.0", "Weight for Smoker->Hunter/Jockey chain control assist", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankSupport = CreateConVar("sm_skill_w_tank_support", "0.0", "Weight for assisting tank hits via boom/pin setup", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightAlarmPenalty = CreateConVar("sm_skill_w_alarm_penalty", "-35.0", "Penalty per car alarm triggered", FCVAR_NONE, false, 0.0, false);
-	g_CvarWeightTankHoldSec = CreateConVar("sm_skill_w_tank_hold_sec", "0.73", "Weight per second holding tank", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightTankKill = CreateConVar("sm_skill_w_tank_kill", "60.0", "Weight per survivor kill by tank", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightTankPassPenalty = CreateConVar("sm_skill_w_tank_pass_penalty", "-60.0", "Penalty per voluntary tank pass", FCVAR_NONE, false, 0.0, false);
-	g_CvarWeightTankWipe = CreateConVar("sm_skill_w_tank_wipe", "60.0", "Bonus when the human tank wipes the survivors", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankHoldSec = CreateConVar("sm_skill_w_tank_hold_sec", "0.0", "Weight per second holding tank. Zero by default: who gets the tank is a lottery, and what he does with it already counts as damage", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankKill = CreateConVar("sm_skill_w_tank_kill", "0.0", "Weight per survivor kill by tank", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightTankPassPenalty = CreateConVar("sm_skill_w_tank_pass_penalty", "0.0", "Penalty per voluntary tank pass. Zero by default: passing already gives up everything the tank would have earned", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightTankWipe = CreateConVar("sm_skill_w_tank_wipe", "0.0", "Bonus when the human tank wipes the survivors", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightChargerLevel = CreateConVar("sm_skill_w_charger_level", "35.0", "Weight for leveling/interrupting charger", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightTongueCut = CreateConVar("sm_skill_w_tongue_cut", "25.0", "Weight for cutting smoker tongue", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSpecialShove = CreateConVar("sm_skill_w_special_shove", "10.0", "Weight for a shove that actually broke a pin", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRockEatenPenalty = CreateConVar("sm_skill_w_rock_eaten_penalty", "-25.0", "Penalty when survivor eats a tank rock", FCVAR_NONE, false, 0.0, false);
-	g_CvarWeightReviveInterrupt = CreateConVar("sm_skill_w_revive_interrupt", "20.0", "Weight for interrupting a revive (infected)", FCVAR_NONE, true, 0.0, false);
+	g_CvarWeightReviveInterrupt = CreateConVar("sm_skill_w_revive_interrupt", "0.0", "Weight for interrupting a revive (infected)", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRevive = CreateConVar("sm_skill_w_revive", "20.0", "Revive weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightMedkitGive = CreateConVar("sm_skill_w_medkit_give", "25.0", "Heal other with medkit weight", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightRescue = CreateConVar("sm_skill_w_rescue", "6.0", "Extra weight when the clear saved a teammate rather than yourself", FCVAR_NONE, true, 0.0, false);
@@ -419,7 +437,7 @@ public void OnPluginStart()
 	g_CvarWeightSurvivalSec = CreateConVar("sm_skill_w_survival_sec", "0.0", "Weight per second alive in round. Zero by default: how long the team survived is the round result, not a measure of the player", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightFlowPercent = CreateConVar("sm_skill_w_flow_percent", "0.0", "Weight per % flow progress. Zero by default: map progress is the round result, shared by the whole team", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightBoomerVomitHit = CreateConVar("sm_skill_w_boomer_vomit_hit", "25.0", "Weight per boomer vomit victim (infected side)", FCVAR_NONE, true, 0.0, false);
-	g_CvarWeightBoomerVomitCast = CreateConVar("sm_skill_w_boomer_vomit_cast", "-10.0", "Penalty per boomer vomit cast (infected side)", FCVAR_NONE, false, 0.0, false);
+	g_CvarWeightBoomerVomitCast = CreateConVar("sm_skill_w_boomer_vomit_cast", "-25.0", "Penalty per boomer vomit cast (infected side). Equal to one hit, so a boomer scores on hits per cast, not on casts", FCVAR_NONE, false, 0.0, false);
 	g_CvarTopListMax = CreateConVar("sm_skill_top_list_max", "100", "How many ranked players the leaderboard loads. The menu pages through them seven at a time", FCVAR_NONE, true, 7.0, false);
 	g_CvarTopMinRounds = CreateConVar("sm_skill_top_min_rounds", "20", "Minimum rounds for KSR top/similar ranking (hard floor 20)", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixVotePct = CreateConVar("sm_skill_mix_vote_pct", "51", "Percent votes required for skill mix", FCVAR_NONE, true, 1.0, true, 100.0);
@@ -431,17 +449,18 @@ public void OnPluginStart()
 	g_CvarRatingEmaMin = CreateConVar("sm_skill_rating_ema", "0.004", "Minimum EMA factor per round. 0.004 is roughly a 500 round memory. A short window tracks form but makes the ranking itself unstable, and form has its own line in the profile", FCVAR_NONE, true, 0.001, true, 1.0);
 	g_CvarRatingShrinkRounds = CreateConVar("sm_skill_rating_shrink", "80", "Rounds of shrinkage towards the average for players with little history. Measured: at 20, players with 25 rounds outranked 700 round regulars", FCVAR_NONE, true, 0.0, false);
 	g_CvarBaselineEma = CreateConVar("sm_skill_baseline_ema", "0.003", "EMA factor for the rolling per-side score baseline, applied once per scored player", FCVAR_NONE, true, 0.0001, true, 1.0);
-	g_CvarSeedSurvMean = CreateConVar("sm_skill_seed_surv_mean", "248.0", "Seed value for the survivor raw score baseline", FCVAR_NONE, true, 1.0, false);
-	g_CvarSeedSurvSd = CreateConVar("sm_skill_seed_surv_sd", "141.0", "Seed value for the survivor raw score spread", FCVAR_NONE, true, 1.0, false);
-	g_CvarSeedInfMean = CreateConVar("sm_skill_seed_inf_mean", "218.0", "Seed value for the infected raw score baseline", FCVAR_NONE, true, 1.0, false);
-	g_CvarSeedInfSd = CreateConVar("sm_skill_seed_inf_sd", "146.0", "Seed value for the infected raw score spread", FCVAR_NONE, true, 1.0, false);
+	g_CvarSeedSurvMean = CreateConVar("sm_skill_seed_surv_mean", "213.0", "Seed value for the survivor raw score baseline", FCVAR_NONE, true, 1.0, false);
+	g_CvarSeedSurvSd = CreateConVar("sm_skill_seed_surv_sd", "142.0", "Seed value for the survivor raw score spread", FCVAR_NONE, true, 1.0, false);
+	g_CvarSeedInfMean = CreateConVar("sm_skill_seed_inf_mean", "130.0", "Seed value for the infected raw score baseline", FCVAR_NONE, true, 1.0, false);
+	g_CvarSeedInfSd = CreateConVar("sm_skill_seed_inf_sd", "84.0", "Seed value for the infected raw score spread", FCVAR_NONE, true, 1.0, false);
 	g_CvarWeightDeathCharge = CreateConVar("sm_skill_w_death_charge", "60.0", "Weight per death charge - the highest value single play the infected side has", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightHunterPounceDmg = CreateConVar("sm_skill_w_hunter_pounce_dmg", "0.5", "Weight per point of damage on a hunter high pounce", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightJockeyHighPounce = CreateConVar("sm_skill_w_jockey_high_pounce", "20.0", "Weight per jockey high pounce", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixShapeWarn = CreateConVar("sm_skill_mix_shape_warn", "250.0", "Difference in internal spread between the two teams, in KSR, above which the mix preview warns that equal sums hide an uneven match-up. 0 disables the warning", FCVAR_NONE, true, 0.0, false);
-	g_CvarMixStackPenalty = CreateConVar("sm_skill_mix_stack_penalty", "150.0", "Extra team-sum difference, in KSR, that is acceptable in order to keep the two highest rated players apart. Measured cost of never stacking them: about 4 KSR in an average lobby", FCVAR_NONE, true, 0.0, false);
-	g_CvarMixTolerance = CreateConVar("sm_skill_mix_tolerance", "0.0", "KSR the split search may give up on team-sum balance for a better shaped match-up. 0 = never trade away balance, secondary criteria only break exact ties", FCVAR_NONE, true, 0.0, false);
-	g_CvarMixWarnDelta = CreateConVar("sm_skill_mix_warn_delta", "150.0", "KSR gap between teams above which a mix is suggested during ready-up", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixStackPenalty = CreateConVar("sm_skill_mix_stack_penalty", "75.0", "Extra team-sum difference, in KSR, that is acceptable in order to keep the two highest rated players apart. Kept small: over 494 lobbies a team holding both top players did no better than its sum predicted", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixTolerance = CreateConVar("sm_skill_mix_tolerance", "40.0", "Team-sum KSR the split search may give up for a better shaped match-up (stars apart, equal spread, both halves of the map even). 0 = secondary criteria only break exact ties, which in practice means never", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixWarnDelta = CreateConVar("sm_skill_mix_warn_delta", "75.0", "Average KSR gap between teams above which a mix is suggested during ready-up. At 75 the stronger side wins about 60 percent of maps", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixShrink = CreateConVar("sm_skill_mix_shrink", "20", "Rounds of shrinkage used for the number the mix and the balance lines work on. Lower than sm_skill_rating_shrink on purpose: the ladder has to be hard to climb on a short history, but a mix only has to predict the next map, and measured on 619 maps the lightly shrunk number does that better", FCVAR_NONE, true, 0.0, false);
 	g_CvarReadyBalanceInfo = CreateConVar("sm_skill_ready_balance_info", "1", "Announce team KSR balance when the live countdown starts", FCVAR_NONE, true, 0.0, true, 1.0);
 
 	// v2 changed almost every weight default. AutoExecConfig never rewrites values
@@ -1277,6 +1296,21 @@ public void Event_PlayerHurt(Event event, const char[] name, bool dontBroadcast)
 			AddPinDpsAssist(attacker, victim, damage);
 
 			int zClassAtt = GetEntProp(attacker, Prop_Send, "m_zombieClass");
+
+			// Spit keeps burning after the spitter died and came back as something
+			// else, so the class is read off the weapon for it rather than off the
+			// player.
+			char hurtWeapon[32];
+			event.GetString("weapon", hurtWeapon, sizeof(hurtWeapon));
+			int logClass = StrEqual(hurtWeapon, "insect_swarm", false) ? ZC_SPITTER : zClassAtt;
+			if (logClass == ZC_TANK)
+			{
+				g_iDamageAsTank[attacker] += damage;
+			}
+			else if (logClass >= ZC_SMOKER && logClass <= ZC_CHARGER)
+			{
+				g_iClassDamage[logClass][attacker] += damage;
+			}
 			float now = GetEngineTime();
 
 			// Shared focus fire (multiple SI on same target)
@@ -1474,6 +1508,8 @@ public void Event_PlayerIncapacitated(Event event, const char[] name, bool dontB
 
 		if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
 		{
+			g_iInfIncaps[attacker]++;
+
 			int zc = GetEntProp(attacker, Prop_Send, "m_zombieClass");
 			if (zc == ZC_CHARGER || zc == ZC_TANK)
 			{
@@ -1660,11 +1696,22 @@ public void OnHunterHighPounce(int hunter, int survivor, int actualDamage, float
 	}
 }
 
-public void OnJockeyHighPounce(int survivor, int jockey, float height, bool reportedHigh)
+public void OnJockeyHighPounce(int first, int second, float height, bool reportedHigh)
 {
-	// Note the argument order: this forward puts the survivor first, unlike the
-	// hunter one.
-	if (!g_bRoundActive || !IsValidHuman(jockey) || GetClientTeam(jockey) != TEAM_INFECTED)
+	// The include documents (survivor, jockey), the detection plugin pushes
+	// (jockey, survivor). Trusting the include meant the team check below always
+	// saw the survivor and threw every pounce away - 0 hits in 5535 rows. Take
+	// whichever of the two is actually on the infected team.
+	//
+	// The forward also fires for every ride that started from a jump, so only the
+	// ones over the height threshold count.
+	if (!g_bRoundActive || !reportedHigh)
+	{
+		return;
+	}
+
+	int jockey = (IsValidHuman(first) && GetClientTeam(first) == TEAM_INFECTED) ? first : second;
+	if (!IsValidHuman(jockey) || GetClientTeam(jockey) != TEAM_INFECTED)
 	{
 		return;
 	}
@@ -1747,9 +1794,13 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	if (IsValidHuman(attacker) && GetClientTeam(attacker) == TEAM_INFECTED)
 	{
 		int zcAtt = GetEntProp(attacker, Prop_Send, "m_zombieClass");
-		if (zcAtt == ZC_TANK && IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
+		if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
 		{
-			g_iTankKills[attacker]++;
+			g_iInfKills[attacker]++;
+			if (zcAtt == ZC_TANK)
+			{
+				g_iTankKills[attacker]++;
+			}
 		}
 	}
 
@@ -1917,6 +1968,8 @@ public void OnSmokerSelfClear(int survivor, int smoker, bool withShove)
 
 public void OnSkeet(int survivor, int hunter)
 {
+	CountAgainstInfected(g_iGotSkeeted, hunter);
+
 	if (!g_bRoundActive || !IsValidHuman(survivor))
 	{
 		return;
@@ -1934,6 +1987,8 @@ public void OnSkeet(int survivor, int hunter)
 
 public void OnSkeetMelee(int survivor, int hunter)
 {
+	CountAgainstInfected(g_iGotSkeeted, hunter);
+
 	if (!g_bRoundActive || !IsValidHuman(survivor))
 	{
 		return;
@@ -1978,6 +2033,8 @@ public void OnTankRockSkeeted(int survivor, int tank)
 
 public void OnHunterDeadstop(int survivor, int hunter)
 {
+	CountAgainstInfected(g_iGotDeadstopped, hunter);
+
 	if (!g_bRoundActive || !IsValidHuman(survivor))
 	{
 		return;
@@ -1995,6 +2052,8 @@ public void OnHunterDeadstop(int survivor, int hunter)
 
 public void OnBoomerPop(int survivor, int boomer, int shoveCount, float timeAlive)
 {
+	CountAgainstInfected(g_iGotPopped, boomer);
+
 	if (!g_bRoundActive || !IsValidHuman(survivor))
 	{
 		return;
@@ -3204,12 +3263,14 @@ void AnnounceShapeWarning()
 // is 35 distinct splits, so this is free and always returns the true optimum -
 // a greedy walk only approximates it.
 //
-// Balance means equal total strength, so the difference in sums is the objective
-// and nothing is allowed to trade it away. The secondary criteria - not stacking
-// both stars on one side, matching the internal spread, and matching the two
-// teams on each half of the map - only pick between splits whose sums are already
-// within sm_skill_mix_tolerance of the best one available, which defaults to 0:
-// the smallest possible gap always wins, shape only decides exact ties.
+// Balance means equal total strength, so the difference in sums is the objective.
+// The secondary criteria - not stacking both stars on one side, matching the
+// internal spread, and matching the two teams on each half of the map - pick
+// between the splits whose sums are within sm_skill_mix_tolerance of the best one
+// available. With a tolerance of 0 they only decided exact ties, and two float sums
+// are never exactly tied, so they never ran at all. 40 KSR of team sum is 10 a
+// head, about one and a half points of win chance, and buys a third off the
+// imbalance on each half of the map.
 bool FindBestSplit(const float rating[MAXPLAYERS + 1], int count, int teamSize,
 	const int players[MAXPLAYERS + 1], int teamSurv[MAXPLAYERS + 1], int teamInf[MAXPLAYERS + 1],
 	int &survIdx, int &infIdx)
@@ -3363,16 +3424,16 @@ float SplitSecondaryCost(int mask, const float rating[MAXPLAYERS + 1],
 			if (firstA || r > topA) { topA = r; }
 			if (firstA || r < lowA) { lowA = r; }
 			firstA = false;
-			survA += GetSideKSR(c, TEAM_SURVIVOR);
-			infA += GetSideKSR(c, TEAM_INFECTED);
+			survA += GetSideMixRating(c, TEAM_SURVIVOR);
+			infA += GetSideMixRating(c, TEAM_INFECTED);
 		}
 		else
 		{
 			if (firstB || r > topB) { topB = r; }
 			if (firstB || r < lowB) { lowB = r; }
 			firstB = false;
-			survB += GetSideKSR(c, TEAM_SURVIVOR);
-			infB += GetSideKSR(c, TEAM_INFECTED);
+			survB += GetSideMixRating(c, TEAM_SURVIVOR);
+			infB += GetSideMixRating(c, TEAM_INFECTED);
 		}
 	}
 
@@ -4144,11 +4205,11 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	char escMap[128];
 	g_Db.Escape(g_sMapName, escMap, sizeof(escMap));
 
-	char qRound[2048];
+	char qRound[4096];
 	Format(qRound, sizeof(qRound),
 		"INSERT INTO round_stats (steamid, name, round_index, map_name, team, raw_points, awarded_points, "
-		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, chain_clear_boom, safe_saves, zero_ff_bonus, shared_focus, boom_focus, stagger_setup, chain_control, tank_support, alarm_triggers, tank_hold_time, tank_passes, tank_kills, tank_wipe_bonus, charger_levels, tongue_cuts, special_shove_saves, rock_eaten_penalty, revive_interrupts, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, common_damage, witch_kills, scoring_version, rating_z, death_charges, hunter_pounce_dmg, jockey_high_pounces, ts) "
-		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, %d, %d, %d, %.4f, %d, %d, %d, strftime('%%s', 'now'));",
+		... "dmg_infected, dmg_survivor, dmg_tank, dmg_witch, common_kills, special_clears, self_clears, skeets, skeets_melee, deadstops, boomer_pops, boomer_pops_splash, pin_assists, pin_dps_assist, big_hit_assists, big_hit_assist_score, spit_ticks_pinned, spit_ticks_incap, tank_boom_assists, witch_assists, spit_setup_assists, boom_kill_assists, charger_multi, spit_multi_hits, shove_si, witch_crowns, rock_skeets, chain_clear_boom, safe_saves, zero_ff_bonus, shared_focus, boom_focus, stagger_setup, chain_control, tank_support, alarm_triggers, tank_hold_time, tank_passes, tank_kills, tank_wipe_bonus, charger_levels, tongue_cuts, special_shove_saves, rock_eaten_penalty, revive_interrupts, revives, medkit_gives, special_rescues, jockey_blocks, tank_play_actions, ff_dealt, ff_taken, headshot_si, boomer_vomit_casts, boomer_vomit_hits, flow_percent, survival_time, alive_end, common_damage, witch_kills, scoring_version, rating_z, death_charges, hunter_pounce_dmg, jockey_high_pounces, dmg_as_tank, inf_incaps, inf_kills, pins_landed, got_skeeted, got_deadstopped, got_popped, got_leveled, got_tongue_cut, dmg_smoker, dmg_boomer, dmg_hunter, dmg_spitter, dmg_jockey, dmg_charger, spawns_smoker, spawns_boomer, spawns_hunter, spawns_spitter, spawns_jockey, spawns_charger, ts) "
+		... "VALUES ('%s', '%s', %d, '%s', %d, %.4f, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %.2f, %.2f, %d, %d, %d, %d, %.4f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, strftime('%%s', 'now'));",
 		steamid, escName, g_iRoundNumber, escMap, team, rawScore, awarded,
 		g_iDamageAsInfected[client],
 		g_iDamageAsSurvivor[client],
@@ -4214,7 +4275,28 @@ void SaveRoundAndUpdatePlayer(int client, int team, float rawScore, float awarde
 	g_fLastRoundZ[client],
 	g_iDeathCharges[client],
 	g_iHunterPounceDamage[client],
-	g_iJockeyHighPounces[client]);
+	g_iJockeyHighPounces[client],
+	g_iDamageAsTank[client],
+	g_iInfIncaps[client],
+	g_iInfKills[client],
+	g_iPinsLanded[client],
+	g_iGotSkeeted[client],
+	g_iGotDeadstopped[client],
+	g_iGotPopped[client],
+	g_iGotLeveled[client],
+	g_iGotTongueCut[client],
+	g_iClassDamage[ZC_SMOKER][client],
+	g_iClassDamage[ZC_BOOMER][client],
+	g_iClassDamage[ZC_HUNTER][client],
+	g_iClassDamage[ZC_SPITTER][client],
+	g_iClassDamage[ZC_JOCKEY][client],
+	g_iClassDamage[ZC_CHARGER][client],
+	g_iClassSpawns[ZC_SMOKER][client],
+	g_iClassSpawns[ZC_BOOMER][client],
+	g_iClassSpawns[ZC_HUNTER][client],
+	g_iClassSpawns[ZC_SPITTER][client],
+	g_iClassSpawns[ZC_JOCKEY][client],
+	g_iClassSpawns[ZC_CHARGER][client]);
 	g_Db.Query(SQL_ErrorOnly, qRound);
 
 	g_fTotalPoints[client] += awarded;
@@ -4245,10 +4327,20 @@ void MarkPinStart(int pinner, int victim, int zclass)
 	{
 		return;
 	}
+	float now = GetEngineTime();
+
+	// A smoker pin arrives as tongue_grab and then choke_start, a charger pin as
+	// carry and then pummel. Both halves land here, so the second one within a few
+	// seconds on the same victim is the same pin, not a new one.
+	bool samePin = (g_iLastPinner[victim] == pinner && (now - g_fLastPinStart[victim]) <= 10.0);
+	if (!samePin || (zclass != ZC_SMOKER && zclass != ZC_CHARGER))
+	{
+		g_iPinsLanded[pinner]++;
+	}
+
 	g_iLastPinner[victim] = pinner;
 	g_iLastPinnerClass[victim] = zclass;
 	g_bPinActive[victim] = true;
-	float now = GetEngineTime();
 	g_fLastPinStart[victim] = now;
 	g_fLastPinEnd[victim] = now;
 }
@@ -4346,6 +4438,8 @@ public void TP_OnTankPass(int old_tank, int new_tank)
 
 public void OnChargerLevel(int survivor, int charger)
 {
+	CountAgainstInfected(g_iGotLeveled, charger);
+
 	if (!g_bRoundActive || !IsValidHuman(survivor) || GetClientTeam(survivor) != TEAM_SURVIVOR)
 	{
 		return;
@@ -4353,8 +4447,41 @@ public void OnChargerLevel(int survivor, int charger)
 	g_iChargerLevels[survivor]++;
 }
 
+// A "full" level needs the killing melee hit to do more than 65% of the charger's
+// health. This server caps melee against chargers at 390 of 600 - exactly 65%, not
+// more - so the full version can never fire here and every level arrives as the
+// chipped one. Same play, same credit.
+public void OnChargerLevelHurt(int survivor, int charger, int damage)
+{
+	OnChargerLevel(survivor, charger);
+}
+
+void CountAgainstInfected(int counter[MAXPLAYERS + 1], int client)
+{
+	if (g_bRoundActive && IsValidHuman(client) && GetClientTeam(client) == TEAM_INFECTED)
+	{
+		counter[client]++;
+	}
+}
+
+public void L4D_OnMaterializeFromGhost(int client)
+{
+	if (!g_bRoundActive || !IsValidHuman(client) || GetClientTeam(client) != TEAM_INFECTED)
+	{
+		return;
+	}
+
+	int zc = GetEntProp(client, Prop_Send, "m_zombieClass");
+	if (zc >= ZC_SMOKER && zc <= ZC_CHARGER)
+	{
+		g_iClassSpawns[zc][client]++;
+	}
+}
+
 public void OnTongueCut(int survivor, int smoker)
 {
+	CountAgainstInfected(g_iGotTongueCut, smoker);
+
 	if (!g_bRoundActive || !IsValidHuman(survivor) || GetClientTeam(survivor) != TEAM_SURVIVOR)
 	{
 		return;
@@ -4587,6 +4714,20 @@ void ResetRoundStats(int client)
 	g_iDeathCharges[client] = 0;
 	g_iHunterPounceDamage[client] = 0;
 	g_iJockeyHighPounces[client] = 0;
+	g_iDamageAsTank[client] = 0;
+	g_iInfIncaps[client] = 0;
+	g_iInfKills[client] = 0;
+	g_iPinsLanded[client] = 0;
+	g_iGotSkeeted[client] = 0;
+	g_iGotDeadstopped[client] = 0;
+	g_iGotPopped[client] = 0;
+	g_iGotLeveled[client] = 0;
+	g_iGotTongueCut[client] = 0;
+	for (int zc = 0; zc <= ZC_CHARGER; zc++)
+	{
+		g_iClassDamage[zc][client] = 0;
+		g_iClassSpawns[zc][client] = 0;
+	}
 	g_iReviveTargetForReviver[client] = 0;
 	g_fReviveStartTime[client] = 0.0;
 	g_iLastBoomerKiller[client] = 0;
@@ -4662,10 +4803,30 @@ void FormatKSRWithConfidence(float rating, int rounds, char[] buffer, int size)
 }
 
 // The number the mix balances on. Shrunk, so an unknown player is treated as an
-// average one rather than as whatever his first round happened to look like.
+// average one rather than as whatever his first round happened to look like - but
+// shrunk far less than the ladder number. The ladder guards against a short lucky
+// run; the mix only has to guess the next map, and pulling a 30 round player most
+// of the way back to 1000 throws away what is already known about him.
+float MixRatingToKSR(float rating, int rounds)
+{
+	if (rounds <= 0)
+	{
+		return KSR_BASE;
+	}
+
+	float k = g_CvarMixShrink.FloatValue;
+	float shrunk = (k <= 0.0) ? rating : rating * (float(rounds) / (float(rounds) + k));
+	return KSR_BASE + g_CvarRatingScale.FloatValue * shrunk;
+}
+
 float GetMixRating(int client)
 {
-	return RatingToKSR(g_fRating[client], g_iRatingRounds[client]);
+	return MixRatingToKSR(g_fRating[client], g_iRatingRounds[client]);
+}
+
+float GetSideMixRating(int client, int team)
+{
+	return MixRatingToKSR(g_fRatingSide[team][client], g_iRatingSideRounds[team][client]);
 }
 
 bool IsValidClient(int client)
@@ -4995,6 +5156,27 @@ void CreateTables()
 	EnsureColumn("round_stats", "death_charges", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "hunter_pounce_dmg", "INTEGER NOT NULL DEFAULT 0");
 	EnsureColumn("round_stats", "jockey_high_pounces", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_as_tank", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "inf_incaps", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "inf_kills", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "pins_landed", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "got_skeeted", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "got_deadstopped", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "got_popped", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "got_leveled", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "got_tongue_cut", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_smoker", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_boomer", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_hunter", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_spitter", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_jockey", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "dmg_charger", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spawns_smoker", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spawns_boomer", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spawns_hunter", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spawns_spitter", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spawns_jockey", "INTEGER NOT NULL DEFAULT 0");
+	EnsureColumn("round_stats", "spawns_charger", "INTEGER NOT NULL DEFAULT 0");
 
 	Format(query, sizeof(query),
 		"CREATE TABLE IF NOT EXISTS baselines ("
@@ -5003,6 +5185,13 @@ void CreateTables()
 		... "sd REAL NOT NULL DEFAULT 1.0, "
 		... "samples INTEGER NOT NULL DEFAULT 0"
 		... ");");
+	g_Db.Query(SQL_ErrorOnly, query);
+
+	// Which scoring version the stored baselines describe. A baseline is the mean and
+	// spread of raw round scores, so it is only meaningful for the weights that
+	// produced it: load one from another version and every z-score is off until
+	// the rolling average has crawled over to the new distribution.
+	Format(query, sizeof(query), "CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL DEFAULT '');");
 	g_Db.Query(SQL_ErrorOnly, query);
 
 	Format(query, sizeof(query), "UPDATE players SET first_name = CASE WHEN first_name='' THEN name ELSE first_name END;");
@@ -5042,6 +5231,11 @@ public Action Timer_WarnStaleConfig(Handle timer)
 	CheckModelCvar(g_CvarCarryWeight, mismatches);
 	CheckModelCvar(g_CvarWeightSurvivalSec, mismatches);
 	CheckModelCvar(g_CvarWeightFlowPercent, mismatches);
+	CheckModelCvar(g_CvarWeightInfDamage, mismatches);
+	CheckModelCvar(g_CvarWeightPinAssist, mismatches);
+	CheckModelCvar(g_CvarWeightTankHoldSec, mismatches);
+	CheckModelCvar(g_CvarWeightBoomerVomitCast, mismatches);
+	CheckModelCvar(g_CvarMixShrink, mismatches);
 
 	if (mismatches > 0)
 	{
@@ -5147,7 +5341,8 @@ void SeedBaselines()
 
 void LoadBaselines()
 {
-	g_Db.Query(SQL_LoadBaselines, "SELECT team, mean, sd, samples FROM baselines;");
+	g_Db.Query(SQL_LoadBaselines,
+		"SELECT team, mean, sd, samples, (SELECT value FROM meta WHERE key='baseline_scoring_version') FROM baselines;");
 }
 
 public void SQL_LoadBaselines(Database db, DBResultSet results, const char[] error, any data)
@@ -5164,6 +5359,12 @@ public void SQL_LoadBaselines(Database db, DBResultSet results, const char[] err
 		if (team != TEAM_SURVIVOR && team != TEAM_INFECTED)
 		{
 			continue;
+		}
+
+		if (results.IsFieldNull(4) || results.FetchInt(4) != KSR_SCORING_VERSION)
+		{
+			PrintToServer("[SkillRating] Stored baselines belong to another scoring version - starting from the seed values. Run tools/ksr_recompute.py to replay the history under the current weights.");
+			return;
 		}
 
 		float mean = results.FetchFloat(1);
@@ -5189,6 +5390,10 @@ void SaveBaselines()
 			t, g_fBaseMean[t], g_fBaseSd[t], g_iBaseCount[t]);
 		g_Db.Query(SQL_ErrorOnly, query);
 	}
+
+	Format(query, sizeof(query),
+		"INSERT OR REPLACE INTO meta (key, value) VALUES ('baseline_scoring_version', '%d');", KSR_SCORING_VERSION);
+	g_Db.Query(SQL_ErrorOnly, query);
 }
 
 void EnsureColumn(const char[] table, const char[] column, const char[] definition)
