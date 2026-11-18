@@ -9,7 +9,7 @@
 #include <l4d2_skill_detect>
 #include <readyup>
 
-#define PLUGIN_VERSION "2.3.0"
+#define PLUGIN_VERSION "2.4.0"
 #define DB_NAME "kether_skill_rating"
 
 // Scoring model revision. Bumped whenever weights or detection semantics change,
@@ -205,6 +205,7 @@ ConVar g_CvarMixTolerance;
 ConVar g_CvarMixWarnDelta;
 ConVar g_CvarReadyBalanceInfo;
 ConVar g_CvarMixShrink;
+ConVar g_CvarMixLowCompress;
 ConVar g_CvarWeightInfDamageIncapped;
 ConVar g_CvarWeightTankDamageRel;
 ConVar g_CvarSeedTankDmgLife;
@@ -517,6 +518,7 @@ public void OnPluginStart()
 	g_CvarMixWeakGroupPenalty = CreateConVar("sm_skill_mix_weak_group_penalty", "150.0", "Extra team-sum difference, in KSR, accepted per player it would take to split the weak group evenly (four weak players two and two). 150 splits four weak players evenly in 95% of 4v4 lobbies; 1000 makes it a hard rule. 0 disables it", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixTolerance = CreateConVar("sm_skill_mix_tolerance", "40.0", "Team-sum KSR the split search may give up for a better shaped match-up (stars apart, equal spread, both halves of the map even). 0 = secondary criteria only break exact ties, which in practice means never", FCVAR_NONE, true, 0.0, false);
 	g_CvarMixWarnDelta = CreateConVar("sm_skill_mix_warn_delta", "75.0", "Average KSR gap between teams above which a mix is suggested during ready-up. At 75 the stronger side wins about 60 percent of maps", FCVAR_NONE, true, 0.0, false);
+	g_CvarMixLowCompress = CreateConVar("sm_skill_mix_low_compress", "0.75", "Share of the distance below 1000 that counts in the mix number. On real map results a KSR point under 1000 was worth about 55% of one above it; 0.75 removes half of that bias while staying clear of overfitting. 1 = no compression", FCVAR_NONE, true, 0.1, true, 1.0);
 	g_CvarMixShrink = CreateConVar("sm_skill_mix_shrink", "20", "Rounds of shrinkage used for the number the mix and the balance lines work on. Lower than sm_skill_rating_shrink on purpose: the ladder has to be hard to climb on a short history, but a mix only has to predict the next map, and measured on 619 maps the lightly shrunk number does that better", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightInfDamageIncapped = CreateConVar("sm_skill_w_inf_damage_incapped", "0.15", "Weight per point of infected damage on an incapped survivor. Low on purpose: it comes off the 300 point bleed-out pool and is worth nothing unless it finishes him", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightTankDamageRel = CreateConVar("sm_skill_w_tank_damage_rel", "0.62", "Weight per point of standing-survivor damage as tank, counted against what an average tank does per life. Getting the tank is a lottery worth half a standard deviation by itself; this way only playing it better or worse than average counts", FCVAR_NONE, true, 0.0, false);
@@ -5235,7 +5237,18 @@ float MixRatingToKSR(float rating, int rounds)
 
 	float k = g_CvarMixShrink.FloatValue;
 	float shrunk = (k <= 0.0) ? rating : rating * (float(rounds) / (float(rounds) + k));
-	return KSR_BASE + g_CvarRatingScale.FloatValue * shrunk;
+	float ksr = KSR_BASE + g_CvarRatingScale.FloatValue * shrunk;
+
+	// Below the average the scale overstates how much a player costs his team: on
+	// 634 maps a KSR point under 1000 was worth only about 55% of one above it in
+	// the actual result, so mixes handed the weakest players too strong a team and
+	// those teams kept winning more than predicted. Only the mix number is
+	// compressed; the ladder keeps the full distance.
+	if (ksr < KSR_BASE)
+	{
+		ksr = KSR_BASE - g_CvarMixLowCompress.FloatValue * (KSR_BASE - ksr);
+	}
+	return ksr;
 }
 
 float GetMixRating(int client)
