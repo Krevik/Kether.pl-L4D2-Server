@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rebuild KSR ratings from round_stats using the model of kether_skill_rating.sp v2.1.
+"""Rebuild KSR ratings from round_stats using the model of kether_skill_rating.sp v2.3.
 
 round_stats keeps every raw component of every round, so the whole history can be
 replayed through the current weights instead of being thrown away. Mirrors the
@@ -20,6 +20,17 @@ spit, focus and tank-support assists and every tank point carried no stable
 signal about the player, so they are weighted 0 and damage carries the score.
 Keep W_SURV / W_INF and SCORING_VERSION in step with the plugin defaults.
 
+Scoring version 4 (plugin 2.3) splits infected damage: damage on standing survivors
+(dmg_si_upright), damage on incapped ones (dmg_on_incapped, low weight) and tank
+damage against the average tank per life (tank_dmg_rel, stored by the plugin with
+the reference it had at the time). Older rows never had the split, so their whole
+dmg_infected counts as standing damage, which is how they were scored; --apply
+writes that backfill into dmg_si_upright so the stats screen shows it too.
+
+A survivor charged into a kill trigger used to be logged as a single 10000 point
+hit for the charger (plugin 2.3 caps a hit at the victim's 100 or 300). Those
+rows are corrected here by taking the 10000 off, and --apply writes the fix.
+
 The baselines are written together with the scoring version they belong to; the
 plugin refuses baselines from another version and falls back to its seed values.
 
@@ -38,21 +49,21 @@ if not os.path.exists(DB):
     sys.exit('no such database: ' + DB)
 APPLY = '--apply' in sys.argv
 
-SCORING_VERSION = 3
+SCORING_VERSION = 4
 
 W_SURV = {'dmg_survivor':0.0073,'dmg_tank':0.018,'dmg_witch_real':0.010,'common_damage':0.0,
  'common_kills':0.190,'special_clears':18.0,'special_rescues':6.0,'self_clears':45.0,'skeets':65.0,
- 'skeets_melee':85.0,'deadstops':40.0,'boomer_pops':20.0,'boomer_pops_splash':-25.0,'revives':20.0,
+ 'skeets_melee':0.0,'deadstops':40.0,'boomer_pops':20.0,'boomer_pops_splash':-25.0,'revives':20.0,
  'medkit_gives':25.0,'jockey_blocks':4.0,'tank_play_actions':3.0,'ff_dealt':-3.0,
  'headshot_si':1.5,'survival_time':0.0,'flow_percent':0.0,'shove_si':4.0,'witch_crowns':45.0,
  'witch_kills':6.0,'rock_skeets':40.0,'chain_clear_boom':20.0,'safe_saves':8.0,'zero_ff_bonus':15.0,
  'alarm_triggers':-35.0,'charger_levels':35.0,'tongue_cuts':25.0,'special_shove_saves':10.0,
  'rock_eaten_penalty':-25.0}
-W_INF = {'dmg_infected':0.62,'boomer_vomit_hits':25.0,'boomer_vomit_casts':-25.0,'pin_dps_assist':0.0,
+W_INF = {'dmg_si_upright':0.62,'dmg_on_incapped':0.15,'tank_dmg_rel':0.62,'boomer_vomit_hits':25.0,'boomer_vomit_casts':-25.0,'pin_dps_assist':0.0,
  'pin_assists':0.0,'big_hit_assist_score':11.0,'spit_ticks_pinned':0.0,'spit_ticks_incap':0.0,
  'tank_boom_assists':0.0,'witch_assists':0.0,'spit_setup_assists':6.0,'boom_kill_assists':20.0,
  'charger_multi':0.0,'spit_multi_hits':0.0,'shared_focus':0.0,'boom_focus':0.0,'stagger_setup':0.0,
- 'chain_control':40.0,'tank_support':0.0,'tank_hold_time':0.0,'tank_kills':0.0,'tank_passes':0.0,
+ 'chain_control':40.0,'tank_support':0.0,'tank_hold_time':0.0,'tank_kills':0.0,'tank_passes':-60.0,
  'tank_wipe_bonus':0.0,'revive_interrupts':0.0,'death_charges':60.0,'hunter_pounce_dmg':0.5,
  'jockey_high_pounces':20.0}
 
@@ -81,10 +92,18 @@ def raw(row, team, legacy):
 con = sqlite3.connect(DB); con.row_factory = sqlite3.Row
 con.text_factory = lambda b: b.decode('utf-8','replace')
 rows = [dict(r) for r in con.execute('SELECT * FROM round_stats ORDER BY map_name,round_index,ts,id')]
+TRIGGER_FIX = []
 for r in rows:
     r.setdefault('scoring_version',1)
-    for cl in ('common_damage','witch_kills','death_charges','hunter_pounce_dmg','jockey_high_pounces'):
+    for cl in ('common_damage','witch_kills','death_charges','hunter_pounce_dmg','jockey_high_pounces',
+               'dmg_si_upright','dmg_on_incapped','tank_dmg_rel'):
         r.setdefault(cl,0)
+    if r['team'] == 3 and (r['dmg_infected'] or 0) >= 10000:
+        TRIGGER_FIX.append(r['id'])
+        r['dmg_infected'] -= 10000 * (r['dmg_infected'] // 10000)
+        if (r.get('dmg_charger') or 0) >= 10000: r['dmg_charger'] -= 10000 * (r['dmg_charger'] // 10000)
+    if (r['scoring_version'] or 1) < 4:
+        r['dmg_si_upright'] = r['dmg_infected']; r['dmg_on_incapped'] = 0; r['tank_dmg_rel'] = 0.0
 g, cur = [], None
 for r in rows:
     k = (r['map_name'], r['round_index'])
@@ -133,6 +152,7 @@ old = lambda s: KSR_BASE + SCALE*(P[s].get('rating') or 0.0)*((P[s].get('rating_
 ranked = sorted((s for s in rating if nr[s] >= 20), key=ksr, reverse=True)
 vals = [ksr(s) for s in ranked]
 print('%d rund, %d graczy z >=20 rundami' % (len(rounds), len(ranked)))
+if TRIGGER_FIX: print('poprawione wiersze z trafieniem 10000 (kill trigger): %s' % TRIGGER_FIX)
 print('KSR: %.0f - %.0f  sd %.0f' % (min(vals), max(vals), st.pstdev(vals)))
 print('baseline: ocalali srednia %.1f sd %.1f | zarazeni srednia %.1f sd %.1f\n' % (base[2][0], base[2][1], base[3][0], base[3][1]))
 for i, s in enumerate(ranked[:10], 1):
@@ -154,6 +174,16 @@ if not APPLY:
 con.close()
 shutil.copy2(DB, '%s.bak-%s' % (DB, time.strftime('%Y%m%d-%H%M%S')))
 w = sqlite3.connect(DB)
+have = {c[1] for c in w.execute('PRAGMA table_info(round_stats)')}
+for col, d in (('dmg_si_upright', 'INTEGER NOT NULL DEFAULT 0'), ('dmg_on_incapped', 'INTEGER NOT NULL DEFAULT 0'),
+               ('tank_dmg_rel', 'REAL NOT NULL DEFAULT 0.0')):
+    if col not in have:
+        w.execute('ALTER TABLE round_stats ADD COLUMN %s %s' % (col, d))
+for rid in TRIGGER_FIX:
+    w.execute('UPDATE round_stats SET dmg_infected = dmg_infected % 10000 WHERE id = ?', (rid,))
+    if 'dmg_charger' in have:
+        w.execute('UPDATE round_stats SET dmg_charger = dmg_charger % 10000 WHERE id = ? AND dmg_charger >= 10000', (rid,))
+w.execute('UPDATE round_stats SET dmg_si_upright = dmg_infected WHERE scoring_version < 4')
 w.execute('UPDATE players SET rating=0.0, rating_rounds=0, rating_surv=0.0, '
           'rating_surv_rounds=0, rating_inf=0.0, rating_inf_rounds=0')
 w.executemany('UPDATE players SET rating=?, rating_rounds=?, rating_surv=?, '
