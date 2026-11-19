@@ -437,6 +437,7 @@ public void OnPluginStart()
 	CreateTables();
 
 	g_CvarEnabled = CreateConVar("sm_skill_rating_enabled", "1", "Enable/disable skill rating plugin", FCVAR_NONE, true, 0.0, true, 1.0);
+	g_CvarEnabled.AddChangeHook(OnRatingEnabledChanged);
 	g_CvarRoundPool = CreateConVar("sm_skill_rating_round_pool", "100.0", "Points distributed per team per round", FCVAR_NONE, true, 1.0, false);
 	g_CvarWeightInfDamage = CreateConVar("sm_skill_w_inf_damage", "0.62", "Weight per point of damage a special infected deals to a standing survivor. Damage as tank and damage on incapped survivors have their own weights", FCVAR_NONE, true, 0.0, false);
 	g_CvarWeightSurvDamage = CreateConVar("sm_skill_w_surv_damage", "0.0073", "Survivor damage weight (all damage to infected, tank included)", FCVAR_NONE, true, 0.0, false);
@@ -670,6 +671,24 @@ public void OnClientDisconnect(int client)
 	g_sFirstName[client][0] = '\0';
 	g_sLastName[client][0] = '\0';
 	RequestReadyFooterUpdate();
+}
+
+public void OnRatingEnabledChanged(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (convar.BoolValue)
+	{
+		return;
+	}
+
+	// A partially recorded round cannot be rated after re-enabling the plugin.
+	g_bRoundActive = false;
+	g_bRoundFinalized = true;
+	g_bRoundLive = false;
+	g_bPaused = false;
+	g_iCurrentTank = 0;
+	g_iLastHumanTank = 0;
+	g_fTankHoldStart = 0.0;
+	delete g_hFlowTimer;
 }
 
 public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
@@ -923,7 +942,7 @@ void UpdateReadyFooter()
 
 public void OnRoundIsLive()
 {
-	if (!g_CvarEnabled.BoolValue || g_bRoundFinalized)
+	if (!g_CvarEnabled.BoolValue || !g_bRoundActive || g_bRoundFinalized)
 	{
 		return;
 	}
@@ -974,7 +993,7 @@ public void OnPause()
 	float now = GetEngineTime();
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i))
+		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i) || !g_bAliveAtEnd[i])
 		{
 			continue;
 		}
@@ -1003,7 +1022,7 @@ public void OnUnpause()
 	float now = GetEngineTime();
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i))
+		if (!IsValidHuman(i) || GetClientTeam(i) != TEAM_SURVIVOR || !IsPlayerAlive(i) || !g_bAliveAtEnd[i])
 		{
 			continue;
 		}
@@ -1623,11 +1642,11 @@ public void Event_PlayerIncapacitated(Event event, const char[] name, bool dontB
 		// Every survivor, bots included, so the half's survival bonus can be rebuilt.
 		g_iIncapsTaken[victim]++;
 		g_bIncapped[victim] = true;
-		g_bAliveAtEnd[victim] = false;
-		if (g_bRoundLive && !g_bPaused)
+		if (g_bAliveAtEnd[victim] && g_bRoundLive && !g_bPaused)
 		{
 			g_fSurvivalTime[victim] += GetEngineTime() - g_fLifeStart[victim];
 		}
+		g_bAliveAtEnd[victim] = false;
 		AddPinAssistForVictim(victim);
 		AddBoomAssistIfRecent(victim);
 		AddSpitSetupAssist(victim);
@@ -1674,6 +1693,12 @@ public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadca
 
 	int reviver = GetClientOfUserId(event.GetInt("userid"));
 	int revived = GetClientOfUserId(event.GetInt("subject"));
+	if (IsValidClient(revived) && GetClientTeam(revived) == TEAM_SURVIVOR)
+	{
+		g_bIncapped[revived] = false;
+		g_bAliveAtEnd[revived] = true;
+		g_fLifeStart[revived] = GetEngineTime();
+	}
 	if (IsValidHuman(reviver) && IsValidClient(revived) && reviver != revived && GetClientTeam(reviver) == TEAM_SURVIVOR)
 	{
 		g_iRevives[reviver]++;
@@ -1681,7 +1706,6 @@ public void Event_ReviveSuccess(Event event, const char[] name, bool dontBroadca
 		{
 			g_iTankPlayActions[reviver]++;
 		}
-		g_bIncapped[revived] = false;
 		RegisterSaveCoop(reviver, revived);
 	}
 	g_iReviveTargetForReviver[reviver] = 0;
@@ -1935,11 +1959,11 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 	if (IsValidClient(victim) && GetClientTeam(victim) == TEAM_SURVIVOR)
 	{
 		CreditKillDistance(victim, attacker);
-		g_bAliveAtEnd[victim] = false;
-		if (g_bRoundLive && !g_bPaused)
+		if (g_bAliveAtEnd[victim] && g_bRoundLive && !g_bPaused)
 		{
 			g_fSurvivalTime[victim] += GetEngineTime() - g_fLifeStart[victim];
 		}
+		g_bAliveAtEnd[victim] = false;
 		AddPinAssistForVictim(victim);
 		AddBoomAssistIfRecent(victim);
 		AddSpitSetupAssist(victim);
@@ -4326,14 +4350,14 @@ void LoadPlayerProfile(int client)
 		... "rating_surv, rating_surv_rounds, rating_inf, rating_inf_rounds "
 		... "FROM players WHERE steamid='%s';", steamid);
 	DataPack pack = new DataPack();
-	pack.WriteCell(client);
+	pack.WriteCell(GetClientUserId(client));
 	g_Db.Query(SQL_LoadPlayerProfile, qLoad, pack);
 }
 
 public void SQL_LoadPlayerProfile(Database db, DBResultSet results, const char[] error, DataPack pack)
 {
 	pack.Reset();
-	int client = pack.ReadCell();
+	int client = GetClientOfUserId(pack.ReadCell());
 	delete pack;
 
 	if (!IsValidClient(client))
