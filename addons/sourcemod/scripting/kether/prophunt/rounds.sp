@@ -3,6 +3,11 @@
 #endif
 #define __ph_rounds_included
 
+#define PH_MIN_PARTICIPANTS 2
+#define PH_WARMUP_RETRY_INTERVAL 5.0
+
+static Handle g_hTimerKickoffFirstRound = null;
+
 // L4D2 versus only ever gives two rounds per map before transitioning maps - unsuitable for a
 // rotation gamemode that wants many short rounds on one map. So this never touches the native
 // round-end flow at all: it just keeps reassigning teams and respawning/re-materializing
@@ -19,7 +24,7 @@ void PH_Rounds_OnMatchLoaded()
 	g_ePhase = PHPhase_Warmup;
 	g_iRoundNumber = 0;
 	PH_Stealth_StartAnticheatScan();
-	CreateTimer(5.0, PH_Timer_KickoffFirstRound, _, TIMER_FLAG_NO_MAPCHANGE);
+	g_hTimerKickoffFirstRound = CreateTimer(PH_WARMUP_RETRY_INTERVAL, PH_Timer_KickoffFirstRound, _, TIMER_FLAG_NO_MAPCHANGE);
 }
 
 void PH_Rounds_OnMatchUnloaded()
@@ -37,6 +42,7 @@ void PH_Rounds_OnMatchUnloaded()
 
 public Action PH_Timer_KickoffFirstRound(Handle timer)
 {
+	g_hTimerKickoffFirstRound = null;
 	if (PH_IsModeActive())
 		PH_StartRound();
 	return Plugin_Stop;
@@ -44,6 +50,7 @@ public Action PH_Timer_KickoffFirstRound(Handle timer)
 
 void PH_Rounds_KillTimers()
 {
+	delete g_hTimerKickoffFirstRound;
 	delete g_hTimerHidePhaseEnd;
 	delete g_hTimerRoundTimeUp;
 	delete g_hTimerRoundEndDelay;
@@ -56,6 +63,22 @@ void PH_StartRound()
 		return;
 
 	PH_Rounds_KillTimers();
+	int participantCount = 0;
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (PH_IsEligibleParticipant(i))
+			participantCount++;
+	}
+
+	if (participantCount < PH_MIN_PARTICIPANTS)
+	{
+		g_ePhase = PHPhase_Warmup;
+		g_iPropsAliveCount = 0;
+		g_iPropsTotalCount = 0;
+		g_hTimerRoundEndDelay = CreateTimer(PH_WARMUP_RETRY_INTERVAL, PH_Timer_StartNextRound, _, TIMER_FLAG_NO_MAPCHANGE);
+		return;
+	}
+
 	g_iRoundNumber++;
 	g_ePhase = PHPhase_Hide;
 
@@ -65,8 +88,11 @@ void PH_StartRound()
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (!IsClientInGame(i) || IsFakeClient(i))
+		if (!PH_IsEligibleParticipant(i))
+		{
+			g_bPropEliminated[i] = true;
 			continue;
+		}
 
 		PH_ResetClientRoundState(i);
 
@@ -194,7 +220,7 @@ public Action PH_Timer_HidePhaseEnd(Handle timer)
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (IsClientInGame(i) && PH_IsHunter(i))
+		if (PH_IsEligibleParticipant(i) && PH_IsHunter(i))
 			PH_Hunters_ReleaseForSeek(i);
 	}
 

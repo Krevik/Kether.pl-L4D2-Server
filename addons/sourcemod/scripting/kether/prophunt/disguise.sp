@@ -7,6 +7,11 @@
 #define PH_SOLID_VPHYSICS		6
 #define PH_FSOLID_NOT_SOLID		0x0004
 #define PH_COLLISION_DEBRIS		1
+#define PH_EF_NOSHADOW			0x010
+
+static char g_sOriginalPlayerModel[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+static int g_iOriginalBloodColor[MAXPLAYERS + 1];
+static bool g_bOriginalShadowDisabled[MAXPLAYERS + 1];
 
 // Swaps the client's own model (so bullet traces line up with something roughly prop-sized)
 // and attaches a non-solid visual child entity carrying the real model, per the CS:GO Prop
@@ -22,20 +27,20 @@ bool PH_ApplyDisguise(int client, const char[] model, PHPropType type, const flo
 
 	PH_ClearDisguise(client);
 
-	SetEntityModel(client, model);
-	SetEntProp(client, Prop_Data, "m_bloodColor", -1); // DONT_BLEED
-	AcceptEntityInput(client, "DisableShadow");
-	SetEntityRenderMode(client, RENDER_NONE);
-
 	int prop = CreateEntityByName("prop_dynamic_override");
 	if (prop == -1)
 		prop = CreateEntityByName("prop_dynamic");
 
 	if (prop == -1)
-	{
-		SetEntityRenderMode(client, RENDER_NORMAL);
 		return false;
-	}
+
+	GetClientModel(client, g_sOriginalPlayerModel[client], sizeof(g_sOriginalPlayerModel[]));
+	g_iOriginalBloodColor[client] = GetEntProp(client, Prop_Data, "m_bloodColor");
+	g_bOriginalShadowDisabled[client] = (GetEntProp(client, Prop_Send, "m_fEffects") & PH_EF_NOSHADOW) != 0;
+	SetEntityModel(client, model);
+	SetEntProp(client, Prop_Data, "m_bloodColor", -1); // DONT_BLEED
+	AcceptEntityInput(client, "DisableShadow");
+	SetEntityRenderMode(client, RENDER_NONE);
 
 	float origin[3], angles[3];
 	GetClientAbsOrigin(client, origin);
@@ -74,6 +79,17 @@ bool PH_ApplyDisguise(int client, const char[] model, PHPropType type, const flo
 
 void PH_ClearDisguise(int client)
 {
+	if (IsClientInGame(client) && g_bPropDisguised[client])
+	{
+		SetEntProp(client, Prop_Data, "m_bloodColor", g_iOriginalBloodColor[client]);
+		AcceptEntityInput(client, g_bOriginalShadowDisabled[client] ? "DisableShadow" : "EnableShadow");
+		if (g_sOriginalPlayerModel[client][0] != '\0')
+			SetEntityModel(client, g_sOriginalPlayerModel[client]);
+		if (g_bPropFrozen[client] && IsPlayerAlive(client))
+			SetEntityMoveType(client, MOVETYPE_WALK);
+	}
+	g_sOriginalPlayerModel[client][0] = '\0';
+
 	int prop = EntRefToEntIndex(g_iVisualProp[client]);
 	if (prop != -1 && IsValidEntity(prop))
 		AcceptEntityInput(prop, "Kill");

@@ -98,7 +98,8 @@ public Action PH_Timer_AnticheatScan(Handle timer)
 
 public void PH_OnAnticheatConVarQueried(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] value)
 {
-	if (!g_bCvarAnticheatKick || result != ConVarQuery_Okay || !IsClientInGame(client))
+	if (!g_bCvarAnticheatKick || result != ConVarQuery_Okay || !PH_IsModeActive()
+		|| !IsClientInGame(client) || !PH_IsHunter(client))
 		return;
 
 	if (!StrEqual(value, "0"))

@@ -61,10 +61,19 @@ public void PH_Event_WeaponFire(Event event, const char[] name, bool dontBroadca
 // can suppress the blood decal/particle without touching the underlying player's real HP.
 public Action PH_OnTraceAttack(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &ammotype, int hitbox, int hitgroup)
 {
-	if (!PH_IsModeActive() || g_ePhase != PHPhase_Seek)
+	if (!PH_IsModeActive())
 		return Plugin_Continue;
 
 	if (!PH_IsProp(victim) || attacker < 1 || attacker > MaxClients || !PH_IsHunter(attacker))
+		return Plugin_Continue;
+
+	if (g_ePhase == PHPhase_Hide)
+	{
+		damage = 0.0;
+		return Plugin_Handled;
+	}
+
+	if (g_ePhase != PHPhase_Seek)
 		return Plugin_Continue;
 
 	if (g_iCvarHpHunterIncHit > 0 && IsPlayerAlive(attacker))
@@ -94,6 +103,13 @@ public Action PH_OnTakeDamage(int victim, int &attacker, int &inflictor, float &
 {
 	if (!PH_IsModeActive())
 		return Plugin_Continue;
+
+	if (g_ePhase == PHPhase_Hide && PH_IsProp(victim)
+		&& attacker >= 1 && attacker <= MaxClients && PH_IsHunter(attacker))
+	{
+		damage = 0.0;
+		return Plugin_Handled;
+	}
 
 	if (PH_IsHunter(victim) && attacker >= 1 && attacker <= MaxClients && PH_IsProp(attacker))
 	{

@@ -3,6 +3,8 @@
 #endif
 #define __ph_commands_included
 
+static int g_iPropMenuRound[MAXPLAYERS + 1];
+
 // sm_X commands are automatically reachable as "!x" and "/x" via SourceMod's built-in chat
 // trigger handling, so !hunt / !prop / !lock / !taunt all work without any extra wiring.
 void PH_Commands_Init()
@@ -181,6 +183,9 @@ stock void PH_GetPhaseName(PHRoundPhase phase, char[] buffer, int maxlen)
 // path" from the plan.
 void PH_OpenPropMenu(int client)
 {
+	if (g_ePhase != PHPhase_Hide && g_ePhase != PHPhase_Seek)
+		return;
+
 	if (!PH_IsProp(client) || !IsPlayerAlive(client) || g_bPropEliminated[client])
 		return;
 
@@ -255,6 +260,7 @@ void PH_OpenPropMenu(int client)
 	}
 
 	menu.ExitButton = true;
+	g_iPropMenuRound[client] = g_iRoundNumber;
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
@@ -262,11 +268,24 @@ public int PH_PropMenuHandler(Menu menu, MenuAction action, int param1, int para
 {
 	if (action == MenuAction_Select)
 	{
+		if (!PH_IsModeActive() || !IsClientInGame(param1) || !PH_IsEligibleParticipant(param1)
+			|| !PH_IsProp(param1) || !IsPlayerAlive(param1) || g_bPropEliminated[param1]
+			|| (g_ePhase != PHPhase_Hide && g_ePhase != PHPhase_Seek)
+			|| g_iPropMenuRound[param1] != g_iRoundNumber)
+			return 0;
+
+		if (g_iCvarPropChangeLimit > 0 && g_iPropChanges[param1] >= g_iCvarPropChangeLimit)
+		{
+			PrintHintText(param1, "%t", "PropHunt_ChangeLimitReached");
+			return 0;
+		}
+
 		char model[PLATFORM_MAX_PATH];
 		menu.GetItem(param2, model, sizeof(model));
 
 		float offset[3];
-		PH_IsModelAllowed(model, offset);
+		if (!PH_IsModelAllowed(model, offset))
+			return 0;
 
 		if (PH_ApplyDisguise(param1, model, PHProp_Static, offset))
 		{
