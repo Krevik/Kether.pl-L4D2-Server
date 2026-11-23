@@ -259,17 +259,14 @@ void AnnounceTeamBalance()
 		return;
 	}
 
-	float avgSurv = sumSurv / float(survCount);
-	float avgInf = sumInf / float(infCount);
-
-	PrintToChatAll("\x04[KSR]\x01 \x04Survivors\x01 \x05%.0f\x01 (avg \x05%.0f\x01)  |  \x08Infected\x01 \x05%.0f\x01 (avg \x05%.0f\x01)",
-		sumSurv, avgSurv, sumInf, avgInf);
+	PrintToChatAll("\x04[KSR]\x01 \x04Survivors\x01 \x05%.0f\x01 (%dx)  |  \x08Infected\x01 \x05%.0f\x01 (%dx)",
+		sumSurv, survCount, sumInf, infCount);
 
 	char balanceLine[192];
-	BuildBalanceLine(avgSurv, avgInf, balanceLine, sizeof(balanceLine));
+	BuildBalanceLine(sumSurv, survCount, sumInf, infCount, balanceLine, sizeof(balanceLine));
 	PrintToChatAll("%s", balanceLine);
 
-	float gap = avgSurv - avgInf;
+	float gap = sumSurv - sumInf;
 	if (gap < 0.0)
 	{
 		gap = -gap;
@@ -332,11 +329,19 @@ void UpdateReadyFooter()
 	}
 	else
 	{
-		float avgSurv = sumSurv / float(survCount);
-		float avgInf = sumInf / float(infCount);
-		float gap = avgSurv - avgInf;
-		Format(footer, sizeof(footer), "KSR  S %.0f  vs  I %.0f   (gap %s%.0f)",
-			avgSurv, avgInf, (gap >= 0.0) ? "+" : "-", (gap >= 0.0) ? gap : -gap);
+		float gap = sumSurv - sumInf;
+		if (survCount == infCount)
+		{
+			Format(footer, sizeof(footer), "KSR  S %.0f  vs  I %.0f   (gap %s%.0f)",
+				sumSurv, sumInf, (gap >= 0.0) ? "+" : "-", (gap >= 0.0) ? gap : -gap);
+		}
+		else
+		{
+			// A side with an extra player always has the bigger sum; say so rather
+			// than let the gap look like a real one.
+			Format(footer, sizeof(footer), "KSR  S %.0f  vs  I %.0f   (%dv%d)",
+				sumSurv, sumInf, survCount, infCount);
+		}
 	}
 
 	if (g_iReadyFooterIndex < 0)

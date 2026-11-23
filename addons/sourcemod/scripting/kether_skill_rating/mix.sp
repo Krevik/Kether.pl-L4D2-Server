@@ -284,7 +284,7 @@ void AnnouncePlannedSplit()
 	if (g_iPlannedSurvCount > 0 && g_iPlannedInfCount > 0)
 	{
 		char balance[192];
-		BuildBalanceLine(sumSurv / float(g_iPlannedSurvCount), sumInf / float(g_iPlannedInfCount), balance, sizeof(balance));
+		BuildBalanceLine(sumSurv, g_iPlannedSurvCount, sumInf, g_iPlannedInfCount, balance, sizeof(balance));
 		PrintToChatAll("%s", balance);
 		AnnounceShapeWarning();
 	}
@@ -337,13 +337,17 @@ void AnnounceShapeWarning()
 //
 // Balance means equal total strength, so the difference in sums is the objective,
 // plus the StackPenalty surcharge on splits that put both stars or both weakest
-// players on one side. The secondary criteria - matching the top player, the
-// internal spread, and matching the two teams on each half of the map - pick
-// between the splits whose sums are within sm_skill_mix_tolerance of the best one
-// available. With a tolerance of 0 they only decided exact ties, and two float sums
-// are never exactly tied, so they never ran at all. 40 KSR of team sum is 10 a
-// head, about one and a half points of win chance, and buys a third off the
-// imbalance on each half of the map.
+// players on one side. Tested on 502 maps, the plain team sum predicts the map
+// result better than any mix of top player, weakest player or rank positions, and
+// "stars apart first, then the weakest, then the sums" gave less even maps than
+// the sums alone. The stack penalties are kept anyway: nobody wants to watch the
+// two best or the two worst on one side, and they cost under a point of win chance.
+//
+// The secondary criteria - matching the top player, the internal spread, and the
+// two teams on each half of the map - only pick between splits within
+// sm_skill_mix_tolerance of the best one, which defaults to 0. A tolerance of 40
+// bought evener halves, but the map result depends only on the two sums (a lead on
+// one side comes back on the other), so it made whole maps less even for nothing.
 bool FindBestSplit(const float rating[MAXPLAYERS + 1], int count, int teamSize,
 	const int players[MAXPLAYERS + 1], int teamSurv[MAXPLAYERS + 1], int teamInf[MAXPLAYERS + 1],
 	int &survIdx, int &infIdx)
@@ -441,7 +445,10 @@ bool FindBestSplit(const float rating[MAXPLAYERS + 1], int count, int teamSize,
 // the top two apart costs about 4 KSR of sum balance in an average lobby, which is
 // nearly free, and this penalty is what pays for it in the lopsided ones.
 //
-// The bottom pair gets the same treatment: two passengers on one side means that
+// Only the top pair rule is on by default. The two rules for the weakest below are
+// kept but default to 0: on real results they bought nothing and cost sum balance.
+//
+// The bottom pair gets the same treatment when enabled: two passengers on one side means that
 // side has two players to carry instead of one, whatever the sums say. Both are
 // soft penalties rather than hard rules. Forcing both pairs apart and balancing
 // only the middle leaves a 4v4 lobby a single way to split, and on 494 historical
@@ -652,17 +659,14 @@ void PrintTeamKsrSummary(int client)
 		return;
 	}
 
-	float avgSurv = (survCount > 0) ? sumSurv / float(survCount) : 0.0;
-	float avgInf = (infCount > 0) ? sumInf / float(infCount) : 0.0;
-
 	char survLine[192];
 	char infLine[192];
 	Format(survLine, sizeof(survLine),
-		"\x04[KSR]\x01 \x04Survivors\x01 (\x05%dx\x01): sum \x05%.0f\x01 | avg \x05%.0f\x01",
-		survCount, sumSurv, avgSurv);
+		"\x04[KSR]\x01 \x04Survivors\x01 (\x05%dx\x01): sum \x05%.0f\x01",
+		survCount, sumSurv);
 	Format(infLine, sizeof(infLine),
-		"\x04[KSR]\x01 \x08Infected\x01 (\x05%dx\x01): sum \x05%.0f\x01 | avg \x05%.0f\x01",
-		infCount, sumInf, avgInf);
+		"\x04[KSR]\x01 \x08Infected\x01 (\x05%dx\x01): sum \x05%.0f\x01",
+		infCount, sumInf);
 
 	if (client > 0)
 	{
@@ -678,7 +682,7 @@ void PrintTeamKsrSummary(int client)
 	if (survCount > 0 && infCount > 0)
 	{
 		char balanceLine[192];
-		BuildBalanceLine(avgSurv, avgInf, balanceLine, sizeof(balanceLine));
+		BuildBalanceLine(sumSurv, survCount, sumInf, infCount, balanceLine, sizeof(balanceLine));
 		if (client > 0)
 		{
 			PrintToChat(client, "%s", balanceLine);
@@ -690,19 +694,30 @@ void PrintTeamKsrSummary(int client)
 	}
 }
 
-// Elo-style expectation off the team averages, so the gap is expressed as
-// something people can argue about rather than an abstract point difference.
-void BuildBalanceLine(float avgSurv, float avgInf, char[] buffer, int size)
+// The gap is shown on the team sums, which is what the mix balances. The win
+// expectation stays an Elo curve on the per-head difference: that is the scale it
+// was checked against (a fitted 401 against the 400 used here), and it keeps a 4v3
+// line-up from reading as a landslide just because one side has an extra player.
+void BuildBalanceLine(float sumSurv, int survCount, float sumInf, int infCount, char[] buffer, int size)
 {
-	float delta = avgSurv - avgInf;
-	float expSurv = 100.0 / (1.0 + Pow(10.0, -delta / 400.0));
+	float perHead = sumSurv / float(survCount) - sumInf / float(infCount);
+	float expSurv = 100.0 / (1.0 + Pow(10.0, -perHead / 400.0));
 
 	char gap[16];
-	FloatToStringAbs(delta, gap, sizeof(gap));
+	FloatToStringAbs(sumSurv - sumInf, gap, sizeof(gap));
 
-	Format(buffer, size,
-		"\x04[KSR]\x01 Gap \x05%s\x01 | expected \x04%.0f%%\x01 / \x08%.0f%%\x01",
-		gap, expSurv, 100.0 - expSurv);
+	if (survCount == infCount)
+	{
+		Format(buffer, size,
+			"\x04[KSR]\x01 Sum gap \x05%s\x01 | expected \x04%.0f%%\x01 / \x08%.0f%%\x01",
+			gap, expSurv, 100.0 - expSurv);
+	}
+	else
+	{
+		Format(buffer, size,
+			"\x04[KSR]\x01 Sum gap \x05%s\x01 (%dv%d) | expected \x04%.0f%%\x01 / \x08%.0f%%\x01",
+			gap, survCount, infCount, expSurv, 100.0 - expSurv);
+	}
 }
 
 void FloatToStringAbs(float value, char[] buffer, int size)

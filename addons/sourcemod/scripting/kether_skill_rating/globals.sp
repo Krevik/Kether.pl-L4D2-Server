@@ -11,7 +11,7 @@
 // Bumped whenever a model default changes, because AutoExecConfig will not rewrite
 // values in a config that already exists - a new filename is the only way to make
 // new defaults actually take effect on a server that already ran the old build.
-#define KSR_CONFIG_NAME "kether_skill_rating_v5"
+#define KSR_CONFIG_NAME "kether_skill_rating_v6"
 
 #define TEAM_SPECTATOR 1
 #define TEAM_SURVIVOR 2
